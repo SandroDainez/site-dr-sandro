@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -30,6 +30,12 @@ export default function CalendarioEventos() {
     const hoje = new Date();
     return new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   });
+
+  // Calculado via useEffect para evitar hydration mismatch no SSR do Next.js
+  const [hojeKey, setHojeKey] = useState<string>("");
+  useEffect(() => {
+    setHojeKey(getDateKey(new Date()));
+  }, []);
 
   const { dias, tituloMes } = useMemo(() => {
     const ano = mesAtual.getFullYear();
@@ -141,16 +147,26 @@ export default function CalendarioEventos() {
                 );
               }
 
+              const isHoje = !foraDoMes && dateKey === hojeKey;
               return (
                 <div
                   key={dateKey}
-                  className={`min-h-20 rounded-xl border p-2 ${
+                  className={`min-h-20 rounded-xl border p-2 transition ${
                     foraDoMes
                       ? "border-white/5 bg-white/[0.01] text-white/20"
+                      : isHoje
+                      ? "border-accent/50 bg-accent/10 text-white ring-1 ring-accent/30"
                       : "border-white/10 bg-white/[0.02] text-white/70"
                   }`}
                 >
-                  <p className="text-sm font-medium">{data.getDate()}</p>
+                  <p className={`text-sm font-medium ${isHoje ? "font-bold text-accent" : ""}`}>
+                    {data.getDate()}
+                    {isHoje && (
+                      <span className="ml-1 text-[9px] uppercase tracking-wide text-accent/80">
+                        hoje
+                      </span>
+                    )}
+                  </p>
                 </div>
               );
             })}
