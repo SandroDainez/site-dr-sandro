@@ -1,4 +1,4 @@
-import { list, put } from "@vercel/blob";
+import { list, put, getDownloadUrl } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 
@@ -170,7 +170,8 @@ async function readBlob<T>(key: string, fallback: T): Promise<T> {
     const { blobs } = await list({ prefix: `${BLOB_PREFIX}${key}.json` });
     const blob = blobs.find((b) => b.pathname === `${BLOB_PREFIX}${key}.json`);
     if (!blob) return fallback;
-    const res = await fetch(blob.url, { next: { revalidate: 60 } });
+    const downloadUrl = await getDownloadUrl(blob.url);
+    const res = await fetch(downloadUrl);
     if (!res.ok) return fallback;
     return (await res.json()) as T;
   } catch {
@@ -189,7 +190,7 @@ export async function writeBlob<T>(key: string, data: T): Promise<void> {
     );
   }
   await put(`${BLOB_PREFIX}${key}.json`, JSON.stringify(data, null, 2), {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
     contentType: "application/json",
   });
