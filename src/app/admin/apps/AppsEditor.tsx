@@ -27,6 +27,7 @@ export default function AppsEditor({ initialApps }: Props) {
   const [apps, setApps] = useState<AppData[]>(initialApps);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function updateApp(index: number, field: keyof AppData, value: string | string[]) {
     setApps((prev) =>
@@ -79,9 +80,11 @@ export default function AppsEditor({ initialApps }: Props) {
   }
 
   function handleSave() {
+    setError(null);
     startTransition(async () => {
-      await saveApps(apps);
-      setSaved(true);
+      const result = await saveApps(apps);
+      if (result.ok) setSaved(true);
+      else setError(result.error);
     });
   }
 
@@ -208,6 +211,7 @@ export default function AppsEditor({ initialApps }: Props) {
           {isPending ? "Salvando..." : "Salvar apps"}
         </button>
         {saved && <span className="text-sm text-accent">✓ Salvo com sucesso</span>}
+        {error && <p className="text-sm text-red-400 max-w-md leading-relaxed">{error}</p>}
       </div>
     </div>
   );

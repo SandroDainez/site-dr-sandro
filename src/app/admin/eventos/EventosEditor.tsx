@@ -31,6 +31,7 @@ export default function EventosEditor({ initialEventos }: Props) {
   const [eventos, setEventos] = useState<EventoData[]>(initialEventos);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function updateEvento(index: number, field: keyof EventoData, value: string) {
     setEventos((prev) =>
@@ -57,9 +58,14 @@ export default function EventosEditor({ initialEventos }: Props) {
   }
 
   function handleSave() {
+    setError(null);
     startTransition(async () => {
-      await saveEventos(eventos);
-      setSaved(true);
+      const result = await saveEventos(eventos);
+      if (result.ok) {
+        setSaved(true);
+      } else {
+        setError(result.error);
+      }
     });
   }
 
@@ -169,8 +175,9 @@ export default function EventosEditor({ initialEventos }: Props) {
           <Save className="h-4 w-4" />
           {isPending ? "Salvando..." : "Salvar eventos"}
         </button>
-        {saved && (
-          <span className="text-sm text-accent">✓ Salvo com sucesso</span>
+        {saved && <span className="text-sm text-accent">✓ Salvo com sucesso</span>}
+        {error && (
+          <p className="text-sm text-red-400 max-w-md leading-relaxed">{error}</p>
         )}
       </div>
     </div>

@@ -180,8 +180,13 @@ async function readBlob<T>(key: string, fallback: T): Promise<T> {
 
 export async function writeBlob<T>(key: string, data: T): Promise<void> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    await writeLocal(key, data);
-    return;
+    if (process.env.NODE_ENV === "development") {
+      await writeLocal(key, data);
+      return;
+    }
+    throw new Error(
+      "BLOB_READ_WRITE_TOKEN não configurado. Adicione o Vercel Blob ao projeto no painel da Vercel (Storage → Blob) e faça Redeploy."
+    );
   }
   await put(`${BLOB_PREFIX}${key}.json`, JSON.stringify(data, null, 2), {
     access: "public",

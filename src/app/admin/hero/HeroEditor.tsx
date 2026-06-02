@@ -13,6 +13,7 @@ export default function HeroEditor({ initialHero }: Props) {
   const [hero, setHero] = useState<HeroData>(initialHero);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function update(field: keyof HeroData, value: string) {
     setHero((prev) => ({ ...prev, [field]: value }));
@@ -20,9 +21,11 @@ export default function HeroEditor({ initialHero }: Props) {
   }
 
   function handleSave() {
+    setError(null);
     startTransition(async () => {
-      await saveHero(hero);
-      setSaved(true);
+      const result = await saveHero(hero);
+      if (result.ok) setSaved(true);
+      else setError(result.error);
     });
   }
 
@@ -84,6 +87,7 @@ export default function HeroEditor({ initialHero }: Props) {
           {isPending ? "Salvando..." : "Salvar hero"}
         </button>
         {saved && <span className="text-sm text-accent">✓ Salvo com sucesso</span>}
+        {error && <p className="text-sm text-red-400 max-w-md leading-relaxed">{error}</p>}
       </div>
     </div>
   );

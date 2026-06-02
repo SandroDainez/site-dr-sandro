@@ -13,6 +13,7 @@ export default function ContatoEditor({ initialContato }: Props) {
   const [contato, setContato] = useState<ContatoData>(initialContato);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function update(field: keyof ContatoData, value: string) {
     setContato((prev) => ({ ...prev, [field]: value }));
@@ -20,9 +21,11 @@ export default function ContatoEditor({ initialContato }: Props) {
   }
 
   function handleSave() {
+    setError(null);
     startTransition(async () => {
-      await saveContato(contato);
-      setSaved(true);
+      const result = await saveContato(contato);
+      if (result.ok) setSaved(true);
+      else setError(result.error);
     });
   }
 
@@ -66,6 +69,7 @@ export default function ContatoEditor({ initialContato }: Props) {
           {isPending ? "Salvando..." : "Salvar contato"}
         </button>
         {saved && <span className="text-sm text-accent">✓ Salvo com sucesso</span>}
+        {error && <p className="text-sm text-red-400 max-w-md leading-relaxed">{error}</p>}
       </div>
     </div>
   );

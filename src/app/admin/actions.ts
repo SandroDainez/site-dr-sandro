@@ -20,27 +20,49 @@ async function requireAdmin() {
   }
 }
 
-export async function saveEventos(eventos: EventoData[]) {
-  await requireAdmin();
-  await writeBlob("eventos", eventos);
-  revalidatePath("/");
-  revalidatePath("/inscricao");
+type Result = { ok: true } | { ok: false; error: string };
+
+export async function saveEventos(eventos: EventoData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("eventos", eventos);
+    revalidatePath("/");
+    revalidatePath("/inscricao");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
 }
 
-export async function saveApps(apps: AppData[]) {
-  await requireAdmin();
-  await writeBlob("apps", apps);
-  revalidatePath("/");
+export async function saveApps(apps: AppData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("apps", apps);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
 }
 
-export async function saveContato(contato: ContatoData) {
-  await requireAdmin();
-  await writeBlob("contato", contato);
-  revalidatePath("/");
+export async function saveContato(contato: ContatoData): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("contato", contato);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
 }
 
-export async function saveHero(hero: HeroData) {
-  await requireAdmin();
-  await writeBlob("hero", hero);
-  revalidatePath("/");
+export async function saveHero(hero: HeroData): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("hero", hero);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
 }
