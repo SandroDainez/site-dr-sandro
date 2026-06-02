@@ -1,0 +1,23 @@
+import { getApps } from "@/lib/content";
+import AppsEditor from "./AppsEditor";
+import Link from "next/link";
+
+export default async function AdminAppsPage() {
+  const apps = await getApps();
+
+  return (
+    <div className="max-w-2xl">
+      <div className="mb-6">
+        <Link href="/admin" className="text-xs text-muted hover:text-white transition">
+          ← Admin
+        </Link>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Apps por assinatura</h1>
+        <p className="mt-1 text-sm text-muted">
+          Edite os cards de aplicativos exibidos na home.
+        </p>
+      </div>
+
+      <AppsEditor initialApps={apps} />
+    </div>
+  );
+}

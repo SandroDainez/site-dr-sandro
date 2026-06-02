@@ -14,52 +14,15 @@ import {
   ShieldCheck,
   Sparkles,
   Zap,
+  type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
 import CalendarioEventos from "@/components/CalendarioEventos";
+import { getApps, getContato, getEventos, getHero } from "@/lib/content";
 
-const assinaturaApps = [
-  {
-    title: "AnesMap",
-    subtitle: "Preparação estruturada para residência, especialização e título",
-    text: "Banco de questões, flashcards SM-2 e protocolos por área, com foco em retenção e tomada de decisão.",
-    icon: Layers,
-    glow: "from-emerald-400/30 to-emerald-600/5",
-    highlights: ["Questões comentadas por tema", "Revisão espaçada com SM-2"],
-  },
-  {
-    title: "MedEscala",
-    subtitle: "Organização de plantões e equipe médica",
-    text: "Escalas com previsibilidade, registro de trocas e visão operacional da cobertura assistencial.",
-    icon: CalendarClock,
-    glow: "from-blue-400/30 to-blue-600/5",
-    highlights: ["Distribuição mais equilibrada", "Visão da cobertura por equipe"],
-  },
-  {
-    title: "Ficha de Anestesia",
-    subtitle: "Registro digital intraoperatório",
-    text: "Registro padronizado do pré, intra e pós-operatório, incluindo avaliação pré-anestésica e sala de recuperação anestésica.",
-    icon: FileText,
-    glow: "from-violet-400/30 to-violet-600/5",
-    highlights: ["Pré, intra e pós-operatório", "SRPA e avaliação pré-anestésica"],
-  },
-  {
-    title: "Emergências Médicas",
-    subtitle: "Resposta inicial em cenários críticos",
-    text: "Algoritmos rápidos, doses e condutas críticas para plantão.",
-    icon: Zap,
-    glow: "from-cyan-400/30 to-cyan-600/5",
-    highlights: ["Acesso rápido em cenário crítico", "Condutas com foco em tempo-resposta"],
-  },
-  {
-    title: "ACLS Guiado",
-    subtitle: "Roteiro prático para PCR intra-hospitalar guiado por voz",
-    text: "Cronometria de ciclos, condutas e checkpoints para alinhamento da equipe de reanimação.",
-    icon: HeartPulse,
-    glow: "from-amber-400/30 to-amber-600/5",
-    highlights: ["Comandos guiados por voz", "Sequência prática para equipe"],
-  },
-];
+const iconMap: Record<string, LucideIcon> = {
+  Layers, CalendarClock, FileText, Zap, HeartPulse, BookOpen, AudioLines,
+};
 
 const acessoAbertoCards = [
   {
@@ -74,7 +37,13 @@ const acessoAbertoCards = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const [eventos, apps, contato, hero] = await Promise.all([
+    getEventos(),
+    getApps(),
+    getContato(),
+    getHero(),
+  ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       <div className="pointer-events-none fixed inset-0 -z-10">
@@ -163,14 +132,13 @@ export default function Home() {
 
             <div>
               <div className="finex-glass mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs uppercase tracking-[0.14em] text-accent">
-                <Sparkles className="h-3.5 w-3.5" /> Conteúdo técnico e prática clínica
+                <Sparkles className="h-3.5 w-3.5" /> {hero.badge}
               </div>
               <h1 className="max-w-4xl text-4xl font-medium leading-[1.02] tracking-[-0.03em] md:text-6xl lg:text-7xl">
-                Atualização médica digital com alto padrão
+                {hero.title}
               </h1>
               <p className="mt-8 max-w-2xl text-base leading-relaxed text-muted md:text-lg">
-                Plataforma de apoio à decisão em medicina de urgência e emergência, terapia
-                intensiva e anestesiologia.
+                {hero.subtitle}
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <a
@@ -231,10 +199,12 @@ export default function Home() {
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {assinaturaApps.map((app, idx) => (
+            {apps.map((app, idx) => {
+              const AppIcon = iconMap[app.icon] ?? Layers;
+              return (
               <article
                 key={app.title}
-                className={`group finex-scan card-open relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20 ${idx === assinaturaApps.length - 1 ? "md:col-span-2 xl:col-span-1" : ""}`}
+                className={`group finex-scan card-open relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20 ${idx === apps.length - 1 ? "md:col-span-2 xl:col-span-1" : ""}`}
               >
                 <div className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${app.glow}`} />
                 <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-all duration-500 group-hover:bg-white/20" />
@@ -242,7 +212,7 @@ export default function Home() {
                 <div className="relative">
                   <div className="mb-6 flex items-center justify-between">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
-                      <app.icon className="h-5 w-5 text-white" />
+                      <AppIcon className="h-5 w-5 text-white" />
                     </div>
                     <span className="rounded-full border border-accent/30 bg-accent/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
                       Assinatura
@@ -264,7 +234,8 @@ export default function Home() {
                   </button>
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -348,7 +319,7 @@ export default function Home() {
           </div>
         </section>
 
-        <CalendarioEventos />
+        <CalendarioEventos eventos={eventos} />
 
         <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
           <div className="finex-glass rounded-[2rem] p-8 md:p-10">
@@ -360,23 +331,23 @@ export default function Home() {
               {[
                 {
                   label: "E-mail",
-                  value: "contato@drsandro.com.br",
-                  href: "mailto:contato@drsandro.com.br",
+                  value: contato.email,
+                  href: `mailto:${contato.email}`,
                 },
                 {
                   label: "WhatsApp",
-                  value: "+55 (11) 99999-9999",
-                  href: "https://wa.me/5511999999999",
+                  value: contato.whatsapp,
+                  href: contato.whatsappLink,
                 },
                 {
                   label: "Telefone",
-                  value: "+55 (11) 4000-0000",
-                  href: "tel:+551140000000",
+                  value: contato.telefone,
+                  href: contato.telefoneLink,
                 },
                 {
                   label: "Outros",
-                  value: "Instagram e Telegram",
-                  href: "https://instagram.com/",
+                  value: contato.instagram,
+                  href: contato.instagramLink,
                 },
               ].map((item) => (
                 <div

@@ -3,17 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import type { EventoData } from "@/lib/content";
 
-type EventoCalendario = {
-  titulo: string;
-  slug: string;
-};
-
-const eventos: Record<string, EventoCalendario> = {
-  "2026-05-24": { titulo: "Manejo de via aérea no paciente crítico", slug: "manejo-via-aerea-critico" },
-  "2026-05-28": { titulo: "Via aérea difícil no crítico", slug: "via-aerea-dificil-no-critico" },
-  "2026-06-03": { titulo: "ACLS guiado por voz na prática", slug: "acls-guiado-por-voz" },
-  "2026-06-11": { titulo: "Emergências médicas no plantão", slug: "emergencias-medicas-plantao" },
+type Props = {
+  eventos: EventoData[];
 };
 
 const semana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -25,17 +18,24 @@ function getDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-export default function CalendarioEventos() {
+export default function CalendarioEventos({ eventos }: Props) {
   const [mesAtual, setMesAtual] = useState(() => {
     const hoje = new Date();
     return new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   });
 
-  // Calculado via useEffect para evitar hydration mismatch no SSR do Next.js
   const [hojeKey, setHojeKey] = useState<string>("");
   useEffect(() => {
     setHojeKey(getDateKey(new Date()));
   }, []);
+
+  const eventosMap = useMemo(() => {
+    const map: Record<string, EventoData> = {};
+    for (const e of eventos) {
+      map[e.data] = e;
+    }
+    return map;
+  }, [eventos]);
 
   const { dias, tituloMes } = useMemo(() => {
     const ano = mesAtual.getFullYear();
@@ -127,7 +127,7 @@ export default function CalendarioEventos() {
           <div className="grid grid-cols-7 gap-2">
             {dias.map(({ data, foraDoMes }) => {
               const dateKey = getDateKey(data);
-              const evento = eventos[dateKey];
+              const evento = eventosMap[dateKey];
 
               if (evento && !foraDoMes) {
                 return (

@@ -1,30 +1,8 @@
 import { CalendarCheck2, CircleDollarSign, Stethoscope } from "lucide-react";
+import { getEventos } from "@/lib/content";
 
 type InscricaoPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-const eventosMap: Record<string, { titulo: string; descricao: string; investimento: string }> = {
-  "manejo-via-aerea-critico": {
-    titulo: "Manejo de via aérea no paciente crítico",
-    descricao: "Treinamento com foco em preparação, escolha de estratégia e execução segura no cenário crítico.",
-    investimento: "R$ 890,00",
-  },
-  "via-aerea-dificil-no-critico": {
-    titulo: "Via aérea difícil no crítico",
-    descricao: "Imersão prática em predição, dispositivos de resgate e algoritmo para falha de intubação.",
-    investimento: "R$ 990,00",
-  },
-  "acls-guiado-por-voz": {
-    titulo: "ACLS guiado por voz na prática",
-    descricao: "Atualização prática em PCR intra-hospitalar com simulação de comando e coordenação de equipe.",
-    investimento: "R$ 790,00",
-  },
-  "emergencias-medicas-plantao": {
-    titulo: "Emergências médicas no plantão",
-    descricao: "Abordagem dos principais cenários críticos com tomada de decisão rápida e estruturada.",
-    investimento: "R$ 840,00",
-  },
 };
 
 const eventoFallback = {
@@ -34,17 +12,17 @@ const eventoFallback = {
 };
 
 export default async function InscricaoPage({ searchParams }: InscricaoPageProps) {
-  const params = await searchParams;
+  const [params, eventos] = await Promise.all([searchParams, getEventos()]);
+
   const eventoSlugRaw = params.evento;
   const dataRaw = params.data;
 
   const eventoSlug = Array.isArray(eventoSlugRaw) ? eventoSlugRaw[0] : eventoSlugRaw;
   const dataEvento = Array.isArray(dataRaw) ? dataRaw[0] : dataRaw;
 
-  const evento =
-    typeof eventoSlug === "string" && eventoSlug.length > 0
-      ? (eventosMap[eventoSlug] ?? eventoFallback)
-      : eventoFallback;
+  const eventoData = typeof eventoSlug === "string" && eventoSlug.length > 0
+    ? (eventos.find((e) => e.slug === eventoSlug) ?? eventoFallback)
+    : eventoFallback;
 
   return (
     <main className="min-h-screen bg-background px-6 py-12 text-foreground">
@@ -53,8 +31,8 @@ export default async function InscricaoPage({ searchParams }: InscricaoPageProps
           <Stethoscope className="h-3.5 w-3.5" /> Inscrição de evento
         </div>
 
-        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">{evento.titulo}</h1>
-        <p className="mt-4 text-sm leading-relaxed text-muted md:text-base">{evento.descricao}</p>
+        <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">{eventoData.titulo}</h1>
+        <p className="mt-4 text-sm leading-relaxed text-muted md:text-base">{eventoData.descricao}</p>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
@@ -76,7 +54,7 @@ export default async function InscricaoPage({ searchParams }: InscricaoPageProps
             <p className="mb-2 inline-flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-accent-violet">
               <CircleDollarSign className="h-4 w-4" /> Investimento
             </p>
-            <p className="text-base font-semibold text-white">{evento.investimento}</p>
+            <p className="text-base font-semibold text-white">{eventoData.investimento}</p>
           </div>
         </div>
 
