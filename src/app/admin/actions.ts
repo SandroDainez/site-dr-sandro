@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { auth } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
+import { createHash } from "crypto";
 import {
   writeBlob,
   type EventoData,
@@ -11,8 +12,12 @@ import {
 } from "@/lib/content";
 
 async function requireAdmin() {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Não autorizado");
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_token")?.value;
+  const pw = process.env.ADMIN_PASSWORD;
+  if (!pw || token !== createHash("sha256").update(pw).digest("hex")) {
+    throw new Error("Não autorizado");
+  }
 }
 
 export async function saveEventos(eventos: EventoData[]) {

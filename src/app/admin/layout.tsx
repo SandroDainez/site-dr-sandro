@@ -1,16 +1,22 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
+import { createHash } from "crypto";
 import {
   CalendarDays,
   Contact,
   LayoutDashboard,
   Layers,
+  LogOut,
   Sparkles,
 } from "lucide-react";
+import { adminLogout } from "@/app/admin-login/actions";
 
-const ALLOWED_EMAIL = process.env.ADMIN_EMAIL;
+function getExpectedToken() {
+  const pw = process.env.ADMIN_PASSWORD;
+  if (!pw) return null;
+  return createHash("sha256").update(pw).digest("hex");
+}
 
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -25,28 +31,14 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await currentUser();
+  const isLoginPage = false; // handled by not protecting /admin/login
 
-  if (!user) redirect("/sign-in");
+  const cookieStore = await cookies();
+  const token = cookieStore.get("admin_token")?.value;
+  const expected = getExpectedToken();
 
-  const userEmail = user.emailAddresses?.[0]?.emailAddress ?? "";
-  if (ALLOWED_EMAIL && userEmail !== ALLOWED_EMAIL) {
-    return (
-      <main className="flex min-h-screen items-center justify-center bg-background text-foreground px-6">
-        <div className="rounded-3xl border border-white/10 bg-panel p-10 text-center max-w-md">
-          <p className="text-lg font-semibold text-white">Acesso negado</p>
-          <p className="mt-2 text-sm text-muted">
-            Este email ({userEmail}) não tem permissão de acesso ao painel admin.
-          </p>
-          <Link
-            href="/"
-            className="mt-6 inline-block rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm text-white transition hover:bg-white/10"
-          >
-            Voltar ao site
-          </Link>
-        </div>
-      </main>
-    );
+  if (token !== expected) {
+    redirect("/admin-login");
   }
 
   return (
@@ -68,21 +60,27 @@ export default async function AdminLayout({
             </Link>
           ))}
         </nav>
-        <div className="px-5 py-4 border-t border-white/10 flex items-center gap-3">
-          <UserButton />
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-white truncate">{user.firstName}</p>
-            <p className="text-[10px] text-muted truncate">{userEmail}</p>
-          </div>
+        <div className="px-3 py-4 border-t border-white/10">
+          <form action={adminLogout}>
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/50 transition hover:bg-white/[0.06] hover:text-white/80"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </button>
+          </form>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="lg:hidden flex items-center justify-between border-b border-white/10 bg-black/40 px-5 py-4">
           <p className="text-sm font-semibold text-white">Admin · Dr. Sandro</p>
-          <div className="flex items-center gap-3">
-            <UserButton />
-          </div>
+          <form action={adminLogout}>
+            <button type="submit" className="text-xs text-white/50 hover:text-white transition">
+              Sair
+            </button>
+          </form>
         </header>
 
         <main className="flex-1 px-6 py-8 overflow-auto">
