@@ -16,114 +16,188 @@ const tabs: { value: FilterArea; label: string }[] = [
   { value: "anestesiologia", label: "🩺 Anestesiologia" },
 ];
 
-const areaConfig: Record<AtualizacaoData["area"], { label: string; color: string; border: string; bg: string }> = {
-  emergencias: {
-    label: "🚑 Emergências",
-    color: "text-red-400",
-    border: "border-red-400/25",
-    bg: "bg-red-400/[0.02]",
-  },
-  ti: {
-    label: "🏥 Terapia Intensiva",
-    color: "text-blue-400",
-    border: "border-blue-400/25",
-    bg: "bg-blue-400/[0.02]",
-  },
-  anestesiologia: {
-    label: "🩺 Anestesiologia",
-    color: "text-violet-400",
-    border: "border-violet-400/25",
-    bg: "bg-violet-400/[0.02]",
-  },
+const areaMeta: Record<
+  AtualizacaoData["area"],
+  { title: string; emoji: string }
+> = {
+  emergencias: { title: "ATUALIZAÇÕES EM EMERGÊNCIAS", emoji: "🚑" },
+  ti: { title: "ATUALIZAÇÕES EM MEDICINA INTENSIVA", emoji: "🏥" },
+  anestesiologia: { title: "ATUALIZAÇÕES EM ANESTESIOLOGIA", emoji: "🩺" },
 };
 
-function formatDate(iso: string): string {
+function formatDateBR(iso: string): string {
   try {
-    const [year, month, day] = iso.split("-").map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    const [y, m, d] = iso.split("-").map(Number);
+    const meses = [
+      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+    ];
+    return `${d} de ${meses[m - 1]} de ${y}`;
   } catch {
     return iso;
   }
 }
 
-function TopicCard({ item }: { item: AtualizacaoData }) {
-  const [expanded, setExpanded] = useState(false);
-  const preview = item.conteudo.split(". ").slice(0, 2).join(". ") + ".";
-  const isLong = item.conteudo.length > 200 || item.conteudo.split(".").length > 3;
-
+function Sep() {
   return (
-    <div className="border-t border-white/[0.06] pt-4 first:border-0 first:pt-0">
-      {/* Título */}
-      <h3 className="text-[15px] font-semibold text-white leading-snug">
-        {item.titulo}
-      </h3>
-
-      {/* Conteúdo com expandir/recolher */}
-      <div className="mt-1.5 text-sm leading-relaxed text-white/60">
-        {expanded || !isLong ? (
-          <p>{item.conteudo}</p>
-        ) : (
-          <p>{preview}</p>
-        )}
-      </div>
-
-      {/* Link + expandir na mesma linha */}
-      <div className="mt-2 flex items-center gap-3">
-        {item.link && (
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-medium text-accent/80 hover:text-accent transition"
-          >
-            🔗 Ver fonte →
-          </a>
-        )}
-        {isLong && (
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            className="text-xs text-white/30 hover:text-white/60 transition"
-          >
-            {expanded ? "▲ Recolher" : "▼ Ler mais"}
-          </button>
-        )}
-      </div>
+    <div className="text-white/[0.07] text-center text-xs font-mono tracking-[0.5em] select-none leading-none my-4">
+      {Array(20).fill("_").join("")}
     </div>
   );
 }
 
-function AreaBoletimCard({
+function TopicBlock({
+  item,
+  index,
+}: {
+  item: AtualizacaoData;
+  index: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Split content at "Aplicação prática" or similar markers
+  const parts = item.conteudo.split(/(Aplicação prática[^.]*\.)/i);
+  const mainContent = parts[0] || item.conteudo;
+  const pratica = parts[1];
+
+  const isLong = item.conteudo.length > 300;
+  const displayContent = expanded || !isLong ? mainContent : mainContent.slice(0, 200) + "…";
+
+  return (
+    <div>
+      {/* 🔗 Link — same position as Discord (above the topic) */}
+      {item.link && (
+        <a
+          href={item.link}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs text-accent/80 hover:text-accent transition font-medium"
+        >
+          🔗 {item.titulo}
+        </a>
+      )}
+
+      <Sep />
+
+      {/* 📢 Topic title */}
+      <div className="text-sm font-bold text-white leading-snug flex items-start gap-1.5">
+        <span>📢</span>
+        <span>
+          <span className="text-accent/60">{index + 1}.</span>{" "}
+          {item.titulo}
+        </span>
+      </div>
+
+      {/* 📝 Content */}
+      <div className="mt-2 text-sm leading-relaxed text-white/65">
+        <span className="opacity-60">📝</span>{" "}
+        {displayContent}
+        {isLong && !expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="ml-1 text-accent/60 hover:text-accent transition text-xs"
+          >
+            [continuar lendo]
+          </button>
+        )}
+        {isLong && expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(false)}
+            className="ml-1 text-white/30 hover:text-white/50 transition text-xs"
+          >
+            [mostrar menos]
+          </button>
+        )}
+      </div>
+
+      {/* 💡 Aplicação prática */}
+      {pratica && (
+        <div className="mt-2 text-sm leading-relaxed text-white/65">
+          <span className="opacity-60">💡</span>{" "}
+          {pratica}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BoletimCard({
   area,
   items,
 }: {
   area: AtualizacaoData["area"];
   items: AtualizacaoData[];
 }) {
-  const cfg = areaConfig[area];
-  const latestDate = items[0]?.data;
+  const meta = areaMeta[area];
+
+  const sorted = [...items].sort(
+    (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+  );
+  const latestDate = sorted[0]?.data || "";
+
+  // Build "Também" list — extra topics beyond the main 3
+  const extras = sorted.slice(3);
 
   return (
-    <div
-      className={`rounded-3xl border ${cfg.border} ${cfg.bg} p-6 transition hover:-translate-y-0.5 hover:border-white/20`}
-    >
-      {/* Cabeçalho da área */}
-      <div className="flex items-center justify-between mb-5">
-        <span className={`text-sm font-bold uppercase tracking-[0.12em] ${cfg.color}`}>
-          {cfg.label}
-        </span>
-        <span className="text-[11px] text-white/30">{formatDate(latestDate)}</span>
+    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-7 transition hover:-translate-y-0.5 hover:border-white/20">
+      {/* ═══ HEADER ═══ */}
+      <div className="text-center space-y-1.5">
+        <div className="text-sm font-black tracking-[0.2em] text-white">
+          {meta.emoji} {meta.title}
+        </div>
+        <div className="text-xs text-white/40 flex items-center justify-center gap-1.5">
+          <span>📆</span> {formatDateBR(latestDate)}
+        </div>
       </div>
 
-      {/* Tópicos */}
-      <div className="space-y-4">
-        {items.map((item) => (
-          <TopicCard key={item.id} item={item} />
+      {/* ═══ TOPICS ═══ */}
+      <div className="mt-2">
+        {sorted.slice(0, 3).map((item, idx) => (
+          <div key={item.id} className={idx > 0 ? "mt-2" : ""}>
+            <TopicBlock item={item} index={idx} />
+            {idx < Math.min(sorted.length, 3) - 1 && <Sep />}
+          </div>
         ))}
+      </div>
+
+      {/* ═══ TAMBÉM ═══ */}
+      {extras.length > 0 && (
+        <>
+          <div className="mt-5 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center gap-1.5 text-xs text-white/40 font-medium">
+              <span>📕</span> Também:
+            </div>
+            <div className="mt-1.5 text-xs text-white/50 leading-relaxed">
+              {extras.map((e, i) => (
+                <span key={e.id}>
+                  {e.link ? (
+                    <a
+                      href={e.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-accent/70 hover:text-accent transition"
+                    >
+                      {e.titulo}
+                    </a>
+                  ) : (
+                    e.titulo
+                  )}
+                  {i < extras.length - 1 && <span className="text-white/20 mx-1.5">|</span>}
+                </span>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ═══ FOOTER ═══ */}
+      <div className="mt-5 pt-4 border-t border-white/[0.06]">
+        <div className="flex items-center justify-center gap-1.5 text-xs text-white/25">
+          <span>🤖</span>
+          <span>Boletim gerado pelo Amigo 🦊 — {formatDateBR(latestDate)}</span>
+        </div>
       </div>
     </div>
   );
@@ -132,33 +206,31 @@ function AreaBoletimCard({
 export default function AtualizacoesGrid({ atualizacoes }: Props) {
   const [active, setActive] = useState<FilterArea>("todas");
 
-  // Sort by date descending
-  const sorted = [...atualizacoes].sort(
-    (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
-  );
+  const areas: AtualizacaoData["area"][] = [
+    "emergencias",
+    "ti",
+    "anestesiologia",
+  ];
 
-  // Group by area, take top 3 per area
+  // Group by area
   const grouped: Record<AtualizacaoData["area"], AtualizacaoData[]> = {
     emergencias: [],
     ti: [],
     anestesiologia: [],
   };
 
-  for (const item of sorted) {
-    if (grouped[item.area].length < 3) {
+  for (const item of atualizacoes) {
+    if (grouped[item.area]) {
       grouped[item.area].push(item);
     }
   }
 
-  const areas: AtualizacaoData["area"][] = ["emergencias", "ti", "anestesiologia"];
+  const visibleAreas = areas.filter((a) => grouped[a].length > 0);
 
-  // Determine which areas to show
   const filteredAreas =
     active === "todas"
-      ? areas
-      : areas.filter((a) => a === active);
-
-  const hasContent = filteredAreas.some((a) => grouped[a].length > 0);
+      ? visibleAreas
+      : visibleAreas.filter((a) => a === active);
 
   return (
     <div>
@@ -180,25 +252,18 @@ export default function AtualizacoesGrid({ atualizacoes }: Props) {
         ))}
       </div>
 
-      {!hasContent && (
-        <p className="text-sm text-white/40">Nenhuma atualização nesta área ainda.</p>
-      )}
-
-      {/* Boletim cards — 1 card por área */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {filteredAreas.map((area) => {
-          const items = grouped[area];
-          if (items.length === 0) return null;
-          return <AreaBoletimCard key={area} area={area} items={items} />;
-        })}
-      </div>
-
-      {/* Se alguma área ficou de fora por ter menos de 3 itens, mostra sutil */}
-      {active === "todas" && sorted.length > 0 && (
-        <p className="mt-6 text-xs text-white/20 text-center">
-          Últimas 3 atualizações por área • {sorted.length} no total
+      {filteredAreas.length === 0 && (
+        <p className="text-sm text-white/40 text-center">
+          Nenhuma atualização nesta área ainda.
         </p>
       )}
+
+      {/* Boletins — 1 card por área, formato idêntico ao Discord */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {filteredAreas.map((area) => (
+          <BoletimCard key={area} area={area} items={grouped[area]} />
+        ))}
+      </div>
     </div>
   );
 }
