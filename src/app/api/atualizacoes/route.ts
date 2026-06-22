@@ -109,3 +109,37 @@ export async function GET() {
     return NextResponse.json({ error: "Erro ao buscar atualizações" }, { status: 500 });
   }
 }
+
+// ─── DELETE /api/atualizacoes ───────────────────────────────────────────────
+// Remove uma atualização pelo ID.
+// Requer x-api-key e JSON body com o id a remover.
+export async function DELETE(req: NextRequest) {
+  const auth = requireApiKey(req);
+  if (auth !== "ok") {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  let body: { id?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  if (!body.id) {
+    return NextResponse.json({ error: "Campo 'id' é obrigatório." }, { status: 400 });
+  }
+
+  try {
+    const current = await getAtualizacoes();
+    const filtered = current.filter((item) => item.id !== body.id);
+    if (filtered.length === current.length) {
+      return NextResponse.json({ error: "ID não encontrado." }, { status: 404 });
+    }
+    await writeBlob("atualizacoes", filtered);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erro ao remover";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
