@@ -1,30 +1,14 @@
 import Link from "next/link";
-import { CalendarDays, Contact, Layers, Sparkles, ArrowRight } from "lucide-react";
+import { CalendarDays, Contact, Layers, Sparkles, ArrowRight, UserCircle } from "lucide-react";
 
 const sections = [
   {
-    href: "/admin/eventos",
-    icon: CalendarDays,
-    label: "Eventos",
-    desc: "Adicione, edite ou remova eventos do calendário e da página de inscrição.",
-    color: "text-accent-blue",
-    border: "hover:border-accent-blue/40",
-  },
-  {
-    href: "/admin/apps",
-    icon: Layers,
-    label: "Apps por assinatura",
-    desc: "Edite título, descrição e destaques de cada aplicativo.",
+    href: "/admin/header",
+    icon: UserCircle,
+    label: "Cabeçalho",
+    desc: "Edite nome, CRM, RQEs e URL da logo no topo do site.",
     color: "text-accent",
     border: "hover:border-accent/40",
-  },
-  {
-    href: "/admin/contato",
-    icon: Contact,
-    label: "Contato",
-    desc: "Atualize e-mail, WhatsApp, telefone e redes sociais.",
-    color: "text-accent-violet",
-    border: "hover:border-accent-violet/40",
   },
   {
     href: "/admin/hero",
@@ -33,6 +17,30 @@ const sections = [
     desc: "Edite o badge, título e subtítulo da seção principal.",
     color: "text-amber-400",
     border: "hover:border-amber-400/40",
+  },
+  {
+    href: "/admin/apps",
+    icon: Layers,
+    label: "Apps por assinatura",
+    desc: "Edite título, descrição e destaques de cada aplicativo.",
+    color: "text-accent-blue",
+    border: "hover:border-accent-blue/40",
+  },
+  {
+    href: "/admin/eventos",
+    icon: CalendarDays,
+    label: "Eventos",
+    desc: "Adicione, edite ou remova eventos do calendário e da página de inscrição.",
+    color: "text-accent-violet",
+    border: "hover:border-accent-violet/40",
+  },
+  {
+    href: "/admin/contato",
+    icon: Contact,
+    label: "Contato",
+    desc: "Atualize e-mail, WhatsApp, telefone e redes sociais.",
+    color: "text-white/60",
+    border: "hover:border-white/30",
   },
 ];
 

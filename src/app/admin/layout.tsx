@@ -9,6 +9,7 @@ import {
   Layers,
   LogOut,
   Sparkles,
+  UserCircle,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
 
@@ -20,10 +21,11 @@ function getExpectedToken() {
 
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
-  { href: "/admin/apps", label: "Apps", icon: Layers },
-  { href: "/admin/contato", label: "Contato", icon: Contact },
+  { href: "/admin/header", label: "Cabeçalho", icon: UserCircle },
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
+  { href: "/admin/apps", label: "Apps", icon: Layers },
+  { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
+  { href: "/admin/contato", label: "Contato", icon: Contact },
 ];
 
 export default async function AdminLayout({

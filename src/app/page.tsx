@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import {
   ArrowRight,
   AudioLines,
@@ -18,7 +20,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import CalendarioEventos from "@/components/CalendarioEventos";
-import { getApps, getContato, getEventos, getHero } from "@/lib/content";
+import { getApps, getContato, getEventos, getHero, getHeader } from "@/lib/content";
 
 const iconMap: Record<string, LucideIcon> = {
   Layers, CalendarClock, FileText, Zap, HeartPulse, BookOpen, AudioLines,
@@ -38,11 +40,12 @@ const acessoAbertoCards = [
 ];
 
 export default async function Home() {
-  const [eventos, apps, contato, hero] = await Promise.all([
+  const [eventos, apps, contato, hero, header] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
     getHero(),
+    getHeader(),
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -58,20 +61,21 @@ export default async function Home() {
           <div className="flex items-center gap-3">
             <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-black/10 shadow-[0_0_34px_rgba(44,230,184,0.32)]">
               <Image
-                src="/logo-medicina.png"
-                alt="Logo medicina"
+                src={header.logoUrl}
+                alt="Logo"
                 width={80}
                 height={80}
                 className="h-full w-full object-cover"
                 priority
+                unoptimized={header.logoUrl.startsWith("http")}
               />
             </div>
             <div className="text-center lg:text-left">
-              <p className="text-2xl font-bold tracking-tight text-white md:text-3xl">Dr. Sandro Dainez</p>
+              <p className="text-2xl font-bold tracking-tight text-white md:text-3xl">{header.name}</p>
               <div className="mt-1 space-y-0.5 text-sm font-semibold leading-tight tracking-tight text-accent md:text-base">
-                <p>CREMESP 76.907</p>
-                <p>Anestesiologia RQE 58.201</p>
-                <p>Medicina Intensiva RQE 58.202</p>
+                <p>{header.cremesp}</p>
+                <p>{header.rqe1}</p>
+                <p>{header.rqe2}</p>
               </div>
             </div>
           </div>

@@ -9,6 +9,7 @@ import {
   type AppData,
   type ContatoData,
   type HeroData,
+  type HeaderData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -60,6 +61,17 @@ export async function saveHero(hero: HeroData): Promise<Result> {
   try {
     await requireAdmin();
     await writeBlob("hero", hero);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveHeader(header: HeaderData): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("header", header);
     revalidatePath("/");
     return { ok: true };
   } catch (e) {

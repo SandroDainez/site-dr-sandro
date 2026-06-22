@@ -37,11 +37,20 @@ export type HeroData = {
   subtitle: string;
 };
 
+export type HeaderData = {
+  name: string;
+  cremesp: string;
+  rqe1: string;
+  rqe2: string;
+  logoUrl: string;
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
   contato: ContatoData;
   hero: HeroData;
+  header: HeaderData;
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -141,6 +150,14 @@ export const defaultHero: HeroData = {
     "Plataforma de apoio à decisão em medicina de urgência e emergência, terapia intensiva e anestesiologia.",
 };
 
+export const defaultHeader: HeaderData = {
+  name: "Dr. Sandro Dainez",
+  cremesp: "CREMESP 76.907",
+  rqe1: "Anestesiologia RQE 58.201",
+  rqe2: "Medicina Intensiva RQE 58.202",
+  logoUrl: "/logo-medicina.png",
+};
+
 // ─── Storage helpers (local files em dev, Vercel Blob em produção) ────────────
 
 const DATA_DIR = path.join(process.cwd(), "src", "data");
@@ -213,4 +230,8 @@ export async function getContato(): Promise<ContatoData> {
 
 export async function getHero(): Promise<HeroData> {
   return readBlob("hero", defaultHero);
+}
+
+export async function getHeader(): Promise<HeaderData> {
+  return readBlob("header", defaultHeader);
 }
