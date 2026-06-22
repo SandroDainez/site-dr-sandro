@@ -78,6 +78,17 @@ export type HeaderData = {
   logoUrl: string;
 };
 
+export type AtualizacaoData = {
+  id: string;
+  titulo: string;
+  conteudo: string;
+  area: "emergencias" | "ti" | "anestesiologia";
+  imageUrl: string;
+  imageCaption: string;
+  link: string;
+  data: string; // YYYY-MM-DD
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
@@ -89,6 +100,7 @@ export type ContentMap = {
   courses: CourseData[];
   whyUs: WhyUsData[];
   siteConfig: SiteConfig;
+  atualizacoes: AtualizacaoData[];
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -246,6 +258,42 @@ export const defaultWhyUs: WhyUsData[] = [
   },
 ];
 
+export const defaultAtualizacoes: AtualizacaoData[] = [
+  {
+    id: "acls-2026",
+    titulo: "Atualização ACLS 2026 — principais mudanças",
+    conteudo:
+      "A AHA publicou as novas diretrizes de ressuscitação cardiopulmonar com ênfase em qualidade de compressão e integração de dispositivos de feedback em tempo real.",
+    area: "emergencias",
+    imageUrl: "",
+    imageCaption: "",
+    link: "",
+    data: "2026-06-01",
+  },
+  {
+    id: "vm-protetora-uti",
+    titulo: "Ventilação protetora na UTI — evidências recentes",
+    conteudo:
+      "Revisão das evidências sobre volume corrente baixo, PEEP titulado e driving pressure como alvos primários na ventilação mecânica do paciente crítico.",
+    area: "ti",
+    imageUrl: "",
+    imageCaption: "",
+    link: "",
+    data: "2026-05-20",
+  },
+  {
+    id: "bloqueio-neuroaxial-anticoagulados",
+    titulo: "Bloqueio neuroaxial em pacientes anticoagulados",
+    conteudo:
+      "Atualização dos intervalos de segurança para anticoagulantes orais diretos e heparinas de baixo peso molecular antes de procedimentos neuraxiais.",
+    area: "anestesiologia",
+    imageUrl: "",
+    imageCaption: "",
+    link: "",
+    data: "2026-05-10",
+  },
+];
+
 export const defaultSiteConfig: SiteConfig = {
   marqueeItems: [
     "Protocolos revisados semanalmente",
@@ -360,6 +408,10 @@ export async function getWhyUs(): Promise<WhyUsData[]> {
 
 export async function getSiteConfig(): Promise<SiteConfig> {
   return readBlob("siteConfig", defaultSiteConfig);
+}
+
+export async function getAtualizacoes(): Promise<AtualizacaoData[]> {
+  return readBlob("atualizacoes", defaultAtualizacoes);
 }
 
 export async function uploadImageToBlob(file: File): Promise<string> {

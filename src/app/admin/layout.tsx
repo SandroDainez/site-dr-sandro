@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Layers,
   LogOut,
+  Newspaper,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -37,6 +38,7 @@ const navLinks = [
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/admin/contato", label: "Contato", icon: Contact },
   { href: "/admin/imagens", label: "Imagens", icon: ImageIcon },
+  { href: "/admin/atualizacoes", label: "Atualizações", icon: Newspaper },
   { href: "/admin/config", label: "Configurações", icon: Settings },
 ];
 

@@ -7,6 +7,7 @@ import {
   GraduationCap,
   ImageIcon,
   Layers,
+  Newspaper,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -94,6 +95,14 @@ const sections = [
     desc: "Faça upload de imagens para o Vercel Blob e copie a URL.",
     color: "text-pink-400",
     border: "hover:border-pink-400/40",
+  },
+  {
+    href: "/admin/atualizacoes",
+    icon: Newspaper,
+    label: "Atualizações",
+    desc: "Publique e gerencie atualizações médicas por área clínica.",
+    color: "text-orange-400",
+    border: "hover:border-orange-400/40",
   },
   {
     href: "/admin/config",

@@ -16,6 +16,7 @@ import {
   type CourseData,
   type WhyUsData,
   type SiteConfig,
+  type AtualizacaoData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -134,6 +135,18 @@ export async function saveSiteConfig(config: SiteConfig): Promise<Result> {
     await requireAdmin();
     await writeBlob("siteConfig", config);
     revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveAtualizacoes(atualizacoes: AtualizacaoData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("atualizacoes", atualizacoes);
+    revalidatePath("/");
+    revalidatePath("/atualizacoes");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };
