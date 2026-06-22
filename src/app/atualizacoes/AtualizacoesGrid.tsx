@@ -16,13 +16,25 @@ const tabs: { value: FilterArea; label: string }[] = [
   { value: "anestesiologia", label: "🩺 Anestesiologia" },
 ];
 
-const areaMeta: Record<
-  AtualizacaoData["area"],
-  { title: string; emoji: string }
-> = {
-  emergencias: { title: "ATUALIZAÇÕES EM EMERGÊNCIAS", emoji: "🚑" },
-  ti: { title: "ATUALIZAÇÕES EM MEDICINA INTENSIVA", emoji: "🏥" },
-  anestesiologia: { title: "ATUALIZAÇÕES EM ANESTESIOLOGIA", emoji: "🩺" },
+const areaMeta: Record<AtualizacaoData["area"], { title: string; emoji: string; color: string; border: string }> = {
+  emergencias: {
+    title: "ATUALIZAÇÕES EM EMERGÊNCIAS",
+    emoji: "🚑",
+    color: "text-red-400",
+    border: "border-red-400/25",
+  },
+  ti: {
+    title: "ATUALIZAÇÕES EM MEDICINA INTENSIVA",
+    emoji: "🏥",
+    color: "text-blue-400",
+    border: "border-blue-400/25",
+  },
+  anestesiologia: {
+    title: "ATUALIZAÇÕES EM ANESTESIOLOGIA",
+    emoji: "🩺",
+    color: "text-violet-400",
+    border: "border-violet-400/25",
+  },
 };
 
 function formatDateBR(iso: string): string {
@@ -49,13 +61,14 @@ function Sep() {
 function TopicBlock({
   item,
   index,
+  areaColor,
 }: {
   item: AtualizacaoData;
   index: number;
+  areaColor: string;
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  // Split content at "Aplicação prática" or similar markers
   const parts = item.conteudo.split(/(Aplicação prática[^.]*\.)/i);
   const mainContent = parts[0] || item.conteudo;
   const pratica = parts[1];
@@ -65,13 +78,13 @@ function TopicBlock({
 
   return (
     <div>
-      {/* 🔗 Link — same position as Discord (above the topic) */}
+      {/* 🔗 Link */}
       {item.link && (
         <a
           href={item.link}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs text-accent/80 hover:text-accent transition font-medium"
+          className={`inline-flex items-center gap-1.5 text-xs ${areaColor.replace("text-", "text-").replace("400", "400/80")} hover:${areaColor} transition font-medium`}
         >
           🔗 {item.titulo}
         </a>
@@ -79,11 +92,11 @@ function TopicBlock({
 
       <Sep />
 
-      {/* 📢 Topic title */}
+      {/* 📢 Topic title with area color */}
       <div className="text-sm font-bold text-white leading-snug flex items-start gap-1.5">
         <span>📢</span>
         <span>
-          <span className="text-accent/60">{index + 1}.</span>{" "}
+          <span className={areaColor}>{index + 1}.</span>{" "}
           {item.titulo}
         </span>
       </div>
@@ -136,27 +149,25 @@ function BoletimCard({
     (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
   );
   const latestDate = sorted[0]?.data || "";
-
-  // Build "Também" list — extra topics beyond the main 3
   const extras = sorted.slice(3);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-7 transition hover:-translate-y-0.5 hover:border-white/20">
+    <div className={`rounded-3xl border ${meta.border} bg-white/[0.03] p-6 sm:p-7 transition`}>
       {/* ═══ HEADER ═══ */}
-      <div className="text-center space-y-1.5">
-        <div className="text-sm font-black tracking-[0.2em] text-white">
+      <div className="text-left">
+        <div className={`text-sm font-black tracking-[0.15em] ${meta.color}`}>
           {meta.emoji} {meta.title}
         </div>
-        <div className="text-xs text-white/40 flex items-center justify-center gap-1.5">
-          <span>📆</span> {formatDateBR(latestDate)}
+        <div className="text-xs text-white/40 mt-1">
+          📆 {formatDateBR(latestDate)}
         </div>
       </div>
 
       {/* ═══ TOPICS ═══ */}
-      <div className="mt-2">
+      <div className="mt-4">
         {sorted.slice(0, 3).map((item, idx) => (
-          <div key={item.id} className={idx > 0 ? "mt-2" : ""}>
-            <TopicBlock item={item} index={idx} />
+          <div key={item.id}>
+            <TopicBlock item={item} index={idx} areaColor={meta.color} />
             {idx < Math.min(sorted.length, 3) - 1 && <Sep />}
           </div>
         ))}
@@ -164,37 +175,30 @@ function BoletimCard({
 
       {/* ═══ TAMBÉM ═══ */}
       {extras.length > 0 && (
-        <>
-          <div className="mt-5 pt-4 border-t border-white/[0.06]">
-            <div className="flex items-center gap-1.5 text-xs text-white/40 font-medium">
-              <span>📕</span> Também:
-            </div>
-            <div className="mt-1.5 text-xs text-white/50 leading-relaxed">
-              {extras.map((e, i) => (
-                <span key={e.id}>
-                  {e.link ? (
-                    <a
-                      href={e.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-accent/70 hover:text-accent transition"
-                    >
-                      {e.titulo}
-                    </a>
-                  ) : (
-                    e.titulo
-                  )}
-                  {i < extras.length - 1 && <span className="text-white/20 mx-1.5">|</span>}
-                </span>
-              ))}
-            </div>
+        <div className="mt-5 pt-4 border-t border-white/[0.06]">
+          <div className="flex items-center gap-1.5 text-xs text-white/40 font-medium">
+            <span>📕</span> Também:
           </div>
-        </>
+          <div className="mt-1.5 text-xs text-white/50 leading-relaxed">
+            {extras.map((e, i) => (
+              <span key={e.id}>
+                {e.link ? (
+                  <a href={e.link} target="_blank" rel="noreferrer" className="text-accent/70 hover:text-accent transition">
+                    {e.titulo}
+                  </a>
+                ) : (
+                  e.titulo
+                )}
+                {i < extras.length - 1 && <span className="text-white/20 mx-1.5">|</span>}
+              </span>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* ═══ FOOTER ═══ */}
       <div className="mt-5 pt-4 border-t border-white/[0.06]">
-        <div className="flex items-center justify-center gap-1.5 text-xs text-white/25">
+        <div className="flex items-center gap-1.5 text-xs text-white/25">
           <span>🤖</span>
           <span>Boletim gerado pelo Amigo 🦊 — {formatDateBR(latestDate)}</span>
         </div>
@@ -212,7 +216,6 @@ export default function AtualizacoesGrid({ atualizacoes }: Props) {
     "anestesiologia",
   ];
 
-  // Group by area
   const grouped: Record<AtualizacaoData["area"], AtualizacaoData[]> = {
     emergencias: [],
     ti: [],
@@ -231,6 +234,9 @@ export default function AtualizacoesGrid({ atualizacoes }: Props) {
     active === "todas"
       ? visibleAreas
       : visibleAreas.filter((a) => a === active);
+
+  // Order: Emergências, TI, Anestesiologia (fixed order)
+  const orderedAreas = areas.filter((a) => filteredAreas.includes(a));
 
   return (
     <div>
@@ -252,15 +258,15 @@ export default function AtualizacoesGrid({ atualizacoes }: Props) {
         ))}
       </div>
 
-      {filteredAreas.length === 0 && (
+      {orderedAreas.length === 0 && (
         <p className="text-sm text-white/40 text-center">
           Nenhuma atualização nesta área ainda.
         </p>
       )}
 
-      {/* Boletins — 1 card por área, formato idêntico ao Discord */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredAreas.map((area) => (
+      {/* Boletins — UM ABAIXO DO OUTRO (vertical), não mais em grid */}
+      <div className="flex flex-col gap-8">
+        {orderedAreas.map((area) => (
           <BoletimCard key={area} area={area} items={grouped[area]} />
         ))}
       </div>
