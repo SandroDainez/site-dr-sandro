@@ -5,11 +5,17 @@ import { cookies } from "next/headers";
 import { createHash } from "crypto";
 import {
   writeBlob,
+  uploadImageToBlob,
   type EventoData,
   type AppData,
   type ContatoData,
   type HeroData,
   type HeaderData,
+  type FreeAppData,
+  type ContentItemData,
+  type CourseData,
+  type WhyUsData,
+  type SiteConfig,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -74,6 +80,77 @@ export async function saveHeader(header: HeaderData): Promise<Result> {
     await writeBlob("header", header);
     revalidatePath("/");
     return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveFreeApps(apps: FreeAppData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("freeApps", apps);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveContentItems(items: ContentItemData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("contentItems", items);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveCourses(courses: CourseData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("courses", courses);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveWhyUs(cards: WhyUsData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("whyUs", cards);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveSiteConfig(config: SiteConfig): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("siteConfig", config);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function uploadImage(
+  formData: FormData
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  try {
+    await requireAdmin();
+    const file = formData.get("file") as File;
+    if (!file || file.size === 0) {
+      return { ok: false, error: "Nenhum arquivo enviado." };
+    }
+    const url = await uploadImageToBlob(file);
+    return { ok: true, url };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };
   }

@@ -3,11 +3,17 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createHash } from "crypto";
 import {
+  AudioLines,
+  BookOpen,
   CalendarDays,
   Contact,
+  GraduationCap,
+  ImageIcon,
   LayoutDashboard,
   Layers,
   LogOut,
+  Settings,
+  ShieldCheck,
   Sparkles,
   UserCircle,
 } from "lucide-react";
@@ -24,8 +30,14 @@ const navLinks = [
   { href: "/admin/header", label: "Cabeçalho", icon: UserCircle },
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
   { href: "/admin/apps", label: "Apps", icon: Layers },
+  { href: "/admin/apps-gratis", label: "Apps Grátis", icon: BookOpen },
+  { href: "/admin/conteudo", label: "Conteúdo", icon: AudioLines },
+  { href: "/admin/cursos", label: "Cursos", icon: GraduationCap },
+  { href: "/admin/por-que-nos", label: "Por que nós", icon: ShieldCheck },
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/admin/contato", label: "Contato", icon: Contact },
+  { href: "/admin/imagens", label: "Imagens", icon: ImageIcon },
+  { href: "/admin/config", label: "Configurações", icon: Settings },
 ];
 
 export default async function AdminLayout({

@@ -74,7 +74,7 @@ export default function AppsEditor({ initialApps }: Props) {
   function addApp() {
     setApps((prev) => [
       ...prev,
-      { title: "", subtitle: "", text: "", icon: "Layers", glow: GLOW_OPTIONS[0].value, highlights: [""] },
+      { title: "", subtitle: "", text: "", icon: "Layers", glow: GLOW_OPTIONS[0].value, highlights: [""], link: "" },
     ]);
     setSaved(false);
   }
@@ -157,6 +157,17 @@ export default function AppsEditor({ initialApps }: Props) {
               value={app.text}
               onChange={(e) => updateApp(index, "text", e.target.value)}
               className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50 resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Link do app (URL — ex: https://anesmap.app)</label>
+            <input
+              type="url"
+              value={app.link ?? ""}
+              onChange={(e) => updateApp(index, "link", e.target.value)}
+              placeholder="https://"
+              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
             />
           </div>
 

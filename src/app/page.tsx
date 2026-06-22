@@ -20,32 +20,36 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import CalendarioEventos from "@/components/CalendarioEventos";
-import { getApps, getContato, getEventos, getHero, getHeader } from "@/lib/content";
+import {
+  getApps,
+  getContato,
+  getEventos,
+  getHero,
+  getHeader,
+  getFreeApps,
+  getContentItems,
+  getCourses,
+  getWhyUs,
+  getSiteConfig,
+} from "@/lib/content";
 
 const iconMap: Record<string, LucideIcon> = {
   Layers, CalendarClock, FileText, Zap, HeartPulse, BookOpen, AudioLines,
+  BrainCircuit, ShieldCheck, Sparkles, GraduationCap, Microscope,
 };
 
-const acessoAbertoCards = [
-  {
-    title: "Aplicativos gratuitos",
-    desc: "Ferramentas abertas para consulta rápida e suporte à conduta no plantão.",
-    icon: BookOpen,
-  },
-  {
-    title: "Aulas e podcasts gratuitos",
-    desc: "Conteúdo aberto para atualização objetiva, sem necessidade de login.",
-    icon: AudioLines,
-  },
-];
-
 export default async function Home() {
-  const [eventos, apps, contato, hero, header] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, contentItems, courses, whyUs, siteConfig] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
     getHero(),
     getHeader(),
+    getFreeApps(),
+    getContentItems(),
+    getCourses(),
+    getWhyUs(),
+    getSiteConfig(),
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -169,20 +173,7 @@ export default async function Home() {
         <section className="mx-auto w-full max-w-7xl px-6 pb-20">
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/35 py-3">
             <div className="finex-marquee-track flex items-center gap-3 px-4">
-              {[
-                "Protocolos revisados semanalmente",
-                "Ferramentas para decisão à beira-leito",
-                "Conteúdo aberto sem login",
-                "Cursos presenciais, híbridos e online",
-                "Atualização científica contínua",
-                "Material orientado à prática assistencial",
-                "Protocolos revisados semanalmente",
-                "Ferramentas para decisão à beira-leito",
-                "Conteúdo aberto sem login",
-                "Cursos presenciais, híbridos e online",
-                "Atualização científica contínua",
-                "Material orientado à prática assistencial",
-              ].map((item, idx) => (
+              {[...siteConfig.marqueeItems, ...siteConfig.marqueeItems].map((item, idx) => (
                 <span
                   key={`${item}-${idx}`}
                   className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-1 text-xs uppercase tracking-[0.14em] text-white/70"
@@ -233,9 +224,20 @@ export default async function Home() {
                       </div>
                     ))}
                   </div>
-                  <button className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]">
-                    Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
+                  {app.link ? (
+                    <a
+                      href={app.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]"
+                    >
+                      Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
+                    </a>
+                  ) : (
+                    <button className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]">
+                      Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  )}
                 </div>
               </article>
               );
@@ -248,15 +250,33 @@ export default async function Home() {
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight">Acesso aberto imediato</h3>
             <div className="mt-7 grid gap-4 sm:grid-cols-2">
-              {acessoAbertoCards.map((item) => (
-                <div key={item.title} className="card-open rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-accent/35 hover:bg-black/30">
-                  <div className="flex items-center gap-3">
-                    <item.icon className="h-4 w-4 text-accent" />
-                    <p className="font-medium">{item.title}</p>
+              {freeApps.map((item) => {
+                const FreeIcon = iconMap[item.icon] ?? BookOpen;
+                const cardContent = (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <FreeIcon className="h-4 w-4 text-accent" />
+                      <p className="font-medium">{item.title}</p>
+                    </div>
+                    <p className="mt-2 text-sm leading-relaxed text-muted">{item.desc}</p>
+                  </>
+                );
+                return item.link ? (
+                  <a
+                    key={item.title}
+                    href={item.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="card-open rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-accent/35 hover:bg-black/30 block"
+                  >
+                    {cardContent}
+                  </a>
+                ) : (
+                  <div key={item.title} className="card-open rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-accent/35 hover:bg-black/30">
+                    {cardContent}
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">{item.desc}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -264,26 +284,39 @@ export default async function Home() {
             <p className="text-xs uppercase tracking-[0.16em] text-accent-blue">Conteúdo educacional aberto</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight">Podcasts, aulas e atualizações</h3>
             <div className="mt-7 grid gap-4">
-              {[
-                { title: "Aulas abertas", subtitle: "Acesso livre para revisão rápida", icon: PlayCircle },
-                { title: "Podcasts clínicos", subtitle: "Discussão de casos e condutas", icon: AudioLines },
-                { title: "Atualizações semanais", subtitle: "Evidência recente aplicada", icon: Microscope },
-                { title: "Protocolos guiados", subtitle: "Fluxos de conduta passo a passo", icon: BrainCircuit },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  className="group finex-scan flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent-blue/35 hover:bg-white/[0.06]"
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon className="h-4 w-4 text-accent-blue" />
-                    <div>
-                      <p className="text-sm font-medium">{item.title}</p>
-                      <p className="text-xs text-muted">{item.subtitle}</p>
+              {contentItems.map((item, idx) => {
+                const ContentIcon = [PlayCircle, AudioLines, Microscope, BrainCircuit][idx % 4];
+                const inner = (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <ContentIcon className="h-4 w-4 text-accent-blue" />
+                      <div>
+                        <p className="text-sm font-medium">{item.title}</p>
+                        <p className="text-xs text-muted">{item.subtitle}</p>
+                      </div>
                     </div>
+                    <ArrowRight className="h-4 w-4 text-white/45 transition group-hover:translate-x-1 group-hover:text-white" />
+                  </>
+                );
+                return item.link ? (
+                  <a
+                    key={item.title}
+                    href={item.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group finex-scan flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent-blue/35 hover:bg-white/[0.06]"
+                  >
+                    {inner}
+                  </a>
+                ) : (
+                  <div
+                    key={item.title}
+                    className="group finex-scan flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent-blue/35 hover:bg-white/[0.06]"
+                  >
+                    {inner}
                   </div>
-                  <ArrowRight className="h-4 w-4 text-white/45 transition group-hover:translate-x-1 group-hover:text-white" />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -299,25 +332,34 @@ export default async function Home() {
               </div>
 
               <div className="space-y-3">
-                {[
-                  {
-                    id: "manejo-via-aerea",
-                    title: "Manejo de via aérea no paciente crítico",
-                  },
-                  {
-                    id: "via-aerea-dificil",
-                    title: "Via aérea difícil no crítico",
-                  },
-                ].map((topic) => (
-                  <div
-                    id={topic.id}
-                    key={topic.id}
-                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 transition hover:border-accent-violet/35 hover:bg-black/30"
-                  >
-                    <GraduationCap className="h-4 w-4 text-accent-violet" />
-                    <p className="text-sm text-white/85">{topic.title}</p>
-                  </div>
-                ))}
+                {courses.map((topic) => {
+                  const inner = (
+                    <>
+                      <GraduationCap className="h-4 w-4 text-accent-violet" />
+                      <p className="text-sm text-white/85">{topic.title}</p>
+                    </>
+                  );
+                  return topic.link ? (
+                    <a
+                      id={topic.id}
+                      key={topic.id}
+                      href={topic.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 transition hover:border-accent-violet/35 hover:bg-black/30"
+                    >
+                      {inner}
+                    </a>
+                  ) : (
+                    <div
+                      id={topic.id}
+                      key={topic.id}
+                      className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 transition hover:border-accent-violet/35 hover:bg-black/30"
+                    >
+                      {inner}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -375,37 +417,24 @@ export default async function Home() {
 
         <section className="mx-auto w-full max-w-7xl px-6 pb-24">
           <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Segurança clínica",
-                text: "Condutas estruturadas para reduzir variabilidade assistencial.",
-              },
-              {
-                icon: BrainCircuit,
-                title: "Decisão baseada em evidência",
-                text: "Síntese objetiva da literatura para suporte à conduta.",
-              },
-              {
-                icon: Sparkles,
-                title: "Usabilidade orientada ao plantão",
-                text: "Acesso rápido à informação crítica em momentos de decisão.",
-              },
-            ].map((item) => (
-              <article key={item.title} className="group rounded-3xl border border-white/10 bg-[#10141d] p-6 transition hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_22px_45px_-28px_rgba(44,230,184,0.45)]">
-                <item.icon className="h-5 w-5 text-accent" />
-                <h4 className="mt-4 text-xl font-medium tracking-tight">{item.title}</h4>
-                <p className="mt-3 text-sm leading-relaxed text-muted">{item.text}</p>
-              </article>
-            ))}
+            {whyUs.map((item) => {
+              const WhyIcon = iconMap[item.icon] ?? ShieldCheck;
+              return (
+                <article key={item.title} className="group rounded-3xl border border-white/10 bg-[#10141d] p-6 transition hover:-translate-y-1 hover:border-white/20 hover:shadow-[0_22px_45px_-28px_rgba(44,230,184,0.45)]">
+                  <WhyIcon className="h-5 w-5 text-accent" />
+                  <h4 className="mt-4 text-xl font-medium tracking-tight">{item.title}</h4>
+                  <p className="mt-3 text-sm leading-relaxed text-muted">{item.text}</p>
+                </article>
+              );
+            })}
           </div>
         </section>
       </main>
 
       <footer className="border-t border-line/80 bg-black/20 py-10">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-6 text-sm text-muted sm:flex-row">
-          <p>Dr. Sandro • Portal de Anestesiologia e Medicina Intensiva</p>
-          <p>© 2026 Todos os direitos reservados.</p>
+          <p>{siteConfig.footerName}</p>
+          <p>{siteConfig.footerTagline}</p>
         </div>
       </footer>
     </div>

@@ -19,6 +19,38 @@ export type AppData = {
   icon: string;
   glow: string;
   highlights: string[];
+  link: string;
+};
+
+export type FreeAppData = {
+  title: string;
+  desc: string;
+  icon: string;
+  link: string;
+};
+
+export type ContentItemData = {
+  title: string;
+  subtitle: string;
+  link: string;
+};
+
+export type CourseData = {
+  id: string;
+  title: string;
+  link: string;
+};
+
+export type WhyUsData = {
+  icon: string;
+  title: string;
+  text: string;
+};
+
+export type SiteConfig = {
+  marqueeItems: string[];
+  footerName: string;
+  footerTagline: string;
 };
 
 export type ContatoData = {
@@ -51,6 +83,11 @@ export type ContentMap = {
   contato: ContatoData;
   hero: HeroData;
   header: HeaderData;
+  freeApps: FreeAppData[];
+  contentItems: ContentItemData[];
+  courses: CourseData[];
+  whyUs: WhyUsData[];
+  siteConfig: SiteConfig;
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -98,6 +135,7 @@ export const defaultApps: AppData[] = [
     icon: "Layers",
     glow: "from-emerald-400/30 to-emerald-600/5",
     highlights: ["Questões comentadas por tema", "Revisão espaçada com SM-2"],
+    link: "",
   },
   {
     title: "MedEscala",
@@ -106,6 +144,7 @@ export const defaultApps: AppData[] = [
     icon: "CalendarClock",
     glow: "from-blue-400/30 to-blue-600/5",
     highlights: ["Distribuição mais equilibrada", "Visão da cobertura por equipe"],
+    link: "",
   },
   {
     title: "Ficha de Anestesia",
@@ -114,6 +153,7 @@ export const defaultApps: AppData[] = [
     icon: "FileText",
     glow: "from-violet-400/30 to-violet-600/5",
     highlights: ["Pré, intra e pós-operatório", "SRPA e avaliação pré-anestésica"],
+    link: "",
   },
   {
     title: "Emergências Médicas",
@@ -122,6 +162,7 @@ export const defaultApps: AppData[] = [
     icon: "Zap",
     glow: "from-cyan-400/30 to-cyan-600/5",
     highlights: ["Acesso rápido em cenário crítico", "Condutas com foco em tempo-resposta"],
+    link: "",
   },
   {
     title: "ACLS Guiado",
@@ -130,6 +171,7 @@ export const defaultApps: AppData[] = [
     icon: "HeartPulse",
     glow: "from-amber-400/30 to-amber-600/5",
     highlights: ["Comandos guiados por voz", "Sequência prática para equipe"],
+    link: "",
   },
 ];
 
@@ -156,6 +198,64 @@ export const defaultHeader: HeaderData = {
   rqe1: "Anestesiologia RQE 58.201",
   rqe2: "Medicina Intensiva RQE 58.202",
   logoUrl: "/logo-medicina.png",
+};
+
+export const defaultFreeApps: FreeAppData[] = [
+  {
+    title: "Aplicativos gratuitos",
+    desc: "Ferramentas abertas para consulta rápida e suporte à conduta no plantão.",
+    icon: "BookOpen",
+    link: "",
+  },
+  {
+    title: "Aulas e podcasts gratuitos",
+    desc: "Conteúdo aberto para atualização objetiva, sem necessidade de login.",
+    icon: "AudioLines",
+    link: "",
+  },
+];
+
+export const defaultContentItems: ContentItemData[] = [
+  { title: "Aulas abertas", subtitle: "Acesso livre para revisão rápida", link: "" },
+  { title: "Podcasts clínicos", subtitle: "Discussão de casos e condutas", link: "" },
+  { title: "Atualizações semanais", subtitle: "Evidência recente aplicada", link: "" },
+  { title: "Protocolos guiados", subtitle: "Fluxos de conduta passo a passo", link: "" },
+];
+
+export const defaultCourses: CourseData[] = [
+  { id: "manejo-via-aerea", title: "Manejo de via aérea no paciente crítico", link: "" },
+  { id: "via-aerea-dificil", title: "Via aérea difícil no crítico", link: "" },
+];
+
+export const defaultWhyUs: WhyUsData[] = [
+  {
+    icon: "ShieldCheck",
+    title: "Segurança clínica",
+    text: "Condutas estruturadas para reduzir variabilidade assistencial.",
+  },
+  {
+    icon: "BrainCircuit",
+    title: "Decisão baseada em evidência",
+    text: "Síntese objetiva da literatura para suporte à conduta.",
+  },
+  {
+    icon: "Sparkles",
+    title: "Usabilidade orientada ao plantão",
+    text: "Acesso rápido à informação crítica em momentos de decisão.",
+  },
+];
+
+export const defaultSiteConfig: SiteConfig = {
+  marqueeItems: [
+    "Protocolos revisados semanalmente",
+    "Ferramentas para decisão à beira-leito",
+    "Conteúdo aberto sem login",
+    "Cursos presenciais, híbridos e online",
+    "Atualização científica contínua",
+    "Material orientado à prática assistencial",
+  ],
+  footerName: "Dr. Sandro • Portal de Anestesiologia e Medicina Intensiva",
+  footerTagline: "© 2026 Todos os direitos reservados.",
 };
 
 // ─── Storage helpers (local files em dev, Vercel Blob em produção) ────────────
@@ -234,4 +334,35 @@ export async function getHero(): Promise<HeroData> {
 
 export async function getHeader(): Promise<HeaderData> {
   return readBlob("header", defaultHeader);
+}
+
+export async function getFreeApps(): Promise<FreeAppData[]> {
+  return readBlob("freeApps", defaultFreeApps);
+}
+
+export async function getContentItems(): Promise<ContentItemData[]> {
+  return readBlob("contentItems", defaultContentItems);
+}
+
+export async function getCourses(): Promise<CourseData[]> {
+  return readBlob("courses", defaultCourses);
+}
+
+export async function getWhyUs(): Promise<WhyUsData[]> {
+  return readBlob("whyUs", defaultWhyUs);
+}
+
+export async function getSiteConfig(): Promise<SiteConfig> {
+  return readBlob("siteConfig", defaultSiteConfig);
+}
+
+export async function uploadImageToBlob(file: File): Promise<string> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error("BLOB_READ_WRITE_TOKEN não configurado.");
+  }
+  const { url } = await put(`images/${Date.now()}-${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+  return url;
 }

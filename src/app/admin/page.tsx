@@ -1,5 +1,18 @@
 import Link from "next/link";
-import { CalendarDays, Contact, Layers, Sparkles, ArrowRight, UserCircle } from "lucide-react";
+import {
+  AudioLines,
+  BookOpen,
+  CalendarDays,
+  Contact,
+  GraduationCap,
+  ImageIcon,
+  Layers,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  ArrowRight,
+  UserCircle,
+} from "lucide-react";
 
 const sections = [
   {
@@ -22,9 +35,41 @@ const sections = [
     href: "/admin/apps",
     icon: Layers,
     label: "Apps por assinatura",
-    desc: "Edite título, descrição e destaques de cada aplicativo.",
+    desc: "Edite título, descrição, destaques e link de cada app.",
     color: "text-accent-blue",
     border: "hover:border-accent-blue/40",
+  },
+  {
+    href: "/admin/apps-gratis",
+    icon: BookOpen,
+    label: "Apps Grátis",
+    desc: "Edite os cards de aplicativos gratuitos com ícone e link.",
+    color: "text-emerald-400",
+    border: "hover:border-emerald-400/40",
+  },
+  {
+    href: "/admin/conteudo",
+    icon: AudioLines,
+    label: "Conteúdo",
+    desc: "Edite os itens da seção de podcasts, aulas e atualizações.",
+    color: "text-cyan-400",
+    border: "hover:border-cyan-400/40",
+  },
+  {
+    href: "/admin/cursos",
+    icon: GraduationCap,
+    label: "Cursos",
+    desc: "Edite os tópicos de cursos com título, ID âncora e link.",
+    color: "text-accent-violet",
+    border: "hover:border-accent-violet/40",
+  },
+  {
+    href: "/admin/por-que-nos",
+    icon: ShieldCheck,
+    label: "Por que nós",
+    desc: "Edite os cards de diferenciais no rodapé da home.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
   },
   {
     href: "/admin/eventos",
@@ -39,6 +84,22 @@ const sections = [
     icon: Contact,
     label: "Contato",
     desc: "Atualize e-mail, WhatsApp, telefone e redes sociais.",
+    color: "text-white/60",
+    border: "hover:border-white/30",
+  },
+  {
+    href: "/admin/imagens",
+    icon: ImageIcon,
+    label: "Imagens",
+    desc: "Faça upload de imagens para o Vercel Blob e copie a URL.",
+    color: "text-pink-400",
+    border: "hover:border-pink-400/40",
+  },
+  {
+    href: "/admin/config",
+    icon: Settings,
+    label: "Configurações",
+    desc: "Edite os itens do marquee e os textos do rodapé.",
     color: "text-white/60",
     border: "hover:border-white/30",
   },
