@@ -392,8 +392,10 @@ async function readBlob<T>(key: string, fallback: T): Promise<T> {
     const blob = blobs.find((b) => b.pathname === `${BLOB_PREFIX}${key}.json`);
     if (!blob) return fallback;
     // store is private: pass token as Bearer to authorize the fetch
-    const res = await fetch(blob.url, {
+    const cacheBuster = "?_cb=" + Date.now();
+    const res = await fetch(blob.url + cacheBuster, {
       headers: { Authorization: `Bearer ${token}` },
+      "Cache-Control": "no-cache, no-store, must-revalidate",
       cache: "no-store",
     });
     if (!res.ok) return fallback;
