@@ -1,4 +1,5 @@
-import { list, put, getDownloadUrl } from "@vercel/blob";
+import { list, put } from "@vercel/blob";
+import { unstable_noStore as noStore } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
 
@@ -283,12 +284,12 @@ async function writeLocal<T>(key: string, data: T): Promise<void> {
 
 async function readBlob<T>(key: string, fallback: T): Promise<T> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return readLocal(key, fallback);
+  noStore();
   try {
     const { blobs } = await list({ prefix: `${BLOB_PREFIX}${key}.json` });
     const blob = blobs.find((b) => b.pathname === `${BLOB_PREFIX}${key}.json`);
     if (!blob) return fallback;
-    const downloadUrl = await getDownloadUrl(blob.url);
-    const res = await fetch(downloadUrl);
+    const res = await fetch(blob.downloadUrl, { cache: "no-store" });
     if (!res.ok) return fallback;
     return (await res.json()) as T;
   } catch {
