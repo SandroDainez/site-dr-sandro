@@ -10,23 +10,37 @@ type Props = {
 type FilterArea = "todas" | AtualizacaoData["area"];
 
 const tabs: { value: FilterArea; label: string }[] = [
-  { value: "todas", label: "Todas" },
+  { value: "todas", label: "📋 Todas" },
   { value: "emergencias", label: "🚑 Emergências" },
   { value: "ti", label: "🏥 Terapia Intensiva" },
   { value: "anestesiologia", label: "🩺 Anestesiologia" },
 ];
 
-const areaConfig: Record<AtualizacaoData["area"], { label: string; badge: string }> = {
-  emergencias: { label: "🚑 Emergências", badge: "bg-red-400/15 text-red-400 border-red-400/30" },
-  ti: { label: "🏥 Terapia Intensiva", badge: "bg-blue-400/15 text-blue-400 border-blue-400/30" },
-  anestesiologia: { label: "🩺 Anestesiologia", badge: "bg-violet-400/15 text-violet-400 border-violet-400/30" },
+const areaConfig: Record<AtualizacaoData["area"], { label: string; color: string; border: string; bg: string }> = {
+  emergencias: {
+    label: "🚑 Emergências",
+    color: "text-red-400",
+    border: "border-red-400/25",
+    bg: "bg-red-400/[0.02]",
+  },
+  ti: {
+    label: "🏥 Terapia Intensiva",
+    color: "text-blue-400",
+    border: "border-blue-400/25",
+    bg: "bg-blue-400/[0.02]",
+  },
+  anestesiologia: {
+    label: "🩺 Anestesiologia",
+    color: "text-violet-400",
+    border: "border-violet-400/25",
+    bg: "bg-violet-400/[0.02]",
+  },
 };
 
 function formatDate(iso: string): string {
   try {
     const [year, month, day] = iso.split("-").map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString("pt-BR", {
+    return new Date(year, month - 1, day).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -36,37 +50,20 @@ function formatDate(iso: string): string {
   }
 }
 
-function Card({ item }: { item: AtualizacaoData }) {
+function TopicCard({ item }: { item: AtualizacaoData }) {
   const [expanded, setExpanded] = useState(false);
-  const config = areaConfig[item.area];
   const preview = item.conteudo.split(". ").slice(0, 2).join(". ") + ".";
   const isLong = item.conteudo.length > 200 || item.conteudo.split(".").length > 3;
 
   return (
-    <article className="flex flex-col rounded-3xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-white/20">
-      {/* Area + Date row */}
-      <div className="flex items-center justify-between gap-2">
-        <span className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${config.badge}`}>
-          {config.label}
-        </span>
-        <span className="text-[11px] text-white/30 whitespace-nowrap">{formatDate(item.data)}</span>
-      </div>
-
-      {/* Image */}
-      {item.imageUrl && (
-        <div className="mt-3">
-          <img src={item.imageUrl} alt={item.imageCaption || item.titulo} className="w-full rounded-2xl object-cover max-h-36" />
-          {item.imageCaption && <p className="mt-1 text-xs text-white/40 leading-relaxed">{item.imageCaption}</p>}
-        </div>
-      )}
-
-      {/* Title */}
-      <h2 className="mt-3 text-base font-semibold tracking-tight text-white leading-snug">
+    <div className="border-t border-white/[0.06] pt-4 first:border-0 first:pt-0">
+      {/* Título */}
+      <h3 className="text-[15px] font-semibold text-white leading-snug">
         {item.titulo}
-      </h2>
+      </h3>
 
-      {/* Content with expand */}
-      <div className="mt-2 text-sm leading-relaxed text-white/60">
+      {/* Conteúdo com expandir/recolher */}
+      <div className="mt-1.5 text-sm leading-relaxed text-white/60">
         {expanded || !isLong ? (
           <p>{item.conteudo}</p>
         ) : (
@@ -74,40 +71,94 @@ function Card({ item }: { item: AtualizacaoData }) {
         )}
       </div>
 
-      {/* Actions row */}
-      <div className="mt-auto pt-3 flex items-center gap-3">
+      {/* Link + expandir na mesma linha */}
+      <div className="mt-2 flex items-center gap-3">
         {item.link && (
           <a
             href={item.link}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-medium text-accent/80 transition hover:text-accent"
+            className="inline-flex items-center gap-1 text-xs font-medium text-accent/80 hover:text-accent transition"
           >
-            Ver fonte →
+            🔗 Ver fonte →
           </a>
         )}
         {isLong && (
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
-            className="ml-auto text-xs text-white/40 transition hover:text-white/70"
+            className="text-xs text-white/30 hover:text-white/60 transition"
           >
-            {expanded ? "▲ Mostrar menos" : "▼ Ler mais"}
+            {expanded ? "▲ Recolher" : "▼ Ler mais"}
           </button>
         )}
       </div>
-    </article>
+    </div>
+  );
+}
+
+function AreaBoletimCard({
+  area,
+  items,
+}: {
+  area: AtualizacaoData["area"];
+  items: AtualizacaoData[];
+}) {
+  const cfg = areaConfig[area];
+  const latestDate = items[0]?.data;
+
+  return (
+    <div
+      className={`rounded-3xl border ${cfg.border} ${cfg.bg} p-6 transition hover:-translate-y-0.5 hover:border-white/20`}
+    >
+      {/* Cabeçalho da área */}
+      <div className="flex items-center justify-between mb-5">
+        <span className={`text-sm font-bold uppercase tracking-[0.12em] ${cfg.color}`}>
+          {cfg.label}
+        </span>
+        <span className="text-[11px] text-white/30">{formatDate(latestDate)}</span>
+      </div>
+
+      {/* Tópicos */}
+      <div className="space-y-4">
+        {items.map((item) => (
+          <TopicCard key={item.id} item={item} />
+        ))}
+      </div>
+    </div>
   );
 }
 
 export default function AtualizacoesGrid({ atualizacoes }: Props) {
   const [active, setActive] = useState<FilterArea>("todas");
 
+  // Sort by date descending
   const sorted = [...atualizacoes].sort(
     (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
   );
 
-  const filtered = active === "todas" ? sorted : sorted.filter((a) => a.area === active);
+  // Group by area, take top 3 per area
+  const grouped: Record<AtualizacaoData["area"], AtualizacaoData[]> = {
+    emergencias: [],
+    ti: [],
+    anestesiologia: [],
+  };
+
+  for (const item of sorted) {
+    if (grouped[item.area].length < 3) {
+      grouped[item.area].push(item);
+    }
+  }
+
+  const areas: AtualizacaoData["area"][] = ["emergencias", "ti", "anestesiologia"];
+
+  // Determine which areas to show
+  const filteredAreas =
+    active === "todas"
+      ? areas
+      : areas.filter((a) => a === active);
+
+  const hasContent = filteredAreas.some((a) => grouped[a].length > 0);
 
   return (
     <div>
@@ -129,16 +180,25 @@ export default function AtualizacoesGrid({ atualizacoes }: Props) {
         ))}
       </div>
 
-      {filtered.length === 0 && (
+      {!hasContent && (
         <p className="text-sm text-white/40">Nenhuma atualização nesta área ainda.</p>
       )}
 
-      {/* Grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((item) => (
-          <Card key={item.id} item={item} />
-        ))}
+      {/* Boletim cards — 1 card por área */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {filteredAreas.map((area) => {
+          const items = grouped[area];
+          if (items.length === 0) return null;
+          return <AreaBoletimCard key={area} area={area} items={items} />;
+        })}
       </div>
+
+      {/* Se alguma área ficou de fora por ter menos de 3 itens, mostra sutil */}
+      {active === "todas" && sorted.length > 0 && (
+        <p className="mt-6 text-xs text-white/20 text-center">
+          Últimas 3 atualizações por área • {sorted.length} no total
+        </p>
+      )}
     </div>
   );
 }
