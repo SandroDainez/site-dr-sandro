@@ -3,6 +3,7 @@ import {
   AudioLines,
   BookOpen,
   CalendarDays,
+  ClipboardList,
   Contact,
   GraduationCap,
   ImageIcon,
@@ -103,6 +104,14 @@ const sections = [
     desc: "Publique e gerencie atualizações médicas por área clínica.",
     color: "text-orange-400",
     border: "hover:border-orange-400/40",
+  },
+  {
+    href: "/admin/protocolos",
+    icon: ClipboardList,
+    label: "Protocolos",
+    desc: "Gerencie os protocolos clínicos por área: emergências, TI e anestesiologia.",
+    color: "text-teal-400",
+    border: "hover:border-teal-400/40",
   },
   {
     href: "/admin/config",

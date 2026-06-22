@@ -17,6 +17,7 @@ import {
   type WhyUsData,
   type SiteConfig,
   type AtualizacaoData,
+  type ProtocoloData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -147,6 +148,18 @@ export async function saveAtualizacoes(atualizacoes: AtualizacaoData[]): Promise
     await writeBlob("atualizacoes", atualizacoes);
     revalidatePath("/");
     revalidatePath("/atualizacoes");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveProtocolos(protocolos: ProtocoloData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("protocolos", protocolos);
+    revalidatePath("/");
+    revalidatePath("/protocolos");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };

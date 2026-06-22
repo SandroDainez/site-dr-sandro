@@ -32,6 +32,7 @@ import {
   getWhyUs,
   getSiteConfig,
   getAtualizacoes,
+  getProtocolos,
 } from "@/lib/content";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -40,7 +41,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, contentItems, courses, whyUs, siteConfig, atualizacoes] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, contentItems, courses, whyUs, siteConfig, atualizacoes, protocolos] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -52,6 +53,7 @@ export default async function Home() {
     getWhyUs(),
     getSiteConfig(),
     getAtualizacoes(),
+    getProtocolos(),
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -107,6 +109,9 @@ export default async function Home() {
             </a>
             <a href="/atualizacoes" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
               Atualizações
+            </a>
+            <a href="/protocolos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+              Protocolos
             </a>
           </nav>
 
@@ -392,6 +397,70 @@ export default async function Home() {
                 className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
               >
                 Ver todas <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </section>
+          );
+        })()}
+
+        {/* Protocolos teaser */}
+        {protocolos.length > 0 && (() => {
+          const sorted = [...protocolos].sort(
+            (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+          );
+          const recent = sorted.slice(0, 3);
+          const areaBadge: Record<string, string> = {
+            emergencias: "bg-red-400/15 text-red-400 border-red-400/30",
+            ti: "bg-blue-400/15 text-blue-400 border-blue-400/30",
+            anestesiologia: "bg-violet-400/15 text-violet-400 border-violet-400/30",
+          };
+          const areaLabel: Record<string, string> = {
+            emergencias: "Emergências",
+            ti: "Terapia Intensiva",
+            anestesiologia: "Anestesiologia",
+          };
+          return (
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24">
+              <div className="mb-8 flex items-end justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.16em] text-accent">Condutas clínicas</p>
+                  <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">
+                    Protocolos Clínicos
+                  </h2>
+                </div>
+                <a
+                  href="/protocolos"
+                  className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex"
+                >
+                  Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {recent.map((item) => (
+                  <article
+                    key={item.id}
+                    className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-white/20"
+                  >
+                    <span
+                      className={`self-start rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${areaBadge[item.area] ?? "text-white/60 border-white/20"}`}
+                    >
+                      {areaLabel[item.area] ?? item.area}
+                    </span>
+                    <h3 className="mt-3 text-base font-semibold leading-snug text-white">
+                      {item.titulo}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-white/50 line-clamp-2 flex-1">
+                      {item.descricao}
+                    </p>
+                  </article>
+                ))}
+              </div>
+
+              <a
+                href="/protocolos"
+                className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
+              >
+                Ver todos <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </section>
           );

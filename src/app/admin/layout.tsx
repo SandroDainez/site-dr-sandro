@@ -6,6 +6,7 @@ import {
   AudioLines,
   BookOpen,
   CalendarDays,
+  ClipboardList,
   Contact,
   GraduationCap,
   ImageIcon,
@@ -39,6 +40,7 @@ const navLinks = [
   { href: "/admin/contato", label: "Contato", icon: Contact },
   { href: "/admin/imagens", label: "Imagens", icon: ImageIcon },
   { href: "/admin/atualizacoes", label: "Atualizações", icon: Newspaper },
+  { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList },
   { href: "/admin/config", label: "Configurações", icon: Settings },
 ];
 

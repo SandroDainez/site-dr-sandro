@@ -89,6 +89,19 @@ export type AtualizacaoData = {
   data: string; // YYYY-MM-DD
 };
 
+export type ProtocoloData = {
+  id: string;           // unique slug
+  titulo: string;
+  descricao: string;    // short description shown on card
+  conteudo: string;     // full text content
+  area: "emergencias" | "ti" | "anestesiologia";
+  imageUrl: string;     // optional illustrative image
+  imageCaption: string; // caption below image
+  arquivoUrl: string;   // optional PDF or external material link
+  arquivoLabel: string; // button label, e.g. "Baixar PDF" or "Ver protocolo"
+  data: string;         // YYYY-MM-DD (last updated)
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
@@ -101,6 +114,7 @@ export type ContentMap = {
   whyUs: WhyUsData[];
   siteConfig: SiteConfig;
   atualizacoes: AtualizacaoData[];
+  protocolos: ProtocoloData[];
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -294,6 +308,45 @@ export const defaultAtualizacoes: AtualizacaoData[] = [
   },
 ];
 
+export const defaultProtocolos: ProtocoloData[] = [
+  {
+    id: "manejo-via-aerea-critico",
+    titulo: "Manejo de Via Aérea no Paciente Crítico",
+    descricao: "Algoritmo passo a passo para abordagem da via aérea em cenário de emergência, incluindo pré-oxigenação, sequência rápida e dispositivos de resgate.",
+    conteudo: "1. Avaliação preditiva da via aérea\n2. Pré-oxigenação (VNI ou O2 de alto fluxo)\n3. Posicionamento: elevação de cabeceira 20-30°\n4. Sequência rápida de intubação (SRI)\n5. Plano B: máscara laríngea\n6. Plano C: via aérea cirúrgica",
+    area: "emergencias",
+    imageUrl: "",
+    imageCaption: "",
+    arquivoUrl: "",
+    arquivoLabel: "Baixar PDF",
+    data: "2026-06-01",
+  },
+  {
+    id: "sedoanalgesia-uti",
+    titulo: "Sedoanalgesia na UTI",
+    descricao: "Protocolo de sedação e analgesia baseado na escala CPOT/RASS, priorizando analgesia antes de sedação e minimizando benzodiazepínicos.",
+    conteudo: "Avaliação: RASS alvo -1 a 0 / CPOT < 3\nAnalgesia: Fentanil ou morfina IV\nSedação leve: Propofol ou dexmedetomidina\nSedação profunda (indicações específicas): midazolam\nProtocolo de despertar diário obrigatório",
+    area: "ti",
+    imageUrl: "",
+    imageCaption: "",
+    arquivoUrl: "",
+    arquivoLabel: "Ver protocolo",
+    data: "2026-05-15",
+  },
+  {
+    id: "avaliacao-pre-anestesica",
+    titulo: "Avaliação Pré-Anestésica",
+    descricao: "Checklist estruturado para avaliação pré-operatória, estratificação de risco e planejamento anestésico individualizado.",
+    conteudo: "Anamnese dirigida: alergias, cirurgias prévias, anestesias anteriores\nExame físico: via aérea (Mallampati, abertura bucal, DTM)\nExames complementares por risco cirúrgico\nEscala ASA e estratificação de risco cardíaco\nConsentimento informado",
+    area: "anestesiologia",
+    imageUrl: "",
+    imageCaption: "",
+    arquivoUrl: "",
+    arquivoLabel: "Baixar checklist",
+    data: "2026-05-01",
+  },
+];
+
 export const defaultSiteConfig: SiteConfig = {
   marqueeItems: [
     "Protocolos revisados semanalmente",
@@ -412,6 +465,10 @@ export async function getSiteConfig(): Promise<SiteConfig> {
 
 export async function getAtualizacoes(): Promise<AtualizacaoData[]> {
   return readBlob("atualizacoes", defaultAtualizacoes);
+}
+
+export async function getProtocolos(): Promise<ProtocoloData[]> {
+  return readBlob("protocolos", defaultProtocolos);
 }
 
 export async function uploadImageToBlob(file: File): Promise<string> {
