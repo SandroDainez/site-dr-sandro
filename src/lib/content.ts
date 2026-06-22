@@ -283,14 +283,18 @@ async function writeLocal<T>(key: string, data: T): Promise<void> {
 }
 
 async function readBlob<T>(key: string, fallback: T): Promise<T> {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return readLocal(key, fallback);
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return readLocal(key, fallback);
   noStore();
   try {
     const { blobs } = await list({ prefix: `${BLOB_PREFIX}${key}.json` });
     const blob = blobs.find((b) => b.pathname === `${BLOB_PREFIX}${key}.json`);
     if (!blob) return fallback;
-    // blobs are public — read directly by URL, no signed URL needed
-    const res = await fetch(blob.url, { cache: "no-store" });
+    // store is private: pass token as Bearer to authorize the fetch
+    const res = await fetch(blob.url, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
     if (!res.ok) return fallback;
     return (await res.json()) as T;
   } catch {
@@ -309,7 +313,7 @@ export async function writeBlob<T>(key: string, data: T): Promise<void> {
     );
   }
   await put(`${BLOB_PREFIX}${key}.json`, JSON.stringify(data, null, 2), {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
     allowOverwrite: true,
     contentType: "application/json",
