@@ -115,7 +115,7 @@ export default function AtualizacoesGrid({ atualizacoes }: Props) {
             </h2>
 
             {/* Content */}
-            <p className="mt-3 text-sm leading-relaxed text-white/60 line-clamp-3 flex-1">
+            <p className="mt-3 text-sm leading-relaxed text-white/60 flex-1">
               {item.conteudo}
             </p>
 

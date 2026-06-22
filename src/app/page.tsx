@@ -385,7 +385,7 @@ export default async function Home() {
                     <h3 className="mt-1.5 text-base font-semibold leading-snug text-white">
                       {item.titulo}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/50 line-clamp-2 flex-1">
+                    <p className="mt-2 text-sm leading-relaxed text-white/50 flex-1">
                       {item.conteudo}
                     </p>
                   </article>
@@ -449,7 +449,7 @@ export default async function Home() {
                     <h3 className="mt-3 text-base font-semibold leading-snug text-white">
                       {item.titulo}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/50 line-clamp-2 flex-1">
+                    <p className="mt-2 text-sm leading-relaxed text-white/50 flex-1">
                       {item.descricao}
                     </p>
                   </article>
