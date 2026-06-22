@@ -71,7 +71,7 @@ export default async function Home() {
                 height={80}
                 className="h-full w-full object-cover"
                 priority
-                unoptimized={header.logoUrl.startsWith("http")}
+                unoptimized
               />
             </div>
             <div className="text-center lg:text-left">

@@ -120,7 +120,7 @@ export default function HeaderEditor({ initialHeader }: Props) {
                   width={64}
                   height={64}
                   className="h-full w-full object-cover"
-                  unoptimized={header.logoUrl.startsWith("http")}
+                  unoptimized
                 />
               </div>
               <p className="text-xs text-muted">Logo atual</p>

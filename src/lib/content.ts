@@ -367,8 +367,9 @@ export async function uploadImageToBlob(file: File): Promise<string> {
     throw new Error("BLOB_READ_WRITE_TOKEN não configurado.");
   }
   const { url } = await put(`images/${Date.now()}-${file.name}`, file, {
-    access: "public",
+    access: "private",
     addRandomSuffix: false,
   });
-  return url;
+  // Return a proxy URL so the private blob is accessible on the site
+  return `/api/img?url=${encodeURIComponent(url)}`;
 }
