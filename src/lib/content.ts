@@ -395,7 +395,6 @@ async function readBlob<T>(key: string, fallback: T): Promise<T> {
     const cacheBuster = "?_cb=" + Date.now();
     const res = await fetch(blob.url + cacheBuster, {
       headers: { Authorization: `Bearer ${token}` },
-      "Cache-Control": "no-cache, no-store, must-revalidate",
       cache: "no-store",
     });
     if (!res.ok) return fallback;
