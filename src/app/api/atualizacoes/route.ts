@@ -110,6 +110,28 @@ export async function GET() {
   }
 }
 
+// ─── PUT /api/atualizacoes ──────────────────────────────────────────────────
+// Sobrescreve o array completo de uma vez (operação atômica).
+export async function PUT(req: NextRequest) {
+  const auth = requireApiKey(req);
+  if (auth !== "ok") {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+  let body: AtualizacaoData[];
+  try {
+    body = await req.json();
+    if (!Array.isArray(body)) throw new Error("esperado array");
+  } catch {
+    return NextResponse.json({ error: "JSON inválido: esperado array" }, { status: 400 });
+  }
+  try {
+    await writeBlob("atualizacoes", body);
+    return NextResponse.json({ ok: true, count: body.length });
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Erro" }, { status: 500 });
+  }
+}
+
 // ─── DELETE /api/atualizacoes ───────────────────────────────────────────────
 // Remove uma atualização pelo ID.
 // Requer x-api-key e JSON body com o id a remover.
