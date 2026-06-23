@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Save, RotateCcw, Minus, Plus, Type } from "lucide-react";
-import { TYPOGRAPHY_SECTIONS, type TypographyData } from "@/lib/content";
+import { TYPOGRAPHY_SECTIONS, type TypographyData } from "@/lib/typography-sections";
 import { saveTypography } from "@/app/admin/actions";
 
 type Props = {
