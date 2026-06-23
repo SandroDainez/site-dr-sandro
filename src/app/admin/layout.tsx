@@ -17,6 +17,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Type,
   UserCircle,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
@@ -30,6 +31,7 @@ function getExpectedToken() {
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/header", label: "Cabeçalho", icon: UserCircle },
+  { href: "/admin/tipografia", label: "Tamanho das fontes", icon: Type },
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
   { href: "/admin/apps", label: "Apps", icon: Layers },
   { href: "/admin/apps-gratis", label: "Apps Grátis", icon: BookOpen },

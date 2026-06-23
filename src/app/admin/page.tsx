@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
   ArrowRight,
+  Type,
   UserCircle,
 } from "lucide-react";
 
@@ -22,6 +23,14 @@ const sections = [
     icon: UserCircle,
     label: "Cabeçalho",
     desc: "Edite nome, CRM, RQEs e URL da logo no topo do site.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
+  },
+  {
+    href: "/admin/tipografia",
+    icon: Type,
+    label: "Tamanho das fontes",
+    desc: "Aumente ou diminua o tamanho das letras de cada seção do site.",
     color: "text-accent",
     border: "hover:border-accent/40",
   },

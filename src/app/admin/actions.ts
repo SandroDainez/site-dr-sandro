@@ -17,6 +17,7 @@ import {
   type CourseData,
   type WhyUsData,
   type SiteConfig,
+  type TypographyData,
   type AtualizacaoData,
   type ProtocoloData,
   type VideoaulaData,
@@ -137,6 +138,17 @@ export async function saveSiteConfig(config: SiteConfig): Promise<Result> {
   try {
     await requireAdmin();
     await writeBlob("siteConfig", config);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveTypography(typography: TypographyData): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("typography", typography);
     revalidatePath("/");
     return { ok: true };
   } catch (e) {

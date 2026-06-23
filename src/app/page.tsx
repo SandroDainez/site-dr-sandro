@@ -18,6 +18,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import CalendarioEventos from "@/components/CalendarioEventos";
 import {
@@ -33,6 +34,7 @@ import {
   getAtualizacoes,
   getProtocolos,
   getVideoaulas,
+  getTypography,
 } from "@/lib/content";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -40,8 +42,15 @@ const iconMap: Record<string, LucideIcon> = {
   BrainCircuit, ShieldCheck, Sparkles, GraduationCap, Microscope,
 };
 
+// Converte a escala salva (1 = normal) em um estilo de tamanho de fonte.
+// Usa `zoom` para escalar proporcionalmente o texto da seção inteira.
+function fz(scale?: number): CSSProperties | undefined {
+  if (!scale || scale === 1) return undefined;
+  return { zoom: scale } as unknown as CSSProperties;
+}
+
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -54,6 +63,7 @@ export default async function Home() {
     getAtualizacoes(),
     getProtocolos(),
     getVideoaulas(),
+    getTypography(),
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -64,7 +74,7 @@ export default async function Home() {
         <div className="rain-overlay-soft absolute inset-0" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl" style={fz(typo.header)}>
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           <div className="flex items-center gap-4 md:gap-5">
             <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white p-3 shadow-[0_0_56px_rgba(44,230,184,0.30)] md:h-48 md:w-48 md:p-4">
@@ -89,28 +99,28 @@ export default async function Home() {
           </div>
 
           <nav className="hidden items-center gap-3 rounded-full border border-white/10 bg-black/75 px-3 py-2 text-sm text-white/70 backdrop-blur-md lg:flex">
-            <a href="#apps-assinatura" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="#apps-assinatura" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Apps Assinatura
             </a>
-            <a href="#apps-gratis" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="#apps-gratis" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Apps Grátis
             </a>
-            <a href="#cursos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="#cursos" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Cursos
             </a>
-            <a href="#eventos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="#eventos" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Eventos
             </a>
-            <a href="/atualizacoes" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="/atualizacoes" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Atualizações
             </a>
-            <a href="/protocolos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="/protocolos" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Protocolos
             </a>
-            <a href="/videoaulas" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="/videoaulas" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Videoaulas
             </a>
-            <a href="#contato" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+            <a href="#contato" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
               Contato
             </a>
           </nav>
@@ -119,7 +129,7 @@ export default async function Home() {
       </header>
 
       <main>
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-12 md:pt-20">
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-12 md:pt-20" style={fz(typo.hero)}>
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0C] p-6 shadow-2xl">
             <div className="finex-aura-mask pointer-events-none absolute inset-0 bg-[radial-gradient(50%_40%_at_25%_0%,rgba(44,230,184,0.18),transparent_65%),radial-gradient(45%_35%_at_80%_0%,rgba(59,130,246,0.22),transparent_60%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-20 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.08)_1px,transparent_1px,transparent_10px)]" />
@@ -156,7 +166,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20">
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20" style={fz(typo.marquee)}>
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/35 py-3">
             <div className="finex-marquee-track flex items-center gap-3 px-4">
               {[...siteConfig.marqueeItems, ...siteConfig.marqueeItems].map((item, idx) => (
@@ -171,7 +181,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
+        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.apps)}>
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos por assinatura</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-5xl">
@@ -242,7 +252,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
+        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.freeApps)}>
           <div className="finex-glass rounded-3xl p-8">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight">Acesso aberto imediato</h3>
@@ -293,7 +303,7 @@ export default async function Home() {
           const visibleAreas = areaConfig.filter((a) => grouped[a.key].length > 0);
           if (visibleAreas.length === 0) return null;
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24">
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.atualizacoes)}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo recente</p>
@@ -368,7 +378,7 @@ export default async function Home() {
             anestesiologia: "Anestesiologia",
           };
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24">
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.protocolos)}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Condutas clínicas</p>
@@ -437,7 +447,7 @@ export default async function Home() {
             return match ? match[1] : null;
           }
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24">
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.videoaulas)}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Aulas em vídeo</p>
@@ -572,7 +582,7 @@ export default async function Home() {
           );
         })()}
 
-        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
+        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.cursos)}>
           <div className="finex-glass rounded-[2rem] p-8 md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
@@ -616,9 +626,11 @@ export default async function Home() {
           </div>
         </section>
 
-        <CalendarioEventos eventos={eventos} />
+        <div style={fz(typo.eventos)}>
+          <CalendarioEventos eventos={eventos} />
+        </div>
 
-        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
+        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.contato)}>
           <div className="finex-glass rounded-[2rem] p-8 md:p-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Contato</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
@@ -666,7 +678,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 pb-24">
+        <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.whyUs)}>
           <div className="grid gap-6 md:grid-cols-3">
             {whyUs.map((item) => {
               const WhyIcon = iconMap[item.icon] ?? ShieldCheck;
@@ -682,7 +694,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-line/80 bg-black/20 py-10">
+      <footer className="border-t border-line/80 bg-black/20 py-10" style={fz(typo.footer)}>
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-6 text-sm text-muted sm:flex-row">
           <p>{siteConfig.footerName}</p>
           <p>{siteConfig.footerTagline}</p>

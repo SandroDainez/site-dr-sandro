@@ -87,6 +87,27 @@ export type HeaderData = {
   logoUrl: string;
 };
 
+// Tamanho de fonte por seção do site.
+// Mapa: chave da seção → escala (1 = normal, 1.2 = 20% maior, 0.9 = 10% menor).
+export type TypographyData = Record<string, number>;
+
+// Seções editáveis na home, na ordem em que aparecem no site.
+export const TYPOGRAPHY_SECTIONS: { key: string; label: string }[] = [
+  { key: "header", label: "Cabeçalho (nome, CRM, RQE)" },
+  { key: "hero", label: "Hero (destaque principal)" },
+  { key: "marquee", label: "Faixa rolante (marquee)" },
+  { key: "apps", label: "Apps por assinatura" },
+  { key: "freeApps", label: "Apps grátis" },
+  { key: "atualizacoes", label: "Atualizações (home)" },
+  { key: "protocolos", label: "Protocolos (home)" },
+  { key: "videoaulas", label: "Videoaulas (home)" },
+  { key: "cursos", label: "Cursos" },
+  { key: "eventos", label: "Eventos / calendário" },
+  { key: "contato", label: "Contato" },
+  { key: "whyUs", label: "Por que nós" },
+  { key: "footer", label: "Rodapé" },
+];
+
 export type AtualizacaoData = {
   id: string;
   titulo: string;
@@ -268,7 +289,7 @@ export const defaultFreeApps: FreeAppData[] = [
     link: "",
   },
   {
-    title: "Podcasts gratuitos",
+    title: "Podcast",
     desc: "Episódios em áudio com discussão de casos e condutas, sem necessidade de login.",
     icon: "AudioLines",
     link: "",
@@ -422,6 +443,8 @@ export const defaultVideoaulas: VideoaulaData[] = [
   },
 ];
 
+export const defaultTypography: TypographyData = {};
+
 export const defaultSiteConfig: SiteConfig = {
   marqueeItems: [
     "Protocolos revisados semanalmente",
@@ -537,6 +560,10 @@ export async function getWhyUs(): Promise<WhyUsData[]> {
 
 export async function getSiteConfig(): Promise<SiteConfig> {
   return readBlob("siteConfig", defaultSiteConfig);
+}
+
+export async function getTypography(): Promise<TypographyData> {
+  return readBlob("typography", defaultTypography);
 }
 
 // Fallback vazio: o site mostra apenas o que for cadastrado no admin.
