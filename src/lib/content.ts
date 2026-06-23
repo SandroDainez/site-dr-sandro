@@ -544,3 +544,14 @@ export async function uploadImageToBlob(file: File): Promise<string> {
   // Return a proxy URL so the private blob is accessible on the site
   return `/api/img?url=${encodeURIComponent(url)}`;
 }
+
+export async function uploadPublicImageToBlob(file: File): Promise<string> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error("BLOB_READ_WRITE_TOKEN não configurado.");
+  }
+  const { url } = await put(`public/${Date.now()}-${file.name}`, file, {
+    access: "public",
+    addRandomSuffix: false,
+  });
+  return url;
+}

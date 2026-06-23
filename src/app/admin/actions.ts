@@ -6,6 +6,7 @@ import { createHash } from "crypto";
 import {
   writeBlob,
   uploadImageToBlob,
+  uploadPublicImageToBlob,
   type EventoData,
   type AppData,
   type ContatoData,
@@ -189,6 +190,22 @@ export async function uploadImage(
       return { ok: false, error: "Nenhum arquivo enviado." };
     }
     const url = await uploadImageToBlob(file);
+    return { ok: true, url };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function uploadPublicImage(
+  formData: FormData
+): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  try {
+    await requireAdmin();
+    const file = formData.get("file") as File;
+    if (!file || file.size === 0) {
+      return { ok: false, error: "Nenhum arquivo enviado." };
+    }
+    const url = await uploadPublicImageToBlob(file);
     return { ok: true, url };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };

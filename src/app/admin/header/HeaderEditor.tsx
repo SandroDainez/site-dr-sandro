@@ -4,7 +4,7 @@ import { useState, useTransition, useRef } from "react";
 import { Save, Upload, Loader2 } from "lucide-react";
 import Image from "next/image";
 import type { HeaderData } from "@/lib/content";
-import { saveHeader, uploadImage } from "@/app/admin/actions";
+import { saveHeader, uploadPublicImage } from "@/app/admin/actions";
 
 type Props = {
   initialHeader: HeaderData;
@@ -33,7 +33,7 @@ export default function HeaderEditor({ initialHeader }: Props) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const result = await uploadImage(formData);
+      const result = await uploadPublicImage(formData);
       if (result.ok) {
         const newHeader = { ...header, logoUrl: result.url };
         setHeader(newHeader);
