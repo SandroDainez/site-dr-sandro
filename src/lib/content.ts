@@ -522,16 +522,18 @@ export async function getSiteConfig(): Promise<SiteConfig> {
   return readBlob("siteConfig", defaultSiteConfig);
 }
 
+// Fallback vazio: o site mostra apenas o que for cadastrado no admin.
+// (os exemplos default ficam disponíveis só como referência, não vão ao ar)
 export async function getAtualizacoes(): Promise<AtualizacaoData[]> {
-  return readBlob("atualizacoes", defaultAtualizacoes);
+  return readBlob("atualizacoes", []);
 }
 
 export async function getProtocolos(): Promise<ProtocoloData[]> {
-  return readBlob("protocolos", defaultProtocolos);
+  return readBlob("protocolos", []);
 }
 
 export async function getVideoaulas(): Promise<VideoaulaData[]> {
-  return readBlob("videoaulas", defaultVideoaulas);
+  return readBlob("videoaulas", []);
 }
 
 export async function uploadImageToBlob(file: File): Promise<string> {
