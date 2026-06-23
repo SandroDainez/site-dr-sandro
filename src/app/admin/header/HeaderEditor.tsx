@@ -28,6 +28,7 @@ export default function HeaderEditor({ initialHeader }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadError(null);
+    setError(null);
     setSaved(false);
     setIsUploading(true);
     try {
@@ -37,15 +38,14 @@ export default function HeaderEditor({ initialHeader }: Props) {
       if (result.ok) {
         const newHeader = { ...header, logoUrl: result.url };
         setHeader(newHeader);
-        // auto-save so the logo goes live immediately
-        startTransition(async () => {
-          const saveResult = await saveHeader(newHeader);
-          if (saveResult.ok) setSaved(true);
-          else setError(saveResult.error);
-        });
+        const saveResult = await saveHeader(newHeader);
+        if (saveResult.ok) setSaved(true);
+        else setError("Upload OK, mas falhou ao salvar: " + saveResult.error);
       } else {
-        setUploadError(result.error);
+        setUploadError("Falha no upload: " + result.error);
       }
+    } catch (e) {
+      setUploadError("Erro inesperado: " + String(e instanceof Error ? e.message : e));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
