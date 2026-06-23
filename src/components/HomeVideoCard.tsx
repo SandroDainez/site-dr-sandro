@@ -70,83 +70,80 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
   const isProxy = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
-  const isUploaded = hasVideo && !ytId; // vídeo enviado (toca no site) vs. YouTube (link externo)
 
+  // Thumbnail estático (imagem própria ou capa do YouTube)
   let thumbSrc: string | null = null;
   if (item.imageUrl) thumbSrc = item.imageUrl;
   else if (ytId) thumbSrc = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
 
-  function playInCard() {
-    // Com thumbnail próprio → abre o player em modal. Sem thumb (preview do frame) → toca inline.
-    if (thumbSrc) setPlayerOpen(true);
-    else setInlinePlaying(true);
-  }
+  // Prévia clicável (thumb ou primeiro frame do vídeo enviado)
+  const thumb = (
+    <div className="relative cursor-pointer bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
+      {thumbSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={thumbSrc} alt={item.titulo} className="w-full h-44 object-cover" />
+      ) : isProxy ? (
+        // pointer-events-none manda o clique ao container (toca inline) em vez do player nativo
+        <video
+          src={`${item.videoUrl}#t=0.5`}
+          muted
+          playsInline
+          preload="metadata"
+          className="pointer-events-none w-full h-44 object-cover"
+        />
+      ) : (
+        <div className="flex h-44 w-full items-center justify-center bg-white/[0.03]">
+          <PlayCircle className="h-10 w-10 text-white/25" />
+        </div>
+      )}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition group-hover/thumb:bg-black/45">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
+          <span className="text-xl text-white">▶</span>
+        </div>
+      </div>
+      {item.duracao && (
+        <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white/90">
+          {item.duracao}
+        </span>
+      )}
+    </div>
+  );
 
   return (
     <>
+      {/* Tela cheia é opcional (só p/ vídeo enviado), nunca automática */}
       {playerOpen && isProxy && <VideoModal item={item} onClose={() => setPlayerOpen(false)} />}
 
       <article className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20">
-        {/* Mídia */}
-        {thumbSrc ? (
-          ytId ? (
-            <a href={item.videoUrl} target="_blank" rel="noreferrer" className="relative block group/thumb">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={thumbSrc} alt={item.titulo} className="w-full h-44 object-cover" />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition group-hover/thumb:bg-black/40">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
-                  <span className="text-lg text-white">▶</span>
-                </div>
-              </div>
-            </a>
-          ) : (
-            <div
-              className={`relative ${isUploaded ? "cursor-pointer group/thumb" : ""}`}
-              onClick={() => isUploaded && setPlayerOpen(true)}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={thumbSrc} alt={item.titulo} className="w-full h-44 object-cover" />
-              {isUploaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition group-hover/thumb:bg-black/40">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
-                    <span className="text-lg text-white">▶</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )
-        ) : isProxy ? (
-          inlinePlaying ? (
-            <div className="relative bg-black">
-              <video src={item.videoUrl} controls autoPlay playsInline className="w-full max-h-72 bg-black" />
-              <button
-                type="button"
-                onClick={() => setPlayerOpen(true)}
-                className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/90"
-              >
-                ⛶ Expandir
-              </button>
-            </div>
-          ) : (
-            <div className="relative cursor-pointer bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
-              {/* Preview do primeiro frame; pointer-events-none manda o toque ao container (toca inline) */}
-              <video
-                src={`${item.videoUrl}#t=0.5`}
-                muted
-                playsInline
-                preload="metadata"
-                className="pointer-events-none w-full h-44 object-cover"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover/thumb:bg-black/45">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
-                  <span className="text-lg text-white">▶</span>
-                </div>
-              </div>
-            </div>
-          )
+        {/* Mídia — sempre toca embutida no card */}
+        {!hasVideo ? (
+          <div className="flex h-44 w-full items-center justify-center bg-white/[0.03]">
+            <PlayCircle className="h-10 w-10 text-white/20" />
+          </div>
+        ) : !inlinePlaying ? (
+          thumb
+        ) : ytId ? (
+          // YouTube embutido (iframe) — toca no card, sem sair do site
+          <div className="relative aspect-video w-full bg-black">
+            <iframe
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&playsinline=1`}
+              title={item.titulo}
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
         ) : (
-          <div className="flex h-24 w-full items-center justify-center bg-white/[0.03]">
-            <PlayCircle className="h-8 w-8 text-white/20" />
+          // Vídeo enviado — toca no card
+          <div className="relative bg-black">
+            <video src={item.videoUrl} controls autoPlay playsInline className="w-full max-h-72 bg-black" />
+            <button
+              type="button"
+              onClick={() => setPlayerOpen(true)}
+              className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/90"
+            >
+              ⛶ Tela cheia
+            </button>
           </div>
         )}
 
@@ -175,26 +172,15 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
 
           <h3 className="flex-1 text-sm font-semibold leading-snug text-white">{item.titulo}</h3>
 
-          {hasVideo && (
+          {hasVideo && !inlinePlaying && (
             <div className="mt-3">
-              {ytId ? (
-                <a
-                  href={item.videoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-                >
-                  ▶ Assistir no YouTube
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={playInCard}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-                >
-                  ▶ Assistir
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setInlinePlaying(true)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
+              >
+                ▶ Assistir
+              </button>
             </div>
           )}
         </div>
