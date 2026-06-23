@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import type { AtualizacaoData } from "@/lib/content";
 
 type Props = {
@@ -18,229 +17,113 @@ const tabs: { value: FilterArea; label: string }[] = [
   { value: "anestesiologia", label: "🩺 Anestesiologia" },
 ];
 
-const areaMeta: Record<
-  AtualizacaoData["area"],
-  { title: string; emoji: string; color: string; border: string; hoverBorder: string }
-> = {
+const areaConfig = {
   emergencias: {
-    title: "ATUALIZAÇÕES EM EMERGÊNCIAS",
-    emoji: "🚑",
-    color: "text-red-400",
+    label: "🚑 Emergências",
+    badge: "bg-red-400/15 text-red-400 border-red-400/30",
     border: "border-red-400/25",
-    hoverBorder: "hover:border-red-400/50",
+    sectionTitle: "text-red-400",
   },
   ti: {
-    title: "ATUALIZAÇÕES EM MEDICINA INTENSIVA",
-    emoji: "🏥",
-    color: "text-blue-400",
+    label: "🏥 Terapia Intensiva",
+    badge: "bg-blue-400/15 text-blue-400 border-blue-400/30",
     border: "border-blue-400/25",
-    hoverBorder: "hover:border-blue-400/50",
+    sectionTitle: "text-blue-400",
   },
   anestesiologia: {
-    title: "ATUALIZAÇÕES EM ANESTESIOLOGIA",
-    emoji: "🩺",
-    color: "text-violet-400",
+    label: "🩺 Anestesiologia",
+    badge: "bg-violet-400/15 text-violet-400 border-violet-400/30",
     border: "border-violet-400/25",
-    hoverBorder: "hover:border-violet-400/50",
+    sectionTitle: "text-violet-400",
   },
 };
 
-function formatDateBR(iso: string): string {
+const ALL_AREAS: AtualizacaoData["area"][] = ["emergencias", "ti", "anestesiologia"];
+
+function formatDate(iso: string): string {
   try {
-    const [y, m, d] = iso.split("-").map(Number);
-    const meses = [
-      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-      "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
-    ];
-    return `${d} de ${meses[m - 1]} de ${y}`;
+    const [year, month, day] = iso.split("-").map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   } catch {
     return iso;
   }
 }
 
-function Sep() {
-  return (
-    <div className="text-white/[0.07] text-center text-xs font-mono tracking-[0.5em] select-none leading-none my-4">
-      {Array(20).fill("_").join("")}
-    </div>
-  );
-}
-
-function TopicBlock({
-  item,
-  index,
-  areaColor,
-}: {
-  item: AtualizacaoData;
-  index: number;
-  areaColor: string;
-}) {
+function UpdateCard({ item }: { item: AtualizacaoData }) {
   const [expanded, setExpanded] = useState(false);
-
-  const parts = item.conteudo.split(/(Aplicação prática[^.]*\.)/i);
-  const mainContent = parts[0] || item.conteudo;
-  const pratica = parts[1];
-
-  const isLong = item.conteudo.length > 300;
-  const displayContent = expanded || !isLong ? mainContent : mainContent.slice(0, 200) + "…";
+  const cfg = areaConfig[item.area];
+  const isLong = item.conteudo.length > 250;
+  const display = expanded || !isLong ? item.conteudo : item.conteudo.slice(0, 200) + "…";
 
   return (
-    <div>
-      {item.link && (
-        <a
-          href={item.link}
-          target="_blank"
-          rel="noreferrer"
-          className={`inline-flex items-center gap-1.5 text-xs ${areaColor} opacity-70 hover:opacity-100 transition font-medium`}
-        >
-          🔗 {item.titulo}
-        </a>
-      )}
-
-      <Sep />
-
-      <div className="text-sm font-bold text-white leading-snug flex items-start gap-1.5">
-        <span>📢</span>
-        <span>
-          <span className={areaColor}>{index + 1}.</span>{" "}
-          {item.titulo}
+    <article className={`rounded-2xl border ${cfg.border} bg-white/[0.03] p-5 transition hover:border-white/15`}>
+      {/* Top: badge + date */}
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
+          {cfg.label}
         </span>
+        <span className="text-[11px] text-white/35">{formatDate(item.data)}</span>
       </div>
 
-      {item.imageUrl && (
-        <div className="mt-3">
-          <img
-            src={item.imageUrl}
-            alt={item.imageCaption || item.titulo}
-            className="rounded-xl w-full max-h-60 object-cover border border-white/10"
-          />
-          {item.imageCaption && (
-            <p className="mt-1.5 text-xs text-white/40 text-center">{item.imageCaption}</p>
-          )}
-        </div>
-      )}
+      {/* Title */}
+      <h2 className="text-[15px] font-semibold text-white leading-snug">
+        {item.titulo}
+      </h2>
 
-      <div className="mt-2 text-sm leading-relaxed text-white/65">
-        <span className="opacity-60">📝</span>{" "}
-        {displayContent}
-        {isLong && !expanded && (
+      {/* Content */}
+      <div className="mt-1.5 text-sm leading-relaxed text-white/60">
+        {display}
+        {isLong && (
           <button
             type="button"
-            onClick={() => setExpanded(true)}
-            className="ml-1 text-accent/60 hover:text-accent transition text-xs"
+            onClick={() => setExpanded(!expanded)}
+            className="ml-1 text-accent/60 hover:text-accent transition text-xs whitespace-nowrap"
           >
-            [continuar lendo]
-          </button>
-        )}
-        {isLong && expanded && (
-          <button
-            type="button"
-            onClick={() => setExpanded(false)}
-            className="ml-1 text-white/30 hover:text-white/50 transition text-xs"
-          >
-            [mostrar menos]
+            {expanded ? "[mostrar menos]" : "[continuar lendo]"}
           </button>
         )}
       </div>
 
-      {pratica && (
-        <div className="mt-2 text-sm leading-relaxed text-white/65">
-          <span className="opacity-60">💡</span>{" "}
-          {pratica}
-        </div>
-      )}
-    </div>
+      {/* Link + footer */}
+      <div className="mt-3 flex items-center gap-2 text-xs">
+        {item.link && (
+          <a
+            href={item.link}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-accent/70 hover:text-accent transition font-medium"
+          >
+            🔗 Ver fonte →
+          </a>
+        )}
+      </div>
+    </article>
   );
 }
 
-function BoletimCard({
+function SectionHeader({
   area,
-  items,
-  defaultOpen,
+  count,
 }: {
   area: AtualizacaoData["area"];
-  items: AtualizacaoData[];
-  defaultOpen: boolean;
+  count: number;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const meta = areaMeta[area];
-
-  const sorted = [...items].sort(
-    (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
-  );
-  const latestDate = sorted[0]?.data || "";
-  // Show top 3, rest in "Também"
-  const visible = sorted.slice(0, 3);
-  const extras = sorted.slice(3);
-
+  const cfg = areaConfig[area];
+  const labels: Record<typeof area, string> = {
+    emergencias: "Emergências",
+    ti: "Terapia Intensiva",
+    anestesiologia: "Anestesiologia",
+  };
   return (
-    <div className={`rounded-3xl border ${meta.border} ${meta.hoverBorder} bg-white/[0.03] transition`}>
-      {/* ═══ HEADER (clicável) ═══ */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between p-6 sm:p-7 text-left"
-      >
-        <div>
-          <div className={`text-sm font-black tracking-[0.15em] ${meta.color}`}>
-            {meta.emoji} {meta.title}
-          </div>
-          <div className="text-xs text-white/40 mt-1">
-            📆 {formatDateBR(latestDate)} · {items.length} atualização{items.length !== 1 ? "ões" : ""}
-          </div>
-        </div>
-        <div className={`ml-4 shrink-0 rounded-full border border-white/10 p-1.5 ${meta.color} opacity-60`}>
-          {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </div>
-      </button>
-
-      {/* ═══ BODY (colapsável) ═══ */}
-      {open && (
-        <div className="px-6 pb-6 sm:px-7 sm:pb-7 border-t border-white/[0.06]">
-          <div className="mt-5">
-            {visible.map((item, idx) => (
-              <div key={item.id}>
-                <TopicBlock item={item} index={idx} areaColor={meta.color} />
-                {idx < visible.length - 1 && <Sep />}
-              </div>
-            ))}
-          </div>
-
-          {extras.length > 0 && (
-            <div className="mt-5 pt-4 border-t border-white/[0.06]">
-              <div className="flex items-center gap-1.5 text-xs text-white/40 font-medium">
-                <span>📕</span> Também:
-              </div>
-              <div className="mt-1.5 text-xs text-white/50 leading-relaxed">
-                {extras.map((e, i) => (
-                  <span key={e.id}>
-                    {e.link ? (
-                      <a href={e.link} target="_blank" rel="noreferrer" className="text-accent/70 hover:text-accent transition">
-                        {e.titulo}
-                      </a>
-                    ) : (
-                      e.titulo
-                    )}
-                    {i < extras.length - 1 && <span className="text-white/20 mx-1.5">|</span>}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-5 pt-4 border-t border-white/[0.06]">
-            <div className="flex items-center gap-1.5 text-xs text-white/25">
-              <span>🤖</span>
-              <span>Boletim gerado pelo Amigo 🦊 — {formatDateBR(latestDate)}</span>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className={`flex items-center gap-2 ${cfg.sectionTitle} text-xs font-bold uppercase tracking-[0.15em]`}>
+      {cfg.label.split(" ")[0]} {labels[area]}
     </div>
   );
 }
-
-const ALL_AREAS: AtualizacaoData["area"][] = ["emergencias", "ti", "anestesiologia"];
 
 export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
   const validAreas: FilterArea[] = ["todas", "emergencias", "ti", "anestesiologia"];
@@ -249,28 +132,29 @@ export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
     : "todas";
   const [active, setActive] = useState<FilterArea>(init);
 
-  const grouped = atualizacoes.reduce<Record<AtualizacaoData["area"], AtualizacaoData[]>>(
-    (acc, item) => {
-      if (acc[item.area]) acc[item.area].push(item);
-      return acc;
-    },
-    { emergencias: [], ti: [], anestesiologia: [] }
+  // Sort all by date desc
+  const sorted = [...atualizacoes].sort(
+    (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
   );
 
-  const areasToShow: AtualizacaoData["area"][] = ALL_AREAS.filter((area) => {
+  // Group by area while preserving sort order within each group
+  const grouped: Record<AtualizacaoData["area"], AtualizacaoData[]> = {
+    emergencias: [],
+    ti: [],
+    anestesiologia: [],
+  };
+  for (const item of sorted) {
+    grouped[item.area].push(item);
+  }
+
+  // Which areas to show
+  const areasToShow = ALL_AREAS.filter((area) => {
     if (grouped[area].length === 0) return false;
     if (active === "todas") return true;
     return area === active;
   });
 
-  function handleTabClick(value: FilterArea) {
-    // Clicking the active non-"todas" tab deselects → volta para "todas"
-    if (value !== "todas" && value === active) {
-      setActive("todas");
-    } else {
-      setActive(value);
-    }
-  }
+  const hasAny = areasToShow.length > 0;
 
   return (
     <div>
@@ -280,7 +164,7 @@ export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
           <button
             key={tab.value}
             type="button"
-            onClick={() => handleTabClick(tab.value)}
+            onClick={() => setActive(tab.value)}
             className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
               active === tab.value
                 ? "border-accent bg-accent/15 text-accent"
@@ -288,28 +172,29 @@ export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
             }`}
           >
             {tab.label}
-            {active === tab.value && tab.value !== "todas" && (
-              <span className="ml-1.5 opacity-60">×</span>
-            )}
           </button>
         ))}
       </div>
 
-      {areasToShow.length === 0 && (
-        <p className="text-sm text-white/40 text-center">
+      {!hasAny && (
+        <p className="text-sm text-white/40 text-center py-12">
           Nenhuma atualização nesta área ainda.
         </p>
       )}
 
-      {/* Cards — use key={area+active} so defaultOpen resets on tab change */}
-      <div className="flex flex-col gap-4">
+      {/* Cards grouped by area, one below another */}
+      <div className="flex flex-col gap-8">
         {areasToShow.map((area) => (
-          <BoletimCard
-            key={`${area}-${active}`}
-            area={area}
-            items={grouped[area]}
-            defaultOpen={active !== "todas"}
-          />
+          <section key={area}>
+            <div className="mb-3">
+              <SectionHeader area={area} count={grouped[area].length} />
+            </div>
+            <div className="flex flex-col gap-4">
+              {grouped[area].map((item) => (
+                <UpdateCard key={item.id} item={item} />
+              ))}
+            </div>
+          </section>
         ))}
       </div>
     </div>
