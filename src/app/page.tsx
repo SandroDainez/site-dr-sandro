@@ -575,13 +575,10 @@ export default async function Home() {
                               </a>
                             ) : isProxy ? (
                               <a
-                                href={item.videoUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                download
+                                href="/videoaulas"
                                 className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
                               >
-                                ⬇ Baixar / Assistir
+                                ▶ Assistir
                               </a>
                             ) : (
                               <a
