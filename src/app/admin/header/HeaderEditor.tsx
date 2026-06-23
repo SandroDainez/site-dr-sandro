@@ -3,8 +3,9 @@
 import { useState, useTransition, useRef } from "react";
 import { Save, Upload, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { upload } from "@vercel/blob/client";
 import type { HeaderData } from "@/lib/content";
-import { saveHeader, uploadPublicImage } from "@/app/admin/actions";
+import { saveHeader } from "@/app/admin/actions";
 
 type Props = {
   initialHeader: HeaderData;
@@ -32,20 +33,19 @@ export default function HeaderEditor({ initialHeader }: Props) {
     setSaved(false);
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const result = await uploadPublicImage(formData);
-      if (result.ok) {
-        const newHeader = { ...header, logoUrl: result.url };
-        setHeader(newHeader);
-        const saveResult = await saveHeader(newHeader);
-        if (saveResult.ok) setSaved(true);
-        else setError("Upload OK, mas falhou ao salvar: " + saveResult.error);
-      } else {
-        setUploadError("Falha no upload: " + result.error);
-      }
+      // Upload direto navegador → Vercel Blob (ignora o limite de 1MB das Server Actions)
+      const blob = await upload(`logos/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      const proxyUrl = `/api/img?url=${encodeURIComponent(blob.url)}`;
+      const newHeader = { ...header, logoUrl: proxyUrl };
+      setHeader(newHeader);
+      const saveResult = await saveHeader(newHeader);
+      if (saveResult.ok) setSaved(true);
+      else setError("Upload OK, mas falhou ao salvar: " + saveResult.error);
     } catch (e) {
-      setUploadError("Erro inesperado: " + String(e instanceof Error ? e.message : e));
+      setUploadError("Falha no upload: " + String(e instanceof Error ? e.message : e));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
