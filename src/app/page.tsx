@@ -27,7 +27,6 @@ import {
   getHero,
   getHeader,
   getFreeApps,
-  getContentItems,
   getCourses,
   getWhyUs,
   getSiteConfig,
@@ -42,14 +41,13 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, contentItems, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
     getHero(),
     getHeader(),
     getFreeApps(),
-    getContentItems(),
     getCourses(),
     getWhyUs(),
     getSiteConfig(),
@@ -99,9 +97,6 @@ export default async function Home() {
             </a>
             <a href="#cursos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
               Cursos
-            </a>
-            <a href="#conteudo" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
-              Podcasts e Aulas
             </a>
             <a href="#eventos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
               Eventos
@@ -271,7 +266,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-gratis" className="scroll-mt-32 mx-auto grid w-full max-w-7xl gap-6 px-6 pb-24 lg:grid-cols-2">
+        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
           <div className="finex-glass rounded-3xl p-8">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight">Acesso aberto imediato</h3>
@@ -300,46 +295,6 @@ export default async function Home() {
                 ) : (
                   <div key={item.title} className="card-open rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-accent/35 hover:bg-black/30">
                     {cardContent}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div id="conteudo" className="scroll-mt-32 rounded-3xl border border-white/10 bg-panel p-8">
-            <p className="text-xs uppercase tracking-[0.16em] text-accent-blue">Conteúdo educacional aberto</p>
-            <h3 className="mt-3 text-3xl font-medium tracking-tight">Podcasts, aulas e atualizações</h3>
-            <div className="mt-7 grid gap-4">
-              {contentItems.map((item, idx) => {
-                const ContentIcon = [PlayCircle, AudioLines, Microscope, BrainCircuit][idx % 4];
-                const inner = (
-                  <>
-                    <div className="flex items-center gap-3">
-                      <ContentIcon className="h-4 w-4 text-accent-blue" />
-                      <div>
-                        <p className="text-sm font-medium">{item.title}</p>
-                        <p className="text-xs text-muted">{item.subtitle}</p>
-                      </div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-white/45 transition group-hover:translate-x-1 group-hover:text-white" />
-                  </>
-                );
-                return item.link ? (
-                  <a
-                    key={item.title}
-                    href={item.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group finex-scan flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent-blue/35 hover:bg-white/[0.06]"
-                  >
-                    {inner}
-                  </a>
-                ) : (
-                  <div
-                    key={item.title}
-                    className="group finex-scan flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent-blue/35 hover:bg-white/[0.06]"
-                  >
-                    {inner}
                   </div>
                 );
               })}
