@@ -208,40 +208,30 @@ function BoletimCard({
   );
 }
 
+const ALL_AREAS: AtualizacaoData["area"][] = ["emergencias", "ti", "anestesiologia"];
+
 export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
   const validAreas: FilterArea[] = ["todas", "emergencias", "ti", "anestesiologia"];
-  const defaultArea: FilterArea = validAreas.includes(initialArea as FilterArea)
+  const init: FilterArea = validAreas.includes(initialArea as FilterArea)
     ? (initialArea as FilterArea)
     : "todas";
-  const [active, setActive] = useState<FilterArea>(defaultArea);
+  const [active, setActive] = useState<FilterArea>(init);
 
-  const areas: AtualizacaoData["area"][] = [
-    "emergencias",
-    "ti",
-    "anestesiologia",
-  ];
+  // Group items by area
+  const grouped = atualizacoes.reduce<Record<AtualizacaoData["area"], AtualizacaoData[]>>(
+    (acc, item) => {
+      if (acc[item.area]) acc[item.area].push(item);
+      return acc;
+    },
+    { emergencias: [], ti: [], anestesiologia: [] }
+  );
 
-  const grouped: Record<AtualizacaoData["area"], AtualizacaoData[]> = {
-    emergencias: [],
-    ti: [],
-    anestesiologia: [],
-  };
-
-  for (const item of atualizacoes) {
-    if (grouped[item.area]) {
-      grouped[item.area].push(item);
-    }
-  }
-
-  const visibleAreas = areas.filter((a) => grouped[a].length > 0);
-
-  const filteredAreas =
-    active === "todas"
-      ? visibleAreas
-      : visibleAreas.filter((a) => a === active);
-
-  // Order: Emergências, TI, Anestesiologia (fixed order)
-  const orderedAreas = areas.filter((a) => filteredAreas.includes(a));
+  // Which areas have data and match the active filter
+  const areasToShow: AtualizacaoData["area"][] = ALL_AREAS.filter((area) => {
+    if (grouped[area].length === 0) return false;
+    if (active === "todas") return true;
+    return area === active;
+  });
 
   return (
     <div>
@@ -263,15 +253,14 @@ export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
         ))}
       </div>
 
-      {orderedAreas.length === 0 && (
+      {areasToShow.length === 0 && (
         <p className="text-sm text-white/40 text-center">
           Nenhuma atualização nesta área ainda.
         </p>
       )}
 
-      {/* Boletins — UM ABAIXO DO OUTRO (vertical), não mais em grid */}
       <div className="flex flex-col gap-8">
-        {orderedAreas.map((area) => (
+        {areasToShow.map((area) => (
           <BoletimCard key={area} area={area} items={grouped[area]} />
         ))}
       </div>

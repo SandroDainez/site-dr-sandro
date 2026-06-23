@@ -7,10 +7,10 @@ import Image from "next/image";
 export default async function AtualizacoesPage({
   searchParams,
 }: {
-  searchParams: { area?: string };
+  searchParams: Promise<{ area?: string }>;
 }) {
-  const [atualizacoes, header] = await Promise.all([getAtualizacoes(), getHeader()]);
-  const initialArea = searchParams.area ?? "todas";
+  const [atualizacoes, header, params] = await Promise.all([getAtualizacoes(), getHeader(), searchParams]);
+  const initialArea = params.area ?? "todas";
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
