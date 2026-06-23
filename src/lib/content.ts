@@ -268,8 +268,8 @@ export const defaultFreeApps: FreeAppData[] = [
     link: "",
   },
   {
-    title: "Aulas e podcasts gratuitos",
-    desc: "Conteúdo aberto para atualização objetiva, sem necessidade de login.",
+    title: "Podcasts gratuitos",
+    desc: "Episódios em áudio com discussão de casos e condutas, sem necessidade de login.",
     icon: "AudioLines",
     link: "",
   },

@@ -101,9 +101,6 @@ export default async function Home() {
             <a href="#eventos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
               Eventos
             </a>
-            <a href="#contato" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
-              Contato
-            </a>
             <a href="/atualizacoes" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
               Atualizações
             </a>
@@ -113,16 +110,11 @@ export default async function Home() {
             <a href="/videoaulas" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
               Videoaulas
             </a>
+            <a href="#contato" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+              Contato
+            </a>
           </nav>
 
-          <div className="hidden items-center gap-3 lg:flex">
-            <a
-              href="#via-aerea-dificil"
-              className="finex-beam finex-beam-strong finex-glow-breathe rounded-full px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white"
-            >
-              Via aérea difícil
-            </a>
-          </div>
         </div>
       </header>
 
@@ -166,10 +158,10 @@ export default async function Home() {
                   Explorar plataforma <ArrowRight className="h-4 w-4" />
                 </a>
                 <a
-                  href="#conteudo"
+                  href="#eventos"
                   className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/[0.03] px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.07]"
                 >
-                  Ver conteúdo aberto
+                  Ver agenda de eventos
                 </a>
               </div>
             </div>

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  AudioLines,
   BookOpen,
   CalendarDays,
   ClipboardList,
@@ -49,14 +48,6 @@ const sections = [
     desc: "Edite os cards de aplicativos gratuitos com ícone e link.",
     color: "text-emerald-400",
     border: "hover:border-emerald-400/40",
-  },
-  {
-    href: "/admin/conteudo",
-    icon: AudioLines,
-    label: "Conteúdo",
-    desc: "Edite os itens da seção de podcasts, aulas e atualizações.",
-    color: "text-cyan-400",
-    border: "hover:border-cyan-400/40",
   },
   {
     href: "/admin/cursos",

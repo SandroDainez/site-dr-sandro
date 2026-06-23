@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createHash } from "crypto";
 import {
-  AudioLines,
   BookOpen,
   CalendarDays,
   ClipboardList,
@@ -34,7 +33,6 @@ const navLinks = [
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
   { href: "/admin/apps", label: "Apps", icon: Layers },
   { href: "/admin/apps-gratis", label: "Apps Grátis", icon: BookOpen },
-  { href: "/admin/conteudo", label: "Conteúdo", icon: AudioLines },
   { href: "/admin/cursos", label: "Cursos", icon: GraduationCap },
   { href: "/admin/por-que-nos", label: "Por que nós", icon: ShieldCheck },
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
