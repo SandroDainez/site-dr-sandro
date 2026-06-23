@@ -28,13 +28,21 @@ export default function HeaderEditor({ initialHeader }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadError(null);
+    setSaved(false);
     setIsUploading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
       const result = await uploadImage(formData);
       if (result.ok) {
-        update("logoUrl", result.url);
+        const newHeader = { ...header, logoUrl: result.url };
+        setHeader(newHeader);
+        // auto-save so the logo goes live immediately
+        startTransition(async () => {
+          const saveResult = await saveHeader(newHeader);
+          if (saveResult.ok) setSaved(true);
+          else setError(saveResult.error);
+        });
       } else {
         setUploadError(result.error);
       }
