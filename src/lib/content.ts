@@ -11,6 +11,14 @@ export type EventoData = {
   descricao: string;
   investimento: string;
   data: string; // YYYY-MM-DD
+  tipo?: string; // ex: Curso, Workshop, Imersão, Congresso, Webinar, Aula
+  horario?: string; // ex: "08h às 17h"
+  local?: string; // ex: "Online (Zoom)" ou "São Paulo - SP"
+  cargaHoraria?: string; // ex: "8 horas"
+  publicoAlvo?: string; // ex: "Médicos e residentes"
+  programacao?: string; // conteúdo detalhado / o que será abordado (várias linhas)
+  inscricaoUrl?: string; // link externo de inscrição (opcional)
+  folderUrl?: string; // imagem do folder/cartaz do evento
 };
 
 export type AppData = {
@@ -143,6 +151,15 @@ export const defaultEventos: EventoData[] = [
       "Treinamento com foco em preparação, escolha de estratégia e execução segura no cenário crítico.",
     investimento: "R$ 890,00",
     data: "2026-05-24",
+    tipo: "Workshop prático",
+    horario: "08h às 17h",
+    local: "São Paulo - SP",
+    cargaHoraria: "8 horas",
+    publicoAlvo: "Médicos, residentes e estudantes de medicina",
+    programacao:
+      "Avaliação e predição de via aérea difícil\nPreparação e pré-oxigenação\nSequência rápida de intubação\nDispositivos de resgate e algoritmo de falha\nPrática em simuladores",
+    inscricaoUrl: "",
+    folderUrl: "",
   },
   {
     slug: "via-aerea-dificil-no-critico",

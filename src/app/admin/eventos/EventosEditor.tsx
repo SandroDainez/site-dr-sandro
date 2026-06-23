@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Save, GripVertical } from "lucide-react";
+import { Plus, Trash2, Save, GripVertical, Upload, Loader2 } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import type { EventoData } from "@/lib/content";
 import { saveEventos } from "@/app/admin/actions";
 
@@ -9,12 +10,30 @@ type Props = {
   initialEventos: EventoData[];
 };
 
+const TIPO_OPTIONS = [
+  "Curso",
+  "Workshop prático",
+  "Imersão",
+  "Congresso",
+  "Webinar",
+  "Aula ao vivo",
+  "Mentoria",
+];
+
 const emptyEvento = (): EventoData => ({
   slug: "",
   titulo: "",
   descricao: "",
   investimento: "",
   data: "",
+  tipo: "",
+  horario: "",
+  local: "",
+  cargaHoraria: "",
+  publicoAlvo: "",
+  programacao: "",
+  inscricaoUrl: "",
+  folderUrl: "",
 });
 
 function slugify(text: string) {
@@ -32,6 +51,24 @@ export default function EventosEditor({ initialEventos }: Props) {
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+
+  async function handleFolderUpload(index: number, file: File) {
+    setError(null);
+    setUploadingIdx(index);
+    try {
+      const blob = await upload(`eventos/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      const proxyUrl = `/api/img?url=${encodeURIComponent(blob.url)}`;
+      updateEvento(index, "folderUrl", proxyUrl);
+    } catch (e) {
+      setError("Falha no upload do folder: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingIdx(null);
+    }
+  }
 
   function updateEvento(index: number, field: keyof EventoData, value: string) {
     setEventos((prev) =>
@@ -144,15 +181,170 @@ export default function EventosEditor({ initialEventos }: Props) {
 
           <div>
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
-              Descrição
+              Descrição curta
             </label>
             <textarea
               rows={2}
-              placeholder="Descrição curta do evento..."
+              placeholder="Resumo do evento (aparece no card e no topo da página)..."
               value={evento.descricao}
               onChange={(e) => updateEvento(index, "descricao", e.target.value)}
               className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50 resize-none"
             />
+          </div>
+
+          {/* Tipo + Horário */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+                Tipo de evento
+              </label>
+              <input
+                list={`tipos-${index}`}
+                type="text"
+                placeholder="Ex: Workshop prático"
+                value={evento.tipo ?? ""}
+                onChange={(e) => updateEvento(index, "tipo", e.target.value)}
+                className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50"
+              />
+              <datalist id={`tipos-${index}`}>
+                {TIPO_OPTIONS.map((t) => (
+                  <option key={t} value={t} />
+                ))}
+              </datalist>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+                Horário
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: 08h às 17h"
+                value={evento.horario ?? ""}
+                onChange={(e) => updateEvento(index, "horario", e.target.value)}
+                className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50"
+              />
+            </div>
+          </div>
+
+          {/* Local + Carga horária */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+                Local
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: Online (Zoom) ou São Paulo - SP"
+                value={evento.local ?? ""}
+                onChange={(e) => updateEvento(index, "local", e.target.value)}
+                className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+                Carga horária
+              </label>
+              <input
+                type="text"
+                placeholder="Ex: 8 horas"
+                value={evento.cargaHoraria ?? ""}
+                onChange={(e) => updateEvento(index, "cargaHoraria", e.target.value)}
+                className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+              Público-alvo
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: Médicos, residentes e estudantes de medicina"
+              value={evento.publicoAlvo ?? ""}
+              onChange={(e) => updateEvento(index, "publicoAlvo", e.target.value)}
+              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+              Programação / conteúdo (uma linha por tópico)
+            </label>
+            <textarea
+              rows={5}
+              placeholder={"Avaliação de via aérea difícil\nPré-oxigenação\nSequência rápida de intubação\nDispositivos de resgate"}
+              value={evento.programacao ?? ""}
+              onChange={(e) => updateEvento(index, "programacao", e.target.value)}
+              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50 resize-y"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+              Link de inscrição (opcional — botão externo)
+            </label>
+            <input
+              type="url"
+              placeholder="https://... (Sympla, Hotmart, formulário, etc.)"
+              value={evento.inscricaoUrl ?? ""}
+              onChange={(e) => updateEvento(index, "inscricaoUrl", e.target.value)}
+              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-blue/50"
+            />
+            <p className="mt-1 text-[11px] text-white/35">
+              Se preenchido, o botão leva direto para esse link. Se vazio, mostra o formulário interno de interesse.
+            </p>
+          </div>
+
+          {/* Folder / cartaz do evento */}
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+              Folder / cartaz do evento
+            </label>
+            <div className="flex items-center gap-3">
+              {evento.folderUrl ? (
+                <div className="h-20 w-16 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-black/30">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={evento.folderUrl} alt="Folder" className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className="flex h-20 w-16 shrink-0 items-center justify-center rounded-lg border border-dashed border-white/15 bg-black/20 text-[10px] text-white/30">
+                  sem img
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id={`folder-${index}`}
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleFolderUpload(index, f);
+                    e.target.value = "";
+                  }}
+                />
+                <label
+                  htmlFor={`folder-${index}`}
+                  className={`flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-4 py-2 text-xs font-medium text-white transition hover:bg-white/[0.10] ${uploadingIdx === index ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                  {uploadingIdx === index ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando...</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Enviar folder</>
+                  )}
+                </label>
+                {evento.folderUrl && (
+                  <button
+                    type="button"
+                    onClick={() => updateEvento(index, "folderUrl", "")}
+                    className="text-xs text-white/40 transition hover:text-red-400"
+                  >
+                    Remover
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       ))}

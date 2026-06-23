@@ -37,6 +37,14 @@ export default function CalendarioEventos({ eventos }: Props) {
     return map;
   }, [eventos]);
 
+  const eventosOrdenados = useMemo(
+    () =>
+      [...eventos]
+        .filter((e) => e.data)
+        .sort((a, b) => a.data.localeCompare(b.data)),
+    [eventos]
+  );
+
   const { dias, tituloMes } = useMemo(() => {
     const ano = mesAtual.getFullYear();
     const mes = mesAtual.getMonth();
@@ -172,6 +180,70 @@ export default function CalendarioEventos({ eventos }: Props) {
             })}
           </div>
         </div>
+
+        {/* Lista de eventos com detalhes */}
+        {eventosOrdenados.length > 0 && (
+          <div className="mt-8">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/70">
+              Próximos eventos
+            </h4>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {eventosOrdenados.map((evento) => {
+                const dataFmt = (() => {
+                  try {
+                    return new Date(`${evento.data}T12:00:00`).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    });
+                  } catch {
+                    return evento.data;
+                  }
+                })();
+                return (
+                  <Link
+                    key={evento.slug || evento.data}
+                    href={`/inscricao?evento=${evento.slug}&data=${evento.data}`}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-accent-blue/40"
+                  >
+                    {evento.folderUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={evento.folderUrl}
+                        alt={evento.titulo}
+                        className="h-36 w-full object-cover"
+                      />
+                    )}
+                    <div className="flex flex-1 flex-col p-4">
+                      <div className="mb-2 flex flex-wrap items-center gap-2">
+                        {evento.tipo && (
+                          <span className="rounded-full border border-accent-blue/30 bg-accent-blue/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-accent-blue">
+                            {evento.tipo}
+                          </span>
+                        )}
+                        <span className="text-[11px] font-medium text-white/45">{dataFmt}</span>
+                      </div>
+                      <p className="text-[15px] font-semibold leading-snug text-white">{evento.titulo}</p>
+                      {evento.descricao && (
+                        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted">
+                          {evento.descricao}
+                        </p>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-white/55">
+                        {evento.horario && <span>🕐 {evento.horario}</span>}
+                        {evento.local && <span>📍 {evento.local}</span>}
+                        {evento.investimento && <span>💳 {evento.investimento}</span>}
+                      </div>
+                      <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.1em] text-accent-blue transition group-hover:gap-2">
+                        Ver detalhes e inscrição →
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
