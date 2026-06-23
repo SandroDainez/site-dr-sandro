@@ -73,7 +73,7 @@ export default async function Home() {
                 alt="Logo"
                 width={192}
                 height={192}
-                className="h-full w-full object-cover scale-150"
+                className="h-full w-full object-contain"
                 priority
                 unoptimized
               />

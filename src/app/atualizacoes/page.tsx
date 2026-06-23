@@ -25,7 +25,7 @@ export default async function AtualizacoesPage({
                 alt="Logo"
                 width={96}
                 height={96}
-                className="h-full w-full object-cover scale-150"
+                className="h-full w-full object-contain"
                 unoptimized
               />
             </div>
