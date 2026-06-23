@@ -74,8 +74,8 @@ export default async function Home() {
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           <div className="flex items-center gap-4 md:gap-5">
             <SiteLogo header={header} variant="lg" />
-            <div className="text-center lg:text-left">
-              <p className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">{header.name}</p>
+            <div className="max-w-md text-center lg:text-left">
+              <p className="text-3xl font-bold leading-tight tracking-tight text-white break-words md:text-4xl lg:text-5xl">{header.name}</p>
               <div className="mt-2 space-y-0.5 text-base font-semibold leading-tight tracking-tight text-accent md:text-lg lg:text-xl">
                 <p>{header.cremesp}</p>
                 <p>{header.rqe1}</p>

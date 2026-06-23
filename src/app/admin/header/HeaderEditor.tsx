@@ -262,12 +262,12 @@ export default function HeaderEditor({ initialHeader }: Props) {
 
         {/* Tamanho e posição */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <RangeRow label="Tamanho da moldura" value={header.logoSize} fallback={192} min={96} max={320} suffix="px" onChange={(v) => setField("logoSize", v)} />
-          <RangeRow label="Logo dentro da moldura" value={header.logoScale} fallback={1} min={0.5} max={2} step={0.05} suffix="×" onChange={(v) => setField("logoScale", v)} />
-          <RangeRow label="Espaçamento interno" value={header.logoPadding} fallback={14} min={0} max={64} suffix="px" onChange={(v) => setField("logoPadding", v)} />
-          <RangeRow label="Arredondamento" value={header.logoRadius} fallback={24} min={0} max={100} suffix="px" onChange={(v) => setField("logoRadius", v)} />
-          <RangeRow label="Posição horizontal" value={header.logoOffsetX} fallback={0} min={-40} max={40} suffix="px" onChange={(v) => setField("logoOffsetX", v)} />
-          <RangeRow label="Posição vertical" value={header.logoOffsetY} fallback={0} min={-40} max={40} suffix="px" onChange={(v) => setField("logoOffsetY", v)} />
+          <RangeRow label="Tamanho da moldura" value={header.logoSize} fallback={192} min={96} max={224} suffix="px" onChange={(v) => setField("logoSize", v)} />
+          <RangeRow label="Logo dentro da moldura" value={header.logoScale} fallback={1} min={0.5} max={1.5} step={0.05} suffix="×" onChange={(v) => setField("logoScale", v)} />
+          <RangeRow label="Espaçamento interno" value={header.logoPadding} fallback={14} min={0} max={40} suffix="px" onChange={(v) => setField("logoPadding", v)} />
+          <RangeRow label="Arredondamento" value={header.logoRadius} fallback={24} min={0} max={112} suffix="px" onChange={(v) => setField("logoRadius", v)} />
+          <RangeRow label="Posição horizontal" value={header.logoOffsetX} fallback={0} min={-16} max={16} suffix="px" onChange={(v) => setField("logoOffsetX", v)} />
+          <RangeRow label="Posição vertical" value={header.logoOffsetY} fallback={0} min={-16} max={16} suffix="px" onChange={(v) => setField("logoOffsetY", v)} />
         </div>
 
         {/* Moldura: cor, borda, sombra */}
