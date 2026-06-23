@@ -126,6 +126,30 @@ function VideoCard({ item }: { item: VideoaulaData }) {
             </div>
           )}
         </div>
+      ) : isProxyVideo ? (
+        <div
+          className="relative cursor-pointer group bg-black"
+          onClick={() => setPlayerOpen(true)}
+        >
+          {/* Preview do próprio vídeo (primeiro frame) */}
+          <video
+            src={`${item.videoUrl}#t=0.5`}
+            muted
+            playsInline
+            preload="metadata"
+            className="w-full h-44 object-cover"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">
+              <span className="text-white text-xl">▶</span>
+            </div>
+          </div>
+          {item.duracao && (
+            <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white/90">
+              {item.duracao}
+            </span>
+          )}
+        </div>
       ) : null}
 
       <div className="flex flex-col flex-1 p-5">
