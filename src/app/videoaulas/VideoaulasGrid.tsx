@@ -52,72 +52,57 @@ function getYoutubeId(url: string): string | null {
 }
 
 function VideoCard({ item }: { item: VideoaulaData }) {
-  const [expanded, setExpanded] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [playerOpen, setPlayerOpen] = useState(false);
   const cfg = areaConfig[item.area];
   const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
   const isProxyVideo = item.videoUrl.startsWith("/api/img");
+  const hasVideo = !!item.videoUrl;
   const isLong = item.descricao.length > 140;
-  const display = expanded || !isLong ? item.descricao : item.descricao.slice(0, 120) + "…";
+  const display = descExpanded || !isLong ? item.descricao : item.descricao.slice(0, 120) + "…";
 
-  // Determine thumbnail
+  // Thumbnail
   let thumbSrc: string | null = null;
-  if (item.imageUrl) {
-    thumbSrc = item.imageUrl;
-  } else if (ytId) {
-    thumbSrc = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-  }
-
-  // Determine video button
-  let videoButton: React.ReactNode = null;
-  if (item.videoUrl) {
-    if (ytId) {
-      videoButton = (
-        <a
-          href={item.videoUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white transition hover:border-white/30 hover:bg-white/[0.1]"
-        >
-          ▶ Assistir no YouTube
-        </a>
-      );
-    } else if (isProxyVideo) {
-      videoButton = (
-        <a
-          href={item.videoUrl}
-          target="_blank"
-          rel="noreferrer"
-          download
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white transition hover:border-white/30 hover:bg-white/[0.1]"
-        >
-          ⬇ Baixar / Assistir
-        </a>
-      );
-    } else {
-      videoButton = (
-        <a
-          href={item.videoUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.05] px-3 py-1.5 text-xs font-medium text-white transition hover:border-white/30 hover:bg-white/[0.1]"
-        >
-          ▶ Assistir
-        </a>
-      );
-    }
-  }
+  if (item.imageUrl) thumbSrc = item.imageUrl;
+  else if (ytId) thumbSrc = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
 
   return (
-    <article className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20">
-      {thumbSrc && (
-        <img
-          src={thumbSrc}
-          alt={item.titulo}
-          className="w-full max-h-44 object-cover"
-        />
-      )}
+    <article className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:border-white/20">
+      {/* Thumbnail / player area */}
+      {hasVideo && playerOpen && isProxyVideo ? (
+        <div className="relative bg-black">
+          <video
+            src={item.videoUrl}
+            controls
+            autoPlay
+            className="w-full max-h-64 object-contain"
+          />
+          <button
+            type="button"
+            onClick={() => setPlayerOpen(false)}
+            className="absolute top-2 right-2 rounded-full bg-black/60 px-2.5 py-0.5 text-xs text-white/70 hover:text-white transition"
+          >
+            ✕ fechar
+          </button>
+        </div>
+      ) : thumbSrc ? (
+        <div
+          className={`relative ${hasVideo ? "cursor-pointer group" : ""}`}
+          onClick={() => hasVideo && !ytId && setPlayerOpen(true)}
+        >
+          <img src={thumbSrc} alt={item.titulo} className="w-full max-h-44 object-cover" />
+          {hasVideo && !ytId && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                <span className="text-white text-lg">▶</span>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : null}
+
       <div className="flex flex-col flex-1 p-5">
-        {/* Badges row */}
+        {/* Badges */}
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
             {cfg.label}
@@ -144,9 +129,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
         </div>
 
         {/* Title */}
-        <h2 className="text-[15px] font-semibold text-white leading-snug">
-          {item.titulo}
-        </h2>
+        <h2 className="text-[15px] font-semibold text-white leading-snug">{item.titulo}</h2>
 
         {/* Description */}
         <div className="mt-2 text-sm leading-relaxed text-white/55 flex-1">
@@ -154,18 +137,35 @@ function VideoCard({ item }: { item: VideoaulaData }) {
           {isLong && (
             <button
               type="button"
-              onClick={() => setExpanded(!expanded)}
+              onClick={() => setDescExpanded(!descExpanded)}
               className="ml-1 text-accent/60 hover:text-accent transition text-xs whitespace-nowrap"
             >
-              {expanded ? "[menos]" : "[mais]"}
+              {descExpanded ? "[menos]" : "[mais]"}
             </button>
           )}
         </div>
 
-        {/* Video button */}
-        {videoButton && (
-          <div className="mt-4">
-            {videoButton}
+        {/* Action buttons */}
+        {hasVideo && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {ytId ? (
+              <a
+                href={item.videoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+              >
+                ▶ Assistir no YouTube
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPlayerOpen(!playerOpen)}
+                className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+              >
+                {playerOpen ? "⏹ Fechar player" : "▶ Assistir"}
+              </button>
+            )}
           </div>
         )}
       </div>
