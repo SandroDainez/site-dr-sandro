@@ -9,6 +9,7 @@ import {
   ImageIcon,
   Layers,
   Newspaper,
+  PlayCircle,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -112,6 +113,14 @@ const sections = [
     desc: "Gerencie os protocolos clínicos por área: emergências, TI e anestesiologia.",
     color: "text-teal-400",
     border: "hover:border-teal-400/40",
+  },
+  {
+    href: "/admin/videoaulas",
+    icon: PlayCircle,
+    label: "Videoaulas",
+    desc: "Publique e gerencie videoaulas médicas por área clínica.",
+    color: "text-rose-400",
+    border: "hover:border-rose-400/40",
   },
   {
     href: "/admin/config",

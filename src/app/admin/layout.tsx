@@ -14,6 +14,7 @@ import {
   Layers,
   LogOut,
   Newspaper,
+  PlayCircle,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -41,6 +42,7 @@ const navLinks = [
   { href: "/admin/imagens", label: "Imagens", icon: ImageIcon },
   { href: "/admin/atualizacoes", label: "Atualizações", icon: Newspaper },
   { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList },
+  { href: "/admin/videoaulas", label: "Videoaulas", icon: PlayCircle },
   { href: "/admin/config", label: "Configurações", icon: Settings },
 ];
 

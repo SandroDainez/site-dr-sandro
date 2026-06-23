@@ -18,6 +18,7 @@ import {
   type SiteConfig,
   type AtualizacaoData,
   type ProtocoloData,
+  type VideoaulaData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -160,6 +161,18 @@ export async function saveProtocolos(protocolos: ProtocoloData[]): Promise<Resul
     await writeBlob("protocolos", protocolos);
     revalidatePath("/");
     revalidatePath("/protocolos");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveVideoaulas(videoaulas: VideoaulaData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("videoaulas", videoaulas);
+    revalidatePath("/");
+    revalidatePath("/videoaulas");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };

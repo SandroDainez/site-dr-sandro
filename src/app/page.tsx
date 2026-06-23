@@ -33,6 +33,7 @@ import {
   getSiteConfig,
   getAtualizacoes,
   getProtocolos,
+  getVideoaulas,
 } from "@/lib/content";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -41,7 +42,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, contentItems, courses, whyUs, siteConfig, atualizacoes, protocolos] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, contentItems, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -54,6 +55,7 @@ export default async function Home() {
     getSiteConfig(),
     getAtualizacoes(),
     getProtocolos(),
+    getVideoaulas(),
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -112,6 +114,9 @@ export default async function Home() {
             </a>
             <a href="/protocolos" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
               Protocolos
+            </a>
+            <a href="/videoaulas" className="rounded-full px-3 py-1.5 transition hover:bg-white/10 hover:text-white">
+              Videoaulas
             </a>
           </nav>
 
@@ -463,6 +468,144 @@ export default async function Home() {
                 className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
               >
                 Ver todos <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </section>
+          );
+        })()}
+
+        {/* Videoaulas teaser */}
+        {videoaulas.length > 0 && (() => {
+          const sorted = [...videoaulas].sort(
+            (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+          );
+          const recent = sorted.slice(0, 3);
+          const areaConfig: Record<string, { badge: string; label: string }> = {
+            geral: { badge: "bg-teal-400/15 text-teal-400 border-teal-400/30", label: "Geral" },
+            emergencias: { badge: "bg-red-400/15 text-red-400 border-red-400/30", label: "Emergências" },
+            ti: { badge: "bg-blue-400/15 text-blue-400 border-blue-400/30", label: "TI" },
+            anestesiologia: { badge: "bg-violet-400/15 text-violet-400 border-violet-400/30", label: "Anestesiologia" },
+          };
+          const nivelLabel: Record<string, string> = {
+            basico: "Básico",
+            intermediario: "Intermediário",
+            avancado: "Avançado",
+          };
+          function getYoutubeIdHome(url: string): string | null {
+            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+            return match ? match[1] : null;
+          }
+          return (
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24">
+              <div className="mb-8 flex items-end justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.16em] text-accent">Aulas em vídeo</p>
+                  <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">
+                    Videoaulas
+                  </h2>
+                </div>
+                <a
+                  href="/videoaulas"
+                  className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex"
+                >
+                  Ver todas <ArrowRight className="h-3.5 w-3.5" />
+                </a>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {recent.map((item) => {
+                  const cfg = areaConfig[item.area] ?? { badge: "text-white/60 border-white/20", label: item.area };
+                  const ytId = item.videoUrl ? getYoutubeIdHome(item.videoUrl) : null;
+                  const isProxy = item.videoUrl.startsWith("/api/img");
+                  let thumbSrc: string | null = null;
+                  if (item.imageUrl) thumbSrc = item.imageUrl;
+                  else if (ytId) thumbSrc = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+                  return (
+                    <article
+                      key={item.id}
+                      className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20"
+                    >
+                      {thumbSrc && (
+                        <img
+                          src={thumbSrc}
+                          alt={item.titulo}
+                          className="w-full max-h-44 object-cover"
+                        />
+                      )}
+                      {!thumbSrc && (
+                        <div className="w-full h-24 bg-white/[0.03] flex items-center justify-center">
+                          <PlayCircle className="h-8 w-8 text-white/20" />
+                        </div>
+                      )}
+                      <div className="flex flex-col flex-1 p-5">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
+                            {cfg.label}
+                          </span>
+                          {item.gratuita ? (
+                            <span className="rounded-full border border-green-400/30 bg-green-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-green-400">
+                              Gratuita
+                            </span>
+                          ) : (
+                            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-400">
+                              Assinantes
+                            </span>
+                          )}
+                          {item.nivel && (
+                            <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-0.5 text-[10px] text-white/50">
+                              {nivelLabel[item.nivel] ?? item.nivel}
+                            </span>
+                          )}
+                          {item.duracao && (
+                            <span className="text-[10px] text-white/35">⏱ {item.duracao}</span>
+                          )}
+                        </div>
+                        <h3 className="text-sm font-semibold text-white leading-snug flex-1">
+                          {item.titulo}
+                        </h3>
+                        {item.videoUrl && (
+                          <div className="mt-3">
+                            {ytId ? (
+                              <a
+                                href={item.videoUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
+                              >
+                                ▶ Assistir no YouTube
+                              </a>
+                            ) : isProxy ? (
+                              <a
+                                href={item.videoUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                download
+                                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
+                              >
+                                ⬇ Baixar / Assistir
+                              </a>
+                            ) : (
+                              <a
+                                href={item.videoUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
+                              >
+                                ▶ Assistir
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              <a
+                href="/videoaulas"
+                className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
+              >
+                Ver todas <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </section>
           );

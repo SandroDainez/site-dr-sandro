@@ -102,6 +102,20 @@ export type ProtocoloData = {
   data: string;         // YYYY-MM-DD (last updated)
 };
 
+export type VideoaulaData = {
+  id: string;
+  titulo: string;
+  descricao: string;
+  area: "emergencias" | "ti" | "anestesiologia" | "geral";
+  videoUrl: string;     // YouTube URL, proxied blob URL, or any direct link
+  imageUrl: string;     // thumbnail (optional)
+  imageCaption: string;
+  duracao: string;      // e.g. "45 min"
+  nivel: "basico" | "intermediario" | "avancado" | "";
+  gratuita: boolean;
+  data: string;         // YYYY-MM-DD
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
@@ -115,6 +129,7 @@ export type ContentMap = {
   siteConfig: SiteConfig;
   atualizacoes: AtualizacaoData[];
   protocolos: ProtocoloData[];
+  videoaulas: VideoaulaData[];
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -347,6 +362,48 @@ export const defaultProtocolos: ProtocoloData[] = [
   },
 ];
 
+export const defaultVideoaulas: VideoaulaData[] = [
+  {
+    id: "via-aerea-avancada",
+    titulo: "Via Aérea Avançada — SRI passo a passo",
+    descricao: "Sequência rápida de intubação completa: pré-oxigenação, fármacos, laringoscopia e manejo da via aérea difícil imprevista.",
+    area: "emergencias",
+    videoUrl: "",
+    imageUrl: "",
+    imageCaption: "",
+    duracao: "52 min",
+    nivel: "intermediario",
+    gratuita: false,
+    data: "2026-06-01",
+  },
+  {
+    id: "sdra-ventilacao",
+    titulo: "SDRA — Ventilação Protetora na UTI",
+    descricao: "Volume corrente, driving pressure, PEEP ideal e posição prona.",
+    area: "ti",
+    videoUrl: "",
+    imageUrl: "",
+    imageCaption: "",
+    duracao: "38 min",
+    nivel: "avancado",
+    gratuita: false,
+    data: "2026-05-20",
+  },
+  {
+    id: "raquianestesia-basico",
+    titulo: "Raquianestesia — Técnica e Segurança",
+    descricao: "Anatomia aplicada, posicionamento, anestésico local e complicações.",
+    area: "anestesiologia",
+    videoUrl: "",
+    imageUrl: "",
+    imageCaption: "",
+    duracao: "41 min",
+    nivel: "basico",
+    gratuita: true,
+    data: "2026-05-10",
+  },
+];
+
 export const defaultSiteConfig: SiteConfig = {
   marqueeItems: [
     "Protocolos revisados semanalmente",
@@ -470,6 +527,10 @@ export async function getAtualizacoes(): Promise<AtualizacaoData[]> {
 
 export async function getProtocolos(): Promise<ProtocoloData[]> {
   return readBlob("protocolos", defaultProtocolos);
+}
+
+export async function getVideoaulas(): Promise<VideoaulaData[]> {
+  return readBlob("videoaulas", defaultVideoaulas);
 }
 
 export async function uploadImageToBlob(file: File): Promise<string> {
