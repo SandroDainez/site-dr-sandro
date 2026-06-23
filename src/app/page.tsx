@@ -12,7 +12,6 @@ import {
   HeartPulse,
   Layers,
   Microscope,
-  PlayCircle,
   ShieldCheck,
   Sparkles,
   Zap,
@@ -21,6 +20,7 @@ import {
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import CalendarioEventos from "@/components/CalendarioEventos";
+import HomeVideoCard from "@/components/HomeVideoCard";
 import {
   getApps,
   getContato,
@@ -431,21 +431,6 @@ export default async function Home() {
             (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
           );
           const recent = sorted.slice(0, 3);
-          const areaConfig: Record<string, { badge: string; label: string }> = {
-            geral: { badge: "bg-teal-400/15 text-teal-400 border-teal-400/30", label: "Geral" },
-            emergencias: { badge: "bg-red-400/15 text-red-400 border-red-400/30", label: "Emergências" },
-            ti: { badge: "bg-blue-400/15 text-blue-400 border-blue-400/30", label: "TI" },
-            anestesiologia: { badge: "bg-violet-400/15 text-violet-400 border-violet-400/30", label: "Anestesiologia" },
-          };
-          const nivelLabel: Record<string, string> = {
-            basico: "Básico",
-            intermediario: "Intermediário",
-            avancado: "Avançado",
-          };
-          function getYoutubeIdHome(url: string): string | null {
-            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-            return match ? match[1] : null;
-          }
           return (
             <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.videoaulas)}>
               <div className="mb-8 flex items-end justify-between">
@@ -464,112 +449,9 @@ export default async function Home() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {recent.map((item) => {
-                  const cfg = areaConfig[item.area] ?? { badge: "text-white/60 border-white/20", label: item.area };
-                  const ytId = item.videoUrl ? getYoutubeIdHome(item.videoUrl) : null;
-                  const isProxy = item.videoUrl.startsWith("/api/img");
-                  let thumbSrc: string | null = null;
-                  if (item.imageUrl) thumbSrc = item.imageUrl;
-                  else if (ytId) thumbSrc = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
-                  return (
-                    <article
-                      key={item.id}
-                      className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20"
-                    >
-                      {thumbSrc ? (
-                        <a href="/videoaulas" className="relative block group/thumb">
-                          <img
-                            src={thumbSrc}
-                            alt={item.titulo}
-                            className="w-full h-44 object-cover"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition group-hover/thumb:bg-black/40">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
-                              <span className="text-white text-lg">▶</span>
-                            </div>
-                          </div>
-                        </a>
-                      ) : isProxy ? (
-                        <a href="/videoaulas" className="relative block bg-black group/thumb">
-                          {/* Primeiro frame do próprio vídeo como ilustração */}
-                          <video
-                            src={`${item.videoUrl}#t=0.5`}
-                            muted
-                            playsInline
-                            preload="metadata"
-                            className="w-full h-44 object-cover"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover/thumb:bg-black/45">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
-                              <span className="text-white text-lg">▶</span>
-                            </div>
-                          </div>
-                        </a>
-                      ) : (
-                        <div className="w-full h-24 bg-white/[0.03] flex items-center justify-center">
-                          <PlayCircle className="h-8 w-8 text-white/20" />
-                        </div>
-                      )}
-                      <div className="flex flex-col flex-1 p-5">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
-                            {cfg.label}
-                          </span>
-                          {item.gratuita ? (
-                            <span className="rounded-full border border-green-400/30 bg-green-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-green-400">
-                              Gratuita
-                            </span>
-                          ) : (
-                            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-amber-400">
-                              Assinantes
-                            </span>
-                          )}
-                          {item.nivel && (
-                            <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-0.5 text-[10px] text-white/50">
-                              {nivelLabel[item.nivel] ?? item.nivel}
-                            </span>
-                          )}
-                          {item.duracao && (
-                            <span className="text-[10px] text-white/35">⏱ {item.duracao}</span>
-                          )}
-                        </div>
-                        <h3 className="text-sm font-semibold text-white leading-snug flex-1">
-                          {item.titulo}
-                        </h3>
-                        {item.videoUrl && (
-                          <div className="mt-3">
-                            {ytId ? (
-                              <a
-                                href={item.videoUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-                              >
-                                ▶ Assistir no YouTube
-                              </a>
-                            ) : isProxy ? (
-                              <a
-                                href="/videoaulas"
-                                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-                              >
-                                ▶ Assistir
-                              </a>
-                            ) : (
-                              <a
-                                href={item.videoUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-                              >
-                                ▶ Assistir
-                              </a>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
+                {recent.map((item) => (
+                  <HomeVideoCard key={item.id} item={item} />
+                ))}
               </div>
 
               <a
