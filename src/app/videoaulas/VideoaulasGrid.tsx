@@ -82,6 +82,7 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
           src={item.videoUrl}
           controls
           autoPlay
+          playsInline
           className="w-full rounded-2xl bg-black shadow-2xl"
           style={{ maxHeight: "80vh" }}
         />
@@ -130,11 +131,12 @@ function VideoCard({ item }: { item: VideoaulaData }) {
       ) : isProxyVideo ? (
         inlinePlaying ? (
           <div className="relative bg-black">
-            {/* Vídeo tocando dentro do card */}
+            {/* Vídeo tocando dentro do card (playsInline impede abrir em tela cheia nativa no iPhone) */}
             <video
               src={item.videoUrl}
               controls
               autoPlay
+              playsInline
               className="w-full max-h-72 bg-black"
             />
             {/* Botão expandir p/ tela cheia */}
@@ -151,13 +153,14 @@ function VideoCard({ item }: { item: VideoaulaData }) {
             className="relative cursor-pointer group bg-black"
             onClick={() => setInlinePlaying(true)}
           >
-            {/* Preview do próprio vídeo (primeiro frame) */}
+            {/* Preview do próprio vídeo (primeiro frame) — pointer-events-none faz o toque
+                cair no container (play inline) em vez do player nativo do navegador */}
             <video
               src={`${item.videoUrl}#t=0.5`}
               muted
               playsInline
               preload="metadata"
-              className="w-full h-44 object-cover"
+              className="pointer-events-none w-full h-44 object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">
