@@ -40,9 +40,12 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const videoFileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+  const [pendingSave, setPendingSave] = useState(false);
+
   function updateItem(idx: number, field: keyof VideoaulaData, value: string | boolean) {
     setItems((prev) => prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item)));
     setSaved(false);
+    setPendingSave(true);
   }
 
   function addItem() {
@@ -72,7 +75,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
     setError(null);
     startTransition(async () => {
       const result = await saveVideoaulas(items);
-      if (result.ok) setSaved(true);
+      if (result.ok) { setSaved(true); setPendingSave(false); }
       else setError(result.error);
     });
   }
@@ -116,6 +119,23 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Unsaved changes banner */}
+      {pendingSave && (
+        <div className="flex items-center justify-between rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3">
+          <p className="text-sm text-amber-400 font-medium">
+            ⚠ Alterações não salvas — clique em &quot;Salvar videoaulas&quot; para publicar no site.
+          </p>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isPending}
+            className="flex items-center gap-1.5 rounded-full bg-amber-400 px-4 py-1.5 text-xs font-bold text-black transition hover:opacity-90 disabled:opacity-50 shrink-0 ml-4"
+          >
+            <Save className="h-3.5 w-3.5" />
+            {isPending ? "Salvando..." : "Salvar agora"}
+          </button>
+        </div>
+      )}
       {items.map((item, idx) => {
         const areaColor = areaColors[item.area] ?? "text-white/60 border-white/20";
         const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
