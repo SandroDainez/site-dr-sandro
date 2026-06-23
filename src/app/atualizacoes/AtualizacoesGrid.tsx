@@ -5,6 +5,7 @@ import type { AtualizacaoData } from "@/lib/content";
 
 type Props = {
   atualizacoes: AtualizacaoData[];
+  initialArea?: string;
 };
 
 type FilterArea = "todas" | AtualizacaoData["area"];
@@ -207,8 +208,12 @@ function BoletimCard({
   );
 }
 
-export default function AtualizacoesGrid({ atualizacoes }: Props) {
-  const [active, setActive] = useState<FilterArea>("todas");
+export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
+  const validAreas: FilterArea[] = ["todas", "emergencias", "ti", "anestesiologia"];
+  const defaultArea: FilterArea = validAreas.includes(initialArea as FilterArea)
+    ? (initialArea as FilterArea)
+    : "todas";
+  const [active, setActive] = useState<FilterArea>(defaultArea);
 
   const areas: AtualizacaoData["area"][] = [
     "emergencias",

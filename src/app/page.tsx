@@ -331,22 +331,20 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Atualizações teaser */}
+        {/* Atualizações teaser — 1 card por área */}
         {atualizacoes.length > 0 && (() => {
-          const sorted = [...atualizacoes].sort(
-            (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
-          );
-          const recent = sorted.slice(0, 3);
-          const areaBadge: Record<string, string> = {
-            emergencias: "bg-red-400/15 text-red-400 border-red-400/30",
-            ti: "bg-blue-400/15 text-blue-400 border-blue-400/30",
-            anestesiologia: "bg-violet-400/15 text-violet-400 border-violet-400/30",
-          };
-          const areaLabel: Record<string, string> = {
-            emergencias: "Emergências",
-            ti: "Terapia Intensiva",
-            anestesiologia: "Anestesiologia",
-          };
+          type AreaKey = "emergencias" | "ti" | "anestesiologia";
+          const areaConfig: { key: AreaKey; label: string; emoji: string; badge: string; border: string; color: string }[] = [
+            { key: "emergencias", label: "Emergências",      emoji: "🚑", badge: "bg-red-400/15 text-red-400 border-red-400/30",    border: "hover:border-red-400/40",    color: "text-red-400" },
+            { key: "ti",          label: "Terapia Intensiva",emoji: "🏥", badge: "bg-blue-400/15 text-blue-400 border-blue-400/30",  border: "hover:border-blue-400/40",   color: "text-blue-400" },
+            { key: "anestesiologia", label: "Anestesiologia",emoji: "🩺", badge: "bg-violet-400/15 text-violet-400 border-violet-400/30", border: "hover:border-violet-400/40", color: "text-violet-400" },
+          ];
+          const grouped: Record<AreaKey, typeof atualizacoes> = { emergencias: [], ti: [], anestesiologia: [] };
+          for (const item of atualizacoes) {
+            if (grouped[item.area as AreaKey]) grouped[item.area as AreaKey].push(item);
+          }
+          const visibleAreas = areaConfig.filter((a) => grouped[a.key].length > 0);
+          if (visibleAreas.length === 0) return null;
           return (
             <section className="mx-auto w-full max-w-7xl px-6 pb-24">
               <div className="mb-8 flex items-end justify-between">
@@ -365,31 +363,35 @@ export default async function Home() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {recent.map((item) => (
-                  <article
-                    key={item.id}
-                    className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-white/20"
-                  >
-                    <span
-                      className={`self-start rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${areaBadge[item.area] ?? "text-white/60 border-white/20"}`}
+                {visibleAreas.map((area) => {
+                  const sorted = [...grouped[area.key]].sort(
+                    (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+                  );
+                  const latest = sorted[0];
+                  return (
+                    <a
+                      key={area.key}
+                      href={`/atualizacoes?area=${area.key}`}
+                      className={`group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 ${area.border}`}
                     >
-                      {areaLabel[item.area] ?? item.area}
-                    </span>
-                    <p className="mt-3 text-xs text-white/40">
-                      {new Date(item.data + "T12:00:00").toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                    <h3 className="mt-1.5 text-base font-semibold leading-snug text-white">
-                      {item.titulo}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/50 flex-1">
-                      {item.conteudo}
-                    </p>
-                  </article>
-                ))}
+                      <div className="flex items-center justify-between">
+                        <span className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${area.badge}`}>
+                          {area.emoji} {area.label}
+                        </span>
+                        <span className="text-xs text-white/30">{sorted.length} item{sorted.length !== 1 ? "s" : ""}</span>
+                      </div>
+                      <h3 className={`mt-4 text-base font-semibold leading-snug ${area.color}`}>
+                        {latest.titulo}
+                      </h3>
+                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/50 flex-1">
+                        {latest.conteudo}
+                      </p>
+                      <div className={`mt-4 flex items-center gap-1 text-xs font-medium ${area.color} opacity-0 transition group-hover:opacity-100`}>
+                        Ver atualizações <ArrowRight className="h-3 w-3" />
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
 
               <a
