@@ -21,6 +21,7 @@ export type AppData = {
   glow: string;
   highlights: string[];
   link: string;
+  thumbnailUrl?: string;
 };
 
 export type FreeAppData = {

@@ -221,9 +221,20 @@ export default async function Home() {
                 <div className="pointer-events-none absolute bottom-0 left-1/2 h-20 w-2/3 -translate-x-1/2 rounded-full bg-accent-blue/20 blur-2xl opacity-0 transition duration-500 group-hover:opacity-100" />
                 <div className="relative">
                   <div className="mb-6 flex items-center justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
-                      <AppIcon className="h-5 w-5 text-white" />
-                    </div>
+                    {app.thumbnailUrl ? (
+                      <div className="h-12 w-12 overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={app.thumbnailUrl}
+                          alt={app.title}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
+                        <AppIcon className="h-5 w-5 text-white" />
+                      </div>
+                    )}
                     <span className="rounded-full border border-accent/30 bg-accent/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
                       Assinatura
                     </span>

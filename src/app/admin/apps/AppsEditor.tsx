@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Save, X } from "lucide-react";
+import { Plus, Trash2, Save, X, Upload, Loader2 } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import type { AppData } from "@/lib/content";
 import { saveApps } from "@/app/admin/actions";
 
@@ -28,6 +29,24 @@ export default function AppsEditor({ initialApps }: Props) {
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+
+  async function handleThumbUpload(index: number, file: File) {
+    setError(null);
+    setUploadingIdx(index);
+    try {
+      const blob = await upload(`apps/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      const proxyUrl = `/api/img?url=${encodeURIComponent(blob.url)}`;
+      updateApp(index, "thumbnailUrl", proxyUrl);
+    } catch (e) {
+      setError("Falha no upload da miniatura: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingIdx(null);
+    }
+  }
 
   function updateApp(index: number, field: keyof AppData, value: string | string[]) {
     setApps((prev) =>
@@ -127,6 +146,56 @@ export default function AppsEditor({ initialApps }: Props) {
                   <option key={g.value} value={g.value}>{g.label}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
+              Miniatura do app (opcional — aparece no canto do card)
+            </label>
+            <div className="flex items-center gap-3">
+              {app.thumbnailUrl ? (
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-white/15 bg-black/30">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={app.thumbnailUrl} alt="Miniatura" className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-dashed border-white/15 bg-black/20 text-[10px] text-white/30">
+                  sem img
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id={`thumb-${index}`}
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleThumbUpload(index, f);
+                    e.target.value = "";
+                  }}
+                />
+                <label
+                  htmlFor={`thumb-${index}`}
+                  className={`flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-4 py-2 text-xs font-medium text-white transition hover:bg-white/[0.10] ${uploadingIdx === index ? "opacity-50 pointer-events-none" : ""}`}
+                >
+                  {uploadingIdx === index ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando...</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Enviar miniatura</>
+                  )}
+                </label>
+                {app.thumbnailUrl && (
+                  <button
+                    type="button"
+                    onClick={() => updateApp(index, "thumbnailUrl", "")}
+                    className="text-xs text-white/40 transition hover:text-red-400"
+                  >
+                    Remover
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
