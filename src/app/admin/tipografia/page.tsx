@@ -1,11 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { getTypography } from "@/lib/content";
-import TypographyEditor from "./TypographyEditor";
+import { TYPOGRAPHY_SECTIONS } from "@/lib/typography-sections";
+import AreaTypography from "@/components/admin/AreaTypography";
 import Link from "next/link";
 
 export default async function AdminTipografiaPage() {
-  const typography = await getTypography();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-2xl pb-24">
@@ -13,13 +14,18 @@ export default async function AdminTipografiaPage() {
         <Link href="/admin" className="text-xs text-muted hover:text-white transition">
           ← Admin
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Tamanho das fontes</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Aparência do texto</h1>
         <p className="mt-1 text-sm text-muted">
-          Aumente ou diminua o tamanho das letras de cada seção da página inicial, de forma independente.
+          Controle tamanho, fonte, cor e peso das letras de cada seção da página inicial. O mesmo
+          controle também aparece dentro de cada área de edição.
         </p>
       </div>
 
-      <TypographyEditor initialTypography={typography} />
+      <div className="space-y-6">
+        {TYPOGRAPHY_SECTIONS.map((s) => (
+          <AreaTypography key={s.key} sectionKey={s.key} label={s.label} initial={typo[s.key]} />
+        ))}
+      </div>
     </div>
   );
 }

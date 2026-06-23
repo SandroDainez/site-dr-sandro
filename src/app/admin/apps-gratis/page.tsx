@@ -1,9 +1,11 @@
-import { getFreeApps } from "@/lib/content";
+import { getFreeApps, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import AppsGratisEditor from "./AppsGratisEditor";
 import Link from "next/link";
 
 export default async function AdminAppsGratisPage() {
   const apps = await getFreeApps();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-xl">
@@ -18,6 +20,8 @@ export default async function AdminAppsGratisPage() {
       </div>
 
       <AppsGratisEditor initialApps={apps} />
+
+      <AreaTypography sectionKey="freeApps" label="Apps grátis" initial={typo["freeApps"]} />
     </div>
   );
 }

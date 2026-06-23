@@ -1,9 +1,11 @@
-import { getCourses } from "@/lib/content";
+import { getCourses, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import CursosEditor from "./CursosEditor";
 import Link from "next/link";
 
 export default async function AdminCursosPage() {
   const courses = await getCourses();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-xl">
@@ -18,6 +20,8 @@ export default async function AdminCursosPage() {
       </div>
 
       <CursosEditor initialCourses={courses} />
+
+      <AreaTypography sectionKey="cursos" label="Cursos" initial={typo["cursos"]} />
     </div>
   );
 }

@@ -1,10 +1,12 @@
 export const dynamic = "force-dynamic";
 
-import { getVideoaulas } from "@/lib/content";
+import { getVideoaulas, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import VideoaulasEditor from "./VideoaulasEditor";
 
 export default async function AdminVideoaulasPage() {
   const videoaulas = await getVideoaulas();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-3xl">
@@ -17,6 +19,8 @@ export default async function AdminVideoaulasPage() {
       </div>
 
       <VideoaulasEditor initialVideoaulas={videoaulas} />
+
+      <AreaTypography sectionKey="videoaulas" label="Videoaulas" initial={typo["videoaulas"]} />
     </div>
   );
 }

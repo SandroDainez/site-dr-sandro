@@ -1,9 +1,11 @@
-import { getHero } from "@/lib/content";
+import { getHero, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import HeroEditor from "./HeroEditor";
 import Link from "next/link";
 
 export default async function AdminHeroPage() {
   const hero = await getHero();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-xl">
@@ -18,6 +20,8 @@ export default async function AdminHeroPage() {
       </div>
 
       <HeroEditor initialHero={hero} />
+
+      <AreaTypography sectionKey="hero" label="Hero" initial={typo["hero"]} />
     </div>
   );
 }

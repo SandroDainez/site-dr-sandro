@@ -1,11 +1,13 @@
 export const dynamic = "force-dynamic";
 
-import { getHeader } from "@/lib/content";
+import { getHeader, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import HeaderEditor from "./HeaderEditor";
 import Link from "next/link";
 
 export default async function AdminHeaderPage() {
   const header = await getHeader();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-xl">
@@ -26,6 +28,8 @@ export default async function AdminHeaderPage() {
       </div>
 
       <HeaderEditor initialHeader={header} />
+
+      <AreaTypography sectionKey="header" label="Cabeçalho" initial={typo["header"]} />
     </div>
   );
 }

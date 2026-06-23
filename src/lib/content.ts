@@ -90,7 +90,7 @@ export type HeaderData = {
 // Tamanho de fonte por seção do site. Definidos em arquivo separado (sem `fs`)
 // para poderem ser usados em componentes client sem quebrar o bundle.
 import type { TypographyData } from "./typography-sections";
-export type { TypographyData };
+export type { TypographyData, SectionStyle } from "./typography-sections";
 export { TYPOGRAPHY_SECTIONS } from "./typography-sections";
 
 export type AtualizacaoData = {

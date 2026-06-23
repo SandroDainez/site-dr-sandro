@@ -1,9 +1,11 @@
-import { getContato } from "@/lib/content";
+import { getContato, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import ContatoEditor from "./ContatoEditor";
 import Link from "next/link";
 
 export default async function AdminContatoPage() {
   const contato = await getContato();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-xl">
@@ -18,6 +20,8 @@ export default async function AdminContatoPage() {
       </div>
 
       <ContatoEditor initialContato={contato} />
+
+      <AreaTypography sectionKey="contato" label="Contato" initial={typo["contato"]} />
     </div>
   );
 }

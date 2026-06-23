@@ -5,8 +5,10 @@ import { cookies } from "next/headers";
 import { createHash } from "crypto";
 import {
   writeBlob,
+  getTypography,
   uploadImageToBlob,
   uploadPublicImageToBlob,
+  type SectionStyle,
   type EventoData,
   type AppData,
   type ContatoData,
@@ -149,6 +151,24 @@ export async function saveTypography(typography: TypographyData): Promise<Result
   try {
     await requireAdmin();
     await writeBlob("typography", typography);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+// Salva o estilo de UMA seção, fazendo merge no blob de tipografia.
+// Usado pelos controles embutidos em cada área de edição.
+export async function saveTypographySection(
+  key: string,
+  style: SectionStyle
+): Promise<Result> {
+  try {
+    await requireAdmin();
+    const current = await getTypography();
+    const next: TypographyData = { ...current, [key]: style };
+    await writeBlob("typography", next);
     revalidatePath("/");
     return { ok: true };
   } catch (e) {

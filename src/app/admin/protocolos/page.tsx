@@ -1,8 +1,10 @@
-import { getProtocolos } from "@/lib/content";
+import { getProtocolos, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import ProtocolosEditor from "./ProtocolosEditor";
 
 export default async function AdminProtocolosPage() {
   const protocolos = await getProtocolos();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-3xl">
@@ -15,6 +17,8 @@ export default async function AdminProtocolosPage() {
       </div>
 
       <ProtocolosEditor initialProtocolos={protocolos} />
+
+      <AreaTypography sectionKey="protocolos" label="Protocolos" initial={typo["protocolos"]} />
     </div>
   );
 }

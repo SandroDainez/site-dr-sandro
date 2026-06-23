@@ -1,9 +1,11 @@
-import { getWhyUs } from "@/lib/content";
+import { getWhyUs, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import PorQueNosEditor from "./PorQueNosEditor";
 import Link from "next/link";
 
 export default async function AdminPorQueNosPage() {
   const cards = await getWhyUs();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-xl">
@@ -18,6 +20,8 @@ export default async function AdminPorQueNosPage() {
       </div>
 
       <PorQueNosEditor initialCards={cards} />
+
+      <AreaTypography sectionKey="whyUs" label="Por que nós" initial={typo["whyUs"]} />
     </div>
   );
 }

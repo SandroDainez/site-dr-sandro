@@ -1,8 +1,10 @@
-import { getAtualizacoes } from "@/lib/content";
+import { getAtualizacoes, getTypography } from "@/lib/content";
+import AreaTypography from "@/components/admin/AreaTypography";
 import AtualizacoesEditor from "./AtualizacoesEditor";
 
 export default async function AdminAtualizacoesPage() {
   const atualizacoes = await getAtualizacoes();
+  const typo = await getTypography();
 
   return (
     <div className="max-w-3xl">
@@ -15,6 +17,8 @@ export default async function AdminAtualizacoesPage() {
       </div>
 
       <AtualizacoesEditor initialAtualizacoes={atualizacoes} />
+
+      <AreaTypography sectionKey="atualizacoes" label="Atualizações" initial={typo["atualizacoes"]} />
     </div>
   );
 }

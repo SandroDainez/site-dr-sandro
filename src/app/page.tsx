@@ -17,10 +17,10 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import type { CSSProperties } from "react";
 import Image from "next/image";
 import CalendarioEventos from "@/components/CalendarioEventos";
 import HomeVideoCard from "@/components/HomeVideoCard";
+import { buildTypographyCss } from "@/lib/typography-sections";
 import {
   getApps,
   getContato,
@@ -42,12 +42,6 @@ const iconMap: Record<string, LucideIcon> = {
   BrainCircuit, ShieldCheck, Sparkles, GraduationCap, Microscope,
 };
 
-// Converte a escala salva (1 = normal) em um estilo de tamanho de fonte.
-// Usa `zoom` para escalar proporcionalmente o texto da seção inteira.
-function fz(scale?: number): CSSProperties | undefined {
-  if (!scale || scale === 1) return undefined;
-  return { zoom: scale } as unknown as CSSProperties;
-}
 
 export default async function Home() {
   const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo] = await Promise.all([
@@ -67,6 +61,8 @@ export default async function Home() {
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
+      {/* Tipografia por seção definida no admin (tamanho, fonte, cor, peso) */}
+      <style dangerouslySetInnerHTML={{ __html: buildTypographyCss(typo) }} />
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(70%_45%_at_8%_0%,rgba(44,230,184,0.22),transparent_60%),radial-gradient(60%_40%_at_95%_0%,rgba(95,143,255,0.22),transparent_62%),linear-gradient(180deg,#07090f_0%,#0a1020_55%,#07090f_100%)]" />
         <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:72px_72px]" />
@@ -74,7 +70,7 @@ export default async function Home() {
         <div className="rain-overlay-soft absolute inset-0" />
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl" style={fz(typo.header)}>
+      <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl" data-typo="header">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           <div className="flex items-center gap-4 md:gap-5">
             <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white p-3 shadow-[0_0_56px_rgba(44,230,184,0.30)] md:h-48 md:w-48 md:p-4">
@@ -129,7 +125,7 @@ export default async function Home() {
       </header>
 
       <main>
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-12 md:pt-20" style={fz(typo.hero)}>
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-12 md:pt-20" data-typo="hero">
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0C] p-6 shadow-2xl">
             <div className="finex-aura-mask pointer-events-none absolute inset-0 bg-[radial-gradient(50%_40%_at_25%_0%,rgba(44,230,184,0.18),transparent_65%),radial-gradient(45%_35%_at_80%_0%,rgba(59,130,246,0.22),transparent_60%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-20 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.08)_1px,transparent_1px,transparent_10px)]" />
@@ -166,7 +162,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20" style={fz(typo.marquee)}>
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20" data-typo="marquee">
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/35 py-3">
             <div className="finex-marquee-track flex items-center gap-3 px-4">
               {[...siteConfig.marqueeItems, ...siteConfig.marqueeItems].map((item, idx) => (
@@ -181,7 +177,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.apps)}>
+        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps">
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos por assinatura</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-5xl">
@@ -252,7 +248,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.freeApps)}>
+        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps">
           <div className="finex-glass rounded-3xl p-8">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight">Acesso aberto imediato</h3>
@@ -303,7 +299,7 @@ export default async function Home() {
           const visibleAreas = areaConfig.filter((a) => grouped[a.key].length > 0);
           if (visibleAreas.length === 0) return null;
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.atualizacoes)}>
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes">
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo recente</p>
@@ -378,7 +374,7 @@ export default async function Home() {
             anestesiologia: "Anestesiologia",
           };
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.protocolos)}>
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos">
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Condutas clínicas</p>
@@ -432,7 +428,7 @@ export default async function Home() {
           );
           const recent = sorted.slice(0, 3);
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.videoaulas)}>
+            <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas">
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Aulas em vídeo</p>
@@ -464,7 +460,7 @@ export default async function Home() {
           );
         })()}
 
-        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.cursos)}>
+        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="cursos">
           <div className="finex-glass rounded-[2rem] p-8 md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
@@ -508,11 +504,11 @@ export default async function Home() {
           </div>
         </section>
 
-        <div style={fz(typo.eventos)}>
+        <div data-typo="eventos">
           <CalendarioEventos eventos={eventos} />
         </div>
 
-        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.contato)}>
+        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="contato">
           <div className="finex-glass rounded-[2rem] p-8 md:p-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Contato</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
@@ -560,7 +556,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 pb-24" style={fz(typo.whyUs)}>
+        <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="whyUs">
           <div className="grid gap-6 md:grid-cols-3">
             {whyUs.map((item) => {
               const WhyIcon = iconMap[item.icon] ?? ShieldCheck;
@@ -576,7 +572,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-line/80 bg-black/20 py-10" style={fz(typo.footer)}>
+      <footer className="border-t border-line/80 bg-black/20 py-10" data-typo="footer">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-6 text-sm text-muted sm:flex-row">
           <p>{siteConfig.footerName}</p>
           <p>{siteConfig.footerTagline}</p>
