@@ -535,14 +535,36 @@ export default async function Home() {
                       key={item.id}
                       className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20"
                     >
-                      {thumbSrc && (
-                        <img
-                          src={thumbSrc}
-                          alt={item.titulo}
-                          className="w-full max-h-44 object-cover"
-                        />
-                      )}
-                      {!thumbSrc && (
+                      {thumbSrc ? (
+                        <a href="/videoaulas" className="relative block group/thumb">
+                          <img
+                            src={thumbSrc}
+                            alt={item.titulo}
+                            className="w-full h-44 object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/25 transition group-hover/thumb:bg-black/40">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
+                              <span className="text-white text-lg">▶</span>
+                            </div>
+                          </div>
+                        </a>
+                      ) : isProxy ? (
+                        <a href="/videoaulas" className="relative block bg-black group/thumb">
+                          {/* Primeiro frame do próprio vídeo como ilustração */}
+                          <video
+                            src={`${item.videoUrl}#t=0.5`}
+                            muted
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-44 object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover/thumb:bg-black/45">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
+                              <span className="text-white text-lg">▶</span>
+                            </div>
+                          </div>
+                        </a>
+                      ) : (
                         <div className="w-full h-24 bg-white/[0.03] flex items-center justify-center">
                           <PlayCircle className="h-8 w-8 text-white/20" />
                         </div>
