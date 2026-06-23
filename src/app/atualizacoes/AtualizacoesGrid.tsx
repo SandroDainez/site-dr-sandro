@@ -56,51 +56,64 @@ function formatDate(iso: string): string {
 function UpdateCard({ item }: { item: AtualizacaoData }) {
   const [expanded, setExpanded] = useState(false);
   const cfg = areaConfig[item.area];
-  const isLong = item.conteudo.length > 250;
-  const display = expanded || !isLong ? item.conteudo : item.conteudo.slice(0, 200) + "…";
 
   return (
-    <article className={`rounded-2xl border ${cfg.border} bg-white/[0.03] p-5 transition hover:border-white/15`}>
-      {/* Top: badge + date */}
-      <div className="flex items-center gap-2 mb-2 flex-wrap">
-        <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
-          {cfg.label}
+    <article
+      className={`rounded-2xl border ${cfg.border} bg-white/[0.03] transition ${
+        expanded ? "border-white/20" : "hover:border-white/15"
+      }`}
+    >
+      {/* Header clicável: abre/recolhe o material */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-start justify-between gap-3 p-5 text-left"
+      >
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
+              {cfg.label}
+            </span>
+            <span className="text-[11px] text-white/35">{formatDate(item.data)}</span>
+          </div>
+          <h2 className="text-[15px] font-semibold text-white leading-snug">
+            {item.titulo}
+          </h2>
+          {!expanded && (
+            <p className="mt-1 text-xs text-white/40">Toque para abrir o material</p>
+          )}
+        </div>
+        {/* Indicador de abrir/recolher */}
+        <span
+          className={`mt-1 shrink-0 text-white/40 transition-transform duration-200 ${
+            expanded ? "rotate-180" : ""
+          }`}
+          aria-hidden
+        >
+          ▾
         </span>
-        <span className="text-[11px] text-white/35">{formatDate(item.data)}</span>
-      </div>
+      </button>
 
-      {/* Title */}
-      <h2 className="text-[15px] font-semibold text-white leading-snug">
-        {item.titulo}
-      </h2>
-
-      {/* Content */}
-      <div className="mt-1.5 text-sm leading-relaxed text-white/60">
-        {display}
-        {isLong && (
-          <button
-            type="button"
-            onClick={() => setExpanded(!expanded)}
-            className="ml-1 text-accent/60 hover:text-accent transition text-xs whitespace-nowrap"
-          >
-            {expanded ? "[mostrar menos]" : "[continuar lendo]"}
-          </button>
-        )}
-      </div>
-
-      {/* Link + footer */}
-      <div className="mt-3 flex items-center gap-2 text-xs">
-        {item.link && (
-          <a
-            href={item.link}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 text-accent/70 hover:text-accent transition font-medium"
-          >
-            🔗 Ver fonte →
-          </a>
-        )}
-      </div>
+      {/* Material (só quando expandido) */}
+      {expanded && (
+        <div className="px-5 pb-5 -mt-1">
+          <div className="whitespace-pre-wrap text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4">
+            {item.conteudo}
+          </div>
+          {item.link && (
+            <div className="mt-3 text-xs">
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-accent/70 hover:text-accent transition font-medium"
+              >
+                🔗 Ver fonte →
+              </a>
+            </div>
+          )}
+        </div>
+      )}
     </article>
   );
 }

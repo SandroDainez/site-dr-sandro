@@ -61,8 +61,20 @@ export default async function AtualizacoesPage({
           <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo clínico</p>
           <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Atualizações</h1>
           <p className="mt-3 text-base text-white/50">
-            Conteúdo clínico atualizado por área
+            Revisão rápida e direto ao ponto da evidência mais recente, por área clínica.
           </p>
+          {/* Selos: revisão rápida + atualização semanal */}
+          <div className="mt-5 flex flex-wrap gap-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-xs font-semibold text-accent">
+              ⚡ Revisão rápida
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent-blue/30 bg-accent-blue/10 px-3.5 py-1.5 text-xs font-semibold text-accent-blue">
+              🔄 Atualizada semanalmente
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-xs font-semibold text-white/70">
+              📈 Baseada em evidência recente
+            </span>
+          </div>
         </div>
 
         <AtualizacoesGrid atualizacoes={atualizacoes} initialArea={initialArea} />
