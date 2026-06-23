@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { getVideoaulas, getHeader } from "@/lib/content";
+import SiteLogo from "@/components/SiteLogo";
 import VideoaulasGrid from "./VideoaulasGrid";
-import Image from "next/image";
 
 export default async function VideoaulasPage() {
   const [videoaulas, header] = await Promise.all([getVideoaulas(), getHeader()]);
@@ -14,16 +14,7 @@ export default async function VideoaulasPage() {
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           {/* Logo + name */}
           <a href="/" className="flex items-center gap-3">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white p-2 shadow-[0_0_24px_rgba(44,230,184,0.20)]">
-              <Image
-                src={header.logoUrl}
-                alt="Logo"
-                width={96}
-                height={96}
-                className="h-full w-full object-contain"
-                unoptimized
-              />
-            </div>
+            <SiteLogo header={header} variant="sm" />
             <div>
               <p className="text-2xl font-bold tracking-tight text-white">{header.name}</p>
               <p className="text-xs font-semibold text-accent leading-tight">{header.cremesp}</p>

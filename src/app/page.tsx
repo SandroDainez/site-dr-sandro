@@ -17,9 +17,9 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import Image from "next/image";
 import CalendarioEventos from "@/components/CalendarioEventos";
 import HomeVideoCard from "@/components/HomeVideoCard";
+import SiteLogo from "@/components/SiteLogo";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import {
   getApps,
@@ -73,17 +73,7 @@ export default async function Home() {
       <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl" data-typo="header">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           <div className="flex items-center gap-4 md:gap-5">
-            <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border border-white/15 bg-white p-3 shadow-[0_0_56px_rgba(44,230,184,0.30)] md:h-48 md:w-48 md:p-4">
-              <Image
-                src={header.logoUrl}
-                alt="Logo"
-                width={192}
-                height={192}
-                className="h-full w-full object-contain"
-                priority
-                unoptimized
-              />
-            </div>
+            <SiteLogo header={header} variant="lg" />
             <div className="text-center lg:text-left">
               <p className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">{header.name}</p>
               <div className="mt-2 space-y-0.5 text-base font-semibold leading-tight tracking-tight text-accent md:text-lg lg:text-xl">

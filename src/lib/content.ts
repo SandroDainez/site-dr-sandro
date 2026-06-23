@@ -85,6 +85,24 @@ export type HeaderData = {
   rqe1: string;
   rqe2: string;
   logoUrl: string;
+  // Aparência do logo (tudo opcional; vazio = visual padrão). Tamanhos em px
+  // referem-se ao logo grande da home; nas páginas internas são reduzidos pela metade.
+  logoSize?: number; // tamanho da moldura (largura/altura)
+  logoOffsetX?: number; // deslocamento horizontal da moldura
+  logoOffsetY?: number; // deslocamento vertical da moldura
+  logoScale?: number; // tamanho do desenho DENTRO da moldura (1 = normal)
+  logoPadding?: number; // espaçamento interno da moldura
+  logoRadius?: number; // arredondamento dos cantos
+  logoBg?: string; // cor de fundo da moldura ("transparent" ou hex)
+  logoBorder?: boolean; // mostrar borda (default: sim)
+  logoShadow?: boolean; // mostrar brilho/sombra (default: sim)
+  // Filtros de cor da imagem (%). hue em graus.
+  logoBrightness?: number;
+  logoContrast?: number;
+  logoSaturate?: number;
+  logoGrayscale?: number;
+  logoInvert?: number;
+  logoHue?: number;
 };
 
 // Tamanho de fonte por seção do site. Definidos em arquivo separado (sem `fs`)
