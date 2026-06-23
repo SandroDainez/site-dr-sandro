@@ -67,13 +67,13 @@ export default async function Home() {
       <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           <div className="flex items-center gap-4 md:gap-5">
-            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-3xl border border-white/25 bg-black/10 shadow-[0_0_48px_rgba(44,230,184,0.38)] md:h-36 md:w-36">
+            <div className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-3xl border border-white/25 bg-black/10 shadow-[0_0_56px_rgba(44,230,184,0.40)] md:h-48 md:w-48">
               <Image
                 src={header.logoUrl}
                 alt="Logo"
-                width={144}
-                height={144}
-                className="h-full w-full object-cover"
+                width={192}
+                height={192}
+                className="h-full w-full object-contain"
                 priority
                 unoptimized
               />
