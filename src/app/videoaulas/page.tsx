@@ -14,18 +14,18 @@ export default async function VideoaulasPage() {
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           {/* Logo + name */}
           <a href="/" className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-black/10 shadow-[0_0_24px_rgba(44,230,184,0.25)]">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-black/10 shadow-[0_0_24px_rgba(44,230,184,0.25)]">
               <Image
                 src={header.logoUrl}
                 alt="Logo"
-                width={56}
-                height={56}
+                width={64}
+                height={64}
                 className="h-full w-full object-cover"
                 unoptimized
               />
             </div>
             <div>
-              <p className="text-base font-bold tracking-tight text-white">{header.name}</p>
+              <p className="text-xl font-bold tracking-tight text-white">{header.name}</p>
               <p className="text-xs font-semibold text-accent leading-tight">{header.cremesp}</p>
             </div>
           </a>

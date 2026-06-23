@@ -66,21 +66,21 @@ export default async function Home() {
 
       <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
-          <div className="flex items-center gap-3">
-            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-black/10 shadow-[0_0_34px_rgba(44,230,184,0.32)]">
+          <div className="flex items-center gap-4 md:gap-5">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border border-white/25 bg-black/10 shadow-[0_0_40px_rgba(44,230,184,0.35)] md:h-28 md:w-28">
               <Image
                 src={header.logoUrl}
                 alt="Logo"
-                width={80}
-                height={80}
+                width={112}
+                height={112}
                 className="h-full w-full object-cover"
                 priority
                 unoptimized
               />
             </div>
             <div className="text-center lg:text-left">
-              <p className="text-2xl font-bold tracking-tight text-white md:text-3xl">{header.name}</p>
-              <div className="mt-1 space-y-0.5 text-sm font-semibold leading-tight tracking-tight text-accent md:text-base">
+              <p className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">{header.name}</p>
+              <div className="mt-1.5 space-y-0.5 text-sm font-semibold leading-tight tracking-tight text-accent md:text-base lg:text-lg">
                 <p>{header.cremesp}</p>
                 <p>{header.rqe1}</p>
                 <p>{header.rqe2}</p>
