@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import { Save, Plus, Trash2, Upload, Loader2 } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import type { VideoaulaData } from "@/lib/content";
 import { saveVideoaulas, uploadImage } from "@/app/admin/actions";
 
@@ -35,6 +36,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [uploadingVideoIdx, setUploadingVideoIdx] = useState<number | null>(null);
+  const [videoProgress, setVideoProgress] = useState<number>(0);
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const videoFileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -90,14 +92,25 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
 
   async function handleVideoUpload(idx: number, file: File) {
     setUploadingVideoIdx(idx);
-    const fd = new FormData();
-    fd.append("file", file);
-    const result = await uploadImage(fd);
-    setUploadingVideoIdx(null);
-    if (result.ok) {
-      updateItem(idx, "videoUrl", result.url);
-    } else {
-      setError(result.error);
+    setVideoProgress(0);
+    setError(null);
+    try {
+      // Direct browser → Vercel Blob upload (bypasses serverless 4.5 MB limit)
+      const blob = await upload(`videos/${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+        onUploadProgress: ({ percentage }) => {
+          setVideoProgress(Math.round(percentage));
+        },
+      });
+      // Convert private blob URL to proxy URL so it's servable
+      const proxyUrl = `/api/img?url=${encodeURIComponent(blob.url)}`;
+      updateItem(idx, "videoUrl", proxyUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao enviar vídeo");
+    } finally {
+      setUploadingVideoIdx(null);
+      setVideoProgress(0);
     }
   }
 
@@ -254,24 +267,36 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
               </label>
 
               {/* Upload from Mac */}
-              <div className="flex items-center gap-3 mb-3">
-                <button
-                  type="button"
-                  onClick={() => videoFileRefs.current[idx]?.click()}
-                  disabled={uploadingVideoIdx === idx}
-                  className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white/70 transition hover:border-accent/40 hover:text-white disabled:opacity-50"
-                >
-                  {uploadingVideoIdx === idx ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Upload className="h-4 w-4" />
+              <div className="mb-3 space-y-2">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => videoFileRefs.current[idx]?.click()}
+                    disabled={uploadingVideoIdx === idx}
+                    className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white/70 transition hover:border-accent/40 hover:text-white disabled:opacity-50"
+                  >
+                    {uploadingVideoIdx === idx ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="h-4 w-4" />
+                    )}
+                    {uploadingVideoIdx === idx
+                      ? `Enviando… ${videoProgress}%`
+                      : "Enviar vídeo do Mac"}
+                  </button>
+                  {isProxyVideo && item.videoUrl && uploadingVideoIdx !== idx && (
+                    <span className="text-xs text-accent/70">✓ Vídeo carregado</span>
                   )}
-                  {uploadingVideoIdx === idx ? "Enviando..." : "Enviar vídeo do Mac"}
-                </button>
-                {isProxyVideo && item.videoUrl && (
-                  <span className="text-xs text-white/40 truncate max-w-[200px]">
-                    {decodeURIComponent(item.videoUrl.replace("/api/img?url=", "")).split("/").pop()}
-                  </span>
+                </div>
+
+                {/* Progress bar */}
+                {uploadingVideoIdx === idx && (
+                  <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-accent transition-all duration-200"
+                      style={{ width: `${videoProgress}%` }}
+                    />
+                  </div>
                 )}
               </div>
               <input
