@@ -94,6 +94,7 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
 function VideoCard({ item }: { item: VideoaulaData }) {
   const [descExpanded, setDescExpanded] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
+  const [inlinePlaying, setInlinePlaying] = useState(false);
   const cfg = areaConfig[item.area];
   const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
   const isProxyVideo = item.videoUrl.startsWith("/api/img");
@@ -127,29 +128,49 @@ function VideoCard({ item }: { item: VideoaulaData }) {
           )}
         </div>
       ) : isProxyVideo ? (
-        <div
-          className="relative cursor-pointer group bg-black"
-          onClick={() => setPlayerOpen(true)}
-        >
-          {/* Preview do próprio vídeo (primeiro frame) */}
-          <video
-            src={`${item.videoUrl}#t=0.5`}
-            muted
-            playsInline
-            preload="metadata"
-            className="w-full h-44 object-cover"
-          />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">
-              <span className="text-white text-xl">▶</span>
-            </div>
+        inlinePlaying ? (
+          <div className="relative bg-black">
+            {/* Vídeo tocando dentro do card */}
+            <video
+              src={item.videoUrl}
+              controls
+              autoPlay
+              className="w-full max-h-72 bg-black"
+            />
+            {/* Botão expandir p/ tela cheia */}
+            <button
+              type="button"
+              onClick={() => setPlayerOpen(true)}
+              className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/90"
+            >
+              ⛶ Expandir
+            </button>
           </div>
-          {item.duracao && (
-            <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white/90">
-              {item.duracao}
-            </span>
-          )}
-        </div>
+        ) : (
+          <div
+            className="relative cursor-pointer group bg-black"
+            onClick={() => setInlinePlaying(true)}
+          >
+            {/* Preview do próprio vídeo (primeiro frame) */}
+            <video
+              src={`${item.videoUrl}#t=0.5`}
+              muted
+              playsInline
+              preload="metadata"
+              className="w-full h-44 object-cover"
+            />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">
+                <span className="text-white text-xl">▶</span>
+              </div>
+            </div>
+            {item.duracao && (
+              <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white/90">
+                {item.duracao}
+              </span>
+            )}
+          </div>
+        )
       ) : null}
 
       <div className="flex flex-col flex-1 p-5">
@@ -209,13 +230,22 @@ function VideoCard({ item }: { item: VideoaulaData }) {
                 ▶ Assistir no YouTube
               </a>
             ) : (
-              <button
-                type="button"
-                onClick={() => setPlayerOpen(!playerOpen)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
-              >
-                ▶ Assistir
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setInlinePlaying(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+                >
+                  ▶ Assistir aqui
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPlayerOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:bg-white/[0.1] hover:text-white"
+                >
+                  ⛶ Tela cheia
+                </button>
+              </>
             )}
           </div>
         )}
