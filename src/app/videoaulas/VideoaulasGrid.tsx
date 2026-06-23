@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { VideoaulaData } from "@/lib/content";
 
 type Props = {
@@ -51,6 +51,46 @@ function getYoutubeId(url: string): string | null {
   return match ? match[1] : null;
 }
 
+function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => void }) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-4xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute -top-10 right-0 text-white/60 hover:text-white transition text-sm flex items-center gap-1"
+        >
+          ✕ Fechar (Esc)
+        </button>
+        <video
+          src={item.videoUrl}
+          controls
+          autoPlay
+          className="w-full rounded-2xl bg-black shadow-2xl"
+          style={{ maxHeight: "80vh" }}
+        />
+        <p className="mt-3 text-center text-sm font-medium text-white/70">{item.titulo}</p>
+      </div>
+    </div>
+  );
+}
+
 function VideoCard({ item }: { item: VideoaulaData }) {
   const [descExpanded, setDescExpanded] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
@@ -67,25 +107,12 @@ function VideoCard({ item }: { item: VideoaulaData }) {
   else if (ytId) thumbSrc = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
 
   return (
+    <>
+      {playerOpen && isProxyVideo && (
+        <VideoModal item={item} onClose={() => setPlayerOpen(false)} />
+      )}
     <article className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:border-white/20">
-      {/* Thumbnail / player area */}
-      {hasVideo && playerOpen && isProxyVideo ? (
-        <div className="relative bg-black">
-          <video
-            src={item.videoUrl}
-            controls
-            autoPlay
-            className="w-full max-h-64 object-contain"
-          />
-          <button
-            type="button"
-            onClick={() => setPlayerOpen(false)}
-            className="absolute top-2 right-2 rounded-full bg-black/60 px-2.5 py-0.5 text-xs text-white/70 hover:text-white transition"
-          >
-            ✕ fechar
-          </button>
-        </div>
-      ) : thumbSrc ? (
+      {thumbSrc ? (
         <div
           className={`relative ${hasVideo ? "cursor-pointer group" : ""}`}
           onClick={() => hasVideo && !ytId && setPlayerOpen(true)}
@@ -163,13 +190,14 @@ function VideoCard({ item }: { item: VideoaulaData }) {
                 onClick={() => setPlayerOpen(!playerOpen)}
                 className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
               >
-                {playerOpen ? "⏹ Fechar player" : "▶ Assistir"}
+                ▶ Assistir
               </button>
             )}
           </div>
         )}
       </div>
     </article>
+    </>
   );
 }
 
