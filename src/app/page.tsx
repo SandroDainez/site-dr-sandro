@@ -73,7 +73,7 @@ export default async function Home() {
                 alt="Logo"
                 width={192}
                 height={192}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-cover scale-150"
                 priority
                 unoptimized
               />
@@ -123,22 +123,6 @@ export default async function Home() {
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0C] p-6 shadow-2xl">
             <div className="finex-aura-mask pointer-events-none absolute inset-0 bg-[radial-gradient(50%_40%_at_25%_0%,rgba(44,230,184,0.18),transparent_65%),radial-gradient(45%_35%_at_80%_0%,rgba(59,130,246,0.22),transparent_60%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-20 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.08)_1px,transparent_1px,transparent_10px)]" />
-
-            <div className="relative mb-6 flex items-center justify-between rounded-full border border-white/10 bg-black/70 px-3 py-2 backdrop-blur-md">
-              <div className="inline-flex h-10 w-10" />
-              <div className="hidden items-center gap-6 text-xs uppercase tracking-[0.14em] text-white/65 md:flex">
-                <span>Apps</span>
-                <span>Cursos</span>
-                <span>Protocolos</span>
-                <span>Podcasts</span>
-              </div>
-              <a
-                href="#apps-assinatura"
-                className="finex-beam finex-beam-strong rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white"
-              >
-                Ver oferta
-              </a>
-            </div>
 
             <div>
               <div className="finex-glass mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs uppercase tracking-[0.14em] text-accent">

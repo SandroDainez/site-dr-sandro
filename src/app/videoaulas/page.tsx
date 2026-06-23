@@ -20,7 +20,7 @@ export default async function VideoaulasPage() {
                 alt="Logo"
                 width={96}
                 height={96}
-                className="h-full w-full object-contain"
+                className="h-full w-full object-cover scale-150"
                 unoptimized
               />
             </div>
