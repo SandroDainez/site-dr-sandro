@@ -13,7 +13,7 @@ export default async function ProtocolosPage() {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07090f]/80 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           <a href="/" className="flex items-center gap-3">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-white/25 bg-black/10 shadow-[0_0_24px_rgba(44,230,184,0.25)]">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-white p-2 shadow-[0_0_24px_rgba(44,230,184,0.20)]">
               <Image
                 src={header.logoUrl}
                 alt="Logo"
