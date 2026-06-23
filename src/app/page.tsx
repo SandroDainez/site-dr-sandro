@@ -67,20 +67,20 @@ export default async function Home() {
       <header className="sticky top-0 z-50 border-b border-line/70 bg-background/65 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
           <div className="flex items-center gap-4 md:gap-5">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border border-white/25 bg-black/10 shadow-[0_0_40px_rgba(44,230,184,0.35)] md:h-28 md:w-28">
+            <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-3xl border border-white/25 bg-black/10 shadow-[0_0_48px_rgba(44,230,184,0.38)] md:h-36 md:w-36">
               <Image
                 src={header.logoUrl}
                 alt="Logo"
-                width={112}
-                height={112}
+                width={144}
+                height={144}
                 className="h-full w-full object-cover"
                 priority
                 unoptimized
               />
             </div>
             <div className="text-center lg:text-left">
-              <p className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">{header.name}</p>
-              <div className="mt-1.5 space-y-0.5 text-sm font-semibold leading-tight tracking-tight text-accent md:text-base lg:text-lg">
+              <p className="text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">{header.name}</p>
+              <div className="mt-2 space-y-0.5 text-base font-semibold leading-tight tracking-tight text-accent md:text-lg lg:text-xl">
                 <p>{header.cremesp}</p>
                 <p>{header.rqe1}</p>
                 <p>{header.rqe2}</p>
