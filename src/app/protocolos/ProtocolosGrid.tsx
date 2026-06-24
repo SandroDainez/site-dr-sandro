@@ -46,6 +46,16 @@ function formatDate(iso: string): string {
 export default function ProtocolosGrid({ protocolos }: Props) {
   const [active, setActive] = useState<FilterArea>("todos");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [pdfOpen, setPdfOpen] = useState<Set<string>>(new Set());
+
+  function togglePdf(id: string) {
+    setPdfOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const sorted = [...protocolos].sort(
     (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
@@ -121,8 +131,8 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                   <img
                     src={item.imageUrl}
                     alt={item.imageCaption || item.titulo}
-                    className="w-full rounded-2xl object-cover"
-                    style={{ maxHeight: item.imageSize ?? 176 }}
+                    className="w-full rounded-2xl object-contain"
+                    style={{ maxHeight: item.imageSize ?? 220 }}
                   />
                   {item.imageCaption && (
                     <p className="mt-1.5 text-xs text-white/40 leading-relaxed">
@@ -165,16 +175,36 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                 </div>
               )}
 
-              {/* Arquivo link */}
+              {/* Arquivo / PDF — ler no site ou baixar */}
               {item.arquivoUrl && (
-                <a
-                  href={item.arquivoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex items-center gap-1 self-start rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
-                >
-                  {item.arquivoLabel || "Ver arquivo"} →
-                </a>
+                <div className="mt-4">
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => togglePdf(item.id)}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+                    >
+                      {pdfOpen.has(item.id) ? "Fechar leitura ↑" : "📄 Ler protocolo"}
+                    </button>
+                    <a
+                      href={item.arquivoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      download
+                      className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
+                    >
+                      {item.arquivoLabel || "Baixar PDF"} ↓
+                    </a>
+                  </div>
+                  {pdfOpen.has(item.id) && (
+                    <iframe
+                      src={item.arquivoUrl}
+                      title={item.titulo}
+                      className="mt-3 w-full rounded-xl border border-white/10 bg-white"
+                      style={{ height: "78vh" }}
+                    />
+                  )}
+                </div>
               )}
             </article>
           );
