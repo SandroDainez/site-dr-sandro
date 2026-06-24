@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { Save, Plus, Trash2, Upload } from "lucide-react";
+import { Save, Plus, Trash2, Upload, FileText, Loader2, X } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import type { ProtocoloData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import { saveProtocolos, uploadImage } from "@/app/admin/actions";
@@ -28,7 +29,25 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+  const [uploadingPdfIdx, setUploadingPdfIdx] = useState<number | null>(null);
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  async function handlePdfUpload(idx: number, file: File) {
+    setError(null);
+    setUploadingPdfIdx(idx);
+    try {
+      // Upload direto navegador → Vercel Blob (ignora o limite de 1MB das Server Actions)
+      const blob = await upload(`protocolos/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      updateItem(idx, "arquivoUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+    } catch (e) {
+      setError("Falha no upload do PDF: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingPdfIdx(null);
+    }
+  }
 
   function updateItem(idx: number, field: keyof ProtocoloData, value: string) {
     setItems((prev) => prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item)));
@@ -264,15 +283,51 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
-                  Link do arquivo ou PDF
+                  Arquivo / PDF (envie ou cole um link)
                 </label>
                 <input
                   type="url"
                   value={item.arquivoUrl}
                   onChange={(e) => updateItem(idx, "arquivoUrl", e.target.value)}
-                  placeholder="https://..."
+                  placeholder="https://... ou envie um PDF abaixo"
                   className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
                 />
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    id={`pdf-${idx}`}
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handlePdfUpload(idx, f);
+                      e.target.value = "";
+                    }}
+                  />
+                  <label
+                    htmlFor={`pdf-${idx}`}
+                    className={`flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-3 py-1.5 text-xs text-white transition hover:bg-white/10 ${uploadingPdfIdx === idx ? "pointer-events-none opacity-50" : ""}`}
+                  >
+                    {uploadingPdfIdx === idx ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando PDF...</>
+                    ) : (
+                      <><Upload className="h-3.5 w-3.5" /> Enviar PDF</>
+                    )}
+                  </label>
+                  {item.arquivoUrl && (
+                    <span className="flex items-center gap-1.5 text-xs text-accent">
+                      <FileText className="h-3.5 w-3.5" /> Arquivo anexado
+                      <button
+                        type="button"
+                        onClick={() => updateItem(idx, "arquivoUrl", "")}
+                        className="ml-1 text-white/40 transition hover:text-red-400"
+                        title="Remover arquivo"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div>

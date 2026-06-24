@@ -32,6 +32,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             "video/avi",
             "video/*",
             "image/*",
+            "application/pdf",
           ],
           // 2 GB max per upload
           maximumSizeInBytes: 2 * 1024 * 1024 * 1024,
