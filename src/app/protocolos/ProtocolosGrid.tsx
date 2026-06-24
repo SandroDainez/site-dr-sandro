@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ProtocoloData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 
@@ -63,6 +63,17 @@ export default function ProtocolosGrid({ protocolos }: Props) {
     });
   }
 
+  // Abre automaticamente o protocolo apontado pela URL (#id), vindo da home.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.replace("#", ""));
+    if (!id || !protocolos.some((p) => p.id === id)) return;
+    setExpanded((prev) => new Set(prev).add(id));
+    // rola até o card depois de renderizar
+    setTimeout(() => {
+      document.getElementById(`protocolo-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }, [protocolos]);
+
   return (
     <div>
       {/* Filter tabs */}
@@ -94,7 +105,8 @@ export default function ProtocolosGrid({ protocolos }: Props) {
           return (
             <article
               key={item.id}
-              className="flex flex-col rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-white/20"
+              id={`protocolo-${item.id}`}
+              className="scroll-mt-24 flex flex-col rounded-3xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-white/20"
             >
               {/* Area badge */}
               <span

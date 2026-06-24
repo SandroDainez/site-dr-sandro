@@ -405,8 +405,9 @@ export default async function Home() {
                 <>
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {recent.map((item) => (
-                      <article
+                      <a
                         key={item.id}
+                        href={`/protocolos#${item.id}`}
                         className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-white/20"
                       >
                         <span
@@ -421,7 +422,10 @@ export default async function Home() {
                           className="mt-2 text-sm leading-relaxed text-white/50 flex-1"
                           dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }}
                         />
-                      </article>
+                        <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-accent/80 transition group-hover:text-accent">
+                          Ver protocolo <ArrowRight className="h-3 w-3" />
+                        </span>
+                      </a>
                     ))}
                   </div>
 
