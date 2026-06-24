@@ -358,12 +358,13 @@ export default async function Home() {
           );
         })()}
 
-        {/* Protocolos teaser */}
-        {protocolos.length > 0 && (() => {
+        {/* Protocolos — sempre visível (área própria, separada dos apps) */}
+        {(() => {
           const sorted = [...protocolos].sort(
             (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
           );
           const recent = sorted.slice(0, 3);
+          const hasContent = protocolos.length > 0;
           const areaBadge: Record<string, string> = {
             emergencias: "bg-red-400/15 text-red-400 border-red-400/30",
             ti: "bg-blue-400/15 text-blue-400 border-blue-400/30",
@@ -383,42 +384,55 @@ export default async function Home() {
                     Protocolos Clínicos
                   </h2>
                 </div>
-                <a
-                  href="/protocolos"
-                  className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex"
-                >
-                  Ver todos <ArrowRight className="h-3.5 w-3.5" />
-                </a>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {recent.map((item) => (
-                  <article
-                    key={item.id}
-                    className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-white/20"
+                {hasContent && (
+                  <a
+                    href="/protocolos"
+                    className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex"
                   >
-                    <span
-                      className={`self-start rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${areaBadge[item.area] ?? "text-white/60 border-white/20"}`}
-                    >
-                      {areaLabel[item.area] ?? item.area}
-                    </span>
-                    <h3 className="mt-3 text-base font-semibold leading-snug text-white">
-                      {item.titulo}
-                    </h3>
-                    <p
-                      className="mt-2 text-sm leading-relaxed text-white/50 flex-1"
-                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }}
-                    />
-                  </article>
-                ))}
+                    Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                )}
               </div>
 
-              <a
-                href="/protocolos"
-                className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
-              >
-                Ver todos <ArrowRight className="h-3.5 w-3.5" />
-              </a>
+              {hasContent ? (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {recent.map((item) => (
+                      <article
+                        key={item.id}
+                        className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-white/20"
+                      >
+                        <span
+                          className={`self-start rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${areaBadge[item.area] ?? "text-white/60 border-white/20"}`}
+                        >
+                          {areaLabel[item.area] ?? item.area}
+                        </span>
+                        <h3 className="mt-3 text-base font-semibold leading-snug text-white">
+                          {item.titulo}
+                        </h3>
+                        <p
+                          className="mt-2 text-sm leading-relaxed text-white/50 flex-1"
+                          dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }}
+                        />
+                      </article>
+                    ))}
+                  </div>
+
+                  <a
+                    href="/protocolos"
+                    className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
+                  >
+                    Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
+                </>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-12 text-center">
+                  <p className="text-sm font-medium text-white/70">Protocolos em breve</p>
+                  <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-white/40">
+                    Condutas clínicas passo a passo por área — Emergências, Terapia Intensiva e Anestesiologia.
+                  </p>
+                </div>
+              )}
             </section>
           );
         })()}
