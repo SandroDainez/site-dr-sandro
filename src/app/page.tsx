@@ -127,7 +127,7 @@ export default async function Home() {
                 </a>
                 <a
                   href="#eventos"
-                  className="finex-beam inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white/90 transition"
+                  className="finex-beam inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] transition"
                 >
                   Ver agenda de eventos
                 </a>

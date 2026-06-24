@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Poppins, Lora } from "next/font/google";
+import { getHeader, getHero, headerSubtitleLines } from "@/lib/content";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,11 +22,17 @@ const poppins = Poppins({
 });
 const lora = Lora({ variable: "--font-lora", subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Dr. Sandro | Portal Médico Premium",
-  description:
-    "Portal premium para anestesiologia e medicina intensiva com apps, cursos, podcasts e atualizações clínicas.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [header, hero] = await Promise.all([getHeader(), getHero()]);
+  const name = header.name?.trim() || "Portal Médico";
+  const subtitle = headerSubtitleLines(header)[0];
+  return {
+    title: subtitle ? `${name} — ${subtitle}` : name,
+    description:
+      hero.subtitle?.trim() ||
+      "Portal médico com apps, cursos, podcasts e atualizações clínicas.",
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
