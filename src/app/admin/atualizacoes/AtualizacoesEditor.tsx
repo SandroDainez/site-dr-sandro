@@ -2,9 +2,10 @@
 
 import { useState, useTransition, useRef } from "react";
 import { Save, Plus, Trash2, Upload } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import type { AtualizacaoData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
-import { saveAtualizacoes, uploadImage } from "@/app/admin/actions";
+import { saveAtualizacoes } from "@/app/admin/actions";
 
 type Props = {
   initialAtualizacoes: AtualizacaoData[];
@@ -65,15 +66,18 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
   }
 
   async function handleImageUpload(idx: number, file: File) {
+    setError(null);
     setUploadingIdx(idx);
-    const fd = new FormData();
-    fd.append("file", file);
-    const result = await uploadImage(fd);
-    setUploadingIdx(null);
-    if (result.ok) {
-      updateItem(idx, "imageUrl", result.url);
-    } else {
-      setError(result.error);
+    try {
+      const blob = await upload(`atualizacoes/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      updateItem(idx, "imageUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+    } catch (e) {
+      setError("Falha no upload da imagem: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingIdx(null);
     }
   }
 

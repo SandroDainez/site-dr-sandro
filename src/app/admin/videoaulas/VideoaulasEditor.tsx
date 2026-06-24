@@ -5,7 +5,7 @@ import { Save, Plus, Trash2, Upload, Loader2 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { VideoaulaData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
-import { saveVideoaulas, uploadImage } from "@/app/admin/actions";
+import { saveVideoaulas } from "@/app/admin/actions";
 
 type Props = {
   initialVideoaulas: VideoaulaData[];
@@ -82,15 +82,18 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
   }
 
   async function handleImageUpload(idx: number, file: File) {
+    setError(null);
     setUploadingIdx(idx);
-    const fd = new FormData();
-    fd.append("file", file);
-    const result = await uploadImage(fd);
-    setUploadingIdx(null);
-    if (result.ok) {
-      updateItem(idx, "imageUrl", result.url);
-    } else {
-      setError(result.error);
+    try {
+      const blob = await upload(`videoaulas-img/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      updateItem(idx, "imageUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+    } catch (e) {
+      setError("Falha no upload da imagem: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingIdx(null);
     }
   }
 

@@ -5,7 +5,7 @@ import { Save, Plus, Trash2, Upload, FileText, Loader2, X } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { ProtocoloData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
-import { saveProtocolos, uploadImage } from "@/app/admin/actions";
+import { saveProtocolos } from "@/app/admin/actions";
 
 type Props = {
   initialProtocolos: ProtocoloData[];
@@ -86,15 +86,19 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
   }
 
   async function handleImageUpload(idx: number, file: File) {
+    setError(null);
     setUploadingIdx(idx);
-    const fd = new FormData();
-    fd.append("file", file);
-    const result = await uploadImage(fd);
-    setUploadingIdx(null);
-    if (result.ok) {
-      updateItem(idx, "imageUrl", result.url);
-    } else {
-      setError(result.error);
+    try {
+      // Upload direto navegador → Vercel Blob (sem o limite de 1MB das Server Actions)
+      const blob = await upload(`protocolos/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      updateItem(idx, "imageUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+    } catch (e) {
+      setError("Falha no upload da imagem: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingIdx(null);
     }
   }
 
