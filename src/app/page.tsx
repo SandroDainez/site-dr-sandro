@@ -299,7 +299,7 @@ export default async function Home() {
           const visibleAreas = areaConfig.filter((a) => grouped[a.key].length > 0);
           if (visibleAreas.length === 0) return null;
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes">
+            <section id="atualizacoes" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes">
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo recente</p>
@@ -375,7 +375,7 @@ export default async function Home() {
             anestesiologia: "Anestesiologia",
           };
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos">
+            <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos">
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Condutas clínicas</p>
@@ -430,7 +430,7 @@ export default async function Home() {
           );
           const recent = sorted.slice(0, 3);
           return (
-            <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas">
+            <section id="videoaulas" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas">
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Aulas em vídeo</p>
