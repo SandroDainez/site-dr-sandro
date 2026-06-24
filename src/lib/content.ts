@@ -34,9 +34,10 @@ export type AppData = {
 
 export type FreeAppData = {
   title: string;
-  desc: string;
+  desc: string; // pode conter HTML simples (cores/tamanhos) — sanitizado ao renderizar
   icon: string;
   link: string;
+  imageUrl?: string; // logo/imagem própria do app (substitui o ícone)
 };
 
 export type ContentItemData = {

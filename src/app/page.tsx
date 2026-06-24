@@ -22,6 +22,7 @@ import HomeVideoCard from "@/components/HomeVideoCard";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
+import { sanitizeRichText } from "@/lib/rich-text";
 import {
   getApps,
   getContato,
@@ -230,10 +231,18 @@ export default async function Home() {
                 const cardContent = (
                   <>
                     <div className="flex items-center gap-3">
-                      <FreeIcon className="h-4 w-4 text-accent" />
+                      {item.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={item.imageUrl} alt="" className="h-7 w-7 shrink-0 rounded-lg object-cover" />
+                      ) : (
+                        <FreeIcon className="h-4 w-4 text-accent" />
+                      )}
                       <p className="font-medium">{item.title}</p>
                     </div>
-                    <p className="mt-2 text-sm leading-relaxed text-muted">{item.desc}</p>
+                    <p
+                      className="mt-2 text-sm leading-relaxed text-muted"
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.desc) }}
+                    />
                   </>
                 );
                 return item.link ? (

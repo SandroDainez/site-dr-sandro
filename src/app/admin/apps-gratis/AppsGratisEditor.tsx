@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Save } from "lucide-react";
+import { Plus, Trash2, Save, Upload, Loader2, X } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 import type { FreeAppData } from "@/lib/content";
 import { saveFreeApps } from "@/app/admin/actions";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 const ICON_OPTIONS = [
   "Layers", "CalendarClock", "FileText", "Zap", "HeartPulse", "BookOpen", "AudioLines",
@@ -19,12 +21,29 @@ export default function AppsGratisEditor({ initialApps }: Props) {
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
   function update(index: number, field: keyof FreeAppData, value: string) {
     setApps((prev) =>
       prev.map((a, i) => (i === index ? { ...a, [field]: value } : a))
     );
     setSaved(false);
+  }
+
+  async function handleImageUpload(index: number, file: File) {
+    setError(null);
+    setUploadingIndex(index);
+    try {
+      const blob = await upload(`apps-gratis/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      update(index, "imageUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+    } catch (e) {
+      setError("Falha no upload: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingIndex(null);
+    }
   }
 
   function removeApp(index: number) {
@@ -64,8 +83,55 @@ export default function AppsGratisEditor({ initialApps }: Props) {
             </button>
           </div>
 
+          {/* Imagem própria (logo do app) — substitui o ícone quando definida */}
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Ícone</label>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Imagem / logo do app</label>
+            <div className="flex items-center gap-3">
+              {app.imageUrl ? (
+                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-white/15 bg-black/30">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={app.imageUrl} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => update(index, "imageUrl", "")}
+                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white"
+                    title="Remover imagem"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-dashed border-white/20 text-white/30 text-[10px]">
+                  ícone
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                id={`free-img-${index}`}
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleImageUpload(index, f);
+                  e.target.value = "";
+                }}
+              />
+              <label
+                htmlFor={`free-img-${index}`}
+                className={`flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-3 py-1.5 text-xs text-white transition hover:bg-white/10 ${uploadingIndex === index ? "pointer-events-none opacity-50" : ""}`}
+              >
+                {uploadingIndex === index ? (
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando...</>
+                ) : (
+                  <><Upload className="h-3.5 w-3.5" /> Enviar imagem</>
+                )}
+              </label>
+            </div>
+          </div>
+
+          {/* Ícone (usado quando não há imagem) */}
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Ícone (se não tiver imagem)</label>
             <select
               value={app.icon}
               onChange={(e) => update(index, "icon", e.target.value)}
@@ -89,12 +155,7 @@ export default function AppsGratisEditor({ initialApps }: Props) {
 
           <div>
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Descrição</label>
-            <textarea
-              rows={2}
-              value={app.desc}
-              onChange={(e) => update(index, "desc", e.target.value)}
-              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50 resize-none"
-            />
+            <RichTextEditor value={app.desc} onChange={(html) => update(index, "desc", html)} />
           </div>
 
           <div>
