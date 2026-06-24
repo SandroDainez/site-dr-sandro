@@ -336,7 +336,7 @@ export default async function Home() {
                     >
                       {latest.imageUrl && (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={latest.imageUrl} alt="" className="h-36 w-full object-cover" />
+                        <img src={latest.imageUrl} alt="" className="w-full bg-white object-contain" style={{ maxHeight: 200 }} />
                       )}
                       <div className="flex flex-1 flex-col p-5">
                       <div className="flex items-center justify-between">
@@ -418,7 +418,7 @@ export default async function Home() {
                       >
                         {item.imageUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={item.imageUrl} alt="" className="h-36 w-full object-cover" />
+                          <img src={item.imageUrl} alt="" className="w-full bg-white object-contain" style={{ maxHeight: 200 }} />
                         )}
                         <div className="flex flex-1 flex-col p-5">
                         <span
