@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Bold, Eraser } from "lucide-react";
+import { Bold, Eraser, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 
 type Props = {
   value: string;
@@ -39,14 +39,32 @@ export default function RichTextEditor({ value, onChange }: Props) {
     if (ref.current) onChange(ref.current.innerHTML);
   }
 
+  // Garante uma seleção: se nada estiver selecionado (ou fora do editor),
+  // seleciona TODO o texto — assim os botões funcionam mesmo sem selecionar.
+  function ensureSelection() {
+    const el = ref.current;
+    if (!el) return null;
+    el.focus();
+    const sel = window.getSelection();
+    if (!sel) return null;
+    const inside =
+      sel.rangeCount > 0 && el.contains(sel.getRangeAt(0).commonAncestorContainer);
+    if (!inside || sel.isCollapsed) {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    return sel;
+  }
+
   // envolve a seleção atual num <span> com o estilo dado
   function wrap(style: Partial<CSSStyleDeclaration>) {
     const el = ref.current;
     if (!el) return;
-    const sel = window.getSelection();
+    const sel = ensureSelection();
     if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
     const range = sel.getRangeAt(0);
-    // garante que a seleção está dentro do editor
     if (!el.contains(range.commonAncestorContainer)) return;
     const span = document.createElement("span");
     Object.assign(span.style, style);
@@ -61,17 +79,27 @@ export default function RichTextEditor({ value, onChange }: Props) {
   }
 
   function applyBold() {
+    ensureSelection();
     document.execCommand("bold");
     emit();
   }
 
+  // Alinhamento via span display:block (válido dentro de <p>, ao contrário de <div>)
+  function align(textAlign: "left" | "center" | "right") {
+    wrap({ display: "block", textAlign });
+  }
+
   function clearFormat() {
+    ensureSelection();
     document.execCommand("removeFormat");
     emit();
   }
 
   // mantém a seleção ao clicar nos botões da barra
   const keepSel = (e: React.MouseEvent) => e.preventDefault();
+
+  const toolBtn =
+    "flex h-6 w-6 items-center justify-center rounded-md border border-white/15 bg-white/[0.04] text-white/70 transition hover:bg-white/10 hover:text-white";
 
   return (
     <div className="rounded-xl border border-white/15 bg-black/30">
@@ -102,10 +130,20 @@ export default function RichTextEditor({ value, onChange }: Props) {
           </button>
         ))}
         <span className="mx-2 h-4 w-px bg-white/15" />
-        <button type="button" onMouseDown={keepSel} onClick={applyBold} title="Negrito" className="flex h-6 w-6 items-center justify-center rounded-md border border-white/15 bg-white/[0.04] text-white/70 transition hover:bg-white/10 hover:text-white">
+        <button type="button" onMouseDown={keepSel} onClick={() => align("left")} title="Alinhar à esquerda" className={toolBtn}>
+          <AlignLeft className="h-3.5 w-3.5" />
+        </button>
+        <button type="button" onMouseDown={keepSel} onClick={() => align("center")} title="Centralizar" className={toolBtn}>
+          <AlignCenter className="h-3.5 w-3.5" />
+        </button>
+        <button type="button" onMouseDown={keepSel} onClick={() => align("right")} title="Alinhar à direita" className={toolBtn}>
+          <AlignRight className="h-3.5 w-3.5" />
+        </button>
+        <span className="mx-2 h-4 w-px bg-white/15" />
+        <button type="button" onMouseDown={keepSel} onClick={applyBold} title="Negrito" className={toolBtn}>
           <Bold className="h-3.5 w-3.5" />
         </button>
-        <button type="button" onMouseDown={keepSel} onClick={clearFormat} title="Limpar formatação" className="flex h-6 w-6 items-center justify-center rounded-md border border-white/15 bg-white/[0.04] text-white/70 transition hover:bg-white/10 hover:text-white">
+        <button type="button" onMouseDown={keepSel} onClick={clearFormat} title="Limpar formatação" className={toolBtn}>
           <Eraser className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -117,7 +155,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
         className="min-h-[64px] px-3 py-2 text-sm leading-relaxed text-white outline-none [&_*]:!leading-relaxed"
       />
       <p className="px-3 pb-2 text-[10px] text-white/30">
-        Selecione um trecho do texto e clique numa cor ou tamanho para destacar.
+        Dica: selecione um trecho para formatar só ele — ou clique direto num botão para aplicar no texto todo.
       </p>
     </div>
   );
