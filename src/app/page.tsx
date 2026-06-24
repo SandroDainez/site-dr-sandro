@@ -161,6 +161,13 @@ export default async function Home() {
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
               Apps médicos para decisão clínica
             </h2>
+            <div className="mt-5 flex max-w-3xl items-start gap-3 rounded-2xl border border-accent/25 bg-accent/[0.06] px-4 py-3.5">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+              <p className="text-sm leading-relaxed text-white/80">
+                <strong className="text-white">Ferramentas de apoio à decisão clínica.</strong> Não substituem a avaliação,
+                o julgamento e a responsabilidade do médico. <strong className="text-accent">A palavra final é sempre do profissional responsável.</strong>
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
