@@ -159,7 +159,7 @@ export default async function Home() {
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos por assinatura</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
-              Apps médicos e protocolos para decisão clínica
+              Apps médicos para decisão clínica
             </h2>
           </div>
 
