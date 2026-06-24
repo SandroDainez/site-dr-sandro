@@ -214,6 +214,24 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
                     alt="Preview"
                     className="h-28 w-auto rounded-xl border border-white/10 object-cover"
                   />
+                  <div className="mt-3">
+                    <div className="mb-1 flex items-center justify-between">
+                      <label className="text-xs text-white/40">Tamanho da imagem no site</label>
+                      <span className="text-xs font-semibold tabular-nums text-accent">{item.imageSize ?? 176}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={80}
+                      max={400}
+                      value={item.imageSize ?? 176}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, imageSize: v } : it)));
+                        setSaved(false);
+                      }}
+                      className="w-full accent-[var(--accent,#2ce6b8)]"
+                    />
+                  </div>
                 </div>
               )}
             </div>

@@ -102,6 +102,20 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
             className="whitespace-pre-wrap text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4"
             dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.conteudo) }}
           />
+          {item.imageUrl && (
+            <div className="mt-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.imageUrl}
+                alt={item.imageCaption || item.titulo}
+                className="w-full rounded-2xl object-cover"
+                style={{ maxHeight: item.imageSize ?? 176 }}
+              />
+              {item.imageCaption && (
+                <p className="mt-1.5 text-xs text-white/40 leading-relaxed">{item.imageCaption}</p>
+              )}
+            </div>
+          )}
           {item.link && (
             <div className="mt-3 text-xs">
               <a

@@ -127,6 +127,7 @@ export type AtualizacaoData = {
   area: "emergencias" | "ti" | "anestesiologia";
   imageUrl: string;
   imageCaption: string;
+  imageSize?: number; // tamanho da imagem em px
   link: string;
   data: string; // YYYY-MM-DD
 };
@@ -138,7 +139,8 @@ export type ProtocoloData = {
   conteudo: string;     // full text content
   area: "emergencias" | "ti" | "anestesiologia";
   imageUrl: string;     // optional illustrative image
-  imageCaption: string; // caption below image
+  imageCaption: string;
+  imageSize?: number; // tamanho da imagem em px // caption below image
   arquivoUrl: string;   // optional PDF or external material link
   arquivoLabel: string; // button label, e.g. "Baixar PDF" or "Ver protocolo"
   data: string;         // YYYY-MM-DD (last updated)
@@ -152,6 +154,7 @@ export type VideoaulaData = {
   videoUrl: string;     // YouTube URL, proxied blob URL, or any direct link
   imageUrl: string;     // thumbnail (optional)
   imageCaption: string;
+  imageSize?: number; // tamanho da imagem em px
   duracao: string;      // e.g. "45 min"
   nivel: "basico" | "intermediario" | "avancado" | "";
   gratuita: boolean;

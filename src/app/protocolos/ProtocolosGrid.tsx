@@ -109,7 +109,8 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                   <img
                     src={item.imageUrl}
                     alt={item.imageCaption || item.titulo}
-                    className="w-full rounded-2xl object-cover max-h-44"
+                    className="w-full rounded-2xl object-cover"
+                    style={{ maxHeight: item.imageSize ?? 176 }}
                   />
                   {item.imageCaption && (
                     <p className="mt-1.5 text-xs text-white/40 leading-relaxed">

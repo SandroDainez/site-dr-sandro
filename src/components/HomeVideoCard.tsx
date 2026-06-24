@@ -81,7 +81,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
     <div className="relative cursor-pointer bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
       {thumbSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={thumbSrc} alt={item.titulo} className="w-full h-44 object-cover" />
+        <img src={thumbSrc} alt={item.titulo} className="w-full object-cover" style={{ height: item.imageSize ?? 176 }} />
       ) : isProxy ? (
         // pointer-events-none manda o clique ao container (toca inline) em vez do player nativo
         <video
@@ -89,10 +89,11 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
           muted
           playsInline
           preload="metadata"
-          className="pointer-events-none w-full h-44 object-cover"
+          className="pointer-events-none w-full object-cover"
+          style={{ height: item.imageSize ?? 176 }}
         />
       ) : (
-        <div className="flex h-44 w-full items-center justify-center bg-white/[0.03]">
+        <div className="flex w-full items-center justify-center bg-white/[0.03]" style={{ height: item.imageSize ?? 176 }}>
           <PlayCircle className="h-10 w-10 text-white/25" />
         </div>
       )}
