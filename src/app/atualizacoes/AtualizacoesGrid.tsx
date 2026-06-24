@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { AtualizacaoData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 
@@ -58,9 +58,21 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
   const [expanded, setExpanded] = useState(false);
   const cfg = areaConfig[item.area];
 
+  // Abre automaticamente a atualização apontada pela URL (#id), vinda da home.
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.replace("#", ""));
+    if (id && id === item.id) {
+      setExpanded(true);
+      setTimeout(() => {
+        document.getElementById(`atualizacao-${item.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  }, [item.id]);
+
   return (
     <article
-      className={`rounded-2xl border ${cfg.border} bg-white/[0.03] transition ${
+      id={`atualizacao-${item.id}`}
+      className={`scroll-mt-24 rounded-2xl border ${cfg.border} bg-white/[0.03] transition ${
         expanded ? "border-white/20" : "hover:border-white/15"
       }`}
     >
