@@ -30,6 +30,7 @@ export type AppData = {
   highlights: string[];
   link: string;
   thumbnailUrl?: string;
+  thumbnailSize?: number; // tamanho da miniatura/logo em px (default 48)
 };
 
 export type FreeAppData = {

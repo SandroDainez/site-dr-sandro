@@ -173,12 +173,15 @@ export default async function Home() {
                 <div className="relative">
                   <div className="mb-6 flex items-center justify-between">
                     {app.thumbnailUrl ? (
-                      <div className="h-12 w-12 overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]">
+                      <div
+                        className="overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]"
+                        style={{ width: app.thumbnailSize ?? 48, height: app.thumbnailSize ?? 48 }}
+                      >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={app.thumbnailUrl}
                           alt={app.title}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       </div>
                     ) : (
@@ -191,8 +194,14 @@ export default async function Home() {
                     </span>
                   </div>
                   <h3 className="text-2xl font-medium tracking-tight">{app.title}</h3>
-                  <p className="mt-1 text-sm text-accent-blue">{app.subtitle}</p>
-                  <p className="mt-4 text-sm leading-relaxed text-muted">{app.text}</p>
+                  <p
+                    className="mt-1 text-sm text-accent-blue"
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(app.subtitle) }}
+                  />
+                  <p
+                    className="mt-4 text-sm leading-relaxed text-muted"
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(app.text) }}
+                  />
                   <div className="card-open-content mt-0 space-y-1.5">
                     {app.highlights.map((highlight) => (
                       <div key={highlight} className="flex items-center gap-2 text-xs text-white/80">

@@ -5,6 +5,7 @@ import { Plus, Trash2, Save, X, Upload, Loader2 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { AppData } from "@/lib/content";
 import { saveApps } from "@/app/admin/actions";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 const ICON_OPTIONS = [
   "Layers", "CalendarClock", "FileText", "Zap", "HeartPulse", "BookOpen", "AudioLines",
@@ -197,6 +198,28 @@ export default function AppsEditor({ initialApps }: Props) {
                 )}
               </div>
             </div>
+
+            {/* Tamanho da miniatura/logo — só quando há imagem */}
+            {app.thumbnailUrl && (
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <label className="text-xs text-muted">Tamanho da miniatura</label>
+                  <span className="text-xs font-semibold tabular-nums text-accent">{app.thumbnailSize ?? 48}px</span>
+                </div>
+                <input
+                  type="range"
+                  min={24}
+                  max={120}
+                  value={app.thumbnailSize ?? 48}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    setApps((prev) => prev.map((a, i) => (i === index ? { ...a, thumbnailSize: v } : a)));
+                    setSaved(false);
+                  }}
+                  className="w-full accent-[var(--accent,#2ce6b8)]"
+                />
+              </div>
+            )}
           </div>
 
           <div>
@@ -211,22 +234,12 @@ export default function AppsEditor({ initialApps }: Props) {
 
           <div>
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Subtítulo</label>
-            <input
-              type="text"
-              value={app.subtitle}
-              onChange={(e) => updateApp(index, "subtitle", e.target.value)}
-              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
-            />
+            <RichTextEditor value={app.subtitle} onChange={(html) => updateApp(index, "subtitle", html)} />
           </div>
 
           <div>
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Descrição</label>
-            <textarea
-              rows={2}
-              value={app.text}
-              onChange={(e) => updateApp(index, "text", e.target.value)}
-              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50 resize-none"
-            />
+            <RichTextEditor value={app.text} onChange={(html) => updateApp(index, "text", html)} />
           </div>
 
           <div>
