@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { VideoaulaData } from "@/lib/content";
+import { sanitizeRichText } from "@/lib/rich-text";
 
 type Props = {
   videoaulas: VideoaulaData[];
@@ -100,8 +101,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
   const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
   const isProxyVideo = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
-  const isLong = item.descricao.length > 140;
-  const display = descExpanded || !isLong ? item.descricao : item.descricao.slice(0, 120) + "…";
+  const isLong = item.descricao.replace(/<[^>]*>/g, "").length > 140;
 
   // Thumbnail
   let thumbSrc: string | null = null;
@@ -208,7 +208,10 @@ function VideoCard({ item }: { item: VideoaulaData }) {
 
         {/* Description */}
         <div className="mt-2 text-sm leading-relaxed text-white/55 flex-1">
-          {display}
+          <span
+            className={!descExpanded && isLong ? "line-clamp-3" : ""}
+            dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }}
+          />
           {isLong && (
             <button
               type="button"

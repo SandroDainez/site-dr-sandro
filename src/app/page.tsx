@@ -332,9 +332,10 @@ export default async function Home() {
                       <h3 className={`mt-4 text-base font-semibold leading-snug ${area.color}`}>
                         {latest.titulo}
                       </h3>
-                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/50 flex-1">
-                        {latest.conteudo}
-                      </p>
+                      <p
+                        className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/50 flex-1"
+                        dangerouslySetInnerHTML={{ __html: sanitizeRichText(latest.conteudo) }}
+                      />
                       <div className={`mt-4 flex items-center gap-1 text-xs font-medium ${area.color} opacity-0 transition group-hover:opacity-100`}>
                         Ver atualizações <ArrowRight className="h-3 w-3" />
                       </div>
@@ -400,9 +401,10 @@ export default async function Home() {
                     <h3 className="mt-3 text-base font-semibold leading-snug text-white">
                       {item.titulo}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-white/50 flex-1">
-                      {item.descricao}
-                    </p>
+                    <p
+                      className="mt-2 text-sm leading-relaxed text-white/50 flex-1"
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }}
+                    />
                   </article>
                 ))}
               </div>

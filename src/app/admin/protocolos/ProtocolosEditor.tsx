@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef } from "react";
 import { Save, Plus, Trash2, Upload } from "lucide-react";
 import type { ProtocoloData } from "@/lib/content";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 import { saveProtocolos, uploadImage } from "@/app/admin/actions";
 
 type Props = {
@@ -167,12 +168,7 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
               <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
                 Descrição curta (aparece no card)
               </label>
-              <textarea
-                rows={2}
-                value={item.descricao}
-                onChange={(e) => updateItem(idx, "descricao", e.target.value)}
-                className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50 resize-none"
-              />
+              <RichTextEditor value={item.descricao} onChange={(html) => updateItem(idx, "descricao", html)} />
             </div>
 
             {/* conteudo */}
@@ -180,12 +176,7 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
               <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
                 Conteúdo completo
               </label>
-              <textarea
-                rows={5}
-                value={item.conteudo}
-                onChange={(e) => updateItem(idx, "conteudo", e.target.value)}
-                className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50 resize-none"
-              />
+              <RichTextEditor value={item.conteudo} onChange={(html) => updateItem(idx, "conteudo", html)} />
             </div>
 
             {/* image upload */}

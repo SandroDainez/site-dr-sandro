@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AtualizacaoData } from "@/lib/content";
+import { sanitizeRichText } from "@/lib/rich-text";
 
 type Props = {
   atualizacoes: AtualizacaoData[];
@@ -97,9 +98,10 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
       {/* Material (só quando expandido) */}
       {expanded && (
         <div className="px-5 pb-5 -mt-1">
-          <div className="whitespace-pre-wrap text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4">
-            {item.conteudo}
-          </div>
+          <div
+            className="whitespace-pre-wrap text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4"
+            dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.conteudo) }}
+          />
           {item.link && (
             <div className="mt-3 text-xs">
               <a

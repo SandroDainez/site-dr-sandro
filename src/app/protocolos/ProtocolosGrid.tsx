@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ProtocoloData } from "@/lib/content";
+import { sanitizeRichText } from "@/lib/rich-text";
 
 type Props = {
   protocolos: ProtocoloData[];
@@ -127,9 +128,10 @@ export default function ProtocolosGrid({ protocolos }: Props) {
               </h2>
 
               {/* Descrição */}
-              <p className="mt-3 text-sm leading-relaxed text-white/60 line-clamp-2 flex-1">
-                {item.descricao}
-              </p>
+              <p
+                className="mt-3 text-sm leading-relaxed text-white/60 line-clamp-2 flex-1"
+                dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }}
+              />
 
               {/* Ver protocolo toggle */}
               {item.conteudo && (
@@ -142,9 +144,10 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                     {isExpanded ? "Fechar protocolo ↑" : "Ver protocolo ↓"}
                   </button>
                   {isExpanded && (
-                    <pre className="mt-3 whitespace-pre-wrap rounded-xl border border-white/10 bg-black/30 p-4 text-xs leading-relaxed text-white/70 font-mono">
-                      {item.conteudo}
-                    </pre>
+                    <pre
+                      className="mt-3 whitespace-pre-wrap rounded-xl border border-white/10 bg-black/30 p-4 text-xs leading-relaxed text-white/70 font-mono"
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.conteudo) }}
+                    />
                   )}
                 </div>
               )}
