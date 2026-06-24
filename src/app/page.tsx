@@ -38,6 +38,7 @@ import {
   getVideoaulas,
   getTypography,
   getNavItems,
+  headerSubtitleLines,
 } from "@/lib/content";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -82,11 +83,11 @@ export default async function Home() {
               {header.name && (
                 <p className="text-3xl font-bold leading-tight tracking-tight text-white break-words md:text-4xl lg:text-5xl">{header.name}</p>
               )}
-              {(header.cremesp || header.rqe1 || header.rqe2) && (
+              {headerSubtitleLines(header).length > 0 && (
                 <div className="mt-2 space-y-0.5 text-base font-semibold leading-tight tracking-tight text-accent md:text-lg lg:text-xl">
-                  {header.cremesp && <p>{header.cremesp}</p>}
-                  {header.rqe1 && <p>{header.rqe1}</p>}
-                  {header.rqe2 && <p>{header.rqe2}</p>}
+                  {headerSubtitleLines(header).map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
                 </div>
               )}
             </div>

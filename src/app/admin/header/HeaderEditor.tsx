@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { Save, Upload, Loader2, RotateCcw } from "lucide-react";
+import { Save, Upload, Loader2, RotateCcw, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import Image from "next/image";
 import { upload } from "@vercel/blob/client";
 import type { HeaderData } from "@/lib/content";
@@ -56,7 +56,12 @@ function RangeRow({
 }
 
 export default function HeaderEditor({ initialHeader }: Props) {
-  const [header, setHeader] = useState<HeaderData>(initialHeader);
+  const [header, setHeader] = useState<HeaderData>(() => ({
+    ...initialHeader,
+    subtitleLines:
+      initialHeader.subtitleLines ??
+      [initialHeader.cremesp, initialHeader.rqe1, initialHeader.rqe2].filter(Boolean),
+  }));
   const [isPending, startTransition] = useTransition();
   const [isUploading, setIsUploading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -74,12 +79,35 @@ export default function HeaderEditor({ initialHeader }: Props) {
     setSaved(false);
   }
 
+  // ── Linhas livres abaixo do nome (CRM, RQEs, etc.) ──
+  function setLines(next: string[]) {
+    setHeader((prev) => ({ ...prev, subtitleLines: next }));
+    setSaved(false);
+  }
+  function updateLine(i: number, value: string) {
+    setLines((header.subtitleLines ?? []).map((l, idx) => (idx === i ? value : l)));
+  }
+  function addLine() {
+    setLines([...(header.subtitleLines ?? []), ""]);
+  }
+  function removeLine(i: number) {
+    setLines((header.subtitleLines ?? []).filter((_, idx) => idx !== i));
+  }
+  function moveLine(i: number, dir: -1 | 1) {
+    const arr = [...(header.subtitleLines ?? [])];
+    const j = i + dir;
+    if (j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    setLines(arr);
+  }
+
   function resetLogoStyle() {
     setHeader((prev) => ({
       name: prev.name,
       cremesp: prev.cremesp,
       rqe1: prev.rqe1,
       rqe2: prev.rqe2,
+      subtitleLines: prev.subtitleLines,
       logoUrl: prev.logoUrl,
     }));
     setSaved(false);
@@ -136,40 +164,43 @@ export default function HeaderEditor({ initialHeader }: Props) {
           />
         </div>
 
+        {/* Linhas abaixo do nome — livres (CRM, RQEs, etc.). Deixe vazio para só o nome. */}
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
-            CRM (ex: CREMESP 76.907)
+          <label className="mb-2 block text-xs uppercase tracking-[0.1em] text-muted">
+            Linhas abaixo do nome (CRM, RQEs…)
           </label>
-          <input
-            type="text"
-            value={header.cremesp}
-            onChange={(e) => update("cremesp", e.target.value)}
-            className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
-            Especialidade 1 — RQE
-          </label>
-          <input
-            type="text"
-            value={header.rqe1}
-            onChange={(e) => update("rqe1", e.target.value)}
-            className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">
-            Especialidade 2 — RQE
-          </label>
-          <input
-            type="text"
-            value={header.rqe2}
-            onChange={(e) => update("rqe2", e.target.value)}
-            className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
-          />
+          <div className="space-y-2">
+            {(header.subtitleLines ?? []).map((line, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={line}
+                  onChange={(e) => updateLine(i, e.target.value)}
+                  placeholder="Ex: CREMESP 76.907"
+                  className="min-w-0 flex-1 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
+                />
+                <button type="button" onClick={() => moveLine(i, -1)} disabled={i === 0} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-black/30 text-white transition hover:bg-white/10 disabled:opacity-30" title="Subir">
+                  <ArrowUp className="h-4 w-4" />
+                </button>
+                <button type="button" onClick={() => moveLine(i, 1)} disabled={i === (header.subtitleLines ?? []).length - 1} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-black/30 text-white transition hover:bg-white/10 disabled:opacity-30" title="Descer">
+                  <ArrowDown className="h-4 w-4" />
+                </button>
+                <button type="button" onClick={() => removeLine(i)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-400/30 bg-red-400/10 text-red-400 transition hover:bg-red-400/20" title="Excluir">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addLine}
+            className="mt-2 flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs text-white/70 transition hover:bg-white/10 hover:text-white"
+          >
+            <Plus className="h-4 w-4" /> Adicionar linha
+          </button>
+          {(header.subtitleLines ?? []).length === 0 && (
+            <p className="mt-2 text-xs text-white/35">Sem linhas — o site mostra só o nome.</p>
+          )}
         </div>
 
         {/* Logo */}
@@ -238,10 +269,10 @@ export default function HeaderEditor({ initialHeader }: Props) {
         {/* Preview */}
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
           <p className="mb-2 text-xs uppercase tracking-[0.1em] text-muted">Preview</p>
-          <p className="text-base font-bold text-white">{header.name}</p>
-          <p className="text-xs text-accent">{header.cremesp}</p>
-          <p className="text-xs text-accent">{header.rqe1}</p>
-          <p className="text-xs text-accent">{header.rqe2}</p>
+          {header.name && <p className="text-base font-bold text-white">{header.name}</p>}
+          {(header.subtitleLines ?? []).filter((l) => l.trim()).map((l, i) => (
+            <p key={i} className="text-xs text-accent">{l}</p>
+          ))}
         </div>
       </div>
 

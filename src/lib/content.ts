@@ -82,9 +82,10 @@ export type HeroData = {
 
 export type HeaderData = {
   name: string;
-  cremesp: string;
+  cremesp: string; // legado — mantido p/ compatibilidade; substituído por subtitleLines
   rqe1: string;
   rqe2: string;
+  subtitleLines?: string[]; // linhas livres abaixo do nome (CRM, RQEs, etc.)
   logoUrl: string;
   // Aparência do logo (tudo opcional; vazio = visual padrão). Tamanhos em px
   // referem-se ao logo grande da home; nas páginas internas são reduzidos pela metade.
@@ -560,6 +561,13 @@ export async function getHero(): Promise<HeroData> {
 
 export async function getHeader(): Promise<HeaderData> {
   return readBlob("header", defaultHeader);
+}
+
+// Linhas efetivas abaixo do nome: usa subtitleLines se existir, senão cai nos
+// campos legados (cremesp/rqe1/rqe2). Sempre sem linhas vazias.
+export function headerSubtitleLines(h: HeaderData): string[] {
+  const lines = h.subtitleLines ?? [h.cremesp, h.rqe1, h.rqe2];
+  return lines.map((l) => (l ?? "").trim()).filter(Boolean);
 }
 
 export async function getFreeApps(): Promise<FreeAppData[]> {

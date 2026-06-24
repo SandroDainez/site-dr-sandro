@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { getProtocolos, getHeader, getNavItems, getTypography } from "@/lib/content";
+import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
@@ -19,7 +19,7 @@ export default async function ProtocolosPage() {
             <SiteLogo header={header} variant="sm" />
             <div>
               {header.name && <p className="text-2xl font-bold tracking-tight text-white">{header.name}</p>}
-              {header.cremesp && <p className="text-xs font-semibold text-accent leading-tight">{header.cremesp}</p>}
+              {headerSubtitleLines(header)[0] && <p className="text-xs font-semibold text-accent leading-tight">{headerSubtitleLines(header)[0]}</p>}
             </div>
           </a>
 
