@@ -408,8 +408,13 @@ export default async function Home() {
                       <a
                         key={item.id}
                         href={`/protocolos#${item.id}`}
-                        className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-0.5 hover:border-white/20"
+                        className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-white/20"
                       >
+                        {item.imageUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={item.imageUrl} alt="" className="h-36 w-full object-cover" />
+                        )}
+                        <div className="flex flex-1 flex-col p-5">
                         <span
                           className={`self-start rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${areaBadge[item.area] ?? "text-white/60 border-white/20"}`}
                         >
@@ -425,6 +430,7 @@ export default async function Home() {
                         <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-accent/80 transition group-hover:text-accent">
                           Ver protocolo <ArrowRight className="h-3 w-3" />
                         </span>
+                        </div>
                       </a>
                     ))}
                   </div>
