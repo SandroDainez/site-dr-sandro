@@ -158,7 +158,7 @@ export default async function Home() {
         <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps">
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos por assinatura</p>
-            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-5xl">
+            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
               Apps médicos e protocolos para decisão clínica
             </h2>
           </div>
@@ -238,7 +238,7 @@ export default async function Home() {
         <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps">
           <div className="finex-glass rounded-3xl p-8">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
-            <h3 className="mt-3 text-3xl font-medium tracking-tight">Acesso aberto imediato</h3>
+            <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Acesso aberto imediato</h3>
             <div className="mt-7 grid gap-4 sm:grid-cols-2">
               {freeApps.map((item) => {
                 const FreeIcon = iconMap[item.icon] ?? BookOpen;
@@ -467,7 +467,7 @@ export default async function Home() {
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent-violet">Cursos presenciais, híbridos e online</p>
-                <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-5xl">
+                <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
                   Atualização médica contínua
                 </h3>
               </div>
