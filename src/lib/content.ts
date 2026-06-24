@@ -120,6 +120,15 @@ export type NavItemData = {
   href: string; // ex: "#cursos", "/atualizacoes", "https://..."
 };
 
+// Aparência da barra de menu (tudo opcional; vazio = padrão).
+export type NavStyleData = {
+  fontScale?: number; // multiplicador da fonte (1 = normal)
+  paddingX?: number; // px — espaço interno horizontal da barra
+  paddingY?: number; // px — altura/espaço interno vertical da barra
+  gap?: number; // px — espaço entre os itens
+  itemPaddingX?: number; // px — espaço interno horizontal de cada item
+};
+
 export type AtualizacaoData = {
   id: string;
   titulo: string;
@@ -601,6 +610,10 @@ export async function getTypography(): Promise<TypographyData> {
 
 export async function getNavItems(): Promise<NavItemData[]> {
   return readBlob("navItems", defaultNavItems);
+}
+
+export async function getNavStyle(): Promise<NavStyleData> {
+  return readBlob("navStyle", {});
 }
 
 // Fallback vazio: o site mostra apenas o que for cadastrado no admin.

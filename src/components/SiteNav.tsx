@@ -1,15 +1,31 @@
-import type { NavItemData } from "@/lib/content";
+import type { NavItemData, NavStyleData } from "@/lib/content";
 
 type Props = {
   items: NavItemData[];
+  style?: NavStyleData; // aparência da barra (tamanho/espaçamento/fonte)
   internal?: boolean; // páginas internas: âncoras "#x" viram "/#x"
   currentPath?: string; // destaca o item da página atual
 };
 
-export default function SiteNav({ items, internal = false, currentPath }: Props) {
+export default function SiteNav({ items, style, internal = false, currentPath }: Props) {
+  const s = style ?? {};
+  const navStyle: React.CSSProperties = {
+    paddingLeft: s.paddingX,
+    paddingRight: s.paddingX,
+    paddingTop: s.paddingY,
+    paddingBottom: s.paddingY,
+    gap: s.gap,
+  };
+  const itemStyle: React.CSSProperties = {
+    paddingLeft: s.itemPaddingX,
+    paddingRight: s.itemPaddingX,
+    fontSize: s.fontScale ? `${0.875 * s.fontScale}rem` : undefined,
+  };
+
   return (
     <nav
       data-typo="nav"
+      style={navStyle}
       className="hidden items-center gap-3 rounded-full border border-white/10 bg-black/75 px-3 py-2 text-sm text-white/70 backdrop-blur-md lg:flex"
     >
       {items.map((item, i) => {
@@ -23,6 +39,7 @@ export default function SiteNav({ items, internal = false, currentPath }: Props)
             href={href}
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noreferrer" : undefined}
+            style={itemStyle}
             className={
               active
                 ? "rounded-full bg-white/10 px-3 py-1.5 font-medium text-white"

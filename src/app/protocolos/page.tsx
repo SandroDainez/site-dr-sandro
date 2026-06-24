@@ -1,13 +1,13 @@
 export const dynamic = "force-dynamic";
 
-import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines } from "@/lib/content";
+import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import ProtocolosGrid from "./ProtocolosGrid";
 
 export default async function ProtocolosPage() {
-  const [protocolos, header, navItems, typo] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography()]);
+  const [protocolos, header, navItems, typo, navStyle] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle()]);
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
@@ -23,7 +23,7 @@ export default async function ProtocolosPage() {
             </div>
           </a>
 
-          <SiteNav items={navItems} internal currentPath="/protocolos" />
+          <SiteNav items={navItems} style={navStyle} internal currentPath="/protocolos" />
 
           <a href="/" className="flex items-center gap-1 text-sm text-white/50 transition hover:text-white lg:hidden">
             ← Início

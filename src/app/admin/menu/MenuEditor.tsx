@@ -1,19 +1,69 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Save, Plus, Trash2, ArrowUp, ArrowDown, Menu as MenuIcon } from "lucide-react";
-import type { NavItemData } from "@/lib/content";
-import { saveNavItems } from "@/app/admin/actions";
+import { Save, Plus, Trash2, ArrowUp, ArrowDown, Menu as MenuIcon, Type } from "lucide-react";
+import type { NavItemData, NavStyleData } from "@/lib/content";
+import { saveNavItems, saveNavStyle } from "@/app/admin/actions";
 
 type Props = {
   initialItems: NavItemData[];
+  initialStyle?: NavStyleData;
 };
 
-export default function MenuEditor({ initialItems }: Props) {
+// linha de slider (fora do componente p/ não recriar no render)
+function StyleRow({
+  label,
+  value,
+  fallback,
+  min,
+  max,
+  step = 1,
+  suffix = "px",
+  onChange,
+}: {
+  label: string;
+  value: number | undefined;
+  fallback: number;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+  onChange: (v: number) => void;
+}) {
+  const v = value ?? fallback;
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <label className="text-xs text-white/60">{label}</label>
+        <span className="text-xs font-semibold tabular-nums text-accent">
+          {suffix === "%" ? Math.round(v * 100) : v}
+          {suffix}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={v}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-[var(--accent,#2ce6b8)]"
+      />
+    </div>
+  );
+}
+
+export default function MenuEditor({ initialItems, initialStyle }: Props) {
   const [items, setItems] = useState<NavItemData[]>(initialItems);
+  const [navStyle, setNavStyle] = useState<NavStyleData>(initialStyle ?? {});
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function patchStyle(p: Partial<NavStyleData>) {
+    setNavStyle((prev) => ({ ...prev, ...p }));
+    setSaved(false);
+  }
 
   function touched() {
     setSaved(false);
@@ -51,11 +101,11 @@ export default function MenuEditor({ initialItems }: Props) {
       .map((it) => ({ label: it.label.trim(), href: it.href.trim() }))
       .filter((it) => it.label);
     startTransition(async () => {
-      const res = await saveNavItems(clean);
-      if (res.ok) {
+      const [r1, r2] = await Promise.all([saveNavItems(clean), saveNavStyle(navStyle)]);
+      if (r1.ok && r2.ok) {
         setSaved(true);
         setItems(clean);
-      } else setError(res.error);
+      } else setError((!r1.ok && r1.error) || (!r2.ok && r2.error) || "Erro ao salvar");
     });
   }
 
@@ -110,6 +160,32 @@ export default function MenuEditor({ initialItems }: Props) {
       >
         <Plus className="h-4 w-4" /> Adicionar item
       </button>
+
+      {/* Aparência da barra do menu */}
+      <div className="rounded-2xl border border-accent/20 bg-accent/[0.04] p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <Type className="h-4 w-4 text-accent" />
+          <h3 className="text-sm font-semibold text-white">Aparência do menu</h3>
+        </div>
+        <p className="mb-4 text-xs text-muted">
+          Aumente a fonte e a barra quando precisar. Para mudar a <strong className="text-white">cor</strong> ou o
+          tipo de fonte do menu, use <span className="text-accent">Aparência do texto → Menu (navegação)</span>.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <StyleRow label="Tamanho da fonte" value={navStyle.fontScale} fallback={1} min={0.7} max={1.8} step={0.05} suffix="%" onChange={(v) => patchStyle({ fontScale: v })} />
+          <StyleRow label="Altura da barra" value={navStyle.paddingY} fallback={8} min={4} max={28} onChange={(v) => patchStyle({ paddingY: v })} />
+          <StyleRow label="Largura interna da barra" value={navStyle.paddingX} fallback={12} min={4} max={40} onChange={(v) => patchStyle({ paddingX: v })} />
+          <StyleRow label="Espaço entre itens" value={navStyle.gap} fallback={12} min={0} max={40} onChange={(v) => patchStyle({ gap: v })} />
+          <StyleRow label="Espaço interno do item" value={navStyle.itemPaddingX} fallback={12} min={4} max={36} onChange={(v) => patchStyle({ itemPaddingX: v })} />
+        </div>
+        <button
+          type="button"
+          onClick={() => { setNavStyle({}); setSaved(false); }}
+          className="mt-3 text-xs text-white/50 underline underline-offset-2 hover:text-white"
+        >
+          Restaurar padrão
+        </button>
+      </div>
 
       <div className="sticky bottom-0 -mx-6 flex items-center gap-3 border-t border-white/10 bg-[#07090f]/90 px-6 py-4 backdrop-blur">
         <button

@@ -38,6 +38,7 @@ import {
   getVideoaulas,
   getTypography,
   getNavItems,
+  getNavStyle,
   headerSubtitleLines,
 } from "@/lib/content";
 
@@ -48,7 +49,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo, navItems] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -63,6 +64,7 @@ export default async function Home() {
     getVideoaulas(),
     getTypography(),
     getNavItems(),
+    getNavStyle(),
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -93,7 +95,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <SiteNav items={navItems} />
+          <SiteNav items={navItems} style={navStyle} />
 
         </div>
       </header>

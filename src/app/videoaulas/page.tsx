@@ -1,13 +1,13 @@
 export const dynamic = "force-dynamic";
 
-import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines } from "@/lib/content";
+import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import VideoaulasGrid from "./VideoaulasGrid";
 
 export default async function VideoaulasPage() {
-  const [videoaulas, header, navItems, typo] = await Promise.all([getVideoaulas(), getHeader(), getNavItems(), getTypography()]);
+  const [videoaulas, header, navItems, typo, navStyle] = await Promise.all([getVideoaulas(), getHeader(), getNavItems(), getTypography(), getNavStyle()]);
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
@@ -25,7 +25,7 @@ export default async function VideoaulasPage() {
           </a>
 
           {/* Nav */}
-          <SiteNav items={navItems} internal currentPath="/videoaulas" />
+          <SiteNav items={navItems} style={navStyle} internal currentPath="/videoaulas" />
 
           {/* Mobile back */}
           <a

@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines } from "@/lib/content";
+import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
@@ -11,7 +11,7 @@ export default async function AtualizacoesPage({
 }: {
   searchParams: Promise<{ area?: string }>;
 }) {
-  const [atualizacoes, header, params, navItems, typo] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography()]);
+  const [atualizacoes, header, params, navItems, typo, navStyle] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography(), getNavStyle()]);
   const initialArea = params.area ?? "todas";
 
   return (
@@ -30,7 +30,7 @@ export default async function AtualizacoesPage({
           </a>
 
           {/* Nav */}
-          <SiteNav items={navItems} internal currentPath="/atualizacoes" />
+          <SiteNav items={navItems} style={navStyle} internal currentPath="/atualizacoes" />
 
           {/* Mobile back */}
           <a

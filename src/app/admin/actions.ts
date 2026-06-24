@@ -20,6 +20,7 @@ import {
   type WhyUsData,
   type SiteConfig,
   type NavItemData,
+  type NavStyleData,
   type TypographyData,
   type AtualizacaoData,
   type ProtocoloData,
@@ -152,6 +153,20 @@ export async function saveNavItems(items: NavItemData[]): Promise<Result> {
   try {
     await requireAdmin();
     await writeBlob("navItems", items);
+    revalidatePath("/");
+    revalidatePath("/atualizacoes");
+    revalidatePath("/protocolos");
+    revalidatePath("/videoaulas");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveNavStyle(style: NavStyleData): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("navStyle", style);
     revalidatePath("/");
     revalidatePath("/atualizacoes");
     revalidatePath("/protocolos");

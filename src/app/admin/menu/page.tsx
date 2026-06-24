@@ -1,11 +1,11 @@
 export const dynamic = "force-dynamic";
 
-import { getNavItems } from "@/lib/content";
+import { getNavItems, getNavStyle } from "@/lib/content";
 import MenuEditor from "./MenuEditor";
 import Link from "next/link";
 
 export default async function AdminMenuPage() {
-  const items = await getNavItems();
+  const [items, navStyle] = await Promise.all([getNavItems(), getNavStyle()]);
 
   return (
     <div className="max-w-2xl pb-24">
@@ -20,7 +20,7 @@ export default async function AdminMenuPage() {
         </p>
       </div>
 
-      <MenuEditor initialItems={items} />
+      <MenuEditor initialItems={items} initialStyle={navStyle} />
     </div>
   );
 }
