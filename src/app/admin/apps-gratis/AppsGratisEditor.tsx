@@ -127,6 +127,28 @@ export default function AppsGratisEditor({ initialApps }: Props) {
                 )}
               </label>
             </div>
+
+            {/* Tamanho do logo — só quando há imagem */}
+            {app.imageUrl && (
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <label className="text-xs text-muted">Tamanho do logo</label>
+                  <span className="text-xs font-semibold tabular-nums text-accent">{app.imageSize ?? 28}px</span>
+                </div>
+                <input
+                  type="range"
+                  min={16}
+                  max={96}
+                  value={app.imageSize ?? 28}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    setApps((prev) => prev.map((a, i) => (i === index ? { ...a, imageSize: v } : a)));
+                    setSaved(false);
+                  }}
+                  className="w-full accent-[var(--accent,#2ce6b8)]"
+                />
+              </div>
+            )}
           </div>
 
           {/* Ícone (usado quando não há imagem) */}

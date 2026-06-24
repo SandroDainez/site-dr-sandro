@@ -38,6 +38,7 @@ export type FreeAppData = {
   icon: string;
   link: string;
   imageUrl?: string; // logo/imagem própria do app (substitui o ícone)
+  imageSize?: number; // tamanho do logo em px (default 28)
 };
 
 export type ContentItemData = {

@@ -234,7 +234,12 @@ export default async function Home() {
                     <div className="flex items-center gap-3">
                       {item.imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.imageUrl} alt="" className="h-7 w-7 shrink-0 rounded-lg object-cover" />
+                        <img
+                          src={item.imageUrl}
+                          alt=""
+                          className="shrink-0 rounded-lg object-contain"
+                          style={{ width: item.imageSize ?? 28, height: item.imageSize ?? 28 }}
+                        />
                       ) : (
                         <FreeIcon className="h-4 w-4 text-accent" />
                       )}
