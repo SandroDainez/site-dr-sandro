@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
+import MobileNav from "@/components/MobileNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import VideoaulasGrid from "./VideoaulasGrid";
 
@@ -26,6 +27,7 @@ export default async function VideoaulasPage() {
 
           {/* Nav */}
           <SiteNav items={navItems} style={navStyle} internal currentPath="/videoaulas" />
+          <MobileNav items={navItems} style={navStyle} internal currentPath="/videoaulas" />
 
           {/* Mobile back */}
           <a

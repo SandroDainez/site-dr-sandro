@@ -135,6 +135,15 @@ html {
 
 /* Hover sutil para itens do menu — ecoa o feixe azul dos CTAs sem competir.
    Anel azul suave + glow no topo + um brilho que cruza uma vez. */
+/* Faixa de menu rolável no mobile — sem barra de rolagem visível */
+.mobile-nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.mobile-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 .nav-beam {
   position: relative;
   isolation: isolate;

@@ -21,6 +21,7 @@ import CalendarioEventos from "@/components/CalendarioEventos";
 import HomeVideoCard from "@/components/HomeVideoCard";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
+import MobileNav from "@/components/MobileNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { sanitizeRichText } from "@/lib/rich-text";
 import {
@@ -97,6 +98,7 @@ export default async function Home() {
 
           <SiteNav items={navItems} style={navStyle} />
 
+          <MobileNav items={navItems} style={navStyle} />
         </div>
       </header>
 

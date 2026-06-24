@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
+import MobileNav from "@/components/MobileNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import ProtocolosGrid from "./ProtocolosGrid";
 
@@ -24,6 +25,7 @@ export default async function ProtocolosPage() {
           </a>
 
           <SiteNav items={navItems} style={navStyle} internal currentPath="/protocolos" />
+          <MobileNav items={navItems} style={navStyle} internal currentPath="/protocolos" />
 
           <a href="/" className="flex items-center gap-1 text-sm text-white/50 transition hover:text-white lg:hidden">
             ← Início

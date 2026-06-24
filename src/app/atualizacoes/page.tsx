@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
+import MobileNav from "@/components/MobileNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import AtualizacoesGrid from "./AtualizacoesGrid";
 
@@ -31,6 +32,7 @@ export default async function AtualizacoesPage({
 
           {/* Nav */}
           <SiteNav items={navItems} style={navStyle} internal currentPath="/atualizacoes" />
+          <MobileNav items={navItems} style={navStyle} internal currentPath="/atualizacoes" />
 
           {/* Mobile back */}
           <a
