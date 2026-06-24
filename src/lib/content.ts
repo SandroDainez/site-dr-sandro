@@ -111,6 +111,11 @@ import type { TypographyData } from "./typography-sections";
 export type { TypographyData, SectionStyle } from "./typography-sections";
 export { TYPOGRAPHY_SECTIONS } from "./typography-sections";
 
+export type NavItemData = {
+  label: string;
+  href: string; // ex: "#cursos", "/atualizacoes", "https://..."
+};
+
 export type AtualizacaoData = {
   id: string;
   titulo: string;
@@ -446,6 +451,17 @@ export const defaultVideoaulas: VideoaulaData[] = [
   },
 ];
 
+export const defaultNavItems: NavItemData[] = [
+  { label: "Apps Assinatura", href: "#apps-assinatura" },
+  { label: "Apps Grátis", href: "#apps-gratis" },
+  { label: "Cursos", href: "#cursos" },
+  { label: "Eventos", href: "#eventos" },
+  { label: "Atualizações", href: "/atualizacoes" },
+  { label: "Protocolos", href: "/protocolos" },
+  { label: "Videoaulas", href: "/videoaulas" },
+  { label: "Contato", href: "#contato" },
+];
+
 export const defaultTypography: TypographyData = {};
 
 export const defaultSiteConfig: SiteConfig = {
@@ -567,6 +583,10 @@ export async function getSiteConfig(): Promise<SiteConfig> {
 
 export async function getTypography(): Promise<TypographyData> {
   return readBlob("typography", defaultTypography);
+}
+
+export async function getNavItems(): Promise<NavItemData[]> {
+  return readBlob("navItems", defaultNavItems);
 }
 
 // Fallback vazio: o site mostra apenas o que for cadastrado no admin.

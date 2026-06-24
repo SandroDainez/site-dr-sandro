@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
   ArrowRight,
+  Menu,
   Type,
   UserCircle,
 } from "lucide-react";
@@ -27,10 +28,18 @@ const sections = [
     border: "hover:border-accent/40",
   },
   {
+    href: "/admin/menu",
+    icon: Menu,
+    label: "Menu do topo",
+    desc: "Adicione, exclua, reordene e edite os itens do menu de navegação.",
+    color: "text-accent-blue",
+    border: "hover:border-accent-blue/40",
+  },
+  {
     href: "/admin/tipografia",
     icon: Type,
-    label: "Tamanho das fontes",
-    desc: "Aumente ou diminua o tamanho das letras de cada seção do site.",
+    label: "Aparência do texto",
+    desc: "Tamanho, fonte, cor e peso das letras de cada seção (incl. o menu).",
     color: "text-accent",
     border: "hover:border-accent/40",
   },

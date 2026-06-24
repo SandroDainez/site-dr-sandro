@@ -16,8 +16,8 @@ type Props = {
   initial?: SectionStyle | number;
 };
 
-const SIZE_MIN = 80;
-const SIZE_MAX = 140;
+const SIZE_MIN = 50;
+const SIZE_MAX = 160;
 
 function clampSize(v: number) {
   return Math.min(SIZE_MAX, Math.max(SIZE_MIN, v));

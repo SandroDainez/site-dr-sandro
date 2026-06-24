@@ -20,6 +20,7 @@ import {
 import CalendarioEventos from "@/components/CalendarioEventos";
 import HomeVideoCard from "@/components/HomeVideoCard";
 import SiteLogo from "@/components/SiteLogo";
+import SiteNav from "@/components/SiteNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import {
   getApps,
@@ -35,6 +36,7 @@ import {
   getProtocolos,
   getVideoaulas,
   getTypography,
+  getNavItems,
 } from "@/lib/content";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -44,7 +46,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo, navItems] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -58,6 +60,7 @@ export default async function Home() {
     getProtocolos(),
     getVideoaulas(),
     getTypography(),
+    getNavItems(),
   ]);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -75,41 +78,20 @@ export default async function Home() {
           <div className="flex items-center gap-4 md:gap-5">
             <SiteLogo header={header} variant="lg" />
             <div className="max-w-md text-center lg:text-left">
-              <p className="text-3xl font-bold leading-tight tracking-tight text-white break-words md:text-4xl lg:text-5xl">{header.name}</p>
-              <div className="mt-2 space-y-0.5 text-base font-semibold leading-tight tracking-tight text-accent md:text-lg lg:text-xl">
-                <p>{header.cremesp}</p>
-                <p>{header.rqe1}</p>
-                <p>{header.rqe2}</p>
-              </div>
+              {header.name && (
+                <p className="text-3xl font-bold leading-tight tracking-tight text-white break-words md:text-4xl lg:text-5xl">{header.name}</p>
+              )}
+              {(header.cremesp || header.rqe1 || header.rqe2) && (
+                <div className="mt-2 space-y-0.5 text-base font-semibold leading-tight tracking-tight text-accent md:text-lg lg:text-xl">
+                  {header.cremesp && <p>{header.cremesp}</p>}
+                  {header.rqe1 && <p>{header.rqe1}</p>}
+                  {header.rqe2 && <p>{header.rqe2}</p>}
+                </div>
+              )}
             </div>
           </div>
 
-          <nav className="hidden items-center gap-3 rounded-full border border-white/10 bg-black/75 px-3 py-2 text-sm text-white/70 backdrop-blur-md lg:flex">
-            <a href="#apps-assinatura" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Apps Assinatura
-            </a>
-            <a href="#apps-gratis" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Apps Grátis
-            </a>
-            <a href="#cursos" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Cursos
-            </a>
-            <a href="#eventos" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Eventos
-            </a>
-            <a href="/atualizacoes" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Atualizações
-            </a>
-            <a href="/protocolos" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Protocolos
-            </a>
-            <a href="/videoaulas" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Videoaulas
-            </a>
-            <a href="#contato" className="nav-beam rounded-full px-3 py-1.5 transition hover:text-white">
-              Contato
-            </a>
-          </nav>
+          <SiteNav items={navItems} />
 
         </div>
       </header>

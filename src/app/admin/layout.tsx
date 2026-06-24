@@ -17,6 +17,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  Menu,
   Type,
   UserCircle,
 } from "lucide-react";
@@ -31,7 +32,8 @@ function getExpectedToken() {
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/header", label: "Cabeçalho", icon: UserCircle },
-  { href: "/admin/tipografia", label: "Tamanho das fontes", icon: Type },
+  { href: "/admin/menu", label: "Menu do topo", icon: Menu },
+  { href: "/admin/tipografia", label: "Aparência do texto", icon: Type },
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
   { href: "/admin/apps", label: "Apps", icon: Layers },
   { href: "/admin/apps-gratis", label: "Apps Grátis", icon: BookOpen },
