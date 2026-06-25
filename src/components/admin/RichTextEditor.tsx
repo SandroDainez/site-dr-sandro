@@ -39,59 +39,55 @@ export default function RichTextEditor({ value, onChange }: Props) {
     if (ref.current) onChange(ref.current.innerHTML);
   }
 
-  // Garante uma seleção: se nada estiver selecionado (ou fora do editor),
-  // seleciona TODO o texto — assim os botões funcionam mesmo sem selecionar.
-  function ensureSelection() {
-    const el = ref.current;
-    if (!el) return null;
-    el.focus();
-    const sel = window.getSelection();
-    if (!sel) return null;
-    const inside =
-      sel.rangeCount > 0 && el.contains(sel.getRangeAt(0).commonAncestorContainer);
-    if (!inside || sel.isCollapsed) {
-      const range = document.createRange();
-      range.selectNodeContents(el);
-      sel.removeAllRanges();
-      sel.addRange(range);
+  // wrapper único que envolve TODO o conteúdo (para formatar o texto inteiro
+  // sem precisar selecionar e sem empilhar spans a cada clique).
+  function getOrCreateWrapper(el: HTMLDivElement): HTMLSpanElement {
+    const only = el.childNodes.length === 1 ? el.firstElementChild : null;
+    if (only && only.tagName === "SPAN" && (only as HTMLElement).dataset.rtWrap === "1") {
+      return only as HTMLSpanElement;
     }
-    return sel;
+    const span = document.createElement("span");
+    span.dataset.rtWrap = "1";
+    span.style.display = "block";
+    while (el.firstChild) span.appendChild(el.firstChild);
+    el.appendChild(span);
+    return span;
   }
 
-  // envolve a seleção atual num <span> com o estilo dado
-  function wrap(style: Partial<CSSStyleDeclaration>) {
+  // Aplica os estilos: no trecho selecionado, ou (sem seleção) no texto todo.
+  function apply(setter: (s: HTMLSpanElement) => void) {
     const el = ref.current;
     if (!el) return;
-    const sel = ensureSelection();
-    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return;
-    const range = sel.getRangeAt(0);
-    if (!el.contains(range.commonAncestorContainer)) return;
-    const span = document.createElement("span");
-    Object.assign(span.style, style);
-    try {
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
-      sel.removeAllRanges();
-    } catch {
-      /* seleção complexa — ignora */
+    el.focus();
+    const sel = window.getSelection();
+    const range = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+    const hasSelection =
+      !!range && !range.collapsed && el.contains(range.commonAncestorContainer);
+
+    if (hasSelection && range) {
+      const span = document.createElement("span");
+      setter(span);
+      try {
+        range.surroundContents(span);
+      } catch {
+        try {
+          span.appendChild(range.extractContents());
+          range.insertNode(span);
+        } catch {
+          /* seleção muito complexa — ignora */
+        }
+      }
+      sel?.removeAllRanges();
+    } else {
+      setter(getOrCreateWrapper(el));
     }
     emit();
-  }
-
-  function applyBold() {
-    ensureSelection();
-    document.execCommand("bold");
-    emit();
-  }
-
-  // Alinhamento via span display:block (válido dentro de <p>, ao contrário de <div>)
-  function align(textAlign: "left" | "center" | "right") {
-    wrap({ display: "block", textAlign });
   }
 
   function clearFormat() {
-    ensureSelection();
-    document.execCommand("removeFormat");
+    const el = ref.current;
+    if (!el) return;
+    el.innerHTML = el.textContent || "";
     emit();
   }
 
@@ -111,7 +107,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
             type="button"
             title={c.label}
             onMouseDown={keepSel}
-            onClick={() => wrap({ color: c.hex })}
+            onClick={() => apply((s) => (s.style.color = c.hex))}
             className="h-5 w-5 rounded-full border border-white/20"
             style={{ background: c.hex }}
           />
@@ -123,24 +119,24 @@ export default function RichTextEditor({ value, onChange }: Props) {
             key={s.label}
             type="button"
             onMouseDown={keepSel}
-            onClick={() => wrap({ fontSize: s.em })}
+            onClick={() => apply((sp) => (sp.style.fontSize = s.em))}
             className="rounded-md border border-white/15 bg-white/[0.04] px-2 py-0.5 text-xs text-white/70 transition hover:bg-white/10 hover:text-white"
           >
             {s.label}
           </button>
         ))}
         <span className="mx-2 h-4 w-px bg-white/15" />
-        <button type="button" onMouseDown={keepSel} onClick={() => align("left")} title="Alinhar à esquerda" className={toolBtn}>
+        <button type="button" onMouseDown={keepSel} onClick={() => apply((s) => { s.style.display = "block"; s.style.textAlign = "left"; })} title="Alinhar à esquerda" className={toolBtn}>
           <AlignLeft className="h-3.5 w-3.5" />
         </button>
-        <button type="button" onMouseDown={keepSel} onClick={() => align("center")} title="Centralizar" className={toolBtn}>
+        <button type="button" onMouseDown={keepSel} onClick={() => apply((s) => { s.style.display = "block"; s.style.textAlign = "center"; })} title="Centralizar" className={toolBtn}>
           <AlignCenter className="h-3.5 w-3.5" />
         </button>
-        <button type="button" onMouseDown={keepSel} onClick={() => align("right")} title="Alinhar à direita" className={toolBtn}>
+        <button type="button" onMouseDown={keepSel} onClick={() => apply((s) => { s.style.display = "block"; s.style.textAlign = "right"; })} title="Alinhar à direita" className={toolBtn}>
           <AlignRight className="h-3.5 w-3.5" />
         </button>
         <span className="mx-2 h-4 w-px bg-white/15" />
-        <button type="button" onMouseDown={keepSel} onClick={applyBold} title="Negrito" className={toolBtn}>
+        <button type="button" onMouseDown={keepSel} onClick={() => apply((s) => (s.style.fontWeight = "700"))} title="Negrito" className={toolBtn}>
           <Bold className="h-3.5 w-3.5" />
         </button>
         <button type="button" onMouseDown={keepSel} onClick={clearFormat} title="Limpar formatação" className={toolBtn}>
