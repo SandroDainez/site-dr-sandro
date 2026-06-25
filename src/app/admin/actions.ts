@@ -25,6 +25,7 @@ import {
   type AtualizacaoData,
   type ProtocoloData,
   type VideoaulaData,
+  type CursoData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -236,6 +237,18 @@ export async function saveVideoaulas(videoaulas: VideoaulaData[]): Promise<Resul
     await writeBlob("videoaulas", videoaulas);
     revalidatePath("/");
     revalidatePath("/videoaulas");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveCursos(cursos: CursoData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("cursos", cursos);
+    revalidatePath("/");
+    revalidatePath("/cursos");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };

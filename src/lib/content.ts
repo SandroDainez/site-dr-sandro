@@ -170,6 +170,41 @@ export type VideoaulaData = {
   data: string;         // YYYY-MM-DD
 };
 
+// ─── Cursos (pilar) ───────────────────────────────────────────────────────────
+// Curso > Aulas sequenciais > Materiais (vídeo, slides, pdf, ebook).
+// Acesso: "gratis" abre pra todos; "pago" fica bloqueado (🔒 em breve) até a
+// Fase 2 do pagamento (compra avulsa por curso + assinatura única do site).
+
+export type CursoMaterial = {
+  id: string;
+  tipo: "video" | "slides" | "pdf" | "ebook";
+  titulo: string;
+  url: string; // URL do YouTube (vídeo) ou /api/img de blob privado (vídeo/slides/pdf)
+};
+
+export type CursoAula = {
+  id: string;
+  titulo: string;
+  descricao: string; // rich text (HTML)
+  materiais: CursoMaterial[];
+};
+
+export type CursoData = {
+  id: string; // slug único (ex: ventilacao-mecanica)
+  titulo: string;
+  resumo: string; // frase curta no card
+  descricao: string; // rich text (sobre o curso)
+  area: "emergencias" | "ti" | "anestesiologia" | "geral";
+  nivel: "basico" | "intermediario" | "avancado" | "";
+  professor: string;
+  capaUrl: string; // imagem de capa
+  acesso: "gratis" | "pago";
+  preco: string; // ex "R$ 297" (guardado p/ Fase 2; vazio = sem preço)
+  destaque: boolean;
+  aulas: CursoAula[];
+  data: string; // YYYY-MM-DD
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
@@ -184,6 +219,7 @@ export type ContentMap = {
   atualizacoes: AtualizacaoData[];
   protocolos: ProtocoloData[];
   videoaulas: VideoaulaData[];
+  cursos: CursoData[];
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -470,7 +506,7 @@ export const defaultVideoaulas: VideoaulaData[] = [
 export const defaultNavItems: NavItemData[] = [
   { label: "Apps Assinatura", href: "#apps-assinatura" },
   { label: "Apps Grátis", href: "#apps-gratis" },
-  { label: "Cursos", href: "#cursos" },
+  { label: "Cursos", href: "/cursos" },
   { label: "Eventos", href: "#eventos" },
   { label: "Atualizações", href: "/atualizacoes" },
   { label: "Protocolos", href: "/protocolos" },
@@ -628,6 +664,15 @@ export async function getProtocolos(): Promise<ProtocoloData[]> {
 
 export async function getVideoaulas(): Promise<VideoaulaData[]> {
   return readBlob("videoaulas", []);
+}
+
+export async function getCursos(): Promise<CursoData[]> {
+  return readBlob("cursos", []);
+}
+
+export async function getCurso(slug: string): Promise<CursoData | null> {
+  const cursos = await getCursos();
+  return cursos.find((c) => c.id === slug) ?? null;
 }
 
 export async function uploadImageToBlob(file: File): Promise<string> {

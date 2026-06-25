@@ -71,9 +71,17 @@ const sections = [
     href: "/admin/cursos",
     icon: GraduationCap,
     label: "Cursos",
-    desc: "Edite os tópicos de cursos com título, ID âncora e link.",
+    desc: "Cursos completos: aulas sequenciais, vídeos, slides, PDF/ebook. Grátis ou pago.",
     color: "text-accent-violet",
     border: "hover:border-accent-violet/40",
+  },
+  {
+    href: "/admin/topicos-estudo",
+    icon: BookOpen,
+    label: "Tópicos de estudo (home)",
+    desc: "Lista simples de tópicos exibida na seção de atualização médica contínua.",
+    color: "text-white/60",
+    border: "hover:border-white/30",
   },
   {
     href: "/admin/por-que-nos",
