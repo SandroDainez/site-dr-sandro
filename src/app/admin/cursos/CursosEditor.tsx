@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition } from "react";
 import {
   Save, Plus, Trash2, Upload, ChevronDown, ChevronUp,
   Video, FileText, Presentation, BookOpen,
@@ -50,8 +50,6 @@ export default function CursosEditor({ initialCursos }: Props) {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
-  const fileInput = useRef<HTMLInputElement | null>(null);
-  const pendingUpload = useRef<{ key: string; apply: (url: string) => void } | null>(null);
 
   function touch() {
     setSaved(false);
@@ -155,31 +153,20 @@ export default function CursosEditor({ initialCursos }: Props) {
     setMateriais(ci, ai, (m) => m.filter((_, i) => i !== mi));
   }
 
-  // ── Upload (capa + materiais) ──────────────────────────
-  function pickFile(key: string, accept: string, apply: (url: string) => void) {
-    pendingUpload.current = { key, apply };
-    if (fileInput.current) {
-      fileInput.current.accept = accept;
-      fileInput.current.click();
-    }
-  }
-
-  async function onFileChosen(file: File) {
-    const job = pendingUpload.current;
-    if (!job) return;
+  // ── Upload (capa + materiais) — input próprio por campo (acionado por <label>) ──
+  async function handleUpload(key: string, file: File, apply: (url: string) => void) {
     setError(null);
-    setUploadingKey(job.key);
+    setUploadingKey(key);
     try {
       const blob = await upload(`cursos/${Date.now()}-${file.name}`, file, {
         access: "private",
         handleUploadUrl: "/api/upload",
       });
-      job.apply(`/api/img?url=${encodeURIComponent(blob.url)}`);
+      apply(`/api/img?url=${encodeURIComponent(blob.url)}`);
     } catch (e) {
       setError("Falha no upload: " + String(e instanceof Error ? e.message : e));
     } finally {
       setUploadingKey(null);
-      pendingUpload.current = null;
     }
   }
 
@@ -203,17 +190,6 @@ export default function CursosEditor({ initialCursos }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* input de arquivo único, reutilizado */}
-      <input
-        type="file"
-        ref={fileInput}
-        className="hidden"
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFileChosen(f);
-          e.target.value = "";
-        }}
-      />
 
       {cursos.map((curso, ci) => {
         const cid = curso.id || `idx-${ci}`;
@@ -329,15 +305,24 @@ export default function CursosEditor({ initialCursos }: Props) {
                 <div>
                   <label className={labelCls}>Capa do curso</label>
                   <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      disabled={uploadingKey === `capa-${ci}`}
-                      onClick={() => pickFile(`capa-${ci}`, "image/*", (url) => updateCurso(ci, { capaUrl: url }))}
-                      className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white/70 transition hover:border-accent/40 hover:text-white disabled:opacity-50"
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id={`capa-file-${ci}`}
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleUpload(`capa-${ci}`, f, (url) => updateCurso(ci, { capaUrl: url }));
+                        e.target.value = "";
+                      }}
+                    />
+                    <label
+                      htmlFor={`capa-file-${ci}`}
+                      className={`flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white/70 transition hover:border-accent/40 hover:text-white ${uploadingKey === `capa-${ci}` ? "pointer-events-none opacity-50" : ""}`}
                     >
                       <Upload className="h-4 w-4" />
                       {uploadingKey === `capa-${ci}` ? "Enviando..." : "Enviar capa"}
-                    </button>
+                    </label>
                     {curso.capaUrl && (
                       <button type="button" onClick={() => updateCurso(ci, { capaUrl: "" })} className="text-xs text-red-400/70 hover:text-red-400">Remover</button>
                     )}
@@ -410,19 +395,31 @@ export default function CursosEditor({ initialCursos }: Props) {
                                   <input
                                     className={inputCls + " flex-1"}
                                     value={mat.url}
-                                    placeholder={mat.tipo === "video" ? "Link do YouTube ou envie o arquivo →" : "Envie o arquivo →"}
+                                    placeholder={mat.tipo === "video" ? "Cole um link do YouTube aqui (ou envie do PC →)" : "Envie o arquivo do PC →"}
                                     onChange={(e) => updateMaterial(ci, ai, mi, { url: e.target.value })}
                                   />
-                                  <button
-                                    type="button"
-                                    disabled={isUp}
-                                    onClick={() => pickFile(`mat-${ci}-${ai}-${mi}`, accept, (url) => updateMaterial(ci, ai, mi, { url }))}
-                                    className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-xs text-white/70 transition hover:border-accent/40 hover:text-white disabled:opacity-50"
+                                  <input
+                                    type="file"
+                                    accept={accept}
+                                    id={`mat-file-${ci}-${ai}-${mi}`}
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const f = e.target.files?.[0];
+                                      if (f) handleUpload(`mat-${ci}-${ai}-${mi}`, f, (url) => updateMaterial(ci, ai, mi, { url }));
+                                      e.target.value = "";
+                                    }}
+                                  />
+                                  <label
+                                    htmlFor={`mat-file-${ci}-${ai}-${mi}`}
+                                    className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-xs font-semibold text-accent transition hover:bg-accent/20 ${isUp ? "pointer-events-none opacity-50" : ""}`}
                                   >
                                     <Upload className="h-3.5 w-3.5" />
-                                    {isUp ? "Enviando..." : "Enviar"}
-                                  </button>
+                                    {isUp ? "Enviando..." : mat.tipo === "video" ? "Enviar do PC" : "Enviar arquivo"}
+                                  </label>
                                 </div>
+                                {mat.url && (
+                                  <p className="mt-1.5 truncate text-[11px] text-white/40">✓ {mat.url.includes("youtu") ? "Link do YouTube salvo" : "Arquivo enviado"}</p>
+                                )}
                               </div>
                             );
                           })}
