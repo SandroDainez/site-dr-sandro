@@ -96,7 +96,7 @@ export default async function Home() {
             <SiteLogo header={header} variant="lg" />
             <div className="max-w-md text-center lg:text-left">
               {header.name && (
-                <p className="text-3xl font-bold leading-tight tracking-tight text-white break-words md:text-4xl lg:text-5xl">{header.name}</p>
+                <p className="text-2xl font-bold leading-tight tracking-tight text-white break-words md:text-3xl">{header.name}</p>
               )}
               {headerSubtitleLines(header).length > 0 && (
                 <div className="mt-2 space-y-0.5 text-base font-semibold leading-tight tracking-tight text-accent md:text-lg lg:text-xl">
