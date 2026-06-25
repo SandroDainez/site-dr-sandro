@@ -15,6 +15,7 @@ import {
   type HeroData,
   type HeaderData,
   type FreeAppData,
+  type UtilAppData,
   type ContentItemData,
   type CourseData,
   type WhyUsData,
@@ -99,6 +100,17 @@ export async function saveFreeApps(apps: FreeAppData[]): Promise<Result> {
   try {
     await requireAdmin();
     await writeBlob("freeApps", apps);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveUtilApps(apps: UtilAppData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("utilApps", apps);
     revalidatePath("/");
     return { ok: true };
   } catch (e) {

@@ -21,6 +21,7 @@ export const TYPOGRAPHY_SECTIONS: { key: string; label: string }[] = [
   { key: "marquee", label: "Faixa rolante (marquee)" },
   { key: "apps", label: "Apps por assinatura" },
   { key: "freeApps", label: "Apps grátis" },
+  { key: "utilApps", label: "Apps do dia a dia" },
   { key: "atualizacoes", label: "Atualizações (home)" },
   { key: "protocolos", label: "Protocolos (home)" },
   { key: "videoaulas", label: "Videoaulas (home)" },

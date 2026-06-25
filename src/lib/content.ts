@@ -42,6 +42,18 @@ export type FreeAppData = {
   imageSize?: number; // tamanho do logo em px (default 28)
 };
 
+// Apps genéricos do dia a dia (finanças, organização, produtividade — podem ser
+// fora do tema médico). Mesmo padrão premium, com badge de categoria.
+export type UtilAppData = {
+  title: string;
+  categoria: string; // badge: "Finanças", "Organização", "Produtividade"...
+  desc: string; // rich text (HTML simples, sanitizado ao renderizar)
+  icon: string;
+  link: string;
+  imageUrl?: string; // logo/ícone do app
+  imageSize?: number; // tamanho do logo em px (default 48)
+};
+
 export type ContentItemData = {
   title: string;
   subtitle: string;
@@ -215,6 +227,7 @@ export type ContentMap = {
   hero: HeroData;
   header: HeaderData;
   freeApps: FreeAppData[];
+  utilApps: UtilAppData[];
   contentItems: ContentItemData[];
   courses: CourseData[];
   whyUs: WhyUsData[];
@@ -355,6 +368,30 @@ export const defaultFreeApps: FreeAppData[] = [
     title: "Podcast",
     desc: "Episódios em áudio com discussão de casos e condutas, sem necessidade de login.",
     icon: "AudioLines",
+    link: "",
+  },
+];
+
+export const defaultUtilApps: UtilAppData[] = [
+  {
+    title: "Controle de Gastos",
+    categoria: "Finanças",
+    desc: "Acompanhe receitas e despesas, categorize e visualize para onde vai o seu dinheiro.",
+    icon: "Wallet",
+    link: "",
+  },
+  {
+    title: "Organização Pessoal",
+    categoria: "Organização",
+    desc: "Listas, tarefas e rotinas para manter o dia a dia sob controle.",
+    icon: "ListChecks",
+    link: "",
+  },
+  {
+    title: "Planejamento Financeiro",
+    categoria: "Finanças",
+    desc: "Metas, reserva de emergência e simulações para planejar o futuro com tranquilidade.",
+    icon: "PiggyBank",
     link: "",
   },
 ];
@@ -509,6 +546,7 @@ export const defaultVideoaulas: VideoaulaData[] = [
 export const defaultNavItems: NavItemData[] = [
   { label: "Apps Assinatura", href: "#apps-assinatura" },
   { label: "Apps Grátis", href: "#apps-gratis" },
+  { label: "Dia a dia", href: "#apps-uteis" },
   { label: "Cursos", href: "/cursos" },
   { label: "Eventos", href: "#eventos" },
   { label: "Atualizações", href: "/atualizacoes" },
@@ -625,6 +663,10 @@ export function headerSubtitleLines(h: HeaderData): string[] {
 
 export async function getFreeApps(): Promise<FreeAppData[]> {
   return readBlob("freeApps", defaultFreeApps);
+}
+
+export async function getUtilApps(): Promise<UtilAppData[]> {
+  return readBlob("utilApps", defaultUtilApps);
 }
 
 export async function getContentItems(): Promise<ContentItemData[]> {

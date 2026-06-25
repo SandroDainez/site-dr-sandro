@@ -16,6 +16,7 @@ import {
   Menu,
   Type,
   UserCircle,
+  Wallet,
 } from "lucide-react";
 
 const sections = [
@@ -66,6 +67,14 @@ const sections = [
     desc: "Edite os cards de aplicativos gratuitos com ícone e link.",
     color: "text-emerald-400",
     border: "hover:border-emerald-400/40",
+  },
+  {
+    href: "/admin/apps-uteis",
+    icon: Wallet,
+    label: "Apps do dia a dia",
+    desc: "Apps genéricos (finanças, organização, produtividade), com badge de categoria.",
+    color: "text-amber-400",
+    border: "hover:border-amber-400/40",
   },
   {
     href: "/admin/cursos",

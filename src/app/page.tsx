@@ -11,9 +11,12 @@ import {
   GraduationCap,
   HeartPulse,
   Layers,
+  ListChecks,
   Microscope,
+  PiggyBank,
   ShieldCheck,
   Sparkles,
+  Wallet,
   Zap,
   type LucideIcon,
 } from "lucide-react";
@@ -31,6 +34,7 @@ import {
   getHero,
   getHeader,
   getFreeApps,
+  getUtilApps,
   getCourses,
   getWhyUs,
   getSiteConfig,
@@ -46,17 +50,19 @@ import {
 const iconMap: Record<string, LucideIcon> = {
   Layers, CalendarClock, FileText, Zap, HeartPulse, BookOpen, AudioLines,
   BrainCircuit, ShieldCheck, Sparkles, GraduationCap, Microscope,
+  Wallet, PiggyBank, ListChecks,
 };
 
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo, navItems, navStyle] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
     getHero(),
     getHeader(),
     getFreeApps(),
+    getUtilApps(),
     getCourses(),
     getWhyUs(),
     getSiteConfig(),
@@ -297,6 +303,74 @@ export default async function Home() {
             })}
           </div>
         </section>
+
+        {/* Apps para o dia a dia (genéricos / não-médicos) */}
+        {utilApps.length > 0 && (
+        <section id="apps-uteis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="utilApps">
+          <div className="mb-10">
+            <div className="flex items-center gap-2">
+              <p className="text-xs uppercase tracking-[0.16em] text-amber-300">Para o seu dia a dia</p>
+              <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-amber-300">Novo</span>
+            </div>
+            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Apps para organização e finanças pessoais</h2>
+            <p className="mt-3 max-w-2xl text-sm text-white/50">
+              Ferramentas que ajudam no dia a dia — controle de gastos, organização pessoal,
+              planejamento financeiro e mais. Úteis também fora da medicina, pra facilitar a sua rotina.
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {utilApps.map((item) => {
+              const UtilIcon = iconMap[item.icon] ?? Wallet;
+              const inner = (
+                <>
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-amber-500/10 to-transparent" />
+                  <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-all duration-500 group-hover:bg-white/20" />
+                  <div className="relative">
+                    <div className="mb-6 flex items-center justify-between">
+                      {item.imageUrl ? (
+                        <div
+                          className="overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]"
+                          style={{ width: item.imageSize ?? 48, height: item.imageSize ?? 48 }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />
+                        </div>
+                      ) : (
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
+                          <UtilIcon className="h-5 w-5 text-amber-300" />
+                        </div>
+                      )}
+                      {item.categoria && (
+                        <span className="rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-300">
+                          {item.categoria}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-2xl font-medium tracking-tight">{item.title}</h3>
+                    <p
+                      className="mt-4 text-sm leading-relaxed text-muted"
+                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.desc) }}
+                    />
+                    <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]">
+                      {item.link ? "Abrir app" : "Em breve"} <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
+                </>
+              );
+              const cls =
+                "group finex-scan relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20";
+              return item.link ? (
+                <a key={item.title} href={item.link} target="_blank" rel="noreferrer" className={`${cls} block`}>
+                  {inner}
+                </a>
+              ) : (
+                <article key={item.title} className={cls}>{inner}</article>
+              );
+            })}
+          </div>
+        </section>
+        )}
 
         {/* Atualizações teaser — 1 card por área */}
         {atualizacoes.length > 0 && (() => {
