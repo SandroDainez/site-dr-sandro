@@ -334,12 +334,6 @@ export default async function Home() {
                       href={`/atualizacoes#${latest.id}`}
                       className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 ${area.border}`}
                     >
-                      {latest.imageUrl && (
-                        <div className="flex items-center justify-center border-b border-white/10 bg-white p-3" style={{ height: 150 }}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={latest.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
-                        </div>
-                      )}
                       <div className="flex flex-1 flex-col p-5">
                       <div className="flex items-center justify-between">
                         <span className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${area.badge}`}>
@@ -347,9 +341,17 @@ export default async function Home() {
                         </span>
                         <span className="text-xs text-white/30">{sorted.length} item{sorted.length !== 1 ? "s" : ""}</span>
                       </div>
-                      <h3 className={`mt-4 text-base font-semibold leading-snug ${area.color}`}>
-                        {latest.titulo}
-                      </h3>
+                      <div className="mt-4 flex items-start gap-3">
+                        {latest.imageUrl && (
+                          <div className="shrink-0 overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={latest.imageUrl} alt="" className="h-12 w-12 object-contain" />
+                          </div>
+                        )}
+                        <h3 className={`text-base font-semibold leading-snug ${area.color}`}>
+                          {latest.titulo}
+                        </h3>
+                      </div>
                       <p
                         className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/50 flex-1"
                         dangerouslySetInnerHTML={{ __html: sanitizeRichText(latest.conteudo) }}

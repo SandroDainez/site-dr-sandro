@@ -80,9 +80,15 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex w-full items-start justify-between gap-3 p-5 text-left"
+        className="flex w-full items-start gap-3 p-5 text-left"
       >
-        <div className="min-w-0">
+        {item.imageUrl && (
+          <div className="shrink-0 overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={item.imageUrl} alt="" className="h-12 w-12 object-contain sm:h-14 sm:w-14" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
               {cfg.label}
@@ -114,24 +120,8 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
             className="whitespace-pre-wrap text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4"
             dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.conteudo) }}
           />
-          {item.imageUrl && (
-            <div className="mt-4">
-              {/* Selo enquadrado: painel branco intencional, logo inteiro e centralizado */}
-              <div
-                className="flex items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white p-3 ring-1 ring-black/5"
-                style={{ height: item.imageSize ?? 160 }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.imageUrl}
-                  alt={item.imageCaption || item.titulo}
-                  className="max-h-full max-w-full object-contain"
-                />
-              </div>
-              {item.imageCaption && (
-                <p className="mt-1.5 text-xs text-white/40 leading-relaxed">{item.imageCaption}</p>
-              )}
-            </div>
+          {item.imageCaption && item.imageUrl && (
+            <p className="mt-3 text-xs text-white/40 leading-relaxed">{item.imageCaption}</p>
           )}
           {item.link && (
             <div className="mt-3 text-xs">
