@@ -343,8 +343,11 @@ export default async function Home() {
                           <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />
                         </div>
                       ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
-                          <UtilIcon className="h-5 w-5 text-amber-300" />
+                        <div
+                          className="flex items-center justify-center rounded-2xl border border-white/15 bg-white/10"
+                          style={{ width: item.imageSize ?? 48, height: item.imageSize ?? 48 }}
+                        >
+                          <UtilIcon className="text-amber-300" style={{ width: (item.imageSize ?? 48) * 0.42, height: (item.imageSize ?? 48) * 0.42 }} />
                         </div>
                       )}
                       {item.categoria && (

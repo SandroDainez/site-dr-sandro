@@ -124,26 +124,24 @@ export default function AppsUteisEditor({ initialApps }: Props) {
               </label>
             </div>
 
-            {app.imageUrl && (
-              <div className="mt-3">
-                <div className="mb-1 flex items-center justify-between">
-                  <label className="text-xs text-muted">Tamanho do logo</label>
-                  <span className="text-xs font-semibold tabular-nums text-accent">{app.imageSize ?? 48}px</span>
-                </div>
-                <input
-                  type="range"
-                  min={24}
-                  max={96}
-                  value={app.imageSize ?? 48}
-                  onChange={(e) => {
-                    const v = Number(e.target.value);
-                    setApps((prev) => prev.map((a, i) => (i === index ? { ...a, imageSize: v } : a)));
-                    setSaved(false);
-                  }}
-                  className="w-full accent-[var(--accent,#2ce6b8)]"
-                />
+            <div className="mt-3">
+              <div className="mb-1 flex items-center justify-between">
+                <label className="text-xs text-muted">Tamanho do logo / ícone no card</label>
+                <span className="text-xs font-semibold tabular-nums text-accent">{app.imageSize ?? 48}px</span>
               </div>
-            )}
+              <input
+                type="range"
+                min={24}
+                max={160}
+                value={app.imageSize ?? 48}
+                onChange={(e) => {
+                  const v = Number(e.target.value);
+                  setApps((prev) => prev.map((a, i) => (i === index ? { ...a, imageSize: v } : a)));
+                  setSaved(false);
+                }}
+                className="w-full accent-[var(--accent,#2ce6b8)]"
+              />
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
