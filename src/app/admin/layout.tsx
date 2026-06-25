@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Layers,
   LogOut,
+  Mic,
   Newspaper,
   PlayCircle,
   Settings,
@@ -20,6 +21,7 @@ import {
   Menu,
   Type,
   UserCircle,
+  Wallet,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
 
@@ -37,7 +39,9 @@ const navLinks = [
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
   { href: "/admin/apps", label: "Apps", icon: Layers },
   { href: "/admin/apps-gratis", label: "Apps Grátis", icon: BookOpen },
+  { href: "/admin/apps-uteis", label: "Apps do dia a dia", icon: Wallet },
   { href: "/admin/cursos", label: "Cursos", icon: GraduationCap },
+  { href: "/admin/topicos-estudo", label: "Tópicos de estudo", icon: BookOpen },
   { href: "/admin/por-que-nos", label: "Por que nós", icon: ShieldCheck },
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/admin/contato", label: "Contato", icon: Contact },
@@ -45,6 +49,7 @@ const navLinks = [
   { href: "/admin/atualizacoes", label: "Atualizações", icon: Newspaper },
   { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList },
   { href: "/admin/videoaulas", label: "Videoaulas", icon: PlayCircle },
+  { href: "/admin/podcast", label: "Podcast", icon: Mic },
   { href: "/admin/config", label: "Configurações", icon: Settings },
 ];
 
