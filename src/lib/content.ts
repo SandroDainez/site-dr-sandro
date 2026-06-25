@@ -167,6 +167,7 @@ export type VideoaulaData = {
   duracao: string;      // e.g. "45 min"
   nivel: "basico" | "intermediario" | "avancado" | "";
   gratuita: boolean;
+  enquadramento?: number; // posição horizontal do vídeo no card (object-position X%, 0=esq, 50=centro, 100=dir). default 50
   data: string;         // YYYY-MM-DD
 };
 

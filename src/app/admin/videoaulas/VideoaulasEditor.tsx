@@ -358,6 +358,47 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
               {ytId && (
                 <p className="mt-1 text-xs text-white/40">🎬 YouTube link salvo</p>
               )}
+
+              {/* Enquadramento do vídeo no card (corta as tarjas brancas; ajusta se o personagem ficar fora do centro) */}
+              {isProxyVideo && item.videoUrl && (
+                <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <label className="text-xs text-white/50">
+                      Enquadramento no card (arraste se o personagem ficar cortado)
+                    </label>
+                    <span className="text-xs font-semibold tabular-nums text-accent">{item.enquadramento ?? 50}%</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="relative aspect-[4/5] w-16 shrink-0 overflow-hidden rounded-lg bg-black">
+                      <video
+                        src={`${item.videoUrl}#t=2`}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        style={{ objectPosition: `${item.enquadramento ?? 50}% center` }}
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={item.enquadramento ?? 50}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, enquadramento: v } : it)));
+                          setSaved(false);
+                        }}
+                        className="w-full accent-[var(--accent,#2ce6b8)]"
+                      />
+                      <div className="mt-1 flex justify-between text-[10px] text-white/30">
+                        <span>← Esquerda</span><span>Centro</span><span>Direita →</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Thumbnail upload */}

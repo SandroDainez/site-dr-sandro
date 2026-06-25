@@ -102,6 +102,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
   const isProxyVideo = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
   const isLong = item.descricao.replace(/<[^>]*>/g, "").length > 140;
+  const objPos = { objectPosition: `${item.enquadramento ?? 50}% center` } as const;
 
   // Thumbnail
   let thumbSrc: string | null = null;
@@ -119,7 +120,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
           className={`relative aspect-[4/5] overflow-hidden ${hasVideo ? "cursor-pointer group" : ""}`}
           onClick={() => hasVideo && !ytId && setPlayerOpen(true)}
         >
-          <img src={thumbSrc} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover" />
+          <img src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
           {hasVideo && !ytId && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
@@ -137,6 +138,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
               controls
               autoPlay
               playsInline
+              style={objPos}
               className="absolute inset-0 h-full w-full object-cover"
             />
             {/* Botão expandir p/ tela cheia */}
@@ -160,6 +162,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
               muted
               playsInline
               preload="metadata"
+              style={objPos}
               className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">

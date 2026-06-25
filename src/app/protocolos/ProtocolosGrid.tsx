@@ -285,10 +285,47 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                 className="min-h-0 w-full flex-1 rounded-xl bg-white"
               />
             ) : (
-              <pre
-                className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-black/40 p-5 text-base leading-relaxed text-white/85 font-mono"
-                dangerouslySetInnerHTML={{ __html: sanitizeRichText(p.conteudo) }}
-              />
+              <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-white/10 bg-black/40 p-5">
+                {/* Infográfico (o protocolo visual) */}
+                {p.imageUrl && (
+                  <img
+                    src={p.imageUrl}
+                    alt={p.imageCaption || p.titulo}
+                    className="mx-auto mb-5 max-h-[78vh] w-auto rounded-xl object-contain"
+                  />
+                )}
+                {/* Texto do protocolo */}
+                {p.conteudo && (
+                  <pre
+                    className="whitespace-pre-wrap text-base leading-relaxed text-white/85 font-mono"
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(p.conteudo) }}
+                  />
+                )}
+                {/* PDF completo */}
+                {p.arquivoUrl && (
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setFull({ id: p.id, mode: "pdf" })}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/40 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/25"
+                    >
+                      📄 Abrir PDF completo
+                    </button>
+                    <a
+                      href={p.arquivoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      download
+                      className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
+                    >
+                      {p.arquivoLabel || "Baixar PDF"} ↓
+                    </a>
+                  </div>
+                )}
+                {!p.imageUrl && !p.conteudo && !p.arquivoUrl && (
+                  <p className="text-sm text-white/40">Conteúdo em preparação.</p>
+                )}
+              </div>
             )}
           </div>
         );

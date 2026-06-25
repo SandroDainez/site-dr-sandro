@@ -70,6 +70,8 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
   const isProxy = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
+  // posição horizontal do conteúdo no recorte 4:5 (vídeos com personagem fora do centro)
+  const objPos = { objectPosition: `${item.enquadramento ?? 50}% center` } as const;
 
   // Thumbnail estático (imagem própria ou capa do YouTube)
   let thumbSrc: string | null = null;
@@ -81,7 +83,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
     <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
       {thumbSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={thumbSrc} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover" />
+        <img src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
       ) : isProxy ? (
         // pointer-events-none manda o clique ao container (toca inline) em vez do player nativo
         <video
@@ -89,6 +91,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
           muted
           playsInline
           preload="metadata"
+          style={objPos}
           className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         />
       ) : (
@@ -136,7 +139,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
         ) : (
           // Vídeo enviado — toca no card (cortado em 4:5 p/ esconder as tarjas brancas do vídeo)
           <div className="relative aspect-[4/5] overflow-hidden bg-black">
-            <video src={item.videoUrl} controls autoPlay playsInline className="absolute inset-0 h-full w-full object-cover" />
+            <video src={item.videoUrl} controls autoPlay playsInline style={objPos} className="absolute inset-0 h-full w-full object-cover" />
             <button
               type="button"
               onClick={() => setPlayerOpen(true)}
