@@ -653,7 +653,7 @@ export default async function Home() {
 
         {/* Podcast teaser */}
         {podcasts.filter((p) => p.titulo).length > 0 && (
-          <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-3xl px-6 pb-24" data-typo="podcast">
+          <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="podcast">
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio</p>
@@ -663,7 +663,7 @@ export default async function Home() {
                 Ver todos <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
-            <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 2)} />
+            <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
             <a href="/podcast" className="mt-6 inline-flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden">
               Ver todos os episódios <ArrowRight className="h-3.5 w-3.5" />
             </a>

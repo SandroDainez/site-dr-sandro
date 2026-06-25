@@ -30,7 +30,7 @@ export default async function PodcastPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-6 py-16">
+      <main className="mx-auto w-full max-w-7xl px-6 py-16">
         <div className="mb-10">
           <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio</p>
           <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Podcast</h1>
@@ -43,7 +43,7 @@ export default async function PodcastPage() {
       </main>
 
       <footer className="border-t border-white/10 bg-black/20 py-8">
-        <div className="mx-auto w-full max-w-3xl px-6 flex items-center justify-between text-sm text-white/40">
+        <div className="mx-auto w-full max-w-7xl px-6 flex items-center justify-between text-sm text-white/40">
           <a href="/" className="transition hover:text-white">← Início</a>
           <a href="/videoaulas" className="transition hover:text-white">Videoaulas →</a>
         </div>
