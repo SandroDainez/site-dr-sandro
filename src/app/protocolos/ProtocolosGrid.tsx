@@ -144,12 +144,17 @@ export default function ProtocolosGrid({ protocolos }: Props) {
               {/* Image */}
               {item.imageUrl && (
                 <div className="mt-4">
-                  <img
-                    src={item.imageUrl}
-                    alt={item.imageCaption || item.titulo}
-                    className="w-full rounded-2xl object-contain"
-                    style={{ maxHeight: item.imageSize ?? 220 }}
-                  />
+                  {/* Selo enquadrado: painel branco intencional, logo inteiro e centralizado */}
+                  <div
+                    className="flex items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white p-3 ring-1 ring-black/5"
+                    style={{ height: item.imageSize ?? 160 }}
+                  >
+                    <img
+                      src={item.imageUrl}
+                      alt={item.imageCaption || item.titulo}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
                   {item.imageCaption && (
                     <p className="mt-1.5 text-xs text-white/40 leading-relaxed">
                       {item.imageCaption}

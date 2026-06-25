@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "site-dr-sandro",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "PORT=3940 npm run dev"],
+      "port": 3940
+    }
+  ]
+}

@@ -116,13 +116,18 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
           />
           {item.imageUrl && (
             <div className="mt-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.imageUrl}
-                alt={item.imageCaption || item.titulo}
-                className="w-full rounded-2xl object-cover"
-                style={{ maxHeight: item.imageSize ?? 176 }}
-              />
+              {/* Selo enquadrado: painel branco intencional, logo inteiro e centralizado */}
+              <div
+                className="flex items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white p-3 ring-1 ring-black/5"
+                style={{ height: item.imageSize ?? 160 }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.imageUrl}
+                  alt={item.imageCaption || item.titulo}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
               {item.imageCaption && (
                 <p className="mt-1.5 text-xs text-white/40 leading-relaxed">{item.imageCaption}</p>
               )}

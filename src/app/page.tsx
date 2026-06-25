@@ -335,8 +335,10 @@ export default async function Home() {
                       className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 ${area.border}`}
                     >
                       {latest.imageUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={latest.imageUrl} alt="" className="w-full bg-white object-contain" style={{ maxHeight: 200 }} />
+                        <div className="flex items-center justify-center border-b border-white/10 bg-white p-3" style={{ height: 150 }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={latest.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
+                        </div>
                       )}
                       <div className="flex flex-1 flex-col p-5">
                       <div className="flex items-center justify-between">
@@ -417,8 +419,10 @@ export default async function Home() {
                         className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-white/20"
                       >
                         {item.imageUrl && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={item.imageUrl} alt="" className="w-full bg-white object-contain" style={{ maxHeight: 200 }} />
+                          <div className="flex items-center justify-center border-b border-white/10 bg-white p-3" style={{ height: 150 }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
+                          </div>
                         )}
                         <div className="flex flex-1 flex-col p-5">
                         <span
