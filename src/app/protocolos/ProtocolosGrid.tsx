@@ -185,15 +185,6 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                     >
                       {isExpanded ? "Fechar protocolo ↑" : "Ver protocolo ↓"}
                     </button>
-                    {isExpanded && (
-                      <button
-                        type="button"
-                        onClick={() => setFull({ id: item.id, mode: "text" })}
-                        className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
-                      >
-                        ⛶ Expandir
-                      </button>
-                    )}
                   </div>
                   {isExpanded && (
                     <pre

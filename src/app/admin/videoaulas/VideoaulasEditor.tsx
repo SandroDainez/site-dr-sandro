@@ -360,14 +360,18 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
               )}
 
               {/* Enquadramento do vídeo no card (corta as tarjas brancas; ajusta se o personagem ficar fora do centro) */}
-              {isProxyVideo && item.videoUrl && (
-                <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3">
+              {item.videoUrl && !ytId && (
+                <div className="mt-3 rounded-xl border border-accent/30 bg-accent/[0.05] p-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <label className="text-xs text-white/50">
-                      Enquadramento no card (arraste se o personagem ficar cortado)
+                    <label className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">
+                      📐 Enquadramento do vídeo no card
                     </label>
                     <span className="text-xs font-semibold tabular-nums text-accent">{item.enquadramento ?? 50}%</span>
                   </div>
+                  <p className="mb-2 text-[11px] leading-relaxed text-white/45">
+                    Arraste para mover o recorte na horizontal (corta as tarjas brancas das laterais).
+                    O quadrinho à esquerda mostra como vai ficar no site.
+                  </p>
                   <div className="flex items-center gap-3">
                     <div className="relative aspect-[4/5] w-16 shrink-0 overflow-hidden rounded-lg bg-black">
                       <video
