@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  BarChart3,
   BookOpen,
   CalendarDays,
   ClipboardList,
@@ -22,6 +23,14 @@ import {
 } from "lucide-react";
 
 const sections = [
+  {
+    href: "/admin/analytics",
+    icon: BarChart3,
+    label: "Acessos ao site",
+    desc: "Veja quantas pessoas acessaram, com gráfico de visitas por dia.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
+  },
   {
     href: "/admin/header",
     icon: UserCircle,

@@ -760,6 +760,13 @@ export async function getColaboradores(): Promise<ColaboradorData[]> {
   return readBlob("colaboradores", []);
 }
 
+// Analytics de acessos: { "YYYY-MM-DD": { v: visualizações, u: visitantes únicos } }
+export type AnalyticsData = Record<string, { v: number; u: number }>;
+
+export async function getAnalytics(): Promise<AnalyticsData> {
+  return readBlob<AnalyticsData>("analytics", {});
+}
+
 export async function uploadImageToBlob(file: File): Promise<string> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     throw new Error("BLOB_READ_WRITE_TOKEN não configurado.");

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createHash } from "crypto";
 import {
+  BarChart3,
   BookOpen,
   CalendarDays,
   ClipboardList,
@@ -34,6 +35,7 @@ function getExpectedToken() {
 
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/analytics", label: "Acessos", icon: BarChart3 },
   { href: "/admin/header", label: "Cabeçalho", icon: UserCircle },
   { href: "/admin/menu", label: "Menu do topo", icon: Menu },
   { href: "/admin/tipografia", label: "Aparência do texto", icon: Type },

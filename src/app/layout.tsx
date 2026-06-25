@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Poppins, Lora } from "next/font/google";
 import { getHeader, getHero, headerSubtitleLines } from "@/lib/content";
+import TrackVisit from "@/components/TrackVisit";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,6 +53,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-background text-foreground font-sans">
         {children}
+        <TrackVisit />
       </body>
     </html>
   );
