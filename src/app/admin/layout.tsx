@@ -21,6 +21,7 @@ import {
   Menu,
   Type,
   UserCircle,
+  Users,
   Wallet,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
@@ -49,6 +50,7 @@ const navLinks = [
   { href: "/admin/atualizacoes", label: "Atualizações", icon: Newspaper },
   { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList },
   { href: "/admin/videoaulas", label: "Videoaulas", icon: PlayCircle },
+  { href: "/admin/colaboradores", label: "Colaboradores", icon: Users },
   { href: "/admin/podcast", label: "Podcast", icon: Mic },
   { href: "/admin/config", label: "Configurações", icon: Settings },
 ];

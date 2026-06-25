@@ -17,6 +17,7 @@ import {
   Menu,
   Type,
   UserCircle,
+  Users,
   Wallet,
 } from "lucide-react";
 
@@ -148,6 +149,14 @@ const sections = [
     desc: "Publique e gerencie videoaulas médicas por área clínica.",
     color: "text-rose-400",
     border: "hover:border-rose-400/40",
+  },
+  {
+    href: "/admin/colaboradores",
+    icon: Users,
+    label: "Vídeos de colaboradores",
+    desc: "Vídeos de outros médicos que autorizaram, com nome e especialidade.",
+    color: "text-cyan-400",
+    border: "hover:border-cyan-400/40",
   },
   {
     href: "/admin/podcast",

@@ -23,6 +23,7 @@ import {
 import CalendarioEventos from "@/components/CalendarioEventos";
 import HomeVideoCard from "@/components/HomeVideoCard";
 import PodcastList from "@/app/podcast/PodcastList";
+import ColaboradoresList from "@/app/colaboradores/ColaboradoresList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -43,6 +44,7 @@ import {
   getProtocolos,
   getVideoaulas,
   getPodcasts,
+  getColaboradores,
   getTypography,
   getNavItems,
   getNavStyle,
@@ -57,7 +59,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, typo, navItems, navStyle] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -72,6 +74,7 @@ export default async function Home() {
     getProtocolos(),
     getVideoaulas(),
     getPodcasts(),
+    getColaboradores(),
     getTypography(),
     getNavItems(),
     getNavStyle(),
@@ -581,6 +584,25 @@ export default async function Home() {
             </section>
           );
         })()}
+
+        {/* Colaboradores teaser */}
+        {colaboradores.filter((c) => c.titulo).length > 0 && (
+          <section id="colaboradores" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="colaboradores">
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.16em] text-accent">Comunidade médica</p>
+                <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">Vídeos de colaboradores</h2>
+              </div>
+              <a href="/colaboradores" className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex">
+                Ver todos <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+            <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
+            <a href="/colaboradores" className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden">
+              Ver todos <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </section>
+        )}
 
         <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="cursos">
           <div className="finex-glass rounded-[2rem] p-8 md:p-12">

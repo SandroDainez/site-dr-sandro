@@ -234,6 +234,20 @@ export type PodcastData = {
   data: string; // YYYY-MM-DD
 };
 
+// Vídeos de colaboradores: vídeos de outros médicos que autorizaram a publicação,
+// com crédito (nome + especialidade).
+export type ColaboradorData = {
+  id: string;
+  titulo: string;
+  descricao: string; // rich text
+  medico: string; // nome do médico colaborador
+  especialidade: string; // ex: "Cardiologia"
+  videoUrl: string; // YouTube ou /api/img de blob
+  imageUrl: string; // thumbnail (opcional)
+  duracao: string;
+  data: string; // YYYY-MM-DD
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
@@ -251,6 +265,7 @@ export type ContentMap = {
   videoaulas: VideoaulaData[];
   cursos: CursoData[];
   podcasts: PodcastData[];
+  colaboradores: ColaboradorData[];
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -567,6 +582,7 @@ export const defaultNavItems: NavItemData[] = [
   { label: "Atualizações", href: "/atualizacoes" },
   { label: "Protocolos", href: "/protocolos" },
   { label: "Videoaulas", href: "/videoaulas" },
+  { label: "Colaboradores", href: "/colaboradores" },
   { label: "Podcast", href: "/podcast" },
   { label: "Contato", href: "#contato" },
 ];
@@ -738,6 +754,10 @@ export async function getCurso(slug: string): Promise<CursoData | null> {
 
 export async function getPodcasts(): Promise<PodcastData[]> {
   return readBlob("podcasts", []);
+}
+
+export async function getColaboradores(): Promise<ColaboradorData[]> {
+  return readBlob("colaboradores", []);
 }
 
 export async function uploadImageToBlob(file: File): Promise<string> {
