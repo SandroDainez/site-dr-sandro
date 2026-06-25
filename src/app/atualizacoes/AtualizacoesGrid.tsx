@@ -82,12 +82,6 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-start gap-3 p-5 text-left"
       >
-        {item.imageUrl && (
-          <div className="shrink-0 overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={item.imageUrl} alt="" className="h-12 w-12 object-contain sm:h-14 sm:w-14" />
-          </div>
-        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>

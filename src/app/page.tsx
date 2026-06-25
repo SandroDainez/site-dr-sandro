@@ -243,51 +243,58 @@ export default async function Home() {
         </section>
 
         <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps">
-          <div className="finex-glass rounded-3xl p-8">
+          <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
-            <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Acesso aberto imediato</h3>
-            <div className="mt-7 grid gap-4 sm:grid-cols-2">
-              {freeApps.map((item) => {
-                const FreeIcon = iconMap[item.icon] ?? BookOpen;
-                const cardContent = (
-                  <>
-                    <div className="flex items-center gap-3">
+            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Acesso aberto imediato</h2>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {freeApps.map((item) => {
+              const FreeIcon = iconMap[item.icon] ?? BookOpen;
+              const inner = (
+                <>
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-emerald-500/10 to-transparent" />
+                  <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-all duration-500 group-hover:bg-white/20" />
+                  <div className="relative">
+                    <div className="mb-6 flex items-center justify-between">
                       {item.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={item.imageUrl}
-                          alt=""
-                          className="shrink-0 rounded-lg object-contain"
-                          style={{ width: item.imageSize ?? 28, height: item.imageSize ?? 28 }}
-                        />
+                        <div
+                          className="overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]"
+                          style={{ width: item.imageSize ?? 48, height: item.imageSize ?? 48 }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />
+                        </div>
                       ) : (
-                        <FreeIcon className="h-4 w-4 text-accent" />
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
+                          <FreeIcon className="h-5 w-5 text-white" />
+                        </div>
                       )}
-                      <p className="font-medium">{item.title}</p>
+                      <span className="rounded-full border border-emerald-400/30 bg-emerald-400/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-300">
+                        Gratuito
+                      </span>
                     </div>
+                    <h3 className="text-2xl font-medium tracking-tight">{item.title}</h3>
                     <p
-                      className="mt-2 text-sm leading-relaxed text-muted"
+                      className="mt-4 text-sm leading-relaxed text-muted"
                       dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.desc) }}
                     />
-                  </>
-                );
-                return item.link ? (
-                  <a
-                    key={item.title}
-                    href={item.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="card-open rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-accent/35 hover:bg-black/30 block"
-                  >
-                    {cardContent}
-                  </a>
-                ) : (
-                  <div key={item.title} className="card-open rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-accent/35 hover:bg-black/30">
-                    {cardContent}
+                    <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]">
+                      {item.link ? "Abrir app" : "Em breve"} <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
                   </div>
-                );
-              })}
-            </div>
+                </>
+              );
+              const cls =
+                "group finex-scan relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20";
+              return item.link ? (
+                <a key={item.title} href={item.link} target="_blank" rel="noreferrer" className={`${cls} block`}>
+                  {inner}
+                </a>
+              ) : (
+                <article key={item.title} className={cls}>{inner}</article>
+              );
+            })}
           </div>
         </section>
 
@@ -341,17 +348,9 @@ export default async function Home() {
                         </span>
                         <span className="text-xs text-white/30">{sorted.length} item{sorted.length !== 1 ? "s" : ""}</span>
                       </div>
-                      <div className="mt-4 flex items-start gap-3">
-                        {latest.imageUrl && (
-                          <div className="shrink-0 overflow-hidden rounded-xl bg-white p-1 ring-1 ring-black/5">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={latest.imageUrl} alt="" className="h-12 w-12 object-contain" />
-                          </div>
-                        )}
-                        <h3 className={`text-base font-semibold leading-snug ${area.color}`}>
-                          {latest.titulo}
-                        </h3>
-                      </div>
+                      <h3 className={`mt-4 text-base font-semibold leading-snug ${area.color}`}>
+                        {latest.titulo}
+                      </h3>
                       <p
                         className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/50 flex-1"
                         dangerouslySetInnerHTML={{ __html: sanitizeRichText(latest.conteudo) }}
