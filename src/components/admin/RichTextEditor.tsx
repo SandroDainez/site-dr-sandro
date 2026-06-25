@@ -148,8 +148,14 @@ export default function RichTextEditor({ value, onChange }: Props) {
         <button type="button" onMouseDown={keepSel} onClick={() => apply((s) => (s.style.fontWeight = "700"))} title="Negrito" className={toolBtn}>
           <Bold className="h-3.5 w-3.5" />
         </button>
-        <button type="button" onMouseDown={keepSel} onClick={clearFormat} title="Limpar formatação" className={toolBtn}>
-          <Eraser className="h-3.5 w-3.5" />
+        <button
+          type="button"
+          onMouseDown={keepSel}
+          onClick={clearFormat}
+          title="Remove cores, tamanhos e formatação colada (vira texto puro)"
+          className="flex items-center gap-1.5 rounded-md border border-white/15 bg-white/[0.04] px-2.5 py-1 text-xs font-medium text-white/70 transition hover:bg-white/10 hover:text-white"
+        >
+          <Eraser className="h-3.5 w-3.5" /> Limpar
         </button>
       </div>
       <div
