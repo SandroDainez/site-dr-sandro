@@ -71,7 +71,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   const isProxy = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
   // posição horizontal do conteúdo no recorte 4:5 (vídeos com personagem fora do centro)
-  const objPos = { objectPosition: `${item.enquadramento ?? 50}% center` } as const;
+  const objPos = { objectPosition: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%` } as const;
 
   // Thumbnail estático (imagem própria ou capa do YouTube)
   let thumbSrc: string | null = null;

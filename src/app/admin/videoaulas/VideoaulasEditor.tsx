@@ -366,11 +366,13 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                     <label className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">
                       📐 Enquadramento do vídeo no card
                     </label>
-                    <span className="text-xs font-semibold tabular-nums text-accent">{item.enquadramento ?? 50}%</span>
+                    <span className="text-xs font-semibold tabular-nums text-accent">
+                      {item.enquadramento ?? 50}% / {item.enquadramentoY ?? 50}%
+                    </span>
                   </div>
                   <p className="mb-2 text-[11px] leading-relaxed text-white/45">
-                    Arraste para mover o recorte na horizontal (corta as tarjas brancas das laterais).
-                    O quadrinho à esquerda mostra como vai ficar no site.
+                    Arraste para mover o recorte (corta as tarjas das bordas). O quadrinho à
+                    esquerda mostra como vai ficar no site.
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="relative aspect-[4/5] w-16 shrink-0 overflow-hidden rounded-lg bg-black">
@@ -379,25 +381,44 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         muted
                         playsInline
                         preload="metadata"
-                        style={{ objectPosition: `${item.enquadramento ?? 50}% center` }}
+                        style={{ objectPosition: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%` }}
                         className="absolute inset-0 h-full w-full object-cover"
                       />
                     </div>
-                    <div className="flex-1">
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        value={item.enquadramento ?? 50}
-                        onChange={(e) => {
-                          const v = Number(e.target.value);
-                          setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, enquadramento: v } : it)));
-                          setSaved(false);
-                        }}
-                        className="w-full accent-[var(--accent,#2ce6b8)]"
-                      />
-                      <div className="mt-1 flex justify-between text-[10px] text-white/30">
-                        <span>← Esquerda</span><span>Centro</span><span>Direita →</span>
+                    <div className="flex-1 space-y-2.5">
+                      <div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={item.enquadramento ?? 50}
+                          onChange={(e) => {
+                            const v = Number(e.target.value);
+                            setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, enquadramento: v } : it)));
+                            setSaved(false);
+                          }}
+                          className="w-full accent-[var(--accent,#2ce6b8)]"
+                        />
+                        <div className="mt-1 flex justify-between text-[10px] text-white/30">
+                          <span>← Esquerda</span><span>Horizontal</span><span>Direita →</span>
+                        </div>
+                      </div>
+                      <div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={item.enquadramentoY ?? 50}
+                          onChange={(e) => {
+                            const v = Number(e.target.value);
+                            setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, enquadramentoY: v } : it)));
+                            setSaved(false);
+                          }}
+                          className="w-full accent-[var(--accent,#2ce6b8)]"
+                        />
+                        <div className="mt-1 flex justify-between text-[10px] text-white/30">
+                          <span>↑ Cima</span><span>Vertical</span><span>Baixo ↓</span>
+                        </div>
                       </div>
                     </div>
                   </div>

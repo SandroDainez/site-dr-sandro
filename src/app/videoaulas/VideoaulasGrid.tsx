@@ -102,7 +102,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
   const isProxyVideo = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
   const isLong = item.descricao.replace(/<[^>]*>/g, "").length > 140;
-  const objPos = { objectPosition: `${item.enquadramento ?? 50}% center` } as const;
+  const objPos = { objectPosition: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%` } as const;
 
   // Thumbnail
   let thumbSrc: string | null = null;

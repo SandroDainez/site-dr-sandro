@@ -168,6 +168,7 @@ export type VideoaulaData = {
   nivel: "basico" | "intermediario" | "avancado" | "";
   gratuita: boolean;
   enquadramento?: number; // posição horizontal do vídeo no card (object-position X%, 0=esq, 50=centro, 100=dir). default 50
+  enquadramentoY?: number; // posição vertical do vídeo no card (object-position Y%, 0=topo, 50=centro, 100=baixo). default 50
   data: string;         // YYYY-MM-DD
 };
 
