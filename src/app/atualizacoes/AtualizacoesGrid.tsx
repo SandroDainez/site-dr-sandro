@@ -82,6 +82,15 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
         onClick={() => setExpanded((v) => !v)}
         className="flex w-full items-start gap-3 p-5 text-left"
       >
+        {item.imageUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={item.imageUrl}
+            alt=""
+            className="shrink-0 rounded-lg object-contain"
+            style={{ width: item.imageSize ?? 56, height: item.imageSize ?? 56 }}
+          />
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${cfg.badge}`}>
@@ -114,19 +123,8 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
             className="whitespace-pre-wrap text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4"
             dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.conteudo) }}
           />
-          {item.imageUrl && (
-            <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-black/20">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={item.imageUrl}
-                alt={item.imageCaption || item.titulo}
-                className="mx-auto w-full object-contain"
-                style={{ maxHeight: item.imageSize ?? 320 }}
-              />
-            </div>
-          )}
           {item.imageCaption && item.imageUrl && (
-            <p className="mt-2 text-xs text-white/40 leading-relaxed">{item.imageCaption}</p>
+            <p className="mt-3 text-xs text-white/40 leading-relaxed">{item.imageCaption}</p>
           )}
           {item.link && (
             <div className="mt-3 text-xs">

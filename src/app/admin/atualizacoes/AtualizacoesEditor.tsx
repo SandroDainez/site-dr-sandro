@@ -220,14 +220,14 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
                   />
                   <div className="mt-3">
                     <div className="mb-1 flex items-center justify-between">
-                      <label className="text-xs text-white/40">Tamanho da imagem no site</label>
-                      <span className="text-xs font-semibold tabular-nums text-accent">{item.imageSize ?? 176}px</span>
+                      <label className="text-xs text-white/40">Tamanho do logo (ao lado do título)</label>
+                      <span className="text-xs font-semibold tabular-nums text-accent">{item.imageSize ?? 56}px</span>
                     </div>
                     <input
                       type="range"
-                      min={80}
-                      max={400}
-                      value={item.imageSize ?? 176}
+                      min={32}
+                      max={160}
+                      value={item.imageSize ?? 56}
                       onChange={(e) => {
                         const v = Number(e.target.value);
                         setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, imageSize: v } : it)));

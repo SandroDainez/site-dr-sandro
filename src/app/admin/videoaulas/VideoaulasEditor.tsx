@@ -367,12 +367,13 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                       📐 Enquadramento do vídeo no card
                     </label>
                     <span className="text-xs font-semibold tabular-nums text-accent">
-                      {item.enquadramento ?? 50}% / {item.enquadramentoY ?? 50}%
+                      {item.enquadramento ?? 50}% / {item.enquadramentoY ?? 50}% · zoom {item.zoom ?? 100}%
                     </span>
                   </div>
                   <p className="mb-2 text-[11px] leading-relaxed text-white/45">
-                    Arraste para mover o recorte (corta as tarjas das bordas). O quadrinho à
-                    esquerda mostra como vai ficar no site.
+                    Arraste para mover o recorte. <strong className="text-white/60">Cima/baixo só
+                    funciona com o Zoom acima de 100%</strong> (vídeo largo preenche a altura toda;
+                    o zoom cria folga). O quadrinho à esquerda mostra como vai ficar no site.
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="relative aspect-[4/5] w-16 shrink-0 overflow-hidden rounded-lg bg-black">
@@ -381,7 +382,11 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         muted
                         playsInline
                         preload="metadata"
-                        style={{ objectPosition: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%` }}
+                        style={{
+                          objectPosition: `${item.enquadramento ?? 50}% 50%`,
+                          transform: `scale(${(item.zoom ?? 100) / 100})`,
+                          transformOrigin: `50% ${item.enquadramentoY ?? 50}%`,
+                        }}
                         className="absolute inset-0 h-full w-full object-cover"
                       />
                     </div>
@@ -418,6 +423,23 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         />
                         <div className="mt-1 flex justify-between text-[10px] text-white/30">
                           <span>↑ Cima</span><span>Vertical</span><span>Baixo ↓</span>
+                        </div>
+                      </div>
+                      <div>
+                        <input
+                          type="range"
+                          min={100}
+                          max={250}
+                          value={item.zoom ?? 100}
+                          onChange={(e) => {
+                            const v = Number(e.target.value);
+                            setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, zoom: v } : it)));
+                            setSaved(false);
+                          }}
+                          className="w-full accent-[var(--accent,#2ce6b8)]"
+                        />
+                        <div className="mt-1 flex justify-between text-[10px] text-white/30">
+                          <span>🔍 Zoom 100%</span><span>(libera o cima/baixo)</span><span>250%</span>
                         </div>
                       </div>
                     </div>
