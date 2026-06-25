@@ -182,6 +182,7 @@ export type VideoaulaData = {
   enquadramento?: number; // posição horizontal do vídeo no card (object-position X%, 0=esq, 50=centro, 100=dir). default 50
   enquadramentoY?: number; // posição vertical do vídeo no card (object-position Y%, 0=topo, 50=centro, 100=baixo). default 50
   zoom?: number; // aproximação do vídeo no card (%, 100=normal). >100 cria folga p/ enquadrar na vertical
+  mostrarInteiro?: boolean; // true = object-fit contain (mostra o vídeo inteiro, sem cortar — p/ vídeo vertical com legendas)
   data: string;         // YYYY-MM-DD
 };
 

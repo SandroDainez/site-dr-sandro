@@ -375,6 +375,26 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                     funciona com o Zoom acima de 100%</strong> (vídeo largo preenche a altura toda;
                     o zoom cria folga). O quadrinho à esquerda mostra como vai ficar no site.
                   </p>
+
+                  {/* Mostrar inteiro — p/ vídeo vertical com legendas (não corta) */}
+                  <label className="mb-2 flex cursor-pointer items-start gap-2 rounded-lg border border-white/10 bg-black/20 p-2">
+                    <input
+                      type="checkbox"
+                      checked={!!item.mostrarInteiro}
+                      onChange={(e) => {
+                        const v = e.target.checked;
+                        setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, mostrarInteiro: v } : it)));
+                        setSaved(false);
+                      }}
+                      className="mt-0.5 h-4 w-4 accent-[var(--accent,#2ce6b8)]"
+                    />
+                    <span className="text-[11px] leading-relaxed text-white/70">
+                      <strong className="text-white/85">Mostrar vídeo inteiro (não cortar)</strong> — use
+                      para vídeo <strong>vertical</strong> ou com <strong>legendas no rodapé</strong>.
+                      Mostra tudo, com barras escuras nas laterais. (Desliga o recorte abaixo.)
+                    </span>
+                  </label>
+
                   <div className="flex items-center gap-3">
                     <div className="relative aspect-[4/5] w-16 shrink-0 overflow-hidden rounded-lg bg-black">
                       <video
@@ -382,7 +402,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         muted
                         playsInline
                         preload="metadata"
-                        style={{
+                        style={item.mostrarInteiro ? { objectFit: "contain" } : {
                           objectPosition: `${item.enquadramento ?? 50}% 50%`,
                           transform: `scale(${(item.zoom ?? 100) / 100})`,
                           transformOrigin: `50% ${item.enquadramentoY ?? 50}%`,

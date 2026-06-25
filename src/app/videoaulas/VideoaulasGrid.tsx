@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import type { VideoaulaData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 
@@ -102,11 +102,13 @@ function VideoCard({ item }: { item: VideoaulaData }) {
   const isProxyVideo = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
   const isLong = item.descricao.replace(/<[^>]*>/g, "").length > 140;
-  const objPos = {
-    objectPosition: `${item.enquadramento ?? 50}% 50%`,
-    transform: `scale(${(item.zoom ?? 100) / 100})`,
-    transformOrigin: `50% ${item.enquadramentoY ?? 50}%`,
-  };
+  const objPos: CSSProperties = item.mostrarInteiro
+    ? { objectFit: "contain" }
+    : {
+        objectPosition: `${item.enquadramento ?? 50}% 50%`,
+        transform: `scale(${(item.zoom ?? 100) / 100})`,
+        transformOrigin: `50% ${item.enquadramentoY ?? 50}%`,
+      };
 
   // Thumbnail
   let thumbSrc: string | null = null;

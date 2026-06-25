@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 import { PlayCircle } from "lucide-react";
 import type { VideoaulaData } from "@/lib/content";
 
@@ -71,12 +71,14 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   const isProxy = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
   // posição horizontal do conteúdo no recorte 4:5 (vídeos com personagem fora do centro)
-  // X pela object-position; zoom pela escala; Y pela origem do zoom (só tem folga vertical com zoom > 100%)
-  const objPos = {
-    objectPosition: `${item.enquadramento ?? 50}% 50%`,
-    transform: `scale(${(item.zoom ?? 100) / 100})`,
-    transformOrigin: `50% ${item.enquadramentoY ?? 50}%`,
-  };
+  // mostrarInteiro = mostra o vídeo todo (contain); senão recorta (cover) com X/zoom/Y
+  const objPos: CSSProperties = item.mostrarInteiro
+    ? { objectFit: "contain" }
+    : {
+        objectPosition: `${item.enquadramento ?? 50}% 50%`,
+        transform: `scale(${(item.zoom ?? 100) / 100})`,
+        transformOrigin: `50% ${item.enquadramentoY ?? 50}%`,
+      };
 
   // Thumbnail estático (imagem própria ou capa do YouTube)
   let thumbSrc: string | null = null;
