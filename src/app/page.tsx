@@ -419,9 +419,10 @@ export default async function Home() {
                         className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-white/20"
                       >
                         {item.imageUrl && (
-                          <div className="flex items-center justify-center border-b border-white/10 bg-white p-3" style={{ height: 150 }}>
+                          // Infográfico de fundo escuro — sem branco; funde no card
+                          <div className="overflow-hidden border-b border-white/10 bg-black/20">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.imageUrl} alt="" className="max-h-full max-w-full object-contain" />
+                            <img src={item.imageUrl} alt="" className="aspect-square w-full object-contain" />
                           </div>
                         )}
                         <div className="flex flex-1 flex-col p-5">

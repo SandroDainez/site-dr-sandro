@@ -144,15 +144,12 @@ export default function ProtocolosGrid({ protocolos }: Props) {
               {/* Image */}
               {item.imageUrl && (
                 <div className="mt-4">
-                  {/* Selo enquadrado: painel branco intencional, logo inteiro e centralizado */}
-                  <div
-                    className="flex items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white p-3 ring-1 ring-black/5"
-                    style={{ height: item.imageSize ?? 160 }}
-                  >
+                  {/* Infográfico de fundo escuro — sem painel branco; o fundo escuro funde no card */}
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
                     <img
                       src={item.imageUrl}
                       alt={item.imageCaption || item.titulo}
-                      className="max-h-full max-w-full object-contain"
+                      className="aspect-square w-full object-contain"
                     />
                   </div>
                   {item.imageCaption && (

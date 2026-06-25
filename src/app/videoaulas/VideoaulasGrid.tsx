@@ -116,10 +116,10 @@ function VideoCard({ item }: { item: VideoaulaData }) {
     <article className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:border-white/20">
       {thumbSrc ? (
         <div
-          className={`relative ${hasVideo ? "cursor-pointer group" : ""}`}
+          className={`relative aspect-[4/5] overflow-hidden ${hasVideo ? "cursor-pointer group" : ""}`}
           onClick={() => hasVideo && !ytId && setPlayerOpen(true)}
         >
-          <img src={thumbSrc} alt={item.titulo} className="w-full object-cover" style={{ maxHeight: item.imageSize ?? 176 }} />
+          <img src={thumbSrc} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover" />
           {hasVideo && !ytId && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
@@ -130,14 +130,14 @@ function VideoCard({ item }: { item: VideoaulaData }) {
         </div>
       ) : isProxyVideo ? (
         inlinePlaying ? (
-          <div className="relative bg-black">
+          <div className="relative aspect-[4/5] overflow-hidden bg-black">
             {/* Vídeo tocando dentro do card (playsInline impede abrir em tela cheia nativa no iPhone) */}
             <video
               src={item.videoUrl}
               controls
               autoPlay
               playsInline
-              className="w-full max-h-72 bg-black"
+              className="absolute inset-0 h-full w-full object-cover"
             />
             {/* Botão expandir p/ tela cheia */}
             <button
@@ -150,7 +150,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
           </div>
         ) : (
           <div
-            className="relative cursor-pointer group bg-black"
+            className="relative aspect-[4/5] cursor-pointer group overflow-hidden bg-black"
             onClick={() => setInlinePlaying(true)}
           >
             {/* Preview do próprio vídeo (primeiro frame) — pointer-events-none faz o toque
@@ -160,7 +160,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
               muted
               playsInline
               preload="metadata"
-              className="pointer-events-none w-full h-44 object-cover"
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">

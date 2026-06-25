@@ -78,10 +78,10 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
 
   // Prévia clicável (thumb ou primeiro frame do vídeo enviado)
   const thumb = (
-    <div className="relative cursor-pointer bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
+    <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
       {thumbSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={thumbSrc} alt={item.titulo} className="w-full object-cover" style={{ height: item.imageSize ?? 176 }} />
+        <img src={thumbSrc} alt={item.titulo} className="absolute inset-0 h-full w-full object-cover" />
       ) : isProxy ? (
         // pointer-events-none manda o clique ao container (toca inline) em vez do player nativo
         <video
@@ -89,11 +89,10 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
           muted
           playsInline
           preload="metadata"
-          className="pointer-events-none w-full object-cover"
-          style={{ height: item.imageSize ?? 176 }}
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         />
       ) : (
-        <div className="flex w-full items-center justify-center bg-white/[0.03]" style={{ height: item.imageSize ?? 176 }}>
+        <div className="flex h-full w-full items-center justify-center bg-white/[0.03]">
           <PlayCircle className="h-10 w-10 text-white/25" />
         </div>
       )}
@@ -118,7 +117,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
       <article className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20">
         {/* Mídia — sempre toca embutida no card */}
         {!hasVideo ? (
-          <div className="flex h-44 w-full items-center justify-center bg-white/[0.03]">
+          <div className="flex aspect-[4/5] w-full items-center justify-center bg-white/[0.03]">
             <PlayCircle className="h-10 w-10 text-white/20" />
           </div>
         ) : !inlinePlaying ? (
@@ -135,9 +134,9 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
             />
           </div>
         ) : (
-          // Vídeo enviado — toca no card
-          <div className="relative bg-black">
-            <video src={item.videoUrl} controls autoPlay playsInline className="w-full max-h-72 bg-black" />
+          // Vídeo enviado — toca no card (cortado em 4:5 p/ esconder as tarjas brancas do vídeo)
+          <div className="relative aspect-[4/5] overflow-hidden bg-black">
+            <video src={item.videoUrl} controls autoPlay playsInline className="absolute inset-0 h-full w-full object-cover" />
             <button
               type="button"
               onClick={() => setPlayerOpen(true)}
