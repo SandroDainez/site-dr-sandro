@@ -47,6 +47,21 @@ export default function ProtocolosGrid({ protocolos }: Props) {
   const [active, setActive] = useState<FilterArea>("todos");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [pdfOpen, setPdfOpen] = useState<Set<string>>(new Set());
+  const [full, setFull] = useState<{ id: string; mode: "pdf" | "text" } | null>(null);
+
+  // fecha a leitura em tela cheia com Esc + trava o scroll do fundo
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFull(null);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [full]);
 
   function togglePdf(id: string) {
     setPdfOpen((prev) => {
@@ -74,15 +89,16 @@ export default function ProtocolosGrid({ protocolos }: Props) {
   }
 
   // Abre automaticamente o protocolo apontado pela URL (#id), vindo da home.
+  // Roda SÓ UMA VEZ no mount — senão re-abria quando o usuário tentava recolher.
   useEffect(() => {
     const id = decodeURIComponent(window.location.hash.replace("#", ""));
     if (!id || !protocolos.some((p) => p.id === id)) return;
     setExpanded((prev) => new Set(prev).add(id));
-    // rola até o card depois de renderizar
     setTimeout(() => {
       document.getElementById(`protocolo-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
-  }, [protocolos]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div>
@@ -159,13 +175,24 @@ export default function ProtocolosGrid({ protocolos }: Props) {
               {/* Ver protocolo toggle */}
               {item.conteudo && (
                 <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={() => toggleExpand(item.id)}
-                    className="text-xs font-medium text-accent/80 transition hover:text-accent"
-                  >
-                    {isExpanded ? "Fechar protocolo ↑" : "Ver protocolo ↓"}
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(item.id)}
+                      className="text-xs font-medium text-accent/80 transition hover:text-accent"
+                    >
+                      {isExpanded ? "Fechar protocolo ↑" : "Ver protocolo ↓"}
+                    </button>
+                    {isExpanded && (
+                      <button
+                        type="button"
+                        onClick={() => setFull({ id: item.id, mode: "text" })}
+                        className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
+                      >
+                        ⛶ Expandir
+                      </button>
+                    )}
+                  </div>
                   {isExpanded && (
                     <pre
                       className="mt-3 whitespace-pre-wrap rounded-xl border border-white/10 bg-black/30 p-4 text-xs leading-relaxed text-white/70 font-mono"
@@ -186,15 +213,13 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                     >
                       {pdfOpen.has(item.id) ? "Fechar leitura ↑" : "📄 Ler protocolo"}
                     </button>
-                    {pdfOpen.has(item.id) && (
-                      <button
-                        type="button"
-                        onClick={() => document.getElementById(`pdf-${item.id}`)?.requestFullscreen?.()}
-                        className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
-                      >
-                        ⛶ Tela cheia
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setFull({ id: item.id, mode: "pdf" })}
+                      className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
+                    >
+                      ⛶ Tela cheia
+                    </button>
                     <a
                       href={item.arquivoUrl}
                       target="_blank"
@@ -221,6 +246,51 @@ export default function ProtocolosGrid({ protocolos }: Props) {
           );
         })}
       </div>
+
+      {/* Leitura em tela cheia (PDF grande ou texto grande) */}
+      {full && (() => {
+        const p = protocolos.find((x) => x.id === full.id);
+        if (!p) return null;
+        return (
+          <div className="fixed inset-0 z-[9999] flex flex-col bg-black/95 p-3 backdrop-blur-sm sm:p-5">
+            <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
+              <h3 className="min-w-0 truncate text-base font-semibold text-white">{p.titulo}</h3>
+              <div className="flex shrink-0 items-center gap-2">
+                {full.mode === "pdf" && p.arquivoUrl && (
+                  <a
+                    href={p.arquivoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    download
+                    className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/15"
+                  >
+                    Baixar ↓
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setFull(null)}
+                  className="rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25"
+                >
+                  ✕ Fechar (Esc)
+                </button>
+              </div>
+            </div>
+            {full.mode === "pdf" && p.arquivoUrl ? (
+              <iframe
+                src={`${p.arquivoUrl}#view=FitH`}
+                title={p.titulo}
+                className="min-h-0 w-full flex-1 rounded-xl bg-white"
+              />
+            ) : (
+              <pre
+                className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-black/40 p-5 text-base leading-relaxed text-white/85 font-mono"
+                dangerouslySetInnerHTML={{ __html: sanitizeRichText(p.conteudo) }}
+              />
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
