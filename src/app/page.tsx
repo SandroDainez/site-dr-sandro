@@ -341,6 +341,12 @@ export default async function Home() {
                       href={`/atualizacoes#${latest.id}`}
                       className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 ${area.border}`}
                     >
+                      {latest.imageUrl && (
+                        <div className="overflow-hidden border-b border-white/10 bg-black/20">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={latest.imageUrl} alt="" className="max-h-44 w-full object-contain" />
+                        </div>
+                      )}
                       <div className="flex flex-1 flex-col p-5">
                       <div className="flex items-center justify-between">
                         <span className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${area.badge}`}>
