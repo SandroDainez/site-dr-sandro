@@ -7,6 +7,7 @@ import {
   GraduationCap,
   ImageIcon,
   Layers,
+  Mic,
   Newspaper,
   PlayCircle,
   Settings,
@@ -147,6 +148,14 @@ const sections = [
     desc: "Publique e gerencie videoaulas médicas por área clínica.",
     color: "text-rose-400",
     border: "hover:border-rose-400/40",
+  },
+  {
+    href: "/admin/podcast",
+    icon: Mic,
+    label: "Podcast",
+    desc: "Episódios em áudio: envie suas gravações e/ou cole links (Spotify, YouTube).",
+    color: "text-fuchsia-400",
+    border: "hover:border-fuchsia-400/40",
   },
   {
     href: "/admin/config",

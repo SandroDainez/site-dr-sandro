@@ -25,6 +25,7 @@ export const TYPOGRAPHY_SECTIONS: { key: string; label: string }[] = [
   { key: "atualizacoes", label: "Atualizações (home)" },
   { key: "protocolos", label: "Protocolos (home)" },
   { key: "videoaulas", label: "Videoaulas (home)" },
+  { key: "podcast", label: "Podcast" },
   { key: "cursos", label: "Cursos" },
   { key: "eventos", label: "Eventos / calendário" },
   { key: "contato", label: "Contato" },

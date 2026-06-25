@@ -221,6 +221,19 @@ export type CursoData = {
   data: string; // YYYY-MM-DD
 };
 
+// Podcast: episódios com gravação enviada (áudio do PC) e/ou link externo
+// (Spotify, YouTube, Apple Podcasts). Capa + descrição.
+export type PodcastData = {
+  id: string;
+  titulo: string;
+  descricao: string; // rich text (HTML, sanitizado ao renderizar)
+  imageUrl: string; // capa do episódio
+  audioUrl: string; // gravação enviada (proxied /api/img) ou link direto de áudio (.mp3)
+  embedUrl: string; // link externo: Spotify / YouTube / Apple Podcasts
+  duracao: string; // ex: "32 min"
+  data: string; // YYYY-MM-DD
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
@@ -237,6 +250,7 @@ export type ContentMap = {
   protocolos: ProtocoloData[];
   videoaulas: VideoaulaData[];
   cursos: CursoData[];
+  podcasts: PodcastData[];
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -553,6 +567,7 @@ export const defaultNavItems: NavItemData[] = [
   { label: "Atualizações", href: "/atualizacoes" },
   { label: "Protocolos", href: "/protocolos" },
   { label: "Videoaulas", href: "/videoaulas" },
+  { label: "Podcast", href: "/podcast" },
   { label: "Contato", href: "#contato" },
 ];
 
@@ -719,6 +734,10 @@ export async function getCursos(): Promise<CursoData[]> {
 export async function getCurso(slug: string): Promise<CursoData | null> {
   const cursos = await getCursos();
   return cursos.find((c) => c.id === slug) ?? null;
+}
+
+export async function getPodcasts(): Promise<PodcastData[]> {
+  return readBlob("podcasts", []);
 }
 
 export async function uploadImageToBlob(file: File): Promise<string> {

@@ -27,6 +27,7 @@ import {
   type ProtocoloData,
   type VideoaulaData,
   type CursoData,
+  type PodcastData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -249,6 +250,18 @@ export async function saveVideoaulas(videoaulas: VideoaulaData[]): Promise<Resul
     await writeBlob("videoaulas", videoaulas);
     revalidatePath("/");
     revalidatePath("/videoaulas");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function savePodcasts(podcasts: PodcastData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("podcasts", podcasts);
+    revalidatePath("/");
+    revalidatePath("/podcast");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };

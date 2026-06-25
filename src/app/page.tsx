@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import CalendarioEventos from "@/components/CalendarioEventos";
 import HomeVideoCard from "@/components/HomeVideoCard";
+import PodcastList from "@/app/podcast/PodcastList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -41,6 +42,7 @@ import {
   getAtualizacoes,
   getProtocolos,
   getVideoaulas,
+  getPodcasts,
   getTypography,
   getNavItems,
   getNavStyle,
@@ -55,7 +57,7 @@ const iconMap: Record<string, LucideIcon> = {
 
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, typo, navItems, navStyle] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -69,6 +71,7 @@ export default async function Home() {
     getAtualizacoes(),
     getProtocolos(),
     getVideoaulas(),
+    getPodcasts(),
     getTypography(),
     getNavItems(),
     getNavStyle(),
@@ -622,6 +625,25 @@ export default async function Home() {
             </div>
           </div>
         </section>
+
+        {/* Podcast teaser */}
+        {podcasts.filter((p) => p.titulo).length > 0 && (
+          <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-3xl px-6 pb-24" data-typo="podcast">
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio</p>
+                <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">Podcast</h2>
+              </div>
+              <a href="/podcast" className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex">
+                Ver todos <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+            <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 2)} />
+            <a href="/podcast" className="mt-6 inline-flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden">
+              Ver todos os episódios <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </section>
+        )}
 
         <div data-typo="eventos">
           <CalendarioEventos eventos={eventos} />
