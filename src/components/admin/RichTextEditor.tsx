@@ -91,6 +91,15 @@ export default function RichTextEditor({ value, onChange }: Props) {
     emit();
   }
 
+  // Cola como TEXTO PURO — evita trazer formatação de Word/Google Docs
+  // (que deixava textos colados diferentes dos digitados).
+  function handlePaste(e: React.ClipboardEvent<HTMLDivElement>) {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
+    emit();
+  }
+
   // mantém a seleção ao clicar nos botões da barra
   const keepSel = (e: React.MouseEvent) => e.preventDefault();
 
@@ -148,6 +157,7 @@ export default function RichTextEditor({ value, onChange }: Props) {
         contentEditable
         suppressContentEditableWarning
         onInput={emit}
+        onPaste={handlePaste}
         className="min-h-[64px] px-3 py-2 text-sm leading-relaxed text-white outline-none [&_*]:!leading-relaxed"
       />
       <p className="px-3 pb-2 text-[10px] text-white/30">

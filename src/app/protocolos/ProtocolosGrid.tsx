@@ -186,6 +186,15 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                     >
                       {pdfOpen.has(item.id) ? "Fechar leitura ↑" : "📄 Ler protocolo"}
                     </button>
+                    {pdfOpen.has(item.id) && (
+                      <button
+                        type="button"
+                        onClick={() => document.getElementById(`pdf-${item.id}`)?.requestFullscreen?.()}
+                        className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white"
+                      >
+                        ⛶ Tela cheia
+                      </button>
+                    )}
                     <a
                       href={item.arquivoUrl}
                       target="_blank"
@@ -198,8 +207,10 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                   </div>
                   {pdfOpen.has(item.id) && (
                     <iframe
+                      id={`pdf-${item.id}`}
                       src={item.arquivoUrl}
                       title={item.titulo}
+                      allowFullScreen
                       className="mt-3 w-full rounded-xl border border-white/10 bg-white"
                       style={{ height: "78vh" }}
                     />
