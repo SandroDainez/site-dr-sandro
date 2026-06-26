@@ -30,6 +30,7 @@ import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { secText } from "@/lib/section-texts";
+import { uiText } from "@/lib/ui-texts";
 import { sanitizeRichText } from "@/lib/rich-text";
 import {
   getApps,
@@ -48,6 +49,7 @@ import {
   getPodcasts,
   getColaboradores,
   getSectionTexts,
+  getUiTexts,
   getTypography,
   getNavItems,
   getNavStyle,
@@ -90,7 +92,7 @@ function computeHomeOrder(navItems: { href?: string }[]): Record<string, number>
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, st, typo, navItems, navStyle] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, st, ui, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -107,6 +109,7 @@ export default async function Home() {
     getPodcasts(),
     getColaboradores(),
     getSectionTexts(),
+    getUiTexts(),
     getTypography(),
     getNavItems(),
     getNavStyle(),
@@ -168,13 +171,13 @@ export default async function Home() {
                   href="#apps-assinatura"
                   className="finex-beam finex-beam-strong inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] transition"
                 >
-                  Explorar plataforma <ArrowRight className="h-4 w-4" />
+                  {uiText(ui, "heroCtaPrimary")} <ArrowRight className="h-4 w-4" />
                 </a>
                 <a
                   href="#eventos"
                   className="finex-beam inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] transition"
                 >
-                  Ver agenda de eventos
+                  {uiText(ui, "heroCtaSecondary")}
                 </a>
               </div>
             </div>
@@ -435,7 +438,7 @@ export default async function Home() {
                   href="/atualizacoes"
                   className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
                 >
-                  Ver todas <ArrowRight className="h-3.5 w-3.5" />
+                  {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
 
@@ -478,7 +481,7 @@ export default async function Home() {
                 href="/atualizacoes"
                 className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
               >
-                Ver todas <ArrowRight className="h-3.5 w-3.5" />
+                {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </section>
           );
@@ -515,7 +518,7 @@ export default async function Home() {
                     href="/protocolos"
                     className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
                   >
-                    Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                    {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                   </a>
                 )}
               </div>
@@ -561,7 +564,7 @@ export default async function Home() {
                     href="/protocolos"
                     className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
                   >
-                    Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                    {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                   </a>
                 </>
               ) : (
@@ -595,7 +598,7 @@ export default async function Home() {
                   href="/videoaulas"
                   className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
                 >
-                  Ver todas <ArrowRight className="h-3.5 w-3.5" />
+                  {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                 </a>
               </div>
 
@@ -609,7 +612,7 @@ export default async function Home() {
                 href="/videoaulas"
                 className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
               >
-                Ver todas <ArrowRight className="h-3.5 w-3.5" />
+                {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </section>
           );
@@ -624,12 +627,12 @@ export default async function Home() {
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "colaboradores", "title")}</h2>
               </div>
               <a href="/colaboradores" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
-                Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
             <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
             <a href="/colaboradores" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
-              Ver todos <ArrowRight className="h-3.5 w-3.5" />
+              {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
         )}
@@ -687,12 +690,12 @@ export default async function Home() {
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "podcast", "title")}</h2>
               </div>
               <a href="/podcast" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
-                Ver todos <ArrowRight className="h-3.5 w-3.5" />
+                {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
             <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
             <a href="/podcast" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
-              Ver todos os episódios <ArrowRight className="h-3.5 w-3.5" />
+              {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
         )}

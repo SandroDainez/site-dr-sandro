@@ -2,8 +2,9 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import {
-  getCurso, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle,
+  getCurso, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getUiTexts,
 } from "@/lib/content";
+import { uiText } from "@/lib/ui-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -33,8 +34,8 @@ const nivelLabel: Record<string, string> = {
 
 export default async function CursoDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [curso, header, navItems, typo, navStyle] = await Promise.all([
-    getCurso(slug), getHeader(), getNavItems(), getTypography(), getNavStyle(),
+  const [curso, header, navItems, typo, navStyle, ui] = await Promise.all([
+    getCurso(slug), getHeader(), getNavItems(), getTypography(), getNavStyle(), getUiTexts(),
   ]);
 
   if (!curso || !curso.titulo) notFound();
@@ -102,11 +103,8 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
           {pago ? (
             <div className="rounded-2xl border border-amber-400/20 bg-amber-400/[0.04] px-6 py-10 text-center">
               <Lock className="mx-auto mb-3 h-7 w-7 text-amber-300" />
-              <p className="text-lg font-semibold text-white">Curso por assinatura — em breve</p>
-              <p className="mx-auto mt-2 max-w-md text-sm text-white/50">
-                Este curso fará parte da área de assinatura. Em breve você poderá assiná-lo
-                individualmente ou pelo plano que libera todos os cursos.
-              </p>
+              <p className="text-lg font-semibold text-white">{uiText(ui, "cursoPagoTitulo")}</p>
+              <p className="mx-auto mt-2 max-w-md text-sm text-white/50">{uiText(ui, "cursoPagoTexto")}</p>
               {curso.aulas.length > 0 && (
                 <div className="mx-auto mt-6 max-w-md text-left">
                   <p className="mb-2 text-xs uppercase tracking-[0.12em] text-white/40">Conteúdo do curso</p>

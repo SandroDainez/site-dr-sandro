@@ -282,6 +282,19 @@ export async function saveSectionTexts(
   }
 }
 
+export async function saveUiTexts(
+  data: import("@/lib/ui-texts").UiTextsData
+): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("uiTexts", data);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
 export async function savePodcasts(podcasts: PodcastData[]): Promise<Result> {
   try {
     await requireAdmin();

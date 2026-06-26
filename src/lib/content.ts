@@ -764,6 +764,10 @@ export async function getSectionTexts(): Promise<import("./section-texts").Secti
   return readBlob("sectionTexts", {});
 }
 
+export async function getUiTexts(): Promise<import("./ui-texts").UiTextsData> {
+  return readBlob("uiTexts", {});
+}
+
 // Analytics de acessos: { "YYYY-MM-DD": { v: visualizações, u: visitantes únicos } }
 export type AnalyticsData = Record<string, { v: number; u: number }>;
 

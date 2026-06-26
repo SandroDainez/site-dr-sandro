@@ -1,4 +1,5 @@
-import { getSiteConfig } from "@/lib/content";
+import { getSiteConfig, getUiTexts } from "@/lib/content";
+import { uiText } from "@/lib/ui-texts";
 import { Home } from "lucide-react";
 
 // Links absolutos (funcionam de qualquer página: "/#x" vai pra home e rola até a seção)
@@ -16,7 +17,7 @@ const LINKS: { label: string; href: string }[] = [
 ];
 
 export default async function SiteFooter() {
-  const cfg = await getSiteConfig();
+  const [cfg, ui] = await Promise.all([getSiteConfig(), getUiTexts()]);
 
   return (
     <footer className="border-t border-white/10 bg-black/20 py-10" data-typo="footer">
@@ -27,7 +28,7 @@ export default async function SiteFooter() {
             href="/"
             className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
           >
-            <Home className="h-4 w-4" /> Voltar ao início
+            <Home className="h-4 w-4" /> {uiText(ui, "footerVoltar")}
           </a>
         </div>
 
