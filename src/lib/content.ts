@@ -575,16 +575,15 @@ export const defaultVideoaulas: VideoaulaData[] = [
 
 export const defaultNavItems: NavItemData[] = [
   { label: "Início", href: "/" },
-  { label: "Apps Assinatura", href: "#apps-assinatura" },
-  { label: "Apps Grátis", href: "#apps-gratis" },
-  { label: "Dia a dia", href: "#apps-uteis" },
+  { label: "Apps", href: "#apps-assinatura" },
   { label: "Cursos", href: "/cursos" },
-  { label: "Eventos", href: "#eventos" },
   { label: "Atualizações", href: "/atualizacoes" },
   { label: "Protocolos", href: "/protocolos" },
   { label: "Videoaulas", href: "/videoaulas" },
-  { label: "Colaboradores", href: "/colaboradores" },
   { label: "Podcast", href: "/podcast" },
+  { label: "Colaboradores", href: "/colaboradores" },
+  { label: "Eventos", href: "#eventos" },
+  { label: "Dia a dia", href: "#apps-uteis" },
   { label: "Contato", href: "#contato" },
 ];
 
