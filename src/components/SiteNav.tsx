@@ -26,7 +26,7 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
     <nav
       data-typo="nav"
       style={navStyle}
-      className="hidden items-center gap-0.5 rounded-full border border-white/10 bg-black/75 px-2 py-2 text-[13px] text-white/70 backdrop-blur-md lg:flex"
+      className="hidden items-center gap-0.5 rounded-full border border-white/15 bg-black/80 px-2 py-2 text-[13px] font-medium text-white/85 backdrop-blur-md lg:flex"
     >
       {items.map((item, i) => {
         let href = item.href || "#";
@@ -43,7 +43,7 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
             className={
               active
                 ? "whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1.5 font-medium text-white"
-                : "nav-beam whitespace-nowrap rounded-full px-2.5 py-1.5 transition hover:text-white"
+                : "nav-beam whitespace-nowrap rounded-full px-2.5 py-1.5 text-white/85 transition hover:bg-white/10 hover:text-white"
             }
           >
             {item.label}

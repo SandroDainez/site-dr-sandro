@@ -25,7 +25,7 @@ export default async function SiteFooter() {
         <div className="flex justify-center">
           <a
             href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/80 transition hover:border-accent/40 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
           >
             <Home className="h-4 w-4" /> Voltar ao início
           </a>
