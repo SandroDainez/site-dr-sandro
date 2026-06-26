@@ -33,28 +33,53 @@ function getExpectedToken() {
   return createHash("sha256").update(pw).digest("hex");
 }
 
-const navLinks = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/analytics", label: "Acessos", icon: BarChart3 },
-  { href: "/admin/header", label: "Cabeçalho", icon: UserCircle },
-  { href: "/admin/menu", label: "Menu do topo", icon: Menu },
-  { href: "/admin/tipografia", label: "Aparência do texto", icon: Type },
-  { href: "/admin/hero", label: "Hero", icon: Sparkles },
-  { href: "/admin/apps", label: "Apps", icon: Layers },
-  { href: "/admin/apps-gratis", label: "Apps Grátis", icon: BookOpen },
-  { href: "/admin/apps-uteis", label: "Apps do dia a dia", icon: Wallet },
-  { href: "/admin/cursos", label: "Cursos", icon: GraduationCap },
-  { href: "/admin/topicos-estudo", label: "Tópicos de estudo", icon: BookOpen },
-  { href: "/admin/por-que-nos", label: "Por que nós", icon: ShieldCheck },
-  { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
-  { href: "/admin/contato", label: "Contato", icon: Contact },
-  { href: "/admin/imagens", label: "Imagens", icon: ImageIcon },
-  { href: "/admin/atualizacoes", label: "Atualizações", icon: Newspaper },
-  { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList },
-  { href: "/admin/videoaulas", label: "Videoaulas", icon: PlayCircle },
-  { href: "/admin/colaboradores", label: "Colaboradores", icon: Users },
-  { href: "/admin/podcast", label: "Podcast", icon: Mic },
-  { href: "/admin/config", label: "Configurações", icon: Settings },
+const navGroups = [
+  {
+    title: "Painel",
+    items: [
+      { href: "/admin", label: "Início do admin", icon: LayoutDashboard, hint: "Visão geral e atalhos do painel." },
+      { href: "/admin/analytics", label: "Acessos", icon: BarChart3, hint: "Quantas pessoas acessaram o site, com gráfico de visitas." },
+    ],
+  },
+  {
+    title: "Aparência do site",
+    items: [
+      { href: "/admin/header", label: "Cabeçalho e logo", icon: UserCircle, hint: "Nome, CRM/RQE e o logo que aparecem no topo do site." },
+      { href: "/admin/menu", label: "Menu do topo", icon: Menu, hint: "Itens do menu de navegação: ordem, nomes e para onde levam." },
+      { href: "/admin/tipografia", label: "Fontes e cores do texto", icon: Type, hint: "Tamanho, fonte, cor e peso das letras de cada seção." },
+      { href: "/admin/hero", label: "Destaque da home", icon: Sparkles, hint: "Título e subtítulo do grande bloco no topo da página inicial." },
+      { href: "/admin/config", label: "Rodapé e faixa rolante", icon: Settings, hint: "Frases da faixa que rola e os textos do rodapé." },
+      { href: "/admin/imagens", label: "Imagens", icon: ImageIcon, hint: "Enviar imagens e copiar o link para usar no site." },
+    ],
+  },
+  {
+    title: "Apps",
+    items: [
+      { href: "/admin/apps", label: "Apps por assinatura", icon: Layers, hint: "Apps médicos pagos / por assinatura." },
+      { href: "/admin/apps-gratis", label: "Apps grátis", icon: BookOpen, hint: "Apps médicos de acesso gratuito." },
+      { href: "/admin/apps-uteis", label: "Apps do dia a dia", icon: Wallet, hint: "Apps genéricos: finanças, organização, produtividade." },
+    ],
+  },
+  {
+    title: "Conteúdo",
+    items: [
+      { href: "/admin/cursos", label: "Cursos", icon: GraduationCap, hint: "Cursos completos com aulas, vídeos, slides e PDF." },
+      { href: "/admin/topicos-estudo", label: "Tópicos de estudo (home)", icon: BookOpen, hint: "Lista simples de tópicos exibida na home (não é o curso completo)." },
+      { href: "/admin/atualizacoes", label: "Atualizações clínicas", icon: Newspaper, hint: "Novidades por área: emergências, TI, anestesiologia." },
+      { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList, hint: "Protocolos clínicos com PDF e infográfico." },
+      { href: "/admin/videoaulas", label: "Videoaulas", icon: PlayCircle, hint: "Videoaulas (link do YouTube ou vídeo enviado)." },
+      { href: "/admin/podcast", label: "Podcast", icon: Mic, hint: "Episódios em áudio: suas gravações e/ou links (Spotify, YouTube)." },
+      { href: "/admin/colaboradores", label: "Vídeos de colaboradores", icon: Users, hint: "Vídeos de outros médicos que autorizaram a publicação." },
+    ],
+  },
+  {
+    title: "Mais",
+    items: [
+      { href: "/admin/por-que-nos", label: "Por que nós", icon: ShieldCheck, hint: "Cards de diferenciais exibidos na home." },
+      { href: "/admin/eventos", label: "Eventos", icon: CalendarDays, hint: "Eventos do calendário e a página de inscrição." },
+      { href: "/admin/contato", label: "Contato", icon: Contact, hint: "E-mail, WhatsApp, telefone e redes sociais." },
+    ],
+  },
 ];
 
 export default async function AdminLayout({
@@ -79,16 +104,27 @@ export default async function AdminLayout({
           <p className="text-xs uppercase tracking-[0.16em] text-accent">Admin</p>
           <p className="mt-1 text-sm font-semibold text-white">Dr. Sandro</p>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navLinks.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white"
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-            </Link>
+        <nav className="flex-1 overflow-auto px-3 py-4 space-y-5">
+          {navGroups.map((group) => (
+            <div key={group.title}>
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">{group.title}</p>
+              <div className="space-y-0.5">
+                {group.items.map(({ href, label, icon: Icon, hint }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    title={hint}
+                    className="group/nav flex items-start gap-2.5 rounded-xl px-3 py-2 text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white"
+                  >
+                    <Icon className="mt-0.5 h-4 w-4 shrink-0 text-white/50 group-hover/nav:text-accent" />
+                    <span className="min-w-0">
+                      <span className="block leading-tight">{label}</span>
+                      <span className="mt-0.5 block text-[10px] leading-snug text-white/35">{hint}</span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
         <div className="px-3 py-4 border-t border-white/10">
