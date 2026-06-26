@@ -7,6 +7,7 @@ import {
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
+import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { sanitizeRichText } from "@/lib/rich-text";
 import { Lock } from "lucide-react";
@@ -128,12 +129,7 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
         </div>
       </main>
 
-      <footer className="border-t border-white/10 bg-black/20 py-8">
-        <div className="mx-auto w-full max-w-5xl px-6 flex items-center justify-between text-sm text-white/40">
-          <a href="/cursos" className="transition hover:text-white">← Cursos</a>
-          <a href="/" className="transition hover:text-white">Início →</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

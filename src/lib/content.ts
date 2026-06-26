@@ -574,6 +574,7 @@ export const defaultVideoaulas: VideoaulaData[] = [
 ];
 
 export const defaultNavItems: NavItemData[] = [
+  { label: "Início", href: "/" },
   { label: "Apps Assinatura", href: "#apps-assinatura" },
   { label: "Apps Grátis", href: "#apps-gratis" },
   { label: "Dia a dia", href: "#apps-uteis" },

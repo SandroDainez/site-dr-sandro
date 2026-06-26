@@ -4,6 +4,7 @@ import { getCursos, getHeader, getNavItems, getTypography, headerSubtitleLines, 
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
+import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import CursosCatalog from "./CursosCatalog";
 
@@ -43,12 +44,7 @@ export default async function CursosPage() {
         <CursosCatalog cursos={cursos} />
       </main>
 
-      <footer className="border-t border-white/10 bg-black/20 py-8">
-        <div className="mx-auto w-full max-w-7xl px-6 flex items-center justify-between text-sm text-white/40">
-          <a href="/" className="transition hover:text-white">← Início</a>
-          <a href="/videoaulas" className="transition hover:text-white">Videoaulas →</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

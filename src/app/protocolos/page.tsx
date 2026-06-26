@@ -4,6 +4,7 @@ import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLin
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
+import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import ProtocolosGrid from "./ProtocolosGrid";
 
@@ -47,12 +48,7 @@ export default async function ProtocolosPage() {
         <ProtocolosGrid protocolos={protocolos} />
       </main>
 
-      <footer className="border-t border-white/10 bg-black/20 py-8">
-        <div className="mx-auto w-full max-w-7xl px-6 flex items-center justify-between text-sm text-white/40">
-          <a href="/" className="transition hover:text-white">← Início</a>
-          <a href="/atualizacoes" className="transition hover:text-white">Atualizações →</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

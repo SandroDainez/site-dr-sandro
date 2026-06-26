@@ -4,6 +4,7 @@ import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLin
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
+import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import VideoaulasGrid from "./VideoaulasGrid";
 
@@ -51,12 +52,7 @@ export default async function VideoaulasPage() {
         <VideoaulasGrid videoaulas={videoaulas} />
       </main>
 
-      <footer className="border-t border-white/10 bg-black/20 py-8">
-        <div className="mx-auto w-full max-w-7xl px-6 flex items-center justify-between text-sm text-white/40">
-          <a href="/" className="transition hover:text-white">← Início</a>
-          <a href="/protocolos" className="transition hover:text-white">Protocolos →</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

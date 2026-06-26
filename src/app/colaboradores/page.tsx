@@ -4,6 +4,7 @@ import { getColaboradores, getHeader, getNavItems, getTypography, headerSubtitle
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
+import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import ColaboradoresList from "./ColaboradoresList";
 
@@ -42,12 +43,7 @@ export default async function ColaboradoresPage() {
         <ColaboradoresList items={items} />
       </main>
 
-      <footer className="border-t border-white/10 bg-black/20 py-8">
-        <div className="mx-auto w-full max-w-7xl px-6 flex items-center justify-between text-sm text-white/40">
-          <a href="/" className="transition hover:text-white">← Início</a>
-          <a href="/videoaulas" className="transition hover:text-white">Videoaulas →</a>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

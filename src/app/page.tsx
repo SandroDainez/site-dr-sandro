@@ -23,6 +23,7 @@ import {
 import CalendarioEventos from "@/components/CalendarioEventos";
 import HomeVideoCard from "@/components/HomeVideoCard";
 import PodcastList from "@/app/podcast/PodcastList";
+import SiteFooter from "@/components/SiteFooter";
 import ColaboradoresList from "@/app/colaboradores/ColaboradoresList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -738,12 +739,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-line/80 bg-black/20 py-10" data-typo="footer">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-4 px-6 text-sm text-muted sm:flex-row">
-          <p>{siteConfig.footerName}</p>
-          <p>{siteConfig.footerTagline}</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
