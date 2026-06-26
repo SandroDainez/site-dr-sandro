@@ -760,6 +760,10 @@ export async function getColaboradores(): Promise<ColaboradorData[]> {
   return readBlob("colaboradores", []);
 }
 
+export async function getSectionTexts(): Promise<import("./section-texts").SectionTextsData> {
+  return readBlob("sectionTexts", {});
+}
+
 // Analytics de acessos: { "YYYY-MM-DD": { v: visualizações, u: visitantes únicos } }
 export type AnalyticsData = Record<string, { v: number; u: number }>;
 

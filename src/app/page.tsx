@@ -29,6 +29,7 @@ import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
+import { secText } from "@/lib/section-texts";
 import { sanitizeRichText } from "@/lib/rich-text";
 import {
   getApps,
@@ -46,6 +47,7 @@ import {
   getVideoaulas,
   getPodcasts,
   getColaboradores,
+  getSectionTexts,
   getTypography,
   getNavItems,
   getNavStyle,
@@ -88,7 +90,7 @@ function computeHomeOrder(navItems: { href?: string }[]): Record<string, number>
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, typo, navItems, navStyle] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, st, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -104,6 +106,7 @@ export default async function Home() {
     getVideoaulas(),
     getPodcasts(),
     getColaboradores(),
+    getSectionTexts(),
     getTypography(),
     getNavItems(),
     getNavStyle(),
@@ -199,9 +202,9 @@ export default async function Home() {
 
         <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps" style={{ order: homeOrder["apps-assinatura"] }}>
           <div className="mb-10">
-            <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos por assinatura</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "apps", "eyebrow")}</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
-              Apps médicos para decisão clínica
+              {secText(st, "apps", "title")}
             </h2>
             <div className="mt-5 flex max-w-3xl items-start gap-3 rounded-2xl border border-accent/25 bg-accent/[0.06] px-4 py-3.5">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
@@ -286,8 +289,8 @@ export default async function Home() {
 
         <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps" style={{ order: homeOrder["apps-gratis"] }}>
           <div className="mb-10">
-            <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
-            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Acesso aberto imediato</h2>
+            <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "freeApps", "eyebrow")}</p>
+            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "freeApps", "title")}</h2>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -345,10 +348,10 @@ export default async function Home() {
         <section id="apps-uteis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="utilApps" style={{ order: homeOrder["apps-uteis"] }}>
           <div className="mb-10">
             <div className="flex items-center gap-2">
-              <p className="text-xs uppercase tracking-[0.16em] text-amber-300">Para o seu dia a dia</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-amber-300">{secText(st, "utilApps", "eyebrow")}</p>
               <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-amber-300">Novo</span>
             </div>
-            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Apps para organização e finanças pessoais</h2>
+            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "utilApps", "title")}</h2>
             <p className="mt-3 max-w-2xl text-sm text-white/50">
               Ferramentas que ajudam no dia a dia — controle de gastos, organização pessoal,
               planejamento financeiro e mais. Úteis também fora da medicina, pra facilitar a sua rotina.
@@ -429,9 +432,9 @@ export default async function Home() {
             <section id="atualizacoes" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes" style={{ order: homeOrder["atualizacoes"] }}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo recente</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "atualizacoes", "eyebrow")}</p>
                   <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">
-                    Atualizações clínicas
+                    {secText(st, "atualizacoes", "title")}
                   </h2>
                 </div>
                 <a
@@ -508,9 +511,9 @@ export default async function Home() {
             <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos" style={{ order: homeOrder["protocolos"] }}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-accent">Condutas clínicas</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "protocolos", "eyebrow")}</p>
                   <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">
-                    Protocolos Clínicos
+                    {secText(st, "protocolos", "title")}
                   </h2>
                 </div>
                 {hasContent && (
@@ -589,9 +592,9 @@ export default async function Home() {
             <section id="videoaulas" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas" style={{ order: homeOrder["videoaulas"] }}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-accent">Aulas em vídeo</p>
+                  <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "videoaulas", "eyebrow")}</p>
                   <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">
-                    Videoaulas
+                    {secText(st, "videoaulas", "title")}
                   </h2>
                 </div>
                 <a
@@ -623,8 +626,8 @@ export default async function Home() {
           <section id="colaboradores" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="colaboradores" style={{ order: homeOrder["colaboradores"] }}>
             <div className="mb-8 flex items-end justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-accent">Comunidade médica</p>
-                <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">Vídeos de colaboradores</h2>
+                <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "colaboradores", "eyebrow")}</p>
+                <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "colaboradores", "title")}</h2>
               </div>
               <a href="/colaboradores" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
                 Ver todos <ArrowRight className="h-3.5 w-3.5" />
@@ -641,9 +644,9 @@ export default async function Home() {
           <div className="finex-glass rounded-[2rem] p-8 md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-accent-violet">Cursos presenciais, híbridos e online</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-accent-violet">{secText(st, "cursos", "eyebrow")}</p>
                 <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
-                  Atualização médica contínua
+                  {secText(st, "cursos", "title")}
                 </h3>
               </div>
 
@@ -686,8 +689,8 @@ export default async function Home() {
           <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="podcast" style={{ order: homeOrder["podcast"] }}>
             <div className="mb-8 flex items-end justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio e vídeo</p>
-                <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">Podcast</h2>
+                <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "podcast", "eyebrow")}</p>
+                <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "podcast", "title")}</h2>
               </div>
               <a href="/podcast" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
                 Ver todos <ArrowRight className="h-3.5 w-3.5" />
@@ -706,9 +709,9 @@ export default async function Home() {
 
         <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="contato" style={{ order: homeOrder["contato"] }}>
           <div className="finex-glass rounded-[2rem] p-8 md:p-10">
-            <p className="text-xs uppercase tracking-[0.16em] text-accent">Contato</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "contato", "eyebrow")}</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
-              Canais para inscrição e suporte
+              {secText(st, "contato", "title")}
             </h3>
             <div className="mt-7 grid gap-4 md:grid-cols-2">
               {[

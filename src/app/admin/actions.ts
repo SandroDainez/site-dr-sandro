@@ -269,6 +269,19 @@ export async function saveColaboradores(colaboradores: ColaboradorData[]): Promi
   }
 }
 
+export async function saveSectionTexts(
+  data: import("@/lib/section-texts").SectionTextsData
+): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("sectionTexts", data);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
 export async function savePodcasts(podcasts: PodcastData[]): Promise<Result> {
   try {
     await requireAdmin();

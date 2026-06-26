@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Sparkles,
   Menu,
+  Heading,
   Type,
   UserCircle,
   Users,
@@ -46,6 +47,7 @@ const navGroups = [
     items: [
       { href: "/admin/header", label: "Cabeçalho e logo", icon: UserCircle, hint: "Nome, CRM/RQE e o logo que aparecem no topo do site." },
       { href: "/admin/menu", label: "Menu do topo", icon: Menu, hint: "Itens do menu de navegação: ordem, nomes e para onde levam." },
+      { href: "/admin/titulos", label: "Títulos das seções", icon: Heading, hint: "Rótulo e título de cada seção da home (ex: 'Apps médicos para decisão clínica')." },
       { href: "/admin/tipografia", label: "Fontes e cores do texto", icon: Type, hint: "Tamanho, fonte, cor e peso das letras de cada seção." },
       { href: "/admin/hero", label: "Destaque da home", icon: Sparkles, hint: "Título e subtítulo do grande bloco no topo da página inicial." },
       { href: "/admin/config", label: "Rodapé e faixa rolante", icon: Settings, hint: "Frases da faixa que rola e os textos do rodapé." },
