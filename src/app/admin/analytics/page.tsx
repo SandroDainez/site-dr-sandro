@@ -113,10 +113,15 @@ export default async function AdminAnalyticsPage() {
         )}
       </div>
 
-      <p className="mt-4 text-xs text-white/35">
-        Contagem própria do site (sem rastrear pessoas individualmente). Para números mais precisos e com origem do
-        tráfego, dá pra ativar também o Vercel Web Analytics — me avise se quiser.
-      </p>
+      <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-accent/25 bg-accent/[0.05] px-4 py-3 text-xs leading-relaxed text-white/70">
+        <span aria-hidden>✅</span>
+        <p>
+          <strong className="text-accent">Vercel Web Analytics ativo.</strong> Os números acima são a contagem própria do
+          site (sem rastrear pessoas). Para dados mais precisos e com <strong className="text-white/80">origem do tráfego</strong>
+          {" "}(Google, Instagram, direto…), páginas mais vistas e dispositivos, veja em{" "}
+          <strong className="text-white/80">vercel.com → projeto site-dr-sandro → aba Analytics</strong>.
+        </p>
+      </div>
     </div>
   );
 }
