@@ -59,6 +59,34 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 
+// A ordem das seções da home segue a ordem dos itens do menu (editável em /admin/menu).
+const HOME_SECTIONS = [
+  "apps-assinatura", "apps-gratis", "apps-uteis", "atualizacoes",
+  "protocolos", "videoaulas", "colaboradores", "cursos",
+  "podcast", "eventos", "contato",
+];
+function hrefToSectionId(href: string): string {
+  const path = href.replace(/^https?:\/\/[^/]+/, "");
+  if (path.includes("#")) return path.split("#").pop() || "";
+  return path.replace(/^\/+|\/+$/g, "");
+}
+function computeHomeOrder(navItems: { href?: string }[]): Record<string, number> {
+  const order: Record<string, number> = {};
+  navItems.forEach((it, i) => {
+    const id = hrefToSectionId(it.href || "");
+    if (HOME_SECTIONS.includes(id) && order[id] === undefined) order[id] = (i + 1) * 100;
+  });
+  // "Apps grátis" não tem item no menu: fica logo após os apps por assinatura.
+  if (order["apps-gratis"] === undefined) {
+    order["apps-gratis"] = (order["apps-assinatura"] ?? 100) + 1;
+  }
+  // Qualquer seção ausente do menu vai para o fim, mantendo a ordem natural.
+  HOME_SECTIONS.forEach((id, idx) => {
+    if (order[id] === undefined) order[id] = 9000 + idx;
+  });
+  return order;
+}
+
 export default async function Home() {
   const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
@@ -80,6 +108,7 @@ export default async function Home() {
     getNavItems(),
     getNavStyle(),
   ]);
+  const homeOrder = computeHomeOrder(navItems);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       {/* Tipografia por seção definida no admin (tamanho, fonte, cor, peso) */}
@@ -115,8 +144,8 @@ export default async function Home() {
         </div>
       </header>
 
-      <main>
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-12 md:pt-20" data-typo="hero">
+      <main className="flex flex-col">
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-12 md:pt-20" data-typo="hero" style={{ order: -200 }}>
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0C] p-6 shadow-2xl">
             <div className="finex-aura-mask pointer-events-none absolute inset-0 bg-[radial-gradient(50%_40%_at_25%_0%,rgba(44,230,184,0.18),transparent_65%),radial-gradient(45%_35%_at_80%_0%,rgba(59,130,246,0.22),transparent_60%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-20 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.08)_1px,transparent_1px,transparent_10px)]" />
@@ -153,7 +182,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20" data-typo="marquee">
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20" data-typo="marquee" style={{ order: -100 }}>
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/35 py-3">
             <div className="finex-marquee-track flex items-center gap-3 px-4">
               {[...siteConfig.marqueeItems, ...siteConfig.marqueeItems].map((item, idx) => (
@@ -168,7 +197,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps">
+        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps" style={{ order: homeOrder["apps-assinatura"] }}>
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos por assinatura</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
@@ -255,7 +284,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps">
+        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps" style={{ order: homeOrder["apps-gratis"] }}>
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Aplicativos gratuitos</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">Acesso aberto imediato</h2>
@@ -313,7 +342,7 @@ export default async function Home() {
 
         {/* Apps para o dia a dia (genéricos / não-médicos) */}
         {utilApps.length > 0 && (
-        <section id="apps-uteis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="utilApps">
+        <section id="apps-uteis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="utilApps" style={{ order: homeOrder["apps-uteis"] }}>
           <div className="mb-10">
             <div className="flex items-center gap-2">
               <p className="text-xs uppercase tracking-[0.16em] text-amber-300">Para o seu dia a dia</p>
@@ -397,7 +426,7 @@ export default async function Home() {
           const visibleAreas = areaConfig.filter((a) => grouped[a.key].length > 0);
           if (visibleAreas.length === 0) return null;
           return (
-            <section id="atualizacoes" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes">
+            <section id="atualizacoes" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes" style={{ order: homeOrder["atualizacoes"] }}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo recente</p>
@@ -476,7 +505,7 @@ export default async function Home() {
             anestesiologia: "Anestesiologia",
           };
           return (
-            <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos">
+            <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos" style={{ order: homeOrder["protocolos"] }}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Condutas clínicas</p>
@@ -557,7 +586,7 @@ export default async function Home() {
           );
           const recent = sorted.slice(0, 3);
           return (
-            <section id="videoaulas" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas">
+            <section id="videoaulas" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas" style={{ order: homeOrder["videoaulas"] }}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">Aulas em vídeo</p>
@@ -591,7 +620,7 @@ export default async function Home() {
 
         {/* Colaboradores teaser */}
         {colaboradores.filter((c) => c.titulo).length > 0 && (
-          <section id="colaboradores" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="colaboradores">
+          <section id="colaboradores" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="colaboradores" style={{ order: homeOrder["colaboradores"] }}>
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">Comunidade médica</p>
@@ -608,7 +637,7 @@ export default async function Home() {
           </section>
         )}
 
-        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="cursos">
+        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="cursos" style={{ order: homeOrder["cursos"] }}>
           <div className="finex-glass rounded-[2rem] p-8 md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
@@ -654,7 +683,7 @@ export default async function Home() {
 
         {/* Podcast teaser */}
         {podcasts.filter((p) => p.titulo).length > 0 && (
-          <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="podcast">
+          <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="podcast" style={{ order: homeOrder["podcast"] }}>
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio e vídeo</p>
@@ -671,11 +700,11 @@ export default async function Home() {
           </section>
         )}
 
-        <div data-typo="eventos">
+        <div data-typo="eventos" style={{ order: homeOrder["eventos"] }}>
           <CalendarioEventos eventos={eventos} />
         </div>
 
-        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="contato">
+        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="contato" style={{ order: homeOrder["contato"] }}>
           <div className="finex-glass rounded-[2rem] p-8 md:p-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Contato</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
@@ -723,7 +752,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="whyUs">
+        <section className="mx-auto w-full max-w-7xl px-6 pb-24" data-typo="whyUs" style={{ order: 8000 }}>
           <div className="grid gap-6 md:grid-cols-3">
             {whyUs.map((item) => {
               const WhyIcon = iconMap[item.icon] ?? ShieldCheck;
