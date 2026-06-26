@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
+import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -9,7 +10,7 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import VideoaulasGrid from "./VideoaulasGrid";
 
 export default async function VideoaulasPage() {
-  const [videoaulas, header, navItems, typo, navStyle] = await Promise.all([getVideoaulas(), getHeader(), getNavItems(), getTypography(), getNavStyle()]);
+  const [videoaulas, header, navItems, typo, navStyle, st] = await Promise.all([getVideoaulas(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts()]);
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
@@ -42,11 +43,9 @@ export default async function VideoaulasPage() {
 
       <main className="mx-auto w-full max-w-7xl px-6 py-16">
         <div className="mb-12">
-          <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo em vídeo</p>
-          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Videoaulas</h1>
-          <p className="mt-3 text-base text-white/50">
-            Aulas médicas em vídeo por área
-          </p>
+          <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "page_videoaulas", "eyebrow")}</p>
+          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">{secText(st, "page_videoaulas", "title")}</h1>
+          <p className="mt-3 text-base text-white/50">{secText(st, "page_videoaulas", "desc")}</p>
         </div>
 
         <VideoaulasGrid videoaulas={videoaulas} />

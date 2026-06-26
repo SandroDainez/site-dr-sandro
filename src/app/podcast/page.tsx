@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { getPodcasts, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
+import { getPodcasts, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -9,8 +10,9 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import PodcastList from "./PodcastList";
 
 export default async function PodcastPage() {
-  const [podcasts, header, navItems, typo, navStyle] = await Promise.all([
+  const [podcasts, header, navItems, typo, navStyle, st] = await Promise.all([
     getPodcasts(), getHeader(), getNavItems(), getTypography(), getNavStyle(),
+    getSectionTexts(),
   ]);
 
   return (
@@ -33,11 +35,9 @@ export default async function PodcastPage() {
 
       <main className="mx-auto w-full max-w-7xl px-6 py-16">
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio e vídeo</p>
-          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Podcast</h1>
-          <p className="mt-3 text-base text-white/50">
-            Episódios em áudio e vídeo — discussão de casos, condutas e atualizações. Assista ou ouça aqui, ou no seu app favorito.
-          </p>
+          <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "page_podcast", "eyebrow")}</p>
+          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">{secText(st, "page_podcast", "title")}</h1>
+          <p className="mt-3 text-base text-white/50">{secText(st, "page_podcast", "desc")}</p>
         </div>
 
         <PodcastList podcasts={podcasts} />

@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
+import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -9,7 +10,7 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import ProtocolosGrid from "./ProtocolosGrid";
 
 export default async function ProtocolosPage() {
-  const [protocolos, header, navItems, typo, navStyle] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle()]);
+  const [protocolos, header, navItems, typo, navStyle, st] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts()]);
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
@@ -36,13 +37,11 @@ export default async function ProtocolosPage() {
 
       <main className="mx-auto w-full max-w-7xl px-6 py-16">
         <div className="mb-12">
-          <p className="text-xs uppercase tracking-[0.16em] text-accent">Condutas clínicas</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "page_protocolos", "eyebrow")}</p>
           <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">
-            Protocolos Clínicos
+            {secText(st, "page_protocolos", "title")}
           </h1>
-          <p className="mt-3 text-base text-white/50">
-            Algoritmos e condutas por área
-          </p>
+          <p className="mt-3 text-base text-white/50">{secText(st, "page_protocolos", "desc")}</p>
         </div>
 
         <ProtocolosGrid protocolos={protocolos} />

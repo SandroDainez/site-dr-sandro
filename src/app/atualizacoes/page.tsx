@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
+import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -13,7 +14,7 @@ export default async function AtualizacoesPage({
 }: {
   searchParams: Promise<{ area?: string }>;
 }) {
-  const [atualizacoes, header, params, navItems, typo, navStyle] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography(), getNavStyle()]);
+  const [atualizacoes, header, params, navItems, typo, navStyle, st] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography(), getNavStyle(), getSectionTexts()]);
   const initialArea = params.area ?? "todas";
 
   return (
@@ -47,11 +48,9 @@ export default async function AtualizacoesPage({
 
       <main className="mx-auto w-full max-w-7xl px-6 py-16">
         <div className="mb-12">
-          <p className="text-xs uppercase tracking-[0.16em] text-accent">Conteúdo clínico</p>
-          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Atualizações</h1>
-          <p className="mt-3 text-base text-white/50">
-            Revisão rápida e direto ao ponto da evidência mais recente, por área clínica.
-          </p>
+          <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "page_atualizacoes", "eyebrow")}</p>
+          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">{secText(st, "page_atualizacoes", "title")}</h1>
+          <p className="mt-3 text-base text-white/50">{secText(st, "page_atualizacoes", "desc")}</p>
           {/* Selos: revisão rápida + atualização semanal */}
           <div className="mt-5 flex flex-wrap gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3.5 py-1.5 text-xs font-semibold text-accent">

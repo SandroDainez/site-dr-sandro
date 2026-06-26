@@ -208,10 +208,7 @@ export default async function Home() {
             </h2>
             <div className="mt-5 flex max-w-3xl items-start gap-3 rounded-2xl border border-accent/25 bg-accent/[0.06] px-4 py-3.5">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
-              <p className="text-sm leading-relaxed text-white/80">
-                <strong className="text-white">Ferramentas de apoio à decisão clínica.</strong> Não substituem a avaliação,
-                o julgamento e a responsabilidade do médico. <strong className="text-accent">A palavra final é sempre do profissional responsável.</strong>
-              </p>
+              <p className="text-sm leading-relaxed text-white/80">{secText(st, "apps", "desc")}</p>
             </div>
           </div>
 
@@ -352,10 +349,7 @@ export default async function Home() {
               <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-amber-300">Novo</span>
             </div>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "utilApps", "title")}</h2>
-            <p className="mt-3 max-w-2xl text-sm text-white/50">
-              Ferramentas que ajudam no dia a dia — controle de gastos, organização pessoal,
-              planejamento financeiro e mais. Úteis também fora da medicina, pra facilitar a sua rotina.
-            </p>
+            <p className="mt-3 max-w-2xl text-sm text-white/50">{secText(st, "utilApps", "desc")}</p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

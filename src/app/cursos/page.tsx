@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { getCursos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
+import { getCursos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -9,8 +10,9 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import CursosCatalog from "./CursosCatalog";
 
 export default async function CursosPage() {
-  const [cursos, header, navItems, typo, navStyle] = await Promise.all([
+  const [cursos, header, navItems, typo, navStyle, st] = await Promise.all([
     getCursos(), getHeader(), getNavItems(), getTypography(), getNavStyle(),
+    getSectionTexts(),
   ]);
 
   return (
@@ -33,12 +35,9 @@ export default async function CursosPage() {
 
       <main className="mx-auto w-full max-w-7xl px-6 py-16">
         <div className="mb-12">
-          <p className="text-xs uppercase tracking-[0.16em] text-accent">Formação médica</p>
-          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Cursos</h1>
-          <p className="mt-3 max-w-2xl text-base text-white/50">
-            Cursos com aulas sequenciais, vídeos, slides e materiais para download.
-            Conteúdo gratuito de acesso imediato — cursos completos por assinatura em breve.
-          </p>
+          <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "page_cursos", "eyebrow")}</p>
+          <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">{secText(st, "page_cursos", "title")}</h1>
+          <p className="mt-3 max-w-2xl text-base text-white/50">{secText(st, "page_cursos", "desc")}</p>
         </div>
 
         <CursosCatalog cursos={cursos} />
