@@ -407,7 +407,7 @@ export default async function Home() {
                 </div>
                 <a
                   href="/atualizacoes"
-                  className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex"
+                  className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
                 >
                   Ver todas <ArrowRight className="h-3.5 w-3.5" />
                 </a>
@@ -450,7 +450,7 @@ export default async function Home() {
 
               <a
                 href="/atualizacoes"
-                className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
+                className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
               >
                 Ver todas <ArrowRight className="h-3.5 w-3.5" />
               </a>
@@ -487,7 +487,7 @@ export default async function Home() {
                 {hasContent && (
                   <a
                     href="/protocolos"
-                    className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex"
+                    className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
                   >
                     Ver todos <ArrowRight className="h-3.5 w-3.5" />
                   </a>
@@ -533,7 +533,7 @@ export default async function Home() {
 
                   <a
                     href="/protocolos"
-                    className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
+                    className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
                   >
                     Ver todos <ArrowRight className="h-3.5 w-3.5" />
                   </a>
@@ -567,7 +567,7 @@ export default async function Home() {
                 </div>
                 <a
                   href="/videoaulas"
-                  className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex"
+                  className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
                 >
                   Ver todas <ArrowRight className="h-3.5 w-3.5" />
                 </a>
@@ -581,7 +581,7 @@ export default async function Home() {
 
               <a
                 href="/videoaulas"
-                className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden"
+                className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
               >
                 Ver todas <ArrowRight className="h-3.5 w-3.5" />
               </a>
@@ -597,12 +597,12 @@ export default async function Home() {
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">Comunidade médica</p>
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">Vídeos de colaboradores</h2>
               </div>
-              <a href="/colaboradores" className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex">
+              <a href="/colaboradores" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
                 Ver todos <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
             <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
-            <a href="/colaboradores" className="mt-5 flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden">
+            <a href="/colaboradores" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               Ver todos <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
@@ -660,12 +660,12 @@ export default async function Home() {
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio</p>
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">Podcast</h2>
               </div>
-              <a href="/podcast" className="hidden items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:flex">
+              <a href="/podcast" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
                 Ver todos <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
             <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
-            <a href="/podcast" className="mt-6 inline-flex items-center gap-1 text-sm text-accent/80 transition hover:text-accent sm:hidden">
+            <a href="/podcast" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               Ver todos os episódios <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
