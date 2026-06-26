@@ -657,7 +657,7 @@ export default async function Home() {
           <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="podcast">
             <div className="mb-8 flex items-end justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio e vídeo</p>
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">Podcast</h2>
               </div>
               <a href="/podcast" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">

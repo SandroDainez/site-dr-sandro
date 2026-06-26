@@ -33,10 +33,10 @@ export default async function PodcastPage() {
 
       <main className="mx-auto w-full max-w-7xl px-6 py-16">
         <div className="mb-10">
-          <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-accent">Áudio e vídeo</p>
           <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">Podcast</h1>
           <p className="mt-3 text-base text-white/50">
-            Episódios em áudio — discussão de casos, condutas e atualizações. Ouça aqui ou no seu app favorito.
+            Episódios em áudio e vídeo — discussão de casos, condutas e atualizações. Assista ou ouça aqui, ou no seu app favorito.
           </p>
         </div>
 
