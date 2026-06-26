@@ -1,4 +1,5 @@
 import { getSiteConfig, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import ConfigEditor from "./ConfigEditor";
 import Link from "next/link";
@@ -18,6 +19,8 @@ export default async function AdminConfigPage() {
           Edite os itens do marquee e os textos do rodapé do site.
         </p>
       </div>
+
+      <AdminHelp>Edite as frases da faixa que rola na home e os textos do rodapé. Salvar para aplicar.</AdminHelp>
 
       <ConfigEditor initialConfig={config} />
 

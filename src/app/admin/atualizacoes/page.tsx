@@ -1,4 +1,5 @@
 import { getAtualizacoes, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AtualizacoesEditor from "./AtualizacoesEditor";
 
@@ -15,6 +16,8 @@ export default async function AdminAtualizacoesPage() {
           <span className="font-mono text-white/70">/atualizacoes</span> e na home.
         </p>
       </div>
+
+      <AdminHelp>Clique em “Adicionar atualização”. Escolha a área, escreva o conteúdo e (opcional) envie um logo pequeno. Salvar para publicar.</AdminHelp>
 
       <AtualizacoesEditor initialAtualizacoes={atualizacoes} />
 

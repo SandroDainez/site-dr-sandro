@@ -1,4 +1,5 @@
 import { getUtilApps, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AppsUteisEditor from "./AppsUteisEditor";
 import Link from "next/link";
@@ -20,6 +21,8 @@ export default async function AdminAppsUteisPage() {
           Use a <strong className="text-white/70">categoria</strong> como badge (ex: Finanças, Organização).
         </p>
       </div>
+
+      <AdminHelp>Clique em “Adicionar app”. Defina a categoria (vira o selo), envie o logo, escreva título e descrição, cole o link e Salvar.</AdminHelp>
 
       <AppsUteisEditor initialApps={apps} />
 

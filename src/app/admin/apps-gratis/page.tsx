@@ -1,4 +1,5 @@
 import { getFreeApps, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AppsGratisEditor from "./AppsGratisEditor";
 import Link from "next/link";
@@ -18,6 +19,8 @@ export default async function AdminAppsGratisPage() {
           Edite os cards de aplicativos gratuitos exibidos na seção de acesso aberto.
         </p>
       </div>
+
+      <AdminHelp>Edite cada app gratuito: envie o logo (ou escolha um ícone), título, descrição e o link. Salvar para aplicar.</AdminHelp>
 
       <AppsGratisEditor initialApps={apps} />
 

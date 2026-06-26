@@ -1,4 +1,5 @@
 import { getEventos, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import EventosEditor from "./EventosEditor";
 import Link from "next/link";
@@ -18,6 +19,8 @@ export default async function AdminEventosPage() {
           Gerencie os eventos exibidos no calendário e na página de inscrição.
         </p>
       </div>
+
+      <AdminHelp>Adicione eventos com data, local e detalhes. Aparecem no calendário e na página de inscrição. Salvar.</AdminHelp>
 
       <EventosEditor initialEventos={eventos} />
 

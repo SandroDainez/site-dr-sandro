@@ -1,4 +1,5 @@
 import { getContato, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import ContatoEditor from "./ContatoEditor";
 import Link from "next/link";
@@ -18,6 +19,8 @@ export default async function AdminContatoPage() {
           Atualize os dados de contato exibidos na home.
         </p>
       </div>
+
+      <AdminHelp>Atualize e-mail, WhatsApp, telefone e redes sociais. Salvar para aplicar no site.</AdminHelp>
 
       <ContatoEditor initialContato={contato} />
 

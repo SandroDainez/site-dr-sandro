@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef } from "react";
 import Link from "next/link";
 import { Upload, Copy, Check } from "lucide-react";
+import AdminHelp from "@/components/admin/AdminHelp";
 import { uploadImage } from "@/app/admin/actions";
 
 export default function AdminImagensPage() {
@@ -47,9 +48,11 @@ export default function AdminImagensPage() {
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Imagens</h1>
         <p className="mt-1 text-sm text-muted">
-          Faça upload de imagens para o Vercel Blob e copie a URL para usar em outros campos.
+          Envie imagens e copie o link para usar em outros campos do site.
         </p>
       </div>
+
+      <AdminHelp>Escolha um arquivo de imagem, clique em Enviar e depois em Copiar para pegar o link. Cole esse link onde precisar de uma imagem.</AdminHelp>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">

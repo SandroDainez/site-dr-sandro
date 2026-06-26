@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { getHeader, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import HeaderEditor from "./HeaderEditor";
 import Link from "next/link";
@@ -26,6 +27,8 @@ export default async function AdminHeaderPage() {
         <p className="text-[11px] uppercase tracking-[0.1em] text-white/35 mb-1">URL do logo salva no blob</p>
         <p className="text-xs text-white/60 break-all">{header.logoUrl || "(vazio)"}</p>
       </div>
+
+      <AdminHelp>Edite o nome, CRM/RQE e o logo do topo. Campos vazios desaparecem do site. Ajuste a aparência do logo e Salvar.</AdminHelp>
 
       <HeaderEditor initialHeader={header} />
 

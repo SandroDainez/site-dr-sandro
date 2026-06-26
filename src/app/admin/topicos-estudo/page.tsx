@@ -1,4 +1,5 @@
 import { getCourses, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import TopicosEditor from "./TopicosEditor";
 import Link from "next/link";
@@ -20,6 +21,8 @@ export default async function AdminTopicosEstudoPage() {
           <span className="font-mono text-white/70">Cursos</span>.
         </p>
       </div>
+
+      <AdminHelp>Lista simples de tópicos exibida na home. Adicione título e link em cada um. Salvar.</AdminHelp>
 
       <TopicosEditor initialCourses={courses} />
 

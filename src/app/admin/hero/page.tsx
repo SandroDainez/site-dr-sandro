@@ -1,4 +1,5 @@
 import { getHero, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import HeroEditor from "./HeroEditor";
 import Link from "next/link";
@@ -18,6 +19,8 @@ export default async function AdminHeroPage() {
           Edite o badge, título e subtítulo da seção principal da home.
         </p>
       </div>
+
+      <AdminHelp>Edite o título e o subtítulo do grande destaque no topo da home. Salvar para aplicar.</AdminHelp>
 
       <HeroEditor initialHero={hero} />
 

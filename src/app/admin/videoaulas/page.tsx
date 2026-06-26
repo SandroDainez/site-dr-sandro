@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { getVideoaulas, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import VideoaulasEditor from "./VideoaulasEditor";
 
@@ -17,6 +18,8 @@ export default async function AdminVideoaulasPage() {
           <span className="font-mono text-white/70">/videoaulas</span> e na home.
         </p>
       </div>
+
+      <AdminHelp>Adicione uma videoaula: cole o link do YouTube ou envie o vídeo; defina área e nível; ajuste o enquadramento no card. Salvar.</AdminHelp>
 
       <VideoaulasEditor initialVideoaulas={videoaulas} />
 

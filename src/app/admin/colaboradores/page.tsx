@@ -1,4 +1,5 @@
 import { getColaboradores, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import ColaboradoresEditor from "./ColaboradoresEditor";
 import Link from "next/link";
@@ -20,6 +21,8 @@ export default async function AdminColaboradoresPage() {
           cole um link do YouTube. Aparecem em <span className="font-mono text-white/70">/colaboradores</span> e na home.
         </p>
       </div>
+
+      <AdminHelp>Adicione o vídeo de um médico convidado: cole o link do YouTube ou envie o vídeo, e informe o nome e a especialidade. Salvar.</AdminHelp>
 
       <ColaboradoresEditor initialItems={items} />
 

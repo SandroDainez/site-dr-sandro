@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { getNavItems, getNavStyle } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import MenuEditor from "./MenuEditor";
 import Link from "next/link";
 
@@ -19,6 +20,8 @@ export default async function AdminMenuPage() {
           da fonte do menu, use <Link href="/admin/tipografia" className="text-accent underline underline-offset-2">Aparência do texto</Link> → seção &quot;Menu (navegação)&quot;.
         </p>
       </div>
+
+      <AdminHelp>Adicione, edite, reordene (arraste) ou remova itens do menu. Cada item tem um nome e um link (página ou seção). Salvar.</AdminHelp>
 
       <MenuEditor initialItems={items} initialStyle={navStyle} />
     </div>

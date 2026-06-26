@@ -1,4 +1,5 @@
 import { getPodcasts, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import PodcastEditor from "./PodcastEditor";
 import Link from "next/link";
@@ -20,6 +21,8 @@ export default async function AdminPodcastPage() {
           Aparecem em <span className="font-mono text-white/70">/podcast</span> e na home.
         </p>
       </div>
+
+      <AdminHelp>Clique em “Adicionar episódio”. Envie sua gravação (áudio) e/ou cole um link (Spotify, YouTube, Apple). Capa e descrição são opcionais. Salvar.</AdminHelp>
 
       <PodcastEditor initialPodcasts={podcasts} />
 

@@ -1,4 +1,5 @@
 import { getProtocolos, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import ProtocolosEditor from "./ProtocolosEditor";
 
@@ -15,6 +16,8 @@ export default async function AdminProtocolosPage() {
           <span className="font-mono text-white/70">/protocolos</span> e na home.
         </p>
       </div>
+
+      <AdminHelp>Clique em “Adicionar protocolo”. Preencha título, área e descrição; envie o PDF e/ou a imagem do infográfico. Salvar para publicar.</AdminHelp>
 
       <ProtocolosEditor initialProtocolos={protocolos} />
 

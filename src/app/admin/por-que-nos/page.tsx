@@ -1,4 +1,5 @@
 import { getWhyUs, getTypography } from "@/lib/content";
+import AdminHelp from "@/components/admin/AdminHelp";
 import AreaTypography from "@/components/admin/AreaTypography";
 import PorQueNosEditor from "./PorQueNosEditor";
 import Link from "next/link";
@@ -18,6 +19,8 @@ export default async function AdminPorQueNosPage() {
           Edite os cards de diferenciais exibidos no rodapé da home.
         </p>
       </div>
+
+      <AdminHelp>Edite os cards de diferenciais exibidos na home. Salvar para aplicar.</AdminHelp>
 
       <PorQueNosEditor initialCards={cards} />
 
