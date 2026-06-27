@@ -31,6 +31,14 @@ const sections = [
     border: "hover:border-accent/40",
   },
   {
+    href: "/admin/conteudo-automatico",
+    icon: Sparkles,
+    label: "Conteúdo automático (IA)",
+    desc: "Agentes de IA: atualizações clínicas semanais + eventos científicos. Status e executar agora.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
+  },
+  {
     href: "/admin/header",
     icon: UserCircle,
     label: "Cabeçalho",

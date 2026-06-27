@@ -14,6 +14,9 @@ import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspap
 import ProtocoloCard from "@/components/ProtocoloCard";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import { UpdateCard } from "@/app/atualizacoes/AtualizacoesGrid";
+import AtualizacaoSemanal from "@/components/AtualizacaoSemanal";
+import EventosCientificos from "@/components/EventosCientificos";
+import { siteAreaToEspecialidade } from "@/types/medical";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
 const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
@@ -102,6 +105,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           </div>
         </div>
 
+        {/* Atualização clínica da semana (agente de IA) — some se não houver */}
+        <AtualizacaoSemanal especialidade={siteAreaToEspecialidade(a)} />
+
         {total === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center">
             <p className="text-sm text-white/50">Conteúdo de {cfg.label} em breve.</p>
@@ -169,6 +175,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
             )}
           </>
         )}
+
+        {/* Congressos/eventos científicos da área (agente de IA) — some se não houver */}
+        <EventosCientificos especialidade={siteAreaToEspecialidade(a)} accent={cfg.accent} titulo="Próximos congressos" />
 
         <div className="mt-14 border-t border-white/10 pt-8">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Outras especialidades</p>
