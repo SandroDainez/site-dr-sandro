@@ -62,6 +62,11 @@ export default function UpdateContent({ update }: { update: any }) {
                     ★ Novo {topico.fonte_tipo}{topico.fonte_nome ? ` — ${topico.fonte_nome}` : ""}
                   </span>
                 )}
+                {topico.nivel_evidencia && (
+                  <span className="inline-flex w-fit items-center rounded-full border border-sky-400/30 bg-sky-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
+                    {topico.nivel_evidencia}
+                  </span>
+                )}
                 <h3 className="font-semibold text-white">{topico.titulo}</h3>
                 <p className="text-sm leading-relaxed text-white/70">{topico.descricao}</p>
                 {topico.relevancia_clinica && (

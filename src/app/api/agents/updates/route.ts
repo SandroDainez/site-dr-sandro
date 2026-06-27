@@ -38,6 +38,9 @@ async function buscarPubMed(especialidade: string): Promise<any[]> {
     );
     if (!r2.ok) return [];
     const d2 = await r2.json();
+    // Puxa os ABSTRACTS (efetch) para fundamentar a síntese no que o estudo realmente
+    // diz — base da qualidade: a IA escreve do resumo real, não "adivinha" pelo título.
+    const abstracts = await buscarAbstractsPubMed(ids, key);
     return ids.map((id) => {
       const a = d2.result?.[id];
       if (!a) return null;
@@ -47,11 +50,37 @@ async function buscarPubMed(especialidade: string): Promise<any[]> {
         titulo: a.title ?? "",
         journal: a.source ?? "",
         ano: a.pubdate?.substring(0, 4) ?? "",
+        tipoPub: Array.isArray(a.pubtype) ? a.pubtype.join(", ") : (a.pubtype ?? ""),
+        resumo: abstracts[id] ?? "",
         url: pubmedUrl(id),
       };
     }).filter(Boolean);
   } catch {
     return [];
+  }
+}
+
+// Abstracts do PubMed (efetch XML) → mapa pmid→resumo. Falha silenciosa (sem abstract
+// o item ainda entra, só sem o texto). Extração leve por bloco de artigo.
+async function buscarAbstractsPubMed(ids: string[], key: string): Promise<Record<string, string>> {
+  try {
+    const r = await fetch(
+      `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(",")}&rettype=abstract&retmode=xml${key}`,
+      { signal: AbortSignal.timeout(15000) }
+    );
+    if (!r.ok) return {};
+    const xml = await r.text();
+    const mapa: Record<string, string> = {};
+    for (const bloco of xml.split(/<PubmedArticle[>\s]/).slice(1)) {
+      const pmid = (bloco.match(/<PMID[^>]*>(\d+)<\/PMID>/) ?? [])[1];
+      if (!pmid) continue;
+      const partes = [...bloco.matchAll(/<AbstractText[^>]*>([\s\S]*?)<\/AbstractText>/g)]
+        .map((m) => m[1].replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/g, " ").replace(/\s+/g, " ").trim());
+      if (partes.length) mapa[pmid] = partes.join(" ").slice(0, 900);
+    }
+    return mapa;
+  } catch {
+    return {};
   }
 }
 
@@ -214,6 +243,43 @@ function sanearTopicos(topicos: any[], fontes: any[]): any[] {
   });
 }
 
+// Revisão ADVERSARIAL (2º passe, LLM-as-judge): um especialista sênior cético + editor
+// confronta cada tópico com as fontes e DERRUBA o que estiver exagerado, não sustentado
+// pela fonte, mal atribuído ou pouco relevante p/ especialista. Corrige imprecisões.
+// Fail-safe: em erro/vazio devolve os tópicos originais (nunca zera a semana).
+async function revisarTopicos(topicos: any[], fontesTexto: string, label: string): Promise<any[]> {
+  if (!Array.isArray(topicos) || topicos.length === 0) return topicos ?? [];
+  const prompt = `Você é um revisor SÊNIOR e CÉTICO de ${label} (nível editor de revista médica e parecerista de banca).
+
+FONTES REAIS coletadas esta semana:
+${fontesTexto}
+
+TÓPICOS RASCUNHO (a revisar):
+${JSON.stringify(topicos, null, 2)}
+
+Sua tarefa, tópico por tópico, com rigor de banca:
+- CONFRONTE cada afirmação com a fonte citada (campo fonte_url/pmid e os Resumos acima).
+- REPROVE (remova) o tópico se: a afirmação NÃO é sustentada pela fonte; há exagero/extrapolação além do que o estudo mostra; atribuição errada (journal/sociedade); número/desfecho inventado; ou relevância baixa para um ESPECIALISTA brasileiro.
+- Se aprovado, CORRIJA imprecisões: ajuste a descrição para refletir fielmente a fonte, tom sóbrio de evidência, sem hype. Mantenha fonte_url, pmid, fonte_nome, fonte_tipo e nivel_evidencia.
+- Prefira QUALIDADE: melhor 2 tópicos sólidos do que 4 frouxos.
+
+Retorne APENAS JSON: {"topicos": [ ...os aprovados e corrigidos, mesmos campos do rascunho... ]}`;
+  try {
+    const r = await getOpenAI().chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 2500,
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+    });
+    const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+    const revisados = Array.isArray(parsed.topicos) ? parsed.topicos : [];
+    return revisados.length > 0 ? revisados : topicos; // nunca zera a semana
+  } catch {
+    return topicos;
+  }
+}
+
 async function sintetizar(especialidade: string, todasFontes: any[]): Promise<any> {
   const label = ESPECIALIDADE_LABELS[especialidade];
   const semana = getSemanaAtual();
@@ -228,8 +294,10 @@ async function sintetizar(especialidade: string, todasFontes: any[]): Promise<an
   const fontesTexto = ordenadas.map((f, i) => {
     const pmid = f.pmid ? ` | PMID:${f.pmid}` : "";
     const tipo = f.tipo ? ` | [${f.tipo.toUpperCase()}]` : "";
+    const tp = f.tipoPub ? ` | Tipo:${f.tipoPub}` : "";
     const org = f.origem !== "pubmed" && f.origem !== "rss" ? ` | Fonte:${f.origem}` : "";
-    return `[${i + 1}]${tipo} ${f.titulo} | ${f.journal || ""}${pmid}${org} | URL:${f.url}`;
+    const resumo = f.resumo ? `\n    Resumo: ${f.resumo}` : "";
+    return `[${i + 1}]${tipo} ${f.titulo} | ${f.journal || ""}${pmid}${tp}${org} | URL:${f.url}${resumo}`;
   }).join("\n");
 
   const prompt = `Você é especialista em ${label}, com foco em medicina baseada em evidências para médicos brasileiros especialistas.
@@ -241,7 +309,7 @@ Analise as seguintes atualizações reais coletadas de múltiplas fontes confiá
 ${fontesTexto}
 
 INSTRUÇÕES OBRIGATÓRIAS:
-1. Use APENAS as informações dos itens listados — nunca invente referências
+0. FUNDAMENTE cada tópico no "Resumo:" do item (quando houver). Descreva SÓ o que o resumo/título sustenta — não extrapole, não invente número, desfecho ou magnitude de efeito que não esteja na fonte. Sem exagero ("promissor"/"revolucionário"): tom sóbrio de evidência.
 2. PRIORIZE itens marcados como [GUIDELINE], [POSICIONAMENTO], [ALERTA] ou [RESOLUCAO] — são clinicamente mais urgentes
 3. Destaque itens de fontes regulatórias brasileiras (ANVISA, CFM, CONITEC, MS) — impacto direto na prática nacional
 4. Para cada tópico, indique: PMID (se PubMed), sigla da sociedade ou órgão, ou nome do journal
@@ -263,6 +331,7 @@ Retorne APENAS JSON válido:
       "pmid": "PMID se disponível, senão null",
       "fonte_nome": "nome do journal, sigla da sociedade ou órgão",
       "fonte_tipo": "journal | guideline | posicionamento | alerta | resolucao | trial | regulatorio",
+      "nivel_evidencia": "classifique a evidência da fonte: 'Diretriz/Guideline' | 'Posicionamento de sociedade' | 'Ensaio clínico randomizado' | 'Revisão sistemática/Metanálise' | 'Coorte/Observacional' | 'Regulatório/Alerta' | 'Revisão narrativa' | 'Preprint/Preliminar'",
       "fonte_url": "a URL EXATA do item da lista acima que originou este tópico (copie o campo URL: do item). Obrigatório."
     }
   ]
@@ -279,7 +348,9 @@ Retorne APENAS JSON válido:
         response_format: { type: "json_object" },
       });
       const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
-      // Trava no código: descarta links/PMIDs que não existem nas fontes coletadas.
+      // Pipeline de qualidade: revisão adversarial (derruba exagero/não sustentado) →
+      // guarda de links (descarta URL/PMID que não exista nas fontes coletadas).
+      parsed.topicos = await revisarTopicos(parsed.topicos ?? [], fontesTexto, label);
       parsed.topicos = sanearTopicos(parsed.topicos ?? [], ordenadas);
       return parsed;
     } catch (err) {
