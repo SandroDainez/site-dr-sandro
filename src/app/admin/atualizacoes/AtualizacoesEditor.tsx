@@ -5,6 +5,7 @@ import { Save, Plus, Trash2, Upload } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { AtualizacaoData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 import { saveAtualizacoes } from "@/app/admin/actions";
 
 type Props = {
@@ -31,7 +32,7 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  function updateItem(idx: number, field: keyof AtualizacaoData, value: string) {
+  function updateItem<K extends keyof AtualizacaoData>(idx: number, field: K, value: AtualizacaoData[K]) {
     setItems((prev) => prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item)));
     setSaved(false);
   }
@@ -46,6 +47,7 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
       imageCaption: "",
       link: "",
       data: new Date().toISOString().slice(0, 10),
+      areas: [],
     };
     setItems((prev) => [...prev, newItem]);
     setSaved(false);
@@ -164,6 +166,8 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
                 />
               </div>
             </div>
+
+            <AreasExtra value={item.areas} primary={item.area} onChange={(areas) => updateItem(idx, "areas", areas)} />
 
             {/* conteudo */}
             <div>

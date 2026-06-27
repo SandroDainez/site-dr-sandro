@@ -5,6 +5,7 @@ import { Save, Plus, Trash2, Upload, Loader2 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { VideoaulaData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 import { saveVideoaulas } from "@/app/admin/actions";
 
 type Props = {
@@ -43,7 +44,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
 
   const [pendingSave, setPendingSave] = useState(false);
 
-  function updateItem(idx: number, field: keyof VideoaulaData, value: string | boolean) {
+  function updateItem<K extends keyof VideoaulaData>(idx: number, field: K, value: VideoaulaData[K]) {
     setItems((prev) => prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item)));
     setSaved(false);
     setPendingSave(true);
@@ -62,6 +63,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
       nivel: "",
       gratuita: false,
       data: new Date().toISOString().slice(0, 10),
+      areas: [],
     };
     setItems((prev) => [...prev, newItem]);
     setSaved(false);
@@ -228,6 +230,8 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                 </select>
               </div>
             </div>
+
+            <AreasExtra value={item.areas} primary={item.area} onChange={(areas) => updateItem(idx, "areas", areas)} />
 
             {/* duracao + gratuita + data row */}
             <div className="grid gap-4 sm:grid-cols-3">

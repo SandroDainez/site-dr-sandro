@@ -58,11 +58,15 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
     getHeader(), getNavItems(), getTypography(), getNavStyle(),
   ]);
 
-  const proto = protocolos.filter((p) => p.area === a);
-  const vids = videoaulas.filter((v) => v.area === a);
-  const curs = cursos.filter((c) => c.area === a && c.titulo);
-  const atu = [...atualizacoes].filter((x) => x.area === a).sort((x, y) => new Date(y.data).getTime() - new Date(x.data).getTime());
-  const docs = acervo.filter((x) => x.area === a && x.titulo);
+  // Um item pertence ao hub se sua área principal é `a` OU se `a` está nas áreas
+  // extras (multi-especialidade): um assunto pode aparecer em mais de um hub.
+  const inArea = (item: { area?: string; areas?: string[] }) => item.area === a || (item.areas?.includes(a) ?? false);
+
+  const proto = protocolos.filter(inArea);
+  const vids = videoaulas.filter(inArea);
+  const curs = cursos.filter((c) => inArea(c) && c.titulo);
+  const atu = [...atualizacoes].filter(inArea).sort((x, y) => new Date(y.data).getTime() - new Date(x.data).getTime());
+  const docs = acervo.filter((x) => inArea(x) && x.titulo);
 
   const total = proto.length + vids.length + curs.length + atu.length + docs.length;
 

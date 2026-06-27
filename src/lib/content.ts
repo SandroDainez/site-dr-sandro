@@ -152,6 +152,7 @@ export type AtualizacaoData = {
   imageSize?: number; // tamanho da imagem em px
   link: string;
   data: string; // YYYY-MM-DD
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };
 
 export type ProtocoloData = {
@@ -166,6 +167,7 @@ export type ProtocoloData = {
   arquivoUrl: string;   // optional PDF or external material link
   arquivoLabel: string; // button label, e.g. "Baixar PDF" or "Ver protocolo"
   data: string;         // YYYY-MM-DD (last updated)
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };
 
 export type VideoaulaData = {
@@ -183,6 +185,7 @@ export type VideoaulaData = {
   enquadramento?: number; // posição horizontal do vídeo no card (object-position X%, 0=esq, 50=centro, 100=dir). default 50
   enquadramentoY?: number; // posição vertical do vídeo no card (object-position Y%, 0=topo, 50=centro, 100=baixo). default 50
   zoom?: number; // aproximação do vídeo no card (%, 100=normal). >100 cria folga p/ enquadrar na vertical
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
   mostrarInteiro?: boolean; // true = object-fit contain (mostra o vídeo inteiro, sem cortar — p/ vídeo vertical com legendas)
   data: string;         // YYYY-MM-DD
 };
@@ -220,6 +223,7 @@ export type CursoData = {
   destaque: boolean;
   aulas: CursoAula[];
   data: string; // YYYY-MM-DD
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };
 
 // Podcast: episódios com gravação enviada (áudio do PC) e/ou link externo
@@ -275,6 +279,7 @@ export type AcervoItemData = {
   videoUrl: string; // YouTube ou vídeo enviado (destaque, opcional)
   arquivos: AcervoArquivo[]; // downloads (PDF, livro, imagem, etc.)
   data: string; // YYYY-MM-DD
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };
 
 export type ContentMap = {

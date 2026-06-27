@@ -5,6 +5,7 @@ import { Save, Plus, Trash2, Upload, FileText, Loader2, X } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { ProtocoloData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 import { saveProtocolos } from "@/app/admin/actions";
 
 type Props = {
@@ -49,7 +50,7 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
     }
   }
 
-  function updateItem(idx: number, field: keyof ProtocoloData, value: string) {
+  function updateItem<K extends keyof ProtocoloData>(idx: number, field: K, value: ProtocoloData[K]) {
     setItems((prev) => prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item)));
     setSaved(false);
   }
@@ -66,6 +67,7 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
       arquivoUrl: "",
       arquivoLabel: "Baixar PDF",
       data: new Date().toISOString().slice(0, 10),
+      areas: [],
     };
     setItems((prev) => [...prev, newItem]);
     setSaved(false);
@@ -185,6 +187,8 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
                 />
               </div>
             </div>
+
+            <AreasExtra value={item.areas} primary={item.area} onChange={(areas) => updateItem(idx, "areas", areas)} />
 
             {/* descricao */}
             <div>

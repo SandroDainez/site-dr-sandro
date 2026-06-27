@@ -277,7 +277,7 @@ export default function VideoaulasGrid({ videoaulas }: Props) {
     (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
   );
 
-  const filtered = active === "todas" ? sorted : sorted.filter((v) => v.area === active);
+  const filtered = active === "todas" ? sorted : sorted.filter((v) => v.area === active || v.areas?.includes(active as "emergencias" | "ti" | "anestesiologia"));
 
   return (
     <div>

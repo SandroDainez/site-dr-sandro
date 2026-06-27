@@ -39,7 +39,7 @@ export default function CursosCatalog({ cursos }: { cursos: CursoData[] }) {
   const [active, setActive] = useState<FilterArea>("todos");
 
   const visiveis = cursos.filter((c) => c.titulo);
-  const filtrados = active === "todos" ? visiveis : visiveis.filter((c) => c.area === active);
+  const filtrados = active === "todos" ? visiveis : visiveis.filter((c) => c.area === active || c.areas?.includes(active as "emergencias" | "ti" | "anestesiologia"));
 
   if (visiveis.length === 0) {
     return (

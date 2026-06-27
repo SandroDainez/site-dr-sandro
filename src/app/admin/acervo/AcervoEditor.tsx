@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 import type { AcervoItemData, AcervoArquivo } from "@/lib/content";
 import { saveAcervo } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 
 type Props = { initialItens: AcervoItemData[] };
 
@@ -40,7 +41,7 @@ export default function AcervoEditor({ initialItens }: Props) {
     touch();
   }
   function addItem() {
-    setItens((p) => [...p, { id: uid("ac"), titulo: "", area: "geral", categoria: "", descricao: "", capaUrl: "", videoUrl: "", arquivos: [], data: new Date().toISOString().slice(0, 10) }]);
+    setItens((p) => [...p, { id: uid("ac"), titulo: "", area: "geral", categoria: "", descricao: "", capaUrl: "", videoUrl: "", arquivos: [], data: new Date().toISOString().slice(0, 10), areas: [] }]);
     touch();
   }
   function removeItem(i: number) {
@@ -121,6 +122,8 @@ export default function AcervoEditor({ initialItens }: Props) {
               <input className={inputCls} value={it.categoria} placeholder="Curiosidades, Documento, Protocolo..." onChange={(e) => update(i, { categoria: e.target.value })} />
             </div>
           </div>
+
+          <AreasExtra value={it.areas} primary={it.area} onChange={(areas) => update(i, { areas })} />
 
           {/* Capa */}
           <div>

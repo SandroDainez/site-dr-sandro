@@ -21,7 +21,7 @@ export default function ProtocolosGrid({ protocolos }: Props) {
   const [active, setActive] = useState<FilterArea>("todos");
 
   const sorted = [...protocolos].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  const filtered = active === "todos" ? sorted : sorted.filter((p) => p.area === active);
+  const filtered = active === "todos" ? sorted : sorted.filter((p) => p.area === active || p.areas?.includes(active));
 
   return (
     <div>

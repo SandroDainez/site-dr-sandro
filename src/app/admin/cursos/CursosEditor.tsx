@@ -8,6 +8,7 @@ import {
 import { upload } from "@vercel/blob/client";
 import type { CursoData, CursoAula, CursoMaterial } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 import { saveCursos } from "@/app/admin/actions";
 
 type Props = { initialCursos: CursoData[] };
@@ -85,6 +86,7 @@ export default function CursosEditor({ initialCursos }: Props) {
       destaque: false,
       aulas: [],
       data: new Date().toISOString().slice(0, 10),
+      areas: [],
     };
     setCursos((prev) => [...prev, novo]);
     setOpen((p) => new Set(p).add(id));
@@ -279,6 +281,8 @@ export default function CursosEditor({ initialCursos }: Props) {
                     <input className={inputCls} value={curso.professor} onChange={(e) => updateCurso(ci, { professor: e.target.value })} placeholder="Dr. Sandro Dainez" />
                   </div>
                 </div>
+
+                <AreasExtra value={curso.areas} primary={curso.area} onChange={(areas) => updateCurso(ci, { areas })} />
 
                 {/* acesso / preço / destaque */}
                 <div className="grid gap-4 sm:grid-cols-3">

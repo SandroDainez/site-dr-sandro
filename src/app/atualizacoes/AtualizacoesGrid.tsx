@@ -183,7 +183,9 @@ export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
     anestesiologia: [],
   };
   for (const item of sorted) {
-    grouped[item.area].push(item);
+    // multi-especialidade: aparece no grupo da área principal e de cada área extra
+    const areas = new Set<AtualizacaoData["area"]>([item.area, ...(item.areas ?? [])]);
+    for (const ar of areas) grouped[ar]?.push(item);
   }
 
   // Which areas to show
