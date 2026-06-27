@@ -208,7 +208,7 @@ export default function CalendarioEventos({ eventos }: Props) {
                   >
                     {evento.folderUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <img loading="lazy" decoding="async"
                         src={evento.folderUrl}
                         alt={evento.titulo}
                         className="h-36 w-full object-cover"

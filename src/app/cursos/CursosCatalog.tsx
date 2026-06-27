@@ -85,7 +85,7 @@ export default function CursosCatalog({ cursos }: { cursos: CursoData[] }) {
               <div className="relative aspect-video overflow-hidden bg-black">
                 {curso.capaUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={curso.capaUrl} alt="" className="h-full w-full object-cover transition group-hover:scale-[1.03]" />
+                  <img loading="lazy" decoding="async" src={curso.capaUrl} alt="" className="h-full w-full object-cover transition group-hover:scale-[1.03]" />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-white/[0.03] text-white/20">
                     <PlayCircle className="h-10 w-10" />

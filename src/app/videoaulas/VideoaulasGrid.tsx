@@ -126,7 +126,7 @@ function VideoCard({ item }: { item: VideoaulaData }) {
           className={`relative aspect-[4/5] overflow-hidden ${hasVideo ? "cursor-pointer group" : ""}`}
           onClick={() => hasVideo && !ytId && setPlayerOpen(true)}
         >
-          <img src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
+          <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
           {hasVideo && !ytId && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30">

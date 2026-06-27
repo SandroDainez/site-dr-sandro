@@ -146,7 +146,7 @@ export default function ProtocolosGrid({ protocolos }: Props) {
                 <div className="mt-4">
                   {/* Infográfico de fundo escuro — sem painel branco; o fundo escuro funde no card */}
                   <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
-                    <img
+                    <img loading="lazy" decoding="async"
                       src={item.imageUrl}
                       alt={item.imageCaption || item.titulo}
                       className="aspect-square w-full object-contain"
@@ -279,7 +279,7 @@ export default function ProtocolosGrid({ protocolos }: Props) {
               <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-white/10 bg-black/40 p-5">
                 {/* Infográfico (o protocolo visual) */}
                 {p.imageUrl && (
-                  <img
+                  <img loading="lazy" decoding="async"
                     src={p.imageUrl}
                     alt={p.imageCaption || p.titulo}
                     className="mx-auto mb-5 max-h-[78vh] w-auto rounded-xl object-contain"

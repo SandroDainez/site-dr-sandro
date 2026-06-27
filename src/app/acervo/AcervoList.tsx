@@ -54,7 +54,7 @@ function Card({ item }: { item: AcervoItemData }) {
             <button type="button" onClick={() => hasVideo && setPlaying(true)} className={`group absolute inset-0 h-full w-full ${hasVideo ? "cursor-pointer" : "cursor-default"}`}>
               {thumb ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={thumb} alt={item.titulo} className="h-full w-full object-cover" />
+                <img loading="lazy" decoding="async" src={thumb} alt={item.titulo} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-white/[0.03] text-white/20"><Library className="h-10 w-10" /></div>
               )}

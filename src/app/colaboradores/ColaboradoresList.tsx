@@ -46,7 +46,7 @@ function Card({ item }: { item: ColaboradorData }) {
           <button type="button" onClick={() => setPlaying(true)} className="group absolute inset-0 h-full w-full cursor-pointer">
             {thumb ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={thumb} alt={item.titulo} className="h-full w-full object-cover" />
+              <img loading="lazy" decoding="async" src={thumb} alt={item.titulo} className="h-full w-full object-cover" />
             ) : isProxy ? (
               <video src={`${item.videoUrl}#t=0.5`} muted playsInline preload="metadata" className="pointer-events-none h-full w-full object-cover" />
             ) : (

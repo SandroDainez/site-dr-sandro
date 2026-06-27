@@ -90,7 +90,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
     <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
       {thumbSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
+        <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
       ) : isProxy ? (
         // pointer-events-none manda o clique ao container (toca inline) em vez do player nativo
         <video
