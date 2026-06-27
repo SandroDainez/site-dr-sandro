@@ -1,0 +1,47 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronDown, Sparkles } from "lucide-react";
+import UpdateContent from "./UpdateContent";
+
+const ESP_LABEL: Record<string, string> = {
+  anestesiologia: "Anestesiologia",
+  terapia_intensiva: "Terapia Intensiva",
+  emergencias: "Emergências",
+};
+
+// Card colapsável de um boletim clínico da IA (medical_updates) dentro do feed
+// unificado de Atualizações.
+export default function BoletimCard({ update }: { update: any }) {
+  const [open, setOpen] = useState(false);
+  const data = (() => {
+    try {
+      return new Date(update.data_publicacao).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+    } catch {
+      return "";
+    }
+  })();
+
+  return (
+    <div className={`overflow-hidden rounded-2xl border transition ${open ? "border-accent/40 bg-accent/[0.05]" : "border-accent/25 bg-accent/[0.03] hover:border-accent/40"}`}>
+      <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className="flex w-full items-start justify-between gap-3 p-5 text-left">
+        <div className="min-w-0">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2 text-[11px] text-white/50">
+            <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-semibold text-accent"><Sparkles className="h-3 w-3" /> Boletim da semana</span>
+            <span>{ESP_LABEL[update.especialidade] ?? update.especialidade}</span>
+            <span>· {update.semana_referencia}</span>
+            <span>· {data}</span>
+          </div>
+          <p className="text-base font-semibold text-white">{update.titulo}</p>
+          {!open && update.resumo && <p className="mt-1 line-clamp-2 text-sm text-white/55">{update.resumo}</p>}
+        </div>
+        <ChevronDown className={`mt-1 h-5 w-5 shrink-0 text-accent transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="border-t border-accent/15 px-5 pb-6 pt-4">
+          <UpdateContent update={update} />
+        </div>
+      )}
+    </div>
+  );
+}

@@ -31,3 +31,23 @@ export function createPublicClient() {
     { auth: { persistSession: false } }
   );
 }
+
+// Busca os boletins clínicos da IA (medical_updates). Opcionalmente por especialidade
+// (valor do agente: anestesiologia | terapia_intensiva | emergencias). Vazio se sem config.
+export async function fetchMedicalUpdates(especialidade?: string): Promise<any[]> {
+  if (!supabaseConfigured()) return [];
+  try {
+    const supabase = createPublicClient();
+    let q = supabase
+      .from("medical_updates")
+      .select("*")
+      .eq("publicado", true)
+      .order("data_publicacao", { ascending: false })
+      .limit(60);
+    if (especialidade) q = q.eq("especialidade", especialidade);
+    const { data } = await q;
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}

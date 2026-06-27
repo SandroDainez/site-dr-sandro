@@ -12,14 +12,15 @@ import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
-import AtualizacoesGrid from "./AtualizacoesGrid";
+import AtualizacoesFeed from "@/components/AtualizacoesFeed";
+import { fetchMedicalUpdates } from "@/lib/supabase/server";
 
 export default async function AtualizacoesPage({
   searchParams,
 }: {
   searchParams: Promise<{ area?: string }>;
 }) {
-  const [atualizacoes, header, params, navItems, typo, navStyle, st] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography(), getNavStyle(), getSectionTexts()]);
+  const [atualizacoes, header, params, navItems, typo, navStyle, st, aiBoletins] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), fetchMedicalUpdates()]);
   const initialArea = params.area ?? "todas";
 
   return (
@@ -51,7 +52,7 @@ export default async function AtualizacoesPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-7xl px-6 py-16">
+      <main className="mx-auto w-full max-w-5xl px-6 py-16">
         <div className="mb-12">
           <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "page_atualizacoes", "eyebrow")}</p>
           <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">{secText(st, "page_atualizacoes", "title")}</h1>
@@ -70,7 +71,7 @@ export default async function AtualizacoesPage({
           </div>
         </div>
 
-        <AtualizacoesGrid atualizacoes={atualizacoes} initialArea={initialArea} />
+        <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} showTabs initialArea={initialArea} />
       </main>
 
       <SiteFooter />

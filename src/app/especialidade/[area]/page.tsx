@@ -15,10 +15,10 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download, Stethoscope } from "lucide-react";
 import ProtocoloCard from "@/components/ProtocoloCard";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
-import { UpdateCard } from "@/app/atualizacoes/AtualizacoesGrid";
-import AtualizacaoSemanal from "@/components/AtualizacaoSemanal";
+import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 import EventosCientificos from "@/components/EventosCientificos";
 import { siteAreaToEspecialidade } from "@/types/medical";
+import { fetchMedicalUpdates } from "@/lib/supabase/server";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
 const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
@@ -74,8 +74,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const atu = [...atualizacoes].filter(inArea).sort((x, y) => new Date(y.data).getTime() - new Date(x.data).getTime());
   const docs = acervo.filter((x) => inArea(x) && x.titulo);
   const procs = procedimentos.filter((x) => inArea(x) && x.titulo);
+  const aiBoletins = await fetchMedicalUpdates(siteAreaToEspecialidade(a));
 
-  const total = proto.length + vids.length + curs.length + atu.length + docs.length + procs.length;
+  const total = proto.length + vids.length + curs.length + atu.length + docs.length + procs.length + aiBoletins.length;
 
   const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/20";
 
@@ -109,8 +110,6 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        {/* Atualização clínica da semana (agente de IA) — some se não houver */}
-        <AtualizacaoSemanal especialidade={siteAreaToEspecialidade(a)} />
 
         {total === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center">
@@ -176,11 +175,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
               </Section>
             )}
 
-            {atu.length > 0 && (
+            {(atu.length > 0 || aiBoletins.length > 0) && (
               <Section icon={Newspaper} titulo="Atualizações" verHref="/atualizacoes" accent={cfg.accent}>
-                <div className="flex flex-col gap-4">
-                  {atu.map((x) => <UpdateCard key={x.id} item={x} />)}
-                </div>
+                <AtualizacoesFeed ai={aiBoletins} manuais={atu} />
               </Section>
             )}
           </>

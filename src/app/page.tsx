@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import CalendarioEventos from "@/components/CalendarioEventos";
 import AgendaCientifica from "@/components/AgendaCientifica";
+import AtualizacoesFeed from "@/components/AtualizacoesFeed";
+import { fetchMedicalUpdates } from "@/lib/supabase/server";
 import HomeVideoCard from "@/components/HomeVideoCard";
 import PodcastList from "@/app/podcast/PodcastList";
 import SiteFooter from "@/components/SiteFooter";
@@ -102,6 +104,7 @@ export default async function Home() {
     getHomeOrder(),
   ]);
   const homeOrder = computeHomeOrder(homeOrderList);
+  const aiBoletins = await fetchMedicalUpdates();
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       {/* Tipografia por seção definida no admin (tamanho, fonte, cor, peso) */}
@@ -426,8 +429,8 @@ export default async function Home() {
         </section>
         )}
 
-        {/* Atualizações teaser — 1 card por área */}
-        {atualizacoes.length > 0 && (() => {
+        {/* Atualizações — feed único (boletins da IA + manuais), recentes */}
+        {(atualizacoes.length > 0 || aiBoletins.length > 0) && (() => {
           type AreaKey = "emergencias" | "ti" | "anestesiologia";
           const areaConfig: { key: AreaKey; label: string; emoji: string; badge: string; border: string; color: string }[] = [
             { key: "emergencias", label: "Emergências",      emoji: "🚑", badge: "bg-red-400/15 text-red-400 border-red-400/30",    border: "hover:border-red-400/40",    color: "text-red-400" },
@@ -439,7 +442,7 @@ export default async function Home() {
             if (grouped[item.area as AreaKey]) grouped[item.area as AreaKey].push(item);
           }
           const visibleAreas = areaConfig.filter((a) => grouped[a.key].length > 0);
-          if (visibleAreas.length === 0) return null;
+          if (visibleAreas.length === 0 && aiBoletins.length === 0) return null;
           return (
             <section id="atualizacoes" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes" style={{ order: homeOrder["atualizacoes"] }}>
               <div className="mb-8 flex items-end justify-between">
@@ -457,40 +460,7 @@ export default async function Home() {
                 </a>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {visibleAreas.map((area) => {
-                  const sorted = [...grouped[area.key]].sort(
-                    (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
-                  );
-                  const latest = sorted[0];
-                  return (
-                    <a
-                      key={area.key}
-                      href={`/atualizacoes#${latest.id}`}
-                      className={`group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 ${area.border}`}
-                    >
-                      <div className="flex flex-1 flex-col p-5">
-                      <div className="flex items-center justify-between">
-                        <span className={`rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${area.badge}`}>
-                          {area.emoji} {area.label}
-                        </span>
-                        <span className="text-xs text-white/30">{sorted.length} item{sorted.length !== 1 ? "s" : ""}</span>
-                      </div>
-                      <h3 className={`mt-4 text-base font-semibold leading-snug ${area.color}`}>
-                        {latest.titulo}
-                      </h3>
-                      <p
-                        className="mt-2 line-clamp-3 text-sm leading-relaxed text-white/50 flex-1"
-                        dangerouslySetInnerHTML={{ __html: sanitizeRichText(latest.conteudo) }}
-                      />
-                      <div className={`mt-4 flex items-center gap-1 text-xs font-medium ${area.color} opacity-0 transition group-hover:opacity-100`}>
-                        Ver atualizações <ArrowRight className="h-3 w-3" />
-                      </div>
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
+              <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} limit={4} />
 
               <a
                 href="/atualizacoes"
