@@ -15,17 +15,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Anestesiologia", href: "/especialidade/anestesiologia", emoji: "🩺" },
     ],
   },
-  {
-    label: "Conteúdo",
-    children: [
-      { label: "Cursos", href: "/cursos" },
-      { label: "Videoaulas", href: "/videoaulas" },
-      { label: "Protocolos", href: "/protocolos" },
-      { label: "Atualizações", href: "/atualizacoes" },
-      { label: "Podcast", href: "/podcast" },
-      { label: "Acervo", href: "/acervo" },
-    ],
-  },
+  { label: "Todo o conteúdo", href: "/conteudo" },
   {
     label: "Apps",
     children: [

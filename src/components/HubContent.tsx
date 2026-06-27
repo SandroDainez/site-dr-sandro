@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Download, PlayCircle } from "lucide-react";
+import { ChevronDown, Download, PlayCircle, Link as LinkIcon } from "lucide-react";
 import { sanitizeRichText } from "@/lib/rich-text";
 
 // Componentes do hub de especialidade: o conteúdo abre ALI MESMO (acordeão),
@@ -25,6 +25,7 @@ export type Article = {
   imageSize?: number;
   data?: string;
   download?: { url: string; label: string };
+  sourceUrl?: string;
 };
 
 const proseCls =
@@ -95,6 +96,17 @@ export function HubArticles({ items, accent }: { items: Article[]; accent: strin
                     className="mt-4 inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white transition hover:border-white/30 hover:bg-white/[0.08]"
                   >
                     <Download className="h-4 w-4" /> {x.download.label || "Baixar material"}
+                  </a>
+                )}
+
+                {x.sourceUrl && (
+                  <a
+                    href={x.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`mt-4 inline-flex items-center gap-1.5 text-sm font-medium ${accent} transition hover:opacity-80`}
+                  >
+                    <LinkIcon className="h-3.5 w-3.5" /> Ver fonte →
                   </a>
                 )}
               </div>

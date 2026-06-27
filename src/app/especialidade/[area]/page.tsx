@@ -11,7 +11,7 @@ import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download } from "lucide-react";
-import { HubArticles, HubVideos } from "./HubContent";
+import { HubArticles, HubVideos } from "@/components/HubContent";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
 const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
@@ -176,6 +176,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
                     imageCaption: x.imageCaption,
                     imageSize: x.imageSize,
                     data: x.data,
+                    sourceUrl: x.link,
                   }))}
                 />
               </Section>

@@ -15,7 +15,6 @@ import {
   ShieldCheck,
   Sparkles,
   ArrowRight,
-  Menu,
   Type,
   UserCircle,
   Users,
@@ -38,14 +37,6 @@ const sections = [
     desc: "Edite nome, CRM, RQEs e URL da logo no topo do site.",
     color: "text-accent",
     border: "hover:border-accent/40",
-  },
-  {
-    href: "/admin/menu",
-    icon: Menu,
-    label: "Menu do topo",
-    desc: "Adicione, exclua, reordene e edite os itens do menu de navegação.",
-    color: "text-accent-blue",
-    border: "hover:border-accent-blue/40",
   },
   {
     href: "/admin/tipografia",

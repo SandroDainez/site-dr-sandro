@@ -1,13 +1,6 @@
-export const dynamic = "force-dynamic";
-
-import { getNavItems, getNavStyle } from "@/lib/content";
-import AdminHelp from "@/components/admin/AdminHelp";
-import MenuEditor from "./MenuEditor";
 import Link from "next/link";
 
-export default async function AdminMenuPage() {
-  const [items, navStyle] = await Promise.all([getNavItems(), getNavStyle()]);
-
+export default function AdminMenuPage() {
   return (
     <div className="max-w-2xl pb-24">
       <div className="mb-6">
@@ -15,15 +8,22 @@ export default async function AdminMenuPage() {
           ← Admin
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Menu do topo</h1>
-        <p className="mt-1 text-sm text-muted">
-          Adicione, exclua, reordene e edite os itens do menu de navegação. Para mudar o tamanho/cor
-          da fonte do menu, use <Link href="/admin/tipografia" className="text-accent underline underline-offset-2">Aparência do texto</Link> → seção &quot;Menu (navegação)&quot;.
-        </p>
       </div>
 
-      <AdminHelp>Adicione, edite, reordene (arraste) ou remova itens do menu. Cada item tem um nome e um link (página ou seção). Salvar.</AdminHelp>
-
-      <MenuEditor initialItems={items} initialStyle={navStyle} />
+      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm leading-relaxed text-white/70">
+        <p className="mb-3 font-medium text-white">O menu agora tem uma estrutura fixa, organizada em grupos:</p>
+        <p className="mb-4">
+          <span className="text-white/90">Início · Especialidades ▾ · Todo o conteúdo · Apps ▾ · Sobre ▾</span>
+        </p>
+        <p className="mb-2">
+          Essa estrutura é mantida no código para ficar estável e bem organizada — por isso não é editada por aqui.
+          Os <span className="text-white/90">conteúdos</span> de cada seção (protocolos, atualizações, cursos etc.) seguem
+          totalmente editáveis nas áreas correspondentes do admin.
+        </p>
+        <p className="text-white/50">
+          Se quiser mudar a divisão dos grupos do menu, me avise que ajusto a estrutura.
+        </p>
+      </div>
     </div>
   );
 }
