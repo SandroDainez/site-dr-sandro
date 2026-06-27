@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
-import { verificarCronSecret, FONTES_EVENTOS_COMPLETAS } from "@/lib/agents/utils";
+import { verificarCronSecret } from "@/lib/agents/utils";
 
 export const maxDuration = 300;
 
@@ -21,87 +21,101 @@ function getJanelaEventos() {
   };
 }
 
-async function pesquisarEventos(): Promise<any[]> {
-  const { hoje, anoAtual, anoSeguinte, fimJanela } = getJanelaEventos();
-
-  const prompt = `Você é especialista em eventos científicos médicos.
-Pesquise congressos, simpósios, workshops e cursos nas especialidades:
-anestesiologia, terapia intensiva e medicina de emergência.
-
-JANELA TEMPORAL: ${hoje} até ${fimJanela}
-(Ano completo ${anoAtual} + primeiros 6 meses de ${anoSeguinte})
-
-FONTES PARA PESQUISAR:
-${FONTES_EVENTOS_COMPLETAS}
-
-Para CADA evento encontrado retorne:
+// Esquema de cada evento + regras, compartilhados por todas as buscas focadas.
+function schemaERegras(hoje: string, fimJanela: string): string {
+  return `Para CADA evento retorne um objeto:
 {
-  "titulo": "nome oficial do evento",
+  "titulo": "nome oficial",
   "descricao": "1-2 frases sobre conteúdo e público-alvo",
   "especialidades": ["anestesiologia" e/ou "terapia_intensiva" e/ou "emergencias"],
   "data_inicio": "YYYY-MM-DD",
   "data_fim": "YYYY-MM-DD",
-  "local_nome": "nome do local ou plataforma online",
+  "local_nome": "nome do local ou plataforma",
   "cidade": "cidade",
-  "pais": "nome do país em português",
-  "modalidade": "presencial" ou "online" ou "hibrido",
-  "url_oficial": "URL REAL do site oficial do evento",
-  "organizador": "sigla da sociedade organizadora",
-  "slug_marco": "(SÓ p/ congressos-marco) chave fixa: CBMEDE→'cbmede', COPA SAESP→'copa-saesp', CBA→'cba', CBMI→'cbmi', CLASA→'clasa'. Demais eventos: omita."
+  "pais": "país em português",
+  "modalidade": "presencial" | "online" | "hibrido",
+  "url_oficial": "URL REAL do site oficial (ou do site da sociedade organizadora)",
+  "organizador": "sigla da sociedade",
+  "slug_marco": "SÓ p/ marcos: CBMEDE→'cbmede', COPA SAESP→'copa-saesp', CBA→'cba', CBMI→'cbmi', CLASA→'clasa'. Senão omita."
 }
 
-IMPORTANTE — CONGRESSOS-MARCO: se encontrar a data OFICIAL e exata de um congresso-marco
-(CBMEDE, COPA SAESP, CBA, CBMI, CLASA), retorne-o com o "slug_marco" correto e a data real.
-O sistema usa essa chave para ATUALIZAR automaticamente a data de um marco que ainda estava
-"a confirmar". Use a data oficial só se tiver certeza; não chute.
+CONGRESSOS-MARCO: se achar a data OFICIAL e exata de um marco (CBMEDE, COPA SAESP, CBA, CBMI, CLASA),
+inclua o "slug_marco" certo + a data real — o sistema usa isso para confirmar automaticamente a data.
 
-COBERTURA OBRIGATÓRIA (não pode faltar):
-- PRIORIZE os principais congressos do BRASIL: Congresso Brasileiro de Anestesiologia (CBA/SBA, ~novembro), Congresso Paulista de Anestesiologia (SAESP, ~abril), Congresso Brasileiro de Medicina Intensiva (CBMI/AMIB), Congresso Brasileiro de Medicina de Emergência (SBMU/ABRAMEDE) e os regionais relevantes.
-- Inclua também os principais da AMÉRICA LATINA (CLASA e sociedades nacionais).
-- E os grandes congressos MUNDIAIS (ASA, ESAIC, WFSA, ESICM, SCCM, ISICEM, ACEP, EuSEM, ERC, SAEM).
-- Pesquise ativamente nos sites das sociedades (sba.com.br, saesp.org.br, amib.org.br, sbmu.org.br, abramede.com.br) para achar as datas reais dos eventos brasileiros.
-- Busque de 15 a 30 eventos no total, bem distribuídos entre Brasil, América Latina e mundo.
+REGRAS:
+- url_oficial REAL e verificável — nunca invente. Sem URL confiável: OMITA o evento.
+- Só eventos na janela ${hoje} a ${fimJanela} (nada antes de ${hoje}).
+- Prefira datas oficiais; se não tiver certeza da data, não inclua o evento.
+- Retorne APENAS um array JSON (sem markdown, sem texto ao redor).`;
+}
 
-REGRAS CRÍTICAS:
-- url_oficial deve ser URL real e verificável — não invente. Se não achar a URL exata do congresso, use a do site da sociedade organizadora.
-- Eventos sem URL verificável: OMITIR
-- Não incluir eventos passados (anteriores a ${hoje})
-- Retorne APENAS array JSON, sem markdown`;
+// Buscas FOCADAS: cada uma é estreita (um nicho), o que torna a cobertura muito
+// mais confiável do que uma única consulta gigante. Rodam em paralelo e se juntam.
+function getFocos(hoje: string, fimJanela: string): { id: string; instrucao: string }[] {
+  const base = schemaERegras(hoje, fimJanela);
+  return [
+    { id: "anestesia-br", instrucao: `Liste os principais congressos de ANESTESIOLOGIA no BRASIL na janela. Inclua obrigatoriamente: Congresso Brasileiro de Anestesiologia (CBA/SBA, ~novembro), Congresso Paulista de Anestesiologia (COPA/SAESP, ~abril) e os congressos regionais das sociedades estaduais (SBA: sba.com.br; SAESP: saesp.org.br). 5 a 10 eventos.\n\n${base}` },
+    { id: "ti-br", instrucao: `Liste os principais congressos de TERAPIA INTENSIVA / MEDICINA INTENSIVA no BRASIL na janela. Inclua obrigatoriamente: Congresso Brasileiro de Medicina Intensiva (CBMI/AMIB) e eventos regionais da AMIB (amib.org.br), além do Congresso Luso-Brasileiro. 5 a 10 eventos.\n\n${base}` },
+    { id: "emergencia-br", instrucao: `Liste os principais congressos de MEDICINA DE EMERGÊNCIA no BRASIL na janela. Inclua obrigatoriamente: Congresso Brasileiro de Medicina de Emergência (CBMEDE/ABRAMEDE: abramede.com.br, cbmede.com.br) e eventos da SBMU (sbmu.org.br). 5 a 10 eventos.\n\n${base}` },
+    { id: "america-latina", instrucao: `Liste os principais congressos de ANESTESIOLOGIA, TERAPIA INTENSIVA e MEDICINA DE EMERGÊNCIA na AMÉRICA LATINA (fora do Brasil) na janela. Inclua: CLASA (anestesiaclasa.org), FEPIMCTI (fepimcti.org) e congressos das sociedades nacionais (Argentina, México, Colômbia, Chile, Peru, Uruguai). 5 a 10 eventos.\n\n${base}` },
+    { id: "mundo-anestesia", instrucao: `Liste os grandes congressos MUNDIAIS de ANESTESIOLOGIA na janela: ASA Annual Meeting, Euroanaesthesia (ESAIC), World Congress of Anaesthesiologists (WFSA/WCA) e outros de relevância global. 5 a 10 eventos.\n\n${base}` },
+    { id: "mundo-ti-emergencia", instrucao: `Liste os grandes congressos MUNDIAIS de TERAPIA INTENSIVA e MEDICINA DE EMERGÊNCIA na janela: ESICM LIVES, SCCM Critical Care Congress, ISICEM, ACEP Scientific Assembly, EuSEM, ERC, SAEM. 5 a 10 eventos.\n\n${base}` },
+  ];
+}
 
-  let tentativas = 0;
-  while (tentativas < 3) {
+// Uma busca focada: web search com retry + parsing robusto + fallback sem busca.
+async function buscarFoco(instrucao: string): Promise<any[]> {
+  const prompt = `Você é especialista em eventos científicos médicos. ${instrucao}`;
+  for (let t = 0; t < 2; t++) {
     try {
       const response = await (getOpenAI().chat.completions.create as any)({
         model: "gpt-4o-search-preview",
-        max_tokens: 8000,
+        max_tokens: 4000,
         messages: [{ role: "user", content: prompt }],
       });
       const texto = response.choices[0].message.content ?? "[]";
-      // Extrai o array JSON mesmo que o modelo coloque texto/markdown ao redor.
       const semFence = texto.replace(/```json|```/g, "").trim();
       const m = semFence.match(/\[[\s\S]*\]/);
       const clean = m ? m[0] : (semFence.startsWith("[") ? semFence : `[${semFence}]`);
       const parsed = JSON.parse(clean);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      throw new Error("busca vazia");
+      throw new Error("foco vazio");
     } catch {
-      tentativas++;
-      if (tentativas < 3) {
-        await new Promise((res) => setTimeout(res, 3000 * tentativas));
-      }
+      if (t === 0) await new Promise((r) => setTimeout(r, 2500));
     }
   }
+  // Fallback sem web search (conhecimento do modelo)
+  try {
+    const response = await getOpenAI().chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt + '\n\nRetorne {"eventos":[...]}.' }],
+      max_tokens: 4000,
+      response_format: { type: "json_object" },
+    });
+    const data = JSON.parse(response.choices[0].message.content ?? '{"eventos":[]}');
+    return Array.isArray(data) ? data : (data.eventos ?? data.events ?? data.congressos ?? []);
+  } catch {
+    return [];
+  }
+}
 
-  // Fallback sem web search
-  const response = await getOpenAI().chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt + '\n\nRetorne um objeto JSON {"eventos": [...]} com o array de eventos.' }],
-    max_tokens: 8000,
-    response_format: { type: "json_object" },
-  });
-  const data = JSON.parse(response.choices[0].message.content ?? '{"eventos":[]}');
-  if (Array.isArray(data)) return data;
-  return data.eventos ?? data.events ?? data.congressos ?? [];
+// Roda todas as buscas focadas em paralelo e junta os resultados, deduplicando.
+async function pesquisarEventos(): Promise<any[]> {
+  const { hoje, fimJanela } = getJanelaEventos();
+  const focos = getFocos(hoje, fimJanela);
+  const resultados = await Promise.all(focos.map((f) => buscarFoco(f.instrucao)));
+  const todos = resultados.flat().filter((e) => e && e.titulo && e.url_oficial && e.data_inicio);
+
+  // Dedup: por slug_marco, senão por url_oficial, senão por título+data.
+  const vistos = new Set<string>();
+  const unicos: any[] = [];
+  for (const e of todos) {
+    const chave = (e.slug_marco?.trim() || e.url_oficial?.trim() || `${e.titulo}|${e.data_inicio}`).toLowerCase();
+    if (vistos.has(chave)) continue;
+    vistos.add(chave);
+    unicos.push(e);
+  }
+  return unicos;
 }
 
 export async function POST(request: NextRequest) {
