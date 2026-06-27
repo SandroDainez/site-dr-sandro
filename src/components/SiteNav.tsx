@@ -1,13 +1,18 @@
 import type { NavItemData, NavStyleData } from "@/lib/content";
+import { NAV_GROUPS, resolveHref, isGroupActive } from "@/lib/nav-structure";
+import { ChevronDown } from "lucide-react";
 
 type Props = {
-  items: NavItemData[];
+  items?: NavItemData[]; // mantido por compat; a estrutura vem de NAV_GROUPS
   style?: NavStyleData; // aparência da barra (tamanho/espaçamento/fonte)
   internal?: boolean; // páginas internas: âncoras "#x" viram "/#x"
-  currentPath?: string; // destaca o item da página atual
+  currentPath?: string; // destaca o grupo da página atual
 };
 
-export default function SiteNav({ items, style, internal = false, currentPath }: Props) {
+// Menu principal (desktop, lg+): poucos botões agrupados. Os grupos abrem um
+// dropdown no hover OU quando um item recebe foco por teclado (group-focus-within),
+// então funciona sem JS e continua acessível.
+export default function SiteNav({ style, internal = false, currentPath }: Props) {
   const s = style ?? {};
   const navStyle: React.CSSProperties = {
     paddingLeft: s.paddingX,
@@ -16,11 +21,10 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
     paddingBottom: s.paddingY,
     gap: s.gap,
   };
-  const itemStyle: React.CSSProperties = {
-    paddingLeft: s.itemPaddingX,
-    paddingRight: s.itemPaddingX,
-    fontSize: s.fontScale ? `${0.875 * s.fontScale}rem` : undefined,
-  };
+  const fontSize = s.fontScale ? `${0.875 * s.fontScale}rem` : undefined;
+  const itemStyle: React.CSSProperties = { paddingLeft: s.itemPaddingX, paddingRight: s.itemPaddingX, fontSize };
+
+  const triggerBase = "nav-beam flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 transition";
 
   return (
     <nav
@@ -28,26 +32,61 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
       style={navStyle}
       className="hidden items-center gap-0.5 rounded-full border border-white/15 bg-black/80 px-2 py-2 text-[13px] font-medium text-white/85 backdrop-blur-md lg:flex"
     >
-      {items.map((item, i) => {
-        let href = item.href || "#";
-        if (internal && href.startsWith("#")) href = "/" + href;
-        const isExternal = /^https?:\/\//.test(href);
-        const active = !!currentPath && href === currentPath;
+      {NAV_GROUPS.map((group) => {
+        const active = isGroupActive(group, currentPath);
+
+        // Item simples (sem filhos), ex.: Início
+        if (!group.children) {
+          const href = resolveHref(group.href || "#", internal);
+          return (
+            <a
+              key={group.label}
+              href={href}
+              style={itemStyle}
+              className={
+                active
+                  ? "whitespace-nowrap rounded-full bg-white/10 px-3 py-1.5 font-medium text-white"
+                  : `${triggerBase} text-white/85 hover:bg-white/10 hover:text-white`
+              }
+            >
+              {group.label}
+            </a>
+          );
+        }
+
+        // Grupo com dropdown
         return (
-          <a
-            key={`${item.label}-${i}`}
-            href={href}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noreferrer" : undefined}
-            style={itemStyle}
-            className={
-              active
-                ? "whitespace-nowrap rounded-full bg-white/10 px-2.5 py-1.5 font-medium text-white"
-                : "nav-beam whitespace-nowrap rounded-full px-2.5 py-1.5 text-white/85 transition hover:bg-white/10 hover:text-white"
-            }
-          >
-            {item.label}
-          </a>
+          <div key={group.label} className="group relative">
+            <button
+              type="button"
+              aria-haspopup="true"
+              style={itemStyle}
+              className={`${triggerBase} ${active ? "bg-white/10 text-white" : "text-white/85 hover:bg-white/10 hover:text-white group-hover:bg-white/10 group-hover:text-white"}`}
+            >
+              {group.label}
+              <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
+            </button>
+
+            {/* painel: invisível por opacidade (links continuam focáveis p/ teclado) */}
+            <div className="pointer-events-none absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+              <div className="min-w-[210px] overflow-hidden rounded-2xl border border-white/15 bg-[#0b0f17]/95 p-1.5 shadow-2xl shadow-black/50 backdrop-blur-xl">
+                {group.children.map((c) => {
+                  const href = resolveHref(c.href, internal);
+                  const isActive = !!currentPath && c.href === currentPath;
+                  return (
+                    <a
+                      key={c.label}
+                      href={href}
+                      className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] transition ${isActive ? "bg-white/10 font-medium text-white" : "text-white/75 hover:bg-white/[0.07] hover:text-white"}`}
+                    >
+                      {c.emoji && <span className="text-base leading-none">{c.emoji}</span>}
+                      {c.label}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         );
       })}
     </nav>
