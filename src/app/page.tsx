@@ -703,8 +703,8 @@ export default async function Home() {
           </section>
         )}
 
-        {/* Acervo teaser */}
-        {acervo.filter((p) => p.titulo).length > 0 && (
+        {/* Acervo teaser (sempre visível; mostra "em breve" quando vazio) */}
+        {(
           <section id="acervo" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="acervo" style={{ order: homeOrder["acervo"] }}>
             <div className="mb-8 flex items-end justify-between">
               <div>
