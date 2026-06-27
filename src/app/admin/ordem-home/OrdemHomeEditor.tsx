@@ -8,6 +8,7 @@ import { DEFAULT_HOME_ORDER } from "@/lib/home-sections";
 const LABELS: Record<string, string> = {
   atualizacoes: "Atualizações clínicas",
   protocolos: "Protocolos",
+  procedimentos: "Procedimentos médicos",
   videoaulas: "Videoaulas",
   cursos: "Cursos",
   podcast: "Podcast",

@@ -12,18 +12,18 @@ export default async function AdminAcervoPage() {
     <div className="max-w-3xl">
       <div className="mb-6">
         <Link href="/admin" className="text-xs text-muted hover:text-white transition">← Admin</Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Acervo</h1>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Outros assuntos</h1>
         <p className="mt-1 text-sm text-white/50">
-          Conteúdos gerais e curiosidades, com texto, foto, vídeo e <strong className="text-white/70">arquivos
+          Qualquer tema — inclusive fora da medicina — com texto, foto, vídeo e <strong className="text-white/70">arquivos
           para baixar</strong> (PDFs, livros). Aparece em <span className="font-mono text-white/70">/acervo</span> e na home.
         </p>
       </div>
 
-      <AdminHelp>Clique em “Adicionar item ao acervo”. Preencha título e categoria, escreva o texto, envie capa/vídeo (opcionais) e adicione arquivos para download (PDF, livro, imagem…). Salvar.</AdminHelp>
+      <AdminHelp>Clique em “Adicionar item”. Preencha título e categoria, escreva o texto, envie capa/vídeo (opcionais) e adicione arquivos para download (PDF, livro, imagem…). Salvar.</AdminHelp>
 
-      <AcervoEditor initialItens={itens} />
+      <AcervoEditor initialItens={itens} saveLabel="Salvar" />
 
-      <AreaTypography sectionKey="acervo" label="Acervo" initial={typo["acervo"]} />
+      <AreaTypography sectionKey="acervo" label="Outros assuntos" initial={typo["acervo"]} />
     </div>
   );
 }

@@ -847,6 +847,12 @@ export async function getAcervo(): Promise<AcervoItemData[]> {
   return readBlob("acervo", []);
 }
 
+// Procedimentos médicos: mesma estrutura do acervo (texto, vídeo, capa, arquivos,
+// especialidade + multi-área), em blob próprio.
+export async function getProcedimentos(): Promise<AcervoItemData[]> {
+  return readBlob("procedimentos", []);
+}
+
 export async function getSectionTexts(): Promise<import("./section-texts").SectionTextsData> {
   return readBlob("sectionTexts", {});
 }

@@ -18,7 +18,8 @@ export const SECTION_TEXTS: Entry[] = [
   { key: "cursos", group: "Página inicial", label: "Cursos / atualização contínua (home)", eyebrow: "Cursos presenciais, híbridos e online", title: "Atualização médica contínua" },
   { key: "podcast", group: "Página inicial", label: "Podcast (home)", eyebrow: "Áudio e vídeo", title: "Podcast" },
   { key: "contato", group: "Página inicial", label: "Contato (home)", eyebrow: "Contato", title: "Canais para inscrição e suporte" },
-  { key: "acervo", group: "Página inicial", label: "Acervo (home)", eyebrow: "Conteúdos e materiais", title: "Acervo", desc: "Curiosidades, assuntos gerais e materiais para baixar — textos, vídeos, PDFs e livros." },
+  { key: "acervo", group: "Página inicial", label: "Outros assuntos (home)", eyebrow: "Conteúdos e materiais", title: "Outros assuntos", desc: "Qualquer tema, inclusive fora da medicina — textos, vídeos, PDFs e livros para baixar." },
+  { key: "procedimentos", group: "Página inicial", label: "Procedimentos (home)", eyebrow: "Técnica e prática", title: "Procedimentos médicos" },
 
   // ── Páginas internas (topo de cada página) ───────────────────────
   { key: "page_atualizacoes", group: "Páginas internas", label: "Página Atualizações", eyebrow: "Conteúdo clínico", title: "Atualizações", desc: "Revisão rápida e direto ao ponto da evidência mais recente, por área clínica." },
@@ -27,7 +28,8 @@ export const SECTION_TEXTS: Entry[] = [
   { key: "page_cursos", group: "Páginas internas", label: "Página Cursos", eyebrow: "Formação médica", title: "Cursos", desc: "Cursos com aulas sequenciais, vídeos, slides e materiais para download. Conteúdo gratuito de acesso imediato — cursos completos por assinatura em breve." },
   { key: "page_podcast", group: "Páginas internas", label: "Página Podcast", eyebrow: "Áudio e vídeo", title: "Podcast", desc: "Episódios em áudio e vídeo — discussão de casos, condutas e atualizações. Assista ou ouça aqui, ou no seu app favorito." },
   { key: "page_colaboradores", group: "Páginas internas", label: "Página Parceiros", eyebrow: "Parceiros do portal", title: "Profissionais parceiros", desc: "Materiais generosamente cedidos por colegas de outras instituições. O conteúdo é de autoria deles, com todo o crédito — nosso muito obrigado a cada profissional que compartilha conhecimento aqui." },
-  { key: "page_acervo", group: "Páginas internas", label: "Página Acervo", eyebrow: "Conteúdos e materiais", title: "Acervo", desc: "Curiosidades, assuntos gerais e materiais para baixar — textos, vídeos, PDFs e livros." },
+  { key: "page_acervo", group: "Páginas internas", label: "Página Outros assuntos", eyebrow: "Conteúdos e materiais", title: "Outros assuntos", desc: "Qualquer tema, inclusive fora da medicina — textos, vídeos, PDFs e livros para baixar." },
+  { key: "page_procedimentos", group: "Páginas internas", label: "Página Procedimentos", eyebrow: "Técnica e prática", title: "Procedimentos médicos", desc: "Procedimentos e técnicas com vídeo, passo a passo e materiais para baixar — por especialidade." },
 ];
 
 const DEFAULTS: Record<string, Entry> = Object.fromEntries(SECTION_TEXTS.map((s) => [s.key, s]));

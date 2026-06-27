@@ -319,6 +319,18 @@ export async function saveAcervo(itens: AcervoItemData[]): Promise<Result> {
   }
 }
 
+export async function saveProcedimentos(itens: AcervoItemData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("procedimentos", itens);
+    revalidatePath("/");
+    revalidatePath("/procedimentos");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
 export async function savePodcasts(podcasts: PodcastData[]): Promise<Result> {
   try {
     await requireAdmin();

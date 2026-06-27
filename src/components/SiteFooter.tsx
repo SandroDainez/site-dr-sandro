@@ -19,12 +19,13 @@ export default async function SiteFooter() {
   }
   const extras = [
     { label: "Protocolos", href: "/protocolos" },
+    { label: "Procedimentos", href: "/procedimentos" },
     { label: "Videoaulas", href: "/videoaulas" },
     { label: "Atualizações", href: "/atualizacoes" },
     { label: "Boletins da semana", href: "/atualizacoes-semanais" },
     { label: "Cursos", href: "/cursos" },
     { label: "Podcast", href: "/podcast" },
-    { label: "Acervo", href: "/acervo" },
+    { label: "Outros assuntos", href: "/acervo" },
   ].filter((e) => !navLinks.some((b) => b.href === e.href));
   const links = [...navLinks, ...extras];
 

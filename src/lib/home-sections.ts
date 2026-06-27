@@ -3,7 +3,7 @@
 // (editor de ordem no admin). Ordem lógica: clínico → mídia → comunidade → apps
 // → eventos/contato.
 export const HOME_SECTION_IDS = [
-  "atualizacoes", "protocolos", "videoaulas", "cursos", "podcast",
+  "atualizacoes", "protocolos", "procedimentos", "videoaulas", "cursos", "podcast",
   "colaboradores", "acervo", "apps-assinatura", "apps-gratis", "apps-uteis",
   "eventos", "contato",
 ] as const;

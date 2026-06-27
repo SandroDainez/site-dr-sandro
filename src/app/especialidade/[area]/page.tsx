@@ -2,15 +2,16 @@ export const dynamic = "force-dynamic";
 
 import { notFound } from "next/navigation";
 import {
-  getProtocolos, getVideoaulas, getCursos, getAtualizacoes, getAcervo,
+  getProtocolos, getVideoaulas, getCursos, getAtualizacoes, getAcervo, getProcedimentos,
   getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle,
 } from "@/lib/content";
+import AcervoList from "@/app/acervo/AcervoList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
-import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download } from "lucide-react";
+import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download, Stethoscope } from "lucide-react";
 import ProtocoloCard from "@/components/ProtocoloCard";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import { UpdateCard } from "@/app/atualizacoes/AtualizacoesGrid";
@@ -56,8 +57,8 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const a = area as Area;
   const cfg = AREAS[a];
 
-  const [protocolos, videoaulas, cursos, atualizacoes, acervo, header, navItems, typo, navStyle] = await Promise.all([
-    getProtocolos(), getVideoaulas(), getCursos(), getAtualizacoes(), getAcervo(),
+  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle] = await Promise.all([
+    getProtocolos(), getVideoaulas(), getCursos(), getAtualizacoes(), getAcervo(), getProcedimentos(),
     getHeader(), getNavItems(), getTypography(), getNavStyle(),
   ]);
 
@@ -70,8 +71,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const curs = cursos.filter((c) => inArea(c) && c.titulo);
   const atu = [...atualizacoes].filter(inArea).sort((x, y) => new Date(y.data).getTime() - new Date(x.data).getTime());
   const docs = acervo.filter((x) => inArea(x) && x.titulo);
+  const procs = procedimentos.filter((x) => inArea(x) && x.titulo);
 
-  const total = proto.length + vids.length + curs.length + atu.length + docs.length;
+  const total = proto.length + vids.length + curs.length + atu.length + docs.length + procs.length;
 
   const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/20";
 
@@ -121,6 +123,12 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
                     <ProtocoloCard key={p.id} item={p} />
                   ))}
                 </div>
+              </Section>
+            )}
+
+            {procs.length > 0 && (
+              <Section icon={Stethoscope} titulo="Procedimentos" verHref="/procedimentos" accent={cfg.accent}>
+                <AcervoList itens={procs} />
               </Section>
             )}
 

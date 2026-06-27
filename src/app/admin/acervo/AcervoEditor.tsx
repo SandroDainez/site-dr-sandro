@@ -8,7 +8,13 @@ import { saveAcervo } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import AreasExtra from "@/components/admin/AreasExtra";
 
-type Props = { initialItens: AcervoItemData[] };
+type SaveResult = { ok: true } | { ok: false; error: string };
+type Props = {
+  initialItens: AcervoItemData[];
+  onSave?: (items: AcervoItemData[]) => Promise<SaveResult>;
+  uploadPrefix?: string;
+  saveLabel?: string;
+};
 
 const inputCls =
   "w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50";
@@ -26,7 +32,7 @@ function uid(p: string) {
   return `${p}-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6).toString(36)}`;
 }
 
-export default function AcervoEditor({ initialItens }: Props) {
+export default function AcervoEditor({ initialItens, onSave = saveAcervo, uploadPrefix = "acervo", saveLabel = "Salvar acervo" }: Props) {
   const [itens, setItens] = useState<AcervoItemData[]>(initialItens);
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
@@ -75,7 +81,7 @@ export default function AcervoEditor({ initialItens }: Props) {
     setError(null);
     setUploadingKey(job.key);
     try {
-      const blob = await upload(`acervo/${Date.now()}-${file.name}`, file, { access: "private", handleUploadUrl: "/api/upload" });
+      const blob = await upload(`${uploadPrefix}/${Date.now()}-${file.name}`, file, { access: "private", handleUploadUrl: "/api/upload" });
       job.apply(`/api/img?url=${encodeURIComponent(blob.url)}`);
     } catch (e) {
       setError("Falha no upload: " + String(e instanceof Error ? e.message : e));
@@ -85,7 +91,7 @@ export default function AcervoEditor({ initialItens }: Props) {
   function handleSave() {
     setError(null);
     startTransition(async () => {
-      const r = await saveAcervo(itens);
+      const r = await onSave(itens);
       if (r.ok) setSaved(true); else setError(r.error);
     });
   }
@@ -209,7 +215,7 @@ export default function AcervoEditor({ initialItens }: Props) {
 
       <div className="sticky bottom-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-[#0b0e14]/90 p-3 backdrop-blur">
         <button type="button" onClick={handleSave} disabled={isPending} className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
-          <Save className="h-4 w-4" /> {isPending ? "Salvando..." : "Salvar acervo"}
+          <Save className="h-4 w-4" /> {isPending ? "Salvando..." : saveLabel}
         </button>
         {saved && <span className="text-sm text-accent">✓ Salvo com sucesso</span>}
         {error && <p className="text-sm text-red-400 leading-relaxed">{error}</p>}
