@@ -55,6 +55,7 @@ import {
   getTypography,
   getNavItems,
   getNavStyle,
+  getHomeOrder,
   headerSubtitleLines,
 } from "@/lib/content";
 
@@ -65,36 +66,15 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 
-// A ordem das seções da home segue a ordem dos itens do menu (editável em /admin/menu).
-const HOME_SECTIONS = [
-  "apps-assinatura", "apps-gratis", "apps-uteis", "atualizacoes",
-  "protocolos", "videoaulas", "colaboradores", "cursos",
-  "podcast", "acervo", "eventos", "contato",
-];
-function hrefToSectionId(href: string): string {
-  const path = href.replace(/^https?:\/\/[^/]+/, "");
-  if (path.includes("#")) return path.split("#").pop() || "";
-  return path.replace(/^\/+|\/+$/g, "");
-}
-function computeHomeOrder(navItems: { href?: string }[]): Record<string, number> {
+// A ordem das seções da home vem de getHomeOrder() (editável em /admin/ordem-home).
+function computeHomeOrder(list: string[]): Record<string, number> {
   const order: Record<string, number> = {};
-  navItems.forEach((it, i) => {
-    const id = hrefToSectionId(it.href || "");
-    if (HOME_SECTIONS.includes(id) && order[id] === undefined) order[id] = (i + 1) * 100;
-  });
-  // "Apps grátis" não tem item no menu: fica logo após os apps por assinatura.
-  if (order["apps-gratis"] === undefined) {
-    order["apps-gratis"] = (order["apps-assinatura"] ?? 100) + 1;
-  }
-  // Qualquer seção ausente do menu vai para o fim, mantendo a ordem natural.
-  HOME_SECTIONS.forEach((id, idx) => {
-    if (order[id] === undefined) order[id] = 9000 + idx;
-  });
+  list.forEach((id, i) => { order[id] = (i + 1) * 100; });
   return order;
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, st, ui, typo, navItems, navStyle] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, st, ui, typo, navItems, navStyle, homeOrderList] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -116,8 +96,9 @@ export default async function Home() {
     getTypography(),
     getNavItems(),
     getNavStyle(),
+    getHomeOrder(),
   ]);
-  const homeOrder = computeHomeOrder(navItems);
+  const homeOrder = computeHomeOrder(homeOrderList);
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
       {/* Tipografia por seção definida no admin (tamanho, fonte, cor, peso) */}

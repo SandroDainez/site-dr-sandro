@@ -1,5 +1,6 @@
 import { list, put } from "@vercel/blob";
 import { cache } from "react";
+import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER } from "./home-sections";
 import { unstable_noStore as noStore } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
@@ -790,6 +791,25 @@ export async function getNavItems(): Promise<NavItemData[]> {
 
 export async function getNavStyle(): Promise<NavStyleData> {
   return readBlob("navStyle", {});
+}
+
+// Ordem das seções da home (editável no admin). Constantes em ./home-sections
+// (módulo puro, reusável no cliente). Padrão: clínico → mídia → comunidade → apps.
+export { HOME_SECTION_IDS, DEFAULT_HOME_ORDER };
+
+export async function getHomeOrder(): Promise<string[]> {
+  const saved = await readBlob<string[]>("homeOrder", DEFAULT_HOME_ORDER);
+  // saneamento: mantém só ids válidos, sem duplicar, e acrescenta os que faltarem
+  const ordered: string[] = [];
+  const seen = new Set<string>();
+  for (const id of Array.isArray(saved) ? saved : []) {
+    if ((HOME_SECTION_IDS as readonly string[]).includes(id) && !seen.has(id)) {
+      ordered.push(id);
+      seen.add(id);
+    }
+  }
+  for (const id of HOME_SECTION_IDS) if (!seen.has(id)) ordered.push(id);
+  return ordered;
 }
 
 // Fallback vazio: o site mostra apenas o que for cadastrado no admin.

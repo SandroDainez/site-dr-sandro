@@ -43,6 +43,17 @@ async function requireAdmin() {
 
 type Result = { ok: true } | { ok: false; error: string };
 
+export async function saveHomeOrder(order: string[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("homeOrder", order);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erro ao salvar" };
+  }
+}
+
 export async function saveEventos(eventos: EventoData[]): Promise<Result> {
   try {
     await requireAdmin();

@@ -14,6 +14,7 @@ import {
   Settings,
   ShieldCheck,
   Sparkles,
+  ListOrdered,
   ArrowRight,
   Type,
   UserCircle,
@@ -61,6 +62,14 @@ const sections = [
     desc: "Título e subtítulo do grande bloco no topo da página inicial.",
     color: "text-amber-400",
     border: "hover:border-amber-400/40",
+  },
+  {
+    href: "/admin/ordem-home",
+    icon: ListOrdered,
+    label: "Ordem das seções (home)",
+    desc: "Reordene as seções que aparecem ao rolar a página inicial.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
   },
   {
     href: "/admin/apps",
