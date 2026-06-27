@@ -93,7 +93,7 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
   );
 }
 
-function VideoCard({ item }: { item: VideoaulaData }) {
+export function VideoCard({ item }: { item: VideoaulaData }) {
   const [descExpanded, setDescExpanded] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
   const [inlinePlaying, setInlinePlaying] = useState(false);

@@ -54,7 +54,7 @@ function formatDate(iso: string): string {
   }
 }
 
-function UpdateCard({ item }: { item: AtualizacaoData }) {
+export function UpdateCard({ item }: { item: AtualizacaoData }) {
   const [expanded, setExpanded] = useState(false);
   const cfg = areaConfig[item.area];
 

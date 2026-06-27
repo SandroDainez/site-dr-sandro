@@ -11,8 +11,9 @@ import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download } from "lucide-react";
-import { HubArticles, HubVideos } from "@/components/HubContent";
 import ProtocoloCard from "@/components/ProtocoloCard";
+import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
+import { UpdateCard } from "@/app/atualizacoes/AtualizacoesGrid";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
 const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
@@ -136,10 +137,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {vids.length > 0 && (
               <Section icon={PlayCircle} titulo="Videoaulas" verHref="/videoaulas" accent={cfg.accent}>
-                <HubVideos
-                  accent={cfg.accent}
-                  items={vids.map((v) => ({ id: v.id, titulo: v.titulo, descricao: v.descricao, videoUrl: v.videoUrl, duracao: v.duracao }))}
-                />
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {vids.map((v) => <VideoCard key={v.id} item={v} />)}
+                </div>
               </Section>
             )}
 
@@ -158,19 +158,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {atu.length > 0 && (
               <Section icon={Newspaper} titulo="Atualizações" verHref="/atualizacoes" accent={cfg.accent}>
-                <HubArticles
-                  accent={cfg.accent}
-                  items={atu.map((x) => ({
-                    id: x.id,
-                    titulo: x.titulo,
-                    conteudo: x.conteudo,
-                    imageUrl: x.imageUrl,
-                    imageCaption: x.imageCaption,
-                    imageSize: x.imageSize,
-                    data: x.data,
-                    sourceUrl: x.link,
-                  }))}
-                />
+                <div className="flex flex-col gap-4">
+                  {atu.map((x) => <UpdateCard key={x.id} item={x} />)}
+                </div>
               </Section>
             )}
           </>

@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import {
-  getProtocolos, getVideoaulas, getAtualizacoes, getCursos, getPodcasts, getAcervo,
+  getProtocolos, getVideoaulas, getAtualizacoes, getCursos, getPodcasts, getAcervo, getColaboradores,
   getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle,
 } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
@@ -17,8 +17,8 @@ export const metadata = {
 };
 
 export default async function ConteudoPage() {
-  const [protocolos, videoaulas, atualizacoes, cursos, podcasts, acervo, header, navItems, typo, navStyle] = await Promise.all([
-    getProtocolos(), getVideoaulas(), getAtualizacoes(), getCursos(), getPodcasts(), getAcervo(),
+  const [protocolos, videoaulas, atualizacoes, cursos, podcasts, acervo, colaboradores, header, navItems, typo, navStyle] = await Promise.all([
+    getProtocolos(), getVideoaulas(), getAtualizacoes(), getCursos(), getPodcasts(), getAcervo(), getColaboradores(),
     getHeader(), getNavItems(), getTypography(), getNavStyle(),
   ]);
 
@@ -56,6 +56,7 @@ export default async function ConteudoPage() {
           cursos={cursos}
           podcasts={podcasts}
           acervo={acervo}
+          colaboradores={colaboradores}
         />
       </main>
 
