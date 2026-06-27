@@ -134,15 +134,23 @@ async function verificarDataNaFonte(url: string, dataISO: string): Promise<boole
     clearTimeout(tid);
     if (!res || !res.ok) return false;
     const html = (await res.text()).toLowerCase().replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-    if (!html.includes(y)) return false; // precisa do ano na página
-    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const perto = (a: string, b: string) => new RegExp(`${esc(a)}[\\s\\S]{0,25}${esc(b)}`, "i").test(html);
-    return (
-      perto(dia, mp) || perto(mp, dia) ||
-      perto(dia, me) || perto(me, dia) ||
-      html.includes(`${dd}/${mm}/${y}`) || html.includes(`${dia}/${mm}/${y}`) ||
-      html.includes(dataISO)
-    );
+    // Exige a data como FRASE CONTÍGUA e bem-formada (dia+mês+ano juntos). Assim uma
+    // página genérica que só tenha "25" e "2026" soltos NÃO confirma (sem falso-positivo).
+    const padroes = [
+      // pt: "25 de novembro de 2026" / "25 a 28 de novembro de 2026"
+      new RegExp(`\\b${dia}\\b(?:\\s+a\\s+\\d{1,2})?\\s+de\\s+${mp}\\s+de\\s+${y}`, "i"),
+      // pt (dia é o fim do intervalo): "22 a 25 de novembro de 2026"
+      new RegExp(`\\b\\d{1,2}\\s+a\\s+${dia}\\s+de\\s+${mp}\\s+de\\s+${y}`, "i"),
+      // en: "november 25, 2026" / "november 25-28, 2026"
+      new RegExp(`${me}\\s+${dia}(?:\\s*[-–]\\s*\\d{1,2})?,?\\s+${y}`, "i"),
+      // en: "25 november 2026" / "25-28 november 2026"
+      new RegExp(`\\b${dia}(?:\\s*[-–]\\s*\\d{1,2})?\\s+${me}\\s+${y}`, "i"),
+      // numérico e ISO
+      new RegExp(`\\b${dd}/${mm}/${y}\\b`),
+      new RegExp(`\\b${dia}/${mm}/${y}\\b`),
+      new RegExp(dataISO.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+    ];
+    return padroes.some((re) => re.test(html));
   } catch {
     return false;
   }
