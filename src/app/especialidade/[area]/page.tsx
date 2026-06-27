@@ -11,6 +11,7 @@ import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download } from "lucide-react";
+import { HubArticles, HubVideos } from "./HubContent";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
 const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
@@ -103,14 +104,20 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           <>
             {proto.length > 0 && (
               <Section icon={ClipboardList} titulo="Protocolos" verHref="/protocolos" accent={cfg.accent}>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {proto.map((p) => (
-                    <a key={p.id} href={`/protocolos#${p.id}`} className={card}>
-                      <p className="text-sm font-semibold text-white">{p.titulo}</p>
-                      {p.descricao && <p className="mt-1 line-clamp-2 text-xs text-white/50" dangerouslySetInnerHTML={{ __html: p.descricao.replace(/<[^>]*>/g, "") }} />}
-                    </a>
-                  ))}
-                </div>
+                <HubArticles
+                  accent={cfg.accent}
+                  items={proto.map((p) => ({
+                    id: p.id,
+                    titulo: p.titulo,
+                    conteudo: p.conteudo,
+                    resumo: p.descricao,
+                    imageUrl: p.imageUrl,
+                    imageCaption: p.imageCaption,
+                    imageSize: p.imageSize,
+                    data: p.data,
+                    download: p.arquivoUrl ? { url: p.arquivoUrl, label: p.arquivoLabel || "Abrir material" } : undefined,
+                  }))}
+                />
               </Section>
             )}
 
@@ -137,14 +144,10 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {vids.length > 0 && (
               <Section icon={PlayCircle} titulo="Videoaulas" verHref="/videoaulas" accent={cfg.accent}>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {vids.map((v) => (
-                    <a key={v.id} href="/videoaulas" className={card}>
-                      <p className="text-sm font-semibold text-white">{v.titulo}</p>
-                      {v.duracao && <p className="mt-1 text-xs text-white/40">⏱ {v.duracao}</p>}
-                    </a>
-                  ))}
-                </div>
+                <HubVideos
+                  accent={cfg.accent}
+                  items={vids.map((v) => ({ id: v.id, titulo: v.titulo, descricao: v.descricao, videoUrl: v.videoUrl, duracao: v.duracao }))}
+                />
               </Section>
             )}
 
@@ -163,14 +166,18 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {atu.length > 0 && (
               <Section icon={Newspaper} titulo="Atualizações" verHref="/atualizacoes" accent={cfg.accent}>
-                <div className="space-y-2">
-                  {atu.map((x) => (
-                    <a key={x.id} href={`/atualizacoes#${x.id}`} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:border-white/20">
-                      <span className="text-sm font-medium text-white">{x.titulo}</span>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-white/30" />
-                    </a>
-                  ))}
-                </div>
+                <HubArticles
+                  accent={cfg.accent}
+                  items={atu.map((x) => ({
+                    id: x.id,
+                    titulo: x.titulo,
+                    conteudo: x.conteudo,
+                    imageUrl: x.imageUrl,
+                    imageCaption: x.imageCaption,
+                    imageSize: x.imageSize,
+                    data: x.data,
+                  }))}
+                />
               </Section>
             )}
           </>
