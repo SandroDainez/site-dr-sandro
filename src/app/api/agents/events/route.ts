@@ -67,12 +67,17 @@ REGRAS CRÍTICAS:
     try {
       const response = await (getOpenAI().chat.completions.create as any)({
         model: "gpt-4o-search-preview",
-        max_tokens: 4000,
+        max_tokens: 8000,
         messages: [{ role: "user", content: prompt }],
       });
       const texto = response.choices[0].message.content ?? "[]";
-      const clean = texto.replace(/```json|```/g, "").trim();
-      return JSON.parse(clean.startsWith("[") ? clean : `[${clean}]`);
+      // Extrai o array JSON mesmo que o modelo coloque texto/markdown ao redor.
+      const semFence = texto.replace(/```json|```/g, "").trim();
+      const m = semFence.match(/\[[\s\S]*\]/);
+      const clean = m ? m[0] : (semFence.startsWith("[") ? semFence : `[${semFence}]`);
+      const parsed = JSON.parse(clean);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      throw new Error("busca vazia");
     } catch {
       tentativas++;
       if (tentativas < 3) {
@@ -84,12 +89,13 @@ REGRAS CRÍTICAS:
   // Fallback sem web search
   const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    max_tokens: 4000,
+    messages: [{ role: "user", content: prompt + '\n\nRetorne um objeto JSON {"eventos": [...]} com o array de eventos.' }],
+    max_tokens: 8000,
     response_format: { type: "json_object" },
   });
   const data = JSON.parse(response.choices[0].message.content ?? '{"eventos":[]}');
-  return Array.isArray(data) ? data : (data.eventos ?? []);
+  if (Array.isArray(data)) return data;
+  return data.eventos ?? data.events ?? data.congressos ?? [];
 }
 
 export async function POST(request: NextRequest) {
