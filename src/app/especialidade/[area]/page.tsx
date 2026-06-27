@@ -3,8 +3,9 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import {
   getProtocolos, getVideoaulas, getCursos, getAtualizacoes, getAcervo, getProcedimentos,
-  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle,
+  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts,
 } from "@/lib/content";
+import { secText } from "@/lib/section-texts";
 import AcervoList from "@/app/acervo/AcervoList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -57,10 +58,11 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const a = area as Area;
   const cfg = AREAS[a];
 
-  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle] = await Promise.all([
+  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st] = await Promise.all([
     getProtocolos(), getVideoaulas(), getCursos(), getAtualizacoes(), getAcervo(), getProcedimentos(),
-    getHeader(), getNavItems(), getTypography(), getNavStyle(),
+    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(),
   ]);
+  const hubKey = `hub_${a}`;
 
   // Um item pertence ao hub se sua área principal é `a` OU se `a` está nas áreas
   // extras (multi-especialidade): um assunto pode aparecer em mais de um hub.
@@ -100,9 +102,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${cfg.grad}`} />
           <div className="pointer-events-none absolute -right-10 -top-10 text-[9rem] opacity-10 blur-[1px] md:text-[12rem]">{cfg.emoji}</div>
           <div className="relative">
-            <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${cfg.accent}`}>Especialidade</p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">{cfg.emoji} {cfg.label}</h1>
-            <p className="mt-3 max-w-2xl text-base text-white/65">{cfg.tagline}</p>
+            <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${cfg.accent}`}>{secText(st, hubKey, "eyebrow")}</p>
+            <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">{cfg.emoji} {secText(st, hubKey, "title")}</h1>
+            <p className="mt-3 max-w-2xl text-base text-white/65">{secText(st, hubKey, "desc")}</p>
             {total > 0 && <p className="mt-5 text-xs text-white/45">{total} {total === 1 ? "item" : "itens"} nesta especialidade</p>}
           </div>
         </div>

@@ -30,6 +30,11 @@ export const SECTION_TEXTS: Entry[] = [
   { key: "page_colaboradores", group: "Páginas internas", label: "Página Parceiros", eyebrow: "Parceiros do portal", title: "Profissionais parceiros", desc: "Materiais generosamente cedidos por colegas de outras instituições. O conteúdo é de autoria deles, com todo o crédito — nosso muito obrigado a cada profissional que compartilha conhecimento aqui." },
   { key: "page_acervo", group: "Páginas internas", label: "Página Outros assuntos", eyebrow: "Conteúdos e materiais", title: "Outros assuntos", desc: "Qualquer tema, inclusive fora da medicina — textos, vídeos, PDFs e livros para baixar." },
   { key: "page_procedimentos", group: "Páginas internas", label: "Página Procedimentos", eyebrow: "Técnica e prática", title: "Procedimentos médicos", desc: "Procedimentos e técnicas com vídeo, passo a passo e materiais para baixar — por especialidade." },
+
+  // ── Especialidades (hubs /especialidade/...) — topo de cada hub ──────────────
+  { key: "hub_emergencias", group: "Especialidades", label: "Hub Emergências", eyebrow: "Especialidade", title: "Emergências", desc: "Condutas, protocolos e materiais de medicina de urgência e emergência." },
+  { key: "hub_ti", group: "Especialidades", label: "Hub Terapia Intensiva", eyebrow: "Especialidade", title: "Terapia Intensiva", desc: "Tudo de cuidados intensivos: protocolos, aulas, cursos e materiais." },
+  { key: "hub_anestesiologia", group: "Especialidades", label: "Hub Anestesiologia", eyebrow: "Especialidade", title: "Anestesiologia", desc: "Condutas, documentos e conteúdo de anestesiologia num só lugar." },
 ];
 
 const DEFAULTS: Record<string, Entry> = Object.fromEntries(SECTION_TEXTS.map((s) => [s.key, s]));
