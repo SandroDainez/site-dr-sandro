@@ -1,4 +1,9 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Vídeos de colaboradores",
+  description: "Conteúdo de médicos convidados, com crédito ao autor.",
+};
+
 
 import { getColaboradores, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
 import { secText } from "@/lib/section-texts";

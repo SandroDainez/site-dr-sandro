@@ -24,15 +24,30 @@ const poppins = Poppins({
 });
 const lora = Lora({ variable: "--font-lora", subsets: ["latin"] });
 
+const SITE_URL = "https://site-dr-sandro.vercel.app";
+
 export async function generateMetadata(): Promise<Metadata> {
   const [header, hero] = await Promise.all([getHeader(), getHero()]);
   const name = header.name?.trim() || "Portal Médico";
   const subtitle = headerSubtitleLines(header)[0];
+  const full = subtitle ? `${name} — ${subtitle}` : name;
+  const description =
+    hero.subtitle?.trim() ||
+    "Plataforma de referência em emergências, terapia intensiva e anestesiologia: protocolos, atualizações, cursos, videoaulas, podcasts e materiais para download.";
   return {
-    title: subtitle ? `${name} — ${subtitle}` : name,
-    description:
-      hero.subtitle?.trim() ||
-      "Portal médico com apps, cursos, podcasts e atualizações clínicas.",
+    metadataBase: new URL(SITE_URL),
+    title: { default: full, template: `%s · ${name}` },
+    description,
+    applicationName: name,
+    keywords: [
+      "medicina", "emergências", "terapia intensiva", "anestesiologia",
+      "protocolos clínicos", "atualizações médicas", "cursos de medicina",
+      "videoaulas", "podcast médico", "ensino médico",
+    ],
+    authors: [{ name }],
+    openGraph: { type: "website", locale: "pt_BR", url: SITE_URL, siteName: name, title: full, description },
+    twitter: { card: "summary_large_image", title: full, description },
+    robots: { index: true, follow: true },
   };
 }
 

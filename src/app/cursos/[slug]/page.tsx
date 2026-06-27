@@ -32,6 +32,13 @@ const nivelLabel: Record<string, string> = {
   avancado: "Avançado",
 };
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const curso = await getCurso(slug);
+  if (!curso || !curso.titulo) return { title: "Curso" };
+  return { title: curso.titulo, description: (curso.resumo || `Curso de ${curso.area}`).slice(0, 160) };
+}
+
 export default async function CursoDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const [curso, header, navItems, typo, navStyle, ui] = await Promise.all([

@@ -1,4 +1,9 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Videoaulas",
+  description: "Aulas médicas em vídeo, organizadas por área clínica.",
+};
+
 
 import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
 import { secText } from "@/lib/section-texts";

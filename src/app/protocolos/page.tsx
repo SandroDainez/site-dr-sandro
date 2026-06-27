@@ -1,4 +1,9 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Protocolos clínicos",
+  description: "Algoritmos e condutas por área: emergências, terapia intensiva e anestesiologia.",
+};
+
 
 import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
 import { secText } from "@/lib/section-texts";

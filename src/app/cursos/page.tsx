@@ -1,4 +1,9 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Cursos",
+  description: "Cursos completos com aulas sequenciais, vídeos, slides e materiais.",
+};
+
 
 import { getCursos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
 import { secText } from "@/lib/section-texts";

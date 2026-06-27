@@ -19,6 +19,13 @@ const AREAS: Record<Area, { label: string; emoji: string; accent: string; taglin
   anestesiologia: { label: "Anestesiologia", emoji: "🩺", accent: "text-violet-400", tagline: "Condutas, documentos e conteúdo de anestesiologia num só lugar." },
 };
 
+export async function generateMetadata({ params }: { params: Promise<{ area: string }> }) {
+  const { area } = await params;
+  const a = AREAS[area as Area];
+  if (!a) return { title: "Especialidade" };
+  return { title: a.label, description: a.tagline };
+}
+
 function Section({ icon: Icon, titulo, verHref, children, accent }: { icon: typeof FileText; titulo: string; verHref?: string; children: React.ReactNode; accent: string }) {
   return (
     <section className="mb-10">

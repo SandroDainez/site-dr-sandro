@@ -1,4 +1,9 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Atualizações clínicas",
+  description: "Revisão rápida da evidência médica mais recente, por área clínica.",
+};
+
 
 import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
 import { secText } from "@/lib/section-texts";

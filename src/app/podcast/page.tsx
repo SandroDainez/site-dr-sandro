@@ -1,4 +1,9 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Podcast",
+  description: "Episódios em áudio e vídeo — discussão de casos, condutas e atualizações.",
+};
+
 
 import { getPodcasts, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
 import { secText } from "@/lib/section-texts";

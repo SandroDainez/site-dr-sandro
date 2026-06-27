@@ -1,4 +1,9 @@
 export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "Acervo",
+  description: "Conteúdos, curiosidades e materiais para baixar: PDFs, livros e mais.",
+};
+
 
 import { getAcervo, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
