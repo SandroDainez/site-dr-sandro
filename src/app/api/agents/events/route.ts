@@ -46,8 +46,14 @@ Para CADA evento encontrado retorne:
   "pais": "nome do país em português",
   "modalidade": "presencial" ou "online" ou "hibrido",
   "url_oficial": "URL REAL do site oficial do evento",
-  "organizador": "sigla da sociedade organizadora"
+  "organizador": "sigla da sociedade organizadora",
+  "slug_marco": "(SÓ p/ congressos-marco) chave fixa: CBMEDE→'cbmede', COPA SAESP→'copa-saesp', CBA→'cba', CBMI→'cbmi', CLASA→'clasa'. Demais eventos: omita."
 }
+
+IMPORTANTE — CONGRESSOS-MARCO: se encontrar a data OFICIAL e exata de um congresso-marco
+(CBMEDE, COPA SAESP, CBA, CBMI, CLASA), retorne-o com o "slug_marco" correto e a data real.
+O sistema usa essa chave para ATUALIZAR automaticamente a data de um marco que ainda estava
+"a confirmar". Use a data oficial só se tiver certeza; não chute.
 
 COBERTURA OBRIGATÓRIA (não pode faltar):
 - PRIORIZE os principais congressos do BRASIL: Congresso Brasileiro de Anestesiologia (CBA/SBA, ~novembro), Congresso Paulista de Anestesiologia (SAESP, ~abril), Congresso Brasileiro de Medicina Intensiva (CBMI/AMIB), Congresso Brasileiro de Medicina de Emergência (SBMU/ABRAMEDE) e os regionais relevantes.
@@ -123,20 +129,35 @@ export async function POST(request: NextRequest) {
     if (!ev.url_oficial || !ev.data_inicio || !ev.titulo) { ignorados++; continue; }
     if (ev.data_inicio < hoje || ev.data_inicio > fimJanela) { ignorados++; continue; }
 
-    const { data: existente } = await supabase
-      .from("medical_events")
-      .select("id")
-      .or(`url_oficial.eq.${ev.url_oficial},and(titulo.eq.${ev.titulo},data_inicio.eq.${ev.data_inicio})`)
-      .maybeSingle();
+    // Casa primeiro pela chave de congresso-marco (slug_marco) — assim um marco que
+    // estava "a confirmar" é atualizado com a data oficial. Senão, casa por URL/título.
+    const slug = typeof ev.slug_marco === "string" && ev.slug_marco.trim() ? ev.slug_marco.trim() : null;
+    let existente: { id: string } | null = null;
+    if (slug) {
+      const { data } = await supabase.from("medical_events").select("id").eq("slug_marco", slug).maybeSingle();
+      existente = data ?? null;
+    }
+    if (!existente) {
+      const { data } = await supabase
+        .from("medical_events")
+        .select("id")
+        .or(`url_oficial.eq.${ev.url_oficial},and(titulo.eq.${ev.titulo},data_inicio.eq.${ev.data_inicio})`)
+        .maybeSingle();
+      existente = data ?? null;
+    }
 
     if (existente) {
+      // O agente trouxe uma data concreta → atualiza a data e marca como confirmada
+      // (corrige automaticamente os marcos que estavam "a confirmar").
       await supabase.from("medical_events").update({
+        data_inicio: ev.data_inicio,
         data_fim: ev.data_fim ?? null,
         local_nome: ev.local_nome ?? null,
         cidade: ev.cidade ?? null,
         modalidade: ev.modalidade ?? null,
         descricao: ev.descricao ?? null,
         ativo: true,
+        data_confirmada: true,
         ultima_verificacao: new Date().toISOString(),
       }).eq("id", existente.id);
       atualizados++;
@@ -153,6 +174,7 @@ export async function POST(request: NextRequest) {
         modalidade: ev.modalidade ?? "presencial",
         url_oficial: ev.url_oficial,
         organizador: ev.organizador ?? null,
+        slug_marco: slug,
         destaque: false,
         ativo: true,
       });

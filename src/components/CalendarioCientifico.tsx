@@ -18,7 +18,17 @@ export type EventoUnificado = {
   badge?: string | null; // tipo do curso ou organizador do congresso
   href: string;
   external: boolean; // true = site oficial (nova aba); false = inscrição interna
+  data_confirmada?: boolean; // false = data ainda provisória ("a confirmar")
 };
+
+// Mês/ano por extenso a partir de YYYY-MM-DD (p/ eventos com data a confirmar).
+function fmtMes(iso: string) {
+  try {
+    return new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  } catch {
+    return iso;
+  }
+}
 
 const semana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const MOD_BADGE: Record<string, string> = {
@@ -62,6 +72,7 @@ export default function CalendarioCientifico({
     const m: Record<string, EventoUnificado[]> = {};
     for (const e of eventos) {
       if (!e.data_inicio) continue;
+      if (e.data_confirmada === false) continue; // sem dia exato → não fixa na grade
       (m[e.data_inicio] ??= []).push(e);
     }
     return m;
@@ -160,7 +171,11 @@ export default function CalendarioCientifico({
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold leading-snug text-white">{e.titulo}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/50">
-                        <span>📅 {fmt(e.data_inicio)}{e.data_fim && e.data_fim !== e.data_inicio ? ` – ${fmt(e.data_fim)}` : ""}</span>
+                        {e.data_confirmada === false ? (
+                          <span className="inline-flex items-center gap-1">📅 {fmtMes(e.data_inicio)} <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-300">data a confirmar</span></span>
+                        ) : (
+                          <span>📅 {fmt(e.data_inicio)}{e.data_fim && e.data_fim !== e.data_inicio ? ` – ${fmt(e.data_fim)}` : ""}</span>
+                        )}
                         {e.local && <span>📍 {e.local}{e.pais ? `, ${e.pais}` : ""}</span>}
                         {e.badge && <span>· {e.badge}</span>}
                         {e.modalidade && <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${MOD_BADGE[e.modalidade] ?? "border-white/15 text-white/50"}`}>{e.modalidade}</span>}

@@ -36,6 +36,7 @@ export default async function AgendaCientifica({
       badge: c.tipo ?? null,
       href: `/inscricao?evento=${c.slug}&data=${c.data}`,
       external: false,
+      data_confirmada: true,
     }));
 
   // 2) Congressos científicos (Supabase)
@@ -45,7 +46,7 @@ export default async function AgendaCientifica({
       const supabase = createPublicClient();
       let query = supabase
         .from("medical_events")
-        .select("id,titulo,data_inicio,data_fim,cidade,local_nome,pais,modalidade,organizador,url_oficial")
+        .select("id,titulo,data_inicio,data_fim,cidade,local_nome,pais,modalidade,organizador,url_oficial,data_confirmada")
         .eq("ativo", true)
         .gte("data_inicio", hojeISO)
         .order("data_inicio", { ascending: true })
@@ -63,6 +64,7 @@ export default async function AgendaCientifica({
         badge: e.organizador || null,
         href: e.url_oficial,
         external: true,
+        data_confirmada: e.data_confirmada !== false,
       }));
     } catch {
       dosCongressos = [];
