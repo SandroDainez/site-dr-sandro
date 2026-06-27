@@ -184,8 +184,8 @@ export async function POST(request: NextRequest) {
     // Casa primeiro pela chave de congresso-marco (slug_marco) — assim um marco que
     // estava "a confirmar" é atualizado com a data oficial. Senão, casa por URL/título.
     const slug = typeof ev.slug_marco === "string" && ev.slug_marco.trim() ? ev.slug_marco.trim() : null;
-    const cols = "id,data_confirmada,data_inicio,data_fim";
-    let existente: { id: string; data_confirmada: boolean; data_inicio: string; data_fim: string | null } | null = null;
+    const cols = "id,data_confirmada,data_inicio,data_fim,url_oficial";
+    let existente: { id: string; data_confirmada: boolean; data_inicio: string; data_fim: string | null; url_oficial: string } | null = null;
     if (slug) {
       const { data } = await supabase.from("medical_events").select(cols).eq("slug_marco", slug).maybeSingle();
       existente = (data as any) ?? null;
@@ -207,7 +207,9 @@ export async function POST(request: NextRequest) {
       let novaDataFim = ev.data_fim ?? null;
       let confirmar = true;
       if (marcoPendente) {
-        const verificada = await verificarDataNaFonte(ev.url_oficial, ev.data_inicio);
+        // Verifica SEMPRE no site oficial canônico salvo (não na URL volátil que o
+        // agente trouxe — que pode ser um agregador com data chutada).
+        const verificada = await verificarDataNaFonte(existente.url_oficial, ev.data_inicio);
         if (!verificada) {
           // não confirma: mantém a data provisória e o status "a confirmar"
           novaData = existente.data_inicio;
