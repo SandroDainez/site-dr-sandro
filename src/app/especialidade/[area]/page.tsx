@@ -16,7 +16,7 @@ import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspap
 import ProtocoloCard from "@/components/ProtocoloCard";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
-import EventosCientificos from "@/components/EventosCientificos";
+import AgendaCientifica from "@/components/AgendaCientifica";
 import { siteAreaToEspecialidade } from "@/types/medical";
 import { fetchMedicalUpdates } from "@/lib/supabase/server";
 
@@ -183,8 +183,17 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           </>
         )}
 
-        {/* Congressos/eventos científicos da área (agente de IA) — some se não houver */}
-        <EventosCientificos especialidade={siteAreaToEspecialidade(a)} accent={cfg.accent} titulo="Próximos congressos" />
+        {/* Calendário próprio da especialidade: congressos da área (agente de IA),
+            no mesmo visual de calendário da home. Some se não houver eventos. */}
+        <div className="mb-10">
+          <AgendaCientifica
+            especialidade={siteAreaToEspecialidade(a)}
+            embedded
+            eyebrow={`Agenda · ${cfg.label}`}
+            titulo="Calendário da especialidade"
+            subtitulo={`Próximos congressos e eventos de ${cfg.label.toLowerCase()} (Brasil e mundo). Clique para acessar o site oficial.`}
+          />
+        </div>
 
         <div className="mt-14 border-t border-white/10 pt-8">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Outras especialidades</p>

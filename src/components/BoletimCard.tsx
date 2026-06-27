@@ -12,7 +12,7 @@ const ESP_LABEL: Record<string, string> = {
 
 // Card colapsável de um boletim clínico da IA (medical_updates) dentro do feed
 // unificado de Atualizações.
-export default function BoletimCard({ update }: { update: any }) {
+export default function BoletimCard({ update, manual = false }: { update: any; manual?: boolean }) {
   const [open, setOpen] = useState(false);
   const data = (() => {
     try {
@@ -27,10 +27,10 @@ export default function BoletimCard({ update }: { update: any }) {
       <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} className="flex w-full items-start justify-between gap-3 p-5 text-left">
         <div className="min-w-0">
           <div className="mb-1.5 flex flex-wrap items-center gap-2 text-[11px] text-white/50">
-            <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-semibold text-accent"><Sparkles className="h-3 w-3" /> Boletim da semana</span>
+            <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-semibold text-accent"><Sparkles className="h-3 w-3" /> {manual ? "Boletim" : "Boletim da semana"}</span>
             <span>{ESP_LABEL[update.especialidade] ?? update.especialidade}</span>
-            <span>· {update.semana_referencia}</span>
-            <span>· {data}</span>
+            {update.semana_referencia && <span>· {update.semana_referencia}</span>}
+            {data && <span>· {data}</span>}
           </div>
           <p className="text-base font-semibold text-white">{update.titulo}</p>
           {!open && update.resumo && <p className="mt-1 line-clamp-2 text-sm text-white/55">{update.resumo}</p>}

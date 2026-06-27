@@ -154,6 +154,31 @@ export type AtualizacaoData = {
   link: string;
   data: string; // YYYY-MM-DD
   areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
+  // Formato "boletim": atualização manual com a MESMA estrutura do boletim da IA
+  // (resumo + tópicos com fonte/URL + referências). Renderiza igual ao da IA.
+  // Ausente ou "simples" = card tradicional (conteúdo livre + logo).
+  formato?: "simples" | "boletim";
+  resumo?: string;
+  topicos?: AtualizacaoTopico[];
+  fontes?: AtualizacaoFonte[];
+};
+
+export type AtualizacaoTopico = {
+  titulo: string;
+  descricao: string;
+  relevancia_clinica?: string;
+  fonte_tipo?: string; // guideline | posicionamento | alerta | estudo ...
+  fonte_nome?: string; // ex: "N Engl J Med", "SBA"
+  fonte_url?: string;  // link clicável da fonte
+  pmid?: string;       // opcional, gera link PubMed
+};
+
+export type AtualizacaoFonte = {
+  titulo: string;
+  url: string;
+  journal?: string;
+  ano?: string;
+  origem?: string; // pubmed | rss | sociedade | regulatorio ...
 };
 
 export type ProtocoloData = {

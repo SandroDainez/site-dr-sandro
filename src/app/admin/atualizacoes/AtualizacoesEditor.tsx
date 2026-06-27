@@ -37,6 +37,46 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
     setSaved(false);
   }
 
+  // ---- Helpers do formato "boletim" (tópicos + referências) ----
+  function updateTopico(idx: number, ti: number, field: string, value: string) {
+    setItems((prev) => prev.map((it, i) => {
+      if (i !== idx) return it;
+      const topicos = [...(it.topicos ?? [])];
+      topicos[ti] = { ...topicos[ti], [field]: value };
+      return { ...it, topicos };
+    }));
+    setSaved(false);
+  }
+  function addTopico(idx: number) {
+    setItems((prev) => prev.map((it, i) => (i === idx
+      ? { ...it, topicos: [...(it.topicos ?? []), { titulo: "", descricao: "", relevancia_clinica: "", fonte_nome: "", fonte_url: "" }] }
+      : it)));
+    setSaved(false);
+  }
+  function removeTopico(idx: number, ti: number) {
+    setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, topicos: (it.topicos ?? []).filter((_, k) => k !== ti) } : it)));
+    setSaved(false);
+  }
+  function updateFonte(idx: number, fi: number, field: string, value: string) {
+    setItems((prev) => prev.map((it, i) => {
+      if (i !== idx) return it;
+      const fontes = [...(it.fontes ?? [])];
+      fontes[fi] = { ...fontes[fi], [field]: value };
+      return { ...it, fontes };
+    }));
+    setSaved(false);
+  }
+  function addFonte(idx: number) {
+    setItems((prev) => prev.map((it, i) => (i === idx
+      ? { ...it, fontes: [...(it.fontes ?? []), { titulo: "", url: "", journal: "", ano: "", origem: "pubmed" }] }
+      : it)));
+    setSaved(false);
+  }
+  function removeFonte(idx: number, fi: number) {
+    setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, fontes: (it.fontes ?? []).filter((_, k) => k !== fi) } : it)));
+    setSaved(false);
+  }
+
   function addItem() {
     const newItem: AtualizacaoData = {
       id: "",
@@ -169,6 +209,93 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
 
             <AreasExtra value={item.areas} primary={item.area} onChange={(areas) => updateItem(idx, "areas", areas)} />
 
+            {/* Seletor de formato: card simples OU boletim (igual ao da IA) */}
+            <div>
+              <label className="mb-1.5 block text-xs uppercase tracking-[0.1em] text-white/40">Formato</label>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { v: "simples", label: "Card simples", hint: "logo + texto livre" },
+                  { v: "boletim", label: "Boletim (igual à IA)", hint: "resumo + tópicos com fonte + referências" },
+                ] as const).map((opt) => {
+                  const ativo = (item.formato ?? "simples") === opt.v;
+                  return (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => updateItem(idx, "formato", opt.v)}
+                      className={`rounded-xl border px-3.5 py-2 text-left text-sm transition ${ativo ? "border-accent/50 bg-accent/10 text-accent" : "border-white/15 bg-black/30 text-white/60 hover:border-white/30 hover:text-white"}`}
+                    >
+                      <span className="block font-semibold">{opt.label}</span>
+                      <span className="block text-[11px] opacity-70">{opt.hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {item.formato === "boletim" ? (
+              <>
+                {/* Resumo */}
+                <div>
+                  <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">Resumo da semana</label>
+                  <textarea
+                    value={item.resumo ?? ""}
+                    onChange={(e) => updateItem(idx, "resumo", e.target.value)}
+                    rows={3}
+                    placeholder="2–3 frases resumindo os destaques."
+                    className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
+                  />
+                </div>
+
+                {/* Tópicos */}
+                <div className="space-y-3">
+                  <label className="block text-xs uppercase tracking-[0.1em] text-white/40">Tópicos</label>
+                  {(item.topicos ?? []).map((t, ti) => (
+                    <div key={ti} className="space-y-2 rounded-xl border border-white/10 bg-black/20 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-white/40">Tópico {ti + 1}</span>
+                        <button type="button" onClick={() => removeTopico(idx, ti)} className="rounded-md p-1 text-white/40 transition hover:bg-red-400/10 hover:text-red-400" title="Remover tópico"><Trash2 className="h-3.5 w-3.5" /></button>
+                      </div>
+                      <input type="text" value={t.titulo} onChange={(e) => updateTopico(idx, ti, "titulo", e.target.value)} placeholder="Título do tópico" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                      <textarea value={t.descricao} onChange={(e) => updateTopico(idx, ti, "descricao", e.target.value)} rows={2} placeholder="Descrição / o que mudou" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                      <textarea value={t.relevancia_clinica ?? ""} onChange={(e) => updateTopico(idx, ti, "relevancia_clinica", e.target.value)} rows={2} placeholder="Relevância clínica (opcional)" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <input type="text" value={t.fonte_nome ?? ""} onChange={(e) => updateTopico(idx, ti, "fonte_nome", e.target.value)} placeholder="Fonte (ex: N Engl J Med, SBA)" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                        <input type="url" value={t.fonte_url ?? ""} onChange={(e) => updateTopico(idx, ti, "fonte_url", e.target.value)} placeholder="URL da fonte (link clicável)" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                      </div>
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => addTopico(idx)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 py-2 text-xs text-white/50 transition hover:border-white/40 hover:text-white/80"><Plus className="h-3.5 w-3.5" /> Adicionar tópico</button>
+                </div>
+
+                {/* Referências */}
+                <div className="space-y-3">
+                  <label className="block text-xs uppercase tracking-[0.1em] text-white/40">Referências consultadas (opcional)</label>
+                  {(item.fontes ?? []).map((f, fi) => (
+                    <div key={fi} className="space-y-2 rounded-xl border border-white/10 bg-black/20 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-semibold text-white/40">Referência {fi + 1}</span>
+                        <button type="button" onClick={() => removeFonte(idx, fi)} className="rounded-md p-1 text-white/40 transition hover:bg-red-400/10 hover:text-red-400" title="Remover referência"><Trash2 className="h-3.5 w-3.5" /></button>
+                      </div>
+                      <input type="text" value={f.titulo} onChange={(e) => updateFonte(idx, fi, "titulo", e.target.value)} placeholder="Título do artigo/documento" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        <input type="text" value={f.journal ?? ""} onChange={(e) => updateFonte(idx, fi, "journal", e.target.value)} placeholder="Journal/órgão" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                        <input type="text" value={f.ano ?? ""} onChange={(e) => updateFonte(idx, fi, "ano", e.target.value)} placeholder="Ano" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                        <select value={f.origem ?? "pubmed"} onChange={(e) => updateFonte(idx, fi, "origem", e.target.value)} className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-accent/50">
+                          <option value="pubmed">PubMed</option>
+                          <option value="rss">Journal</option>
+                          <option value="sociedade">Sociedade</option>
+                          <option value="regulatorio">Regulatório</option>
+                        </select>
+                      </div>
+                      <input type="url" value={f.url} onChange={(e) => updateFonte(idx, fi, "url", e.target.value)} placeholder="URL (link clicável)" className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50" />
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => addFonte(idx)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/20 py-2 text-xs text-white/50 transition hover:border-white/40 hover:text-white/80"><Plus className="h-3.5 w-3.5" /> Adicionar referência</button>
+                </div>
+              </>
+            ) : (
+            <>
             {/* conteudo */}
             <div>
               <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
@@ -271,6 +398,8 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
                 className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
               />
             </div>
+            </>
+            )}
           </div>
         );
       })}

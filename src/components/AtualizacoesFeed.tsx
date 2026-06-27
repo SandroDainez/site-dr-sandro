@@ -17,6 +17,25 @@ const TABS: { value: Area; label: string }[] = [
 ];
 
 const espToSite = (e: string): string => (e === "terapia_intensiva" ? "ti" : e);
+const siteToEsp = (a: string): string => (a === "ti" ? "terapia_intensiva" : a);
+
+// Uma atualização manual no "formato boletim" tem resumo/tópicos como a da IA.
+function isBoletimManual(m: AtualizacaoData): boolean {
+  return m.formato === "boletim" && ((m.topicos?.length ?? 0) > 0 || !!m.resumo);
+}
+// Normaliza a manual para o mesmo shape que BoletimCard/UpdateContent consomem.
+function manualParaBoletim(m: AtualizacaoData) {
+  return {
+    id: m.id,
+    titulo: m.titulo,
+    resumo: m.resumo ?? "",
+    topicos: m.topicos ?? [],
+    fontes: m.fontes ?? [],
+    especialidade: siteToEsp(m.area),
+    semana_referencia: "",
+    data_publicacao: m.data,
+  };
+}
 
 type Item =
   | { kind: "ai"; date: string; area: string; raw: any }
@@ -75,8 +94,22 @@ export default function AtualizacoesFeed({
           {shown.map((it) =>
             it.kind === "ai"
               ? <BoletimCard key={`ai-${it.raw.id}`} update={it.raw} />
-              : <UpdateCard key={`m-${it.raw.id}`} item={it.raw} />
+              : isBoletimManual(it.raw)
+                ? <BoletimCard key={`m-${it.raw.id}`} update={manualParaBoletim(it.raw)} manual />
+                : <UpdateCard key={`m-${it.raw.id}`} item={it.raw} />
           )}
+        </div>
+      )}
+
+      {/* Arquivo: cada semana entra um boletim novo; os anteriores ficam guardados. */}
+      {ai.length > 0 && (
+        <div className="mt-6 text-center">
+          <a
+            href={`/atualizacoes-semanais${showTabs && area !== "todas" ? `?area=${area}` : ""}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/[0.06] px-4 py-2 text-sm font-medium text-accent transition hover:border-accent/60 hover:bg-accent/10"
+          >
+            Ver semanas anteriores (histórico de boletins) →
+          </a>
         </div>
       )}
     </div>

@@ -38,7 +38,19 @@ function fmt(iso: string) {
   }
 }
 
-export default function CalendarioCientifico({ eventos }: { eventos: EventoUnificado[] }) {
+export default function CalendarioCientifico({
+  eventos,
+  eyebrow = "Agenda de eventos",
+  titulo = "Calendário de eventos",
+  subtitulo = "Seus cursos/imersões e os congressos de anestesiologia, terapia intensiva e emergências (Brasil e mundo). Clique para acessar.",
+  embedded = false,
+}: {
+  eventos: EventoUnificado[];
+  eyebrow?: string;
+  titulo?: string;
+  subtitulo?: string;
+  embedded?: boolean; // true = dentro de um hub (sem largura/padding própria de seção)
+}) {
   const [mesAtual, setMesAtual] = useState(() => {
     const h = new Date();
     return new Date(h.getFullYear(), h.getMonth(), 1);
@@ -74,14 +86,21 @@ export default function CalendarioCientifico({ eventos }: { eventos: EventoUnifi
     return { dias: grid, tituloMes: mesAtual.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) };
   }, [mesAtual]);
 
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    embedded ? (
+      <section id="eventos" className="scroll-mt-32">{children}</section>
+    ) : (
+      <section id="eventos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">{children}</section>
+    );
+
   return (
-    <section id="eventos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
-      <div className="finex-glass rounded-[2rem] p-8 md:p-10">
+    <Wrapper>
+      <div className={embedded ? "rounded-3xl border border-white/10 bg-white/[0.02] p-6 md:p-8" : "finex-glass rounded-[2rem] p-8 md:p-10"}>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-[0.16em] text-accent-blue">Agenda de eventos</p>
-            <h3 className="mt-2 text-3xl font-medium tracking-tight md:text-4xl">Calendário de eventos</h3>
-            <p className="mt-2 text-sm text-muted">Seus cursos/imersões e os congressos de anestesiologia, terapia intensiva e emergências (Brasil e mundo). Clique para acessar.</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-accent-blue">{eyebrow}</p>
+            <h3 className={embedded ? "mt-2 text-2xl font-medium tracking-tight md:text-3xl" : "mt-2 text-3xl font-medium tracking-tight md:text-4xl"}>{titulo}</h3>
+            <p className="mt-2 text-sm text-muted">{subtitulo}</p>
           </div>
           <CalendarDays className="h-8 w-8 text-accent-blue" />
         </div>
@@ -156,6 +175,6 @@ export default function CalendarioCientifico({ eventos }: { eventos: EventoUnifi
           </div>
         )}
       </div>
-    </section>
+    </Wrapper>
   );
 }
