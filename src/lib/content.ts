@@ -647,23 +647,40 @@ async function writeLocal<T>(key: string, data: T): Promise<void> {
   );
 }
 
+// A URL de cada blob é estável (addRandomSuffix:false + allowOverwrite reusa o
+// mesmo pathname), então memoizamos por chave para eliminar o list() — a ida de
+// rede mais cara — em todas as leituras após a primeira (por instância warm da
+// função). O conteúdo continua sendo buscado com no-store, então o frescor das
+// edições do admin NÃO muda: zero risco de conteúdo desatualizado.
+const blobUrlCache = new Map<string, string>();
+
 async function readBlob<T>(key: string, fallback: T): Promise<T> {
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) return readLocal(key, fallback);
   noStore();
+  const pathname = `${BLOB_PREFIX}${key}.json`;
   try {
-    const { blobs } = await list({ prefix: `${BLOB_PREFIX}${key}.json` });
-    const blob = blobs.find((b) => b.pathname === `${BLOB_PREFIX}${key}.json`);
-    if (!blob) return fallback;
+    let url = blobUrlCache.get(key);
+    if (!url) {
+      const { blobs } = await list({ prefix: pathname });
+      const blob = blobs.find((b) => b.pathname === pathname);
+      if (!blob) return fallback;
+      url = blob.url;
+      blobUrlCache.set(key, url);
+    }
     // store is private: pass token as Bearer to authorize the fetch
-    const cacheBuster = "?_cb=" + Date.now();
-    const res = await fetch(blob.url + cacheBuster, {
+    const res = await fetch(url + "?_cb=" + Date.now(), {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
-    if (!res.ok) return fallback;
+    if (!res.ok) {
+      // URL memoizada pode ter ficado inválida — descarta e re-descobre no próximo request
+      blobUrlCache.delete(key);
+      return fallback;
+    }
     return (await res.json()) as T;
   } catch {
+    blobUrlCache.delete(key);
     return fallback;
   }
 }
