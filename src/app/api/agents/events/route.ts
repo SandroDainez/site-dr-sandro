@@ -21,6 +21,26 @@ function getJanelaEventos() {
   };
 }
 
+// Lista curada de congressos-MARCO (fonte de verdade). Cada um tem uma chave estável
+// (slug) usada para identidade/dedup e para a confirmação automática de data.
+const MARCOS: { slug: string; sigla: string; nome: string }[] = [
+  { slug: "cba", sigla: "CBA/SBA", nome: "Congresso Brasileiro de Anestesiologia" },
+  { slug: "copa-saesp", sigla: "COPA/SAESP", nome: "Congresso Paulista de Anestesiologia" },
+  { slug: "cbmi", sigla: "CBMI/AMIB", nome: "Congresso Brasileiro de Medicina Intensiva" },
+  { slug: "cbmede", sigla: "CBMEDE/ABRAMEDE", nome: "Congresso Brasileiro de Medicina de Emergência" },
+  { slug: "clasa", sigla: "CLASA", nome: "Congreso Latinoamericano de Anestesiología" },
+  { slug: "asa", sigla: "ASA", nome: "ASA Annual Meeting (American Society of Anesthesiologists)" },
+  { slug: "euroanaesthesia", sigla: "ESAIC", nome: "Euroanaesthesia (ESAIC)" },
+  { slug: "wca", sigla: "WFSA/WCA", nome: "World Congress of Anaesthesiologists" },
+  { slug: "esicm-lives", sigla: "ESICM", nome: "ESICM LIVES" },
+  { slug: "sccm", sigla: "SCCM", nome: "SCCM Critical Care Congress" },
+  { slug: "isicem", sigla: "ISICEM", nome: "ISICEM (Bruxelas)" },
+  { slug: "acep", sigla: "ACEP", nome: "ACEP Scientific Assembly" },
+  { slug: "eusem", sigla: "EuSEM", nome: "European Emergency Medicine Congress (EuSEM)" },
+  { slug: "saem", sigla: "SAEM", nome: "SAEM Annual Meeting" },
+];
+const MAPA_MARCOS = MARCOS.map((m) => `${m.sigla}→'${m.slug}'`).join(", ");
+
 // Esquema de cada evento + regras, compartilhados por todas as buscas focadas.
 function schemaERegras(hoje: string, fimJanela: string): string {
   return `Para CADA evento retorne um objeto:
@@ -36,11 +56,12 @@ function schemaERegras(hoje: string, fimJanela: string): string {
   "modalidade": "presencial" | "online" | "hibrido",
   "url_oficial": "URL REAL do site oficial (ou do site da sociedade organizadora)",
   "organizador": "sigla da sociedade",
-  "slug_marco": "SÓ p/ marcos: CBMEDE→'cbmede', COPA SAESP→'copa-saesp', CBA→'cba', CBMI→'cbmi', CLASA→'clasa'. Senão omita."
+  "slug_marco": "SÓ p/ congressos-marco, use a chave: ${MAPA_MARCOS}. Qualquer outro evento: omita este campo."
 }
 
-CONGRESSOS-MARCO: se achar a data OFICIAL e exata de um marco (CBMEDE, COPA SAESP, CBA, CBMI, CLASA),
-inclua o "slug_marco" certo + a data real — o sistema usa isso para confirmar automaticamente a data.
+CONGRESSOS-MARCO: se achar a data OFICIAL e exata de um marco da lista acima, inclua o
+"slug_marco" certo + a data real — o sistema usa a chave para identificar o evento e
+confirmar automaticamente a data quando ela for verificada no site oficial.
 
 REGRAS:
 - url_oficial REAL e verificável — nunca invente. Sem URL confiável: OMITA o evento.
@@ -226,6 +247,8 @@ export async function POST(request: NextRequest) {
         descricao: ev.descricao ?? null,
         ativo: true,
         data_confirmada: confirmar,
+        // marca a linha como marco (sem sobrescrever com null se não vier chave)
+        ...(slug ? { slug_marco: slug } : {}),
         ultima_verificacao: new Date().toISOString(),
       }).eq("id", existente.id);
       atualizados++;
