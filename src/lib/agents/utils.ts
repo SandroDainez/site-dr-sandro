@@ -43,6 +43,8 @@ export const RSS_FEEDS: Record<string, { nome: string; url: string }[]> = {
     { nome: "Acta Anaesthesiologica Scand", url: "https://onlinelibrary.wiley.com/feed/13996576/most-recent" },
     { nome: "Pediatric Anesthesia", url: "https://onlinelibrary.wiley.com/feed/14609592/most-recent" },
     { nome: "Journal of Clinical Anesthesia", url: "https://www.jcafullforum.com/action/showFeed?type=etoc&feed=rss&jc=jca" },
+    { nome: "Anaesthesia (AAGBI)", url: "https://onlinelibrary.wiley.com/feed/13652044/most-recent" },
+    { nome: "medRxiv — Anestesia (preprints)", url: "https://connect.medrxiv.org/medrxiv_xml.php?subject=anesthesia" },
   ],
   terapia_intensiva: [
     { nome: "Intensive Care Medicine (ESICM)", url: "https://link.springer.com/search.rss?query=&search-within=Journal&facet-journal-id=134" },
@@ -52,6 +54,8 @@ export const RSS_FEEDS: Record<string, { nome: string; url: string }[]> = {
     { nome: "Chest", url: "https://journal.chestnet.org/action/showFeed?type=etoc&feed=rss&jc=chest" },
     { nome: "Journal of Critical Care", url: "https://www.jccjournal.org/action/showFeed?type=etoc&feed=rss&jc=yjcrc" },
     { nome: "Annals of Intensive Care", url: "https://annalsofintensivecare.springeropen.com/articles/most-recent/rss.xml" },
+    { nome: "Lancet Respiratory Medicine", url: "https://www.thelancet.com/action/showFeed?type=etoc&feed=rss&jc=lanres" },
+    { nome: "medRxiv — Terapia Intensiva (preprints)", url: "https://connect.medrxiv.org/medrxiv_xml.php?subject=intensive_care_and_critical_care_medicine" },
   ],
   emergencias: [
     { nome: "Annals of Emergency Medicine", url: "https://www.annemergmed.com/action/showFeed?type=etoc&feed=rss&jc=ymem" },
@@ -61,6 +65,8 @@ export const RSS_FEEDS: Record<string, { nome: string; url: string }[]> = {
     { nome: "Prehospital Emergency Care", url: "https://www.tandfonline.com/feed/rss/ipec20" },
     { nome: "Emergency Medicine Australasia", url: "https://onlinelibrary.wiley.com/feed/17426723/most-recent" },
     { nome: "Scandinavian Journal Trauma", url: "https://sjtrem.biomedcentral.com/articles/most-recent/rss.xml" },
+    { nome: "American Journal of Emergency Medicine", url: "https://www.ajemjournal.com/action/showFeed?type=etoc&feed=rss&jc=yajem" },
+    { nome: "medRxiv — Emergências (preprints)", url: "https://connect.medrxiv.org/medrxiv_xml.php?subject=emergency_medicine" },
   ],
 };
 
@@ -308,6 +314,8 @@ export const SITES_SEGURANCA_PACIENTE = [
   { sigla: "Joint Commission", site: "jointcommission.org", foco: "Sentinel Event Alerts e National Patient Safety Goals" },
   { sigla: "WHO Patient Safety", site: "who.int/teams/integrated-health-services/patient-safety", foco: "global patient safety challenges e safety solutions" },
   { sigla: "SENSAR", site: "sensar.es", foco: "incidentes de segurança em anestesiologia — rede ibero-americana" },
+  { sigla: "EMA", site: "ema.europa.eu", foco: "alertas de segurança de medicamentos, recomendações do PRAC e referrals regulatórios europeus" },
+  { sigla: "Health Canada", site: "recalls-rappels.canada.ca", foco: "recalls e alertas de segurança de medicamentos e dispositivos" },
 ];
 
 // ── Fontes de eventos para o agente de calendário ─────────────────────────────

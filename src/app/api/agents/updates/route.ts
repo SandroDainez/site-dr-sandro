@@ -101,7 +101,7 @@ async function buscarRSS(especialidade: string): Promise<any[]> {
   return resultados
     .filter((r) => r.status === "fulfilled")
     .flatMap((r) => (r as PromiseFulfilledResult<any[]>).value)
-    .slice(0, 14);
+    .slice(0, 18);
 }
 
 // ── CAMADA 3: Sites das sociedades — web search ───────────────────────────────
