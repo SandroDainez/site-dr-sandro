@@ -228,12 +228,14 @@ INSTRUÇÕES OBRIGATÓRIAS:
 4. Para cada tópico, indique: PMID (se PubMed), sigla da sociedade ou órgão, ou nome do journal
 5. Linguagem técnica, nível especialista — não explique conceitos básicos
 6. Foco em implicações clínicas práticas e mudanças de conduta
+7. Selecione de 3 a 4 tópicos — SEMPRE os MAIS RELEVANTES da semana (consolide itens correlatos num único tópico para evitar repetição). Se não houver 3-4 itens realmente relevantes, traga o máximo que encontrar até 4. Nunca mais de 4. Relevância clínica acima de quantidade.
 
 Retorne APENAS JSON válido:
 {
   "titulo": "Atualizações em ${label} — ${semana}",
   "resumo": "2-3 frases destacando os achados mais relevantes, priorizando novos guidelines e alertas regulatórios",
   "topicos": [
+    // 3 a 4 tópicos, os mais relevantes (ou o máximo encontrado até 4)
     {
       "titulo": "título objetivo e informativo",
       "descricao": "descrição técnica dos achados (3-5 frases)",
