@@ -13,7 +13,7 @@ export default function AdminMenuPage() {
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm leading-relaxed text-white/70">
         <p className="mb-3 font-medium text-white">O menu agora tem uma estrutura fixa, organizada em grupos:</p>
         <p className="mb-4">
-          <span className="text-white/90">Início · Especialidades ▾ · Todo o conteúdo · Apps ▾ · Sobre ▾</span>
+          <span className="text-white/90">Início · Especialidades ▾ · Apps ▾ · Podcast · Acervo · Parceiros · Eventos · Contato</span>
         </p>
         <p className="mb-2">
           Essa estrutura é mantida no código para ficar estável e bem organizada — por isso não é editada por aqui.
