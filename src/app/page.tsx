@@ -206,6 +206,30 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Navegue por especialidade — hubs */}
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20" style={{ order: -90 }}>
+          <p className="mb-5 text-xs uppercase tracking-[0.16em] text-accent">Navegue por especialidade</p>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-red-500/15" },
+              { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-blue-500/15" },
+              { area: "anestesiologia", label: "Anestesiologia", emoji: "🩺", desc: "Anestesia e pré-operatório", grad: "from-violet-500/15" },
+            ].map((s) => (
+              <a key={s.area} href={`/especialidade/${s.area}`} className="group relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-6 transition hover:-translate-y-1 hover:border-white/20">
+                <div className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${s.grad} to-transparent`} />
+                <div className="relative flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-2xl">{s.emoji}</p>
+                    <h3 className="mt-3 text-xl font-semibold text-white">{s.label}</h3>
+                    <p className="mt-1 text-sm text-white/50">{s.desc}</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 shrink-0 text-white/30 transition group-hover:translate-x-1 group-hover:text-white/70" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
         <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps" style={{ order: homeOrder["apps-assinatura"] }}>
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "apps", "eyebrow")}</p>

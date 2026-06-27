@@ -40,7 +40,7 @@ export default function AcervoEditor({ initialItens }: Props) {
     touch();
   }
   function addItem() {
-    setItens((p) => [...p, { id: uid("ac"), titulo: "", categoria: "", descricao: "", capaUrl: "", videoUrl: "", arquivos: [], data: new Date().toISOString().slice(0, 10) }]);
+    setItens((p) => [...p, { id: uid("ac"), titulo: "", area: "geral", categoria: "", descricao: "", capaUrl: "", videoUrl: "", arquivos: [], data: new Date().toISOString().slice(0, 10) }]);
     touch();
   }
   function removeItem(i: number) {
@@ -102,14 +102,23 @@ export default function AcervoEditor({ initialItens }: Props) {
             </button>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
+          <div>
+            <label className={labelCls}>Título</label>
+            <input className={inputCls} value={it.titulo} onChange={(e) => update(i, { titulo: e.target.value })} />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className={labelCls}>Título</label>
-              <input className={inputCls} value={it.titulo} onChange={(e) => update(i, { titulo: e.target.value })} />
+              <label className={labelCls}>Especialidade (aparece no hub da área)</label>
+              <select className={inputCls} value={it.area ?? "geral"} onChange={(e) => update(i, { area: e.target.value as AcervoItemData["area"] })}>
+                <option value="geral">Geral (sem especialidade)</option>
+                <option value="emergencias">Emergências</option>
+                <option value="ti">Terapia Intensiva</option>
+                <option value="anestesiologia">Anestesiologia</option>
+              </select>
             </div>
             <div>
-              <label className={labelCls}>Categoria (badge)</label>
-              <input className={inputCls} value={it.categoria} placeholder="Curiosidades, Saúde..." onChange={(e) => update(i, { categoria: e.target.value })} />
+              <label className={labelCls}>Categoria (badge livre)</label>
+              <input className={inputCls} value={it.categoria} placeholder="Curiosidades, Documento, Protocolo..." onChange={(e) => update(i, { categoria: e.target.value })} />
             </div>
           </div>
 

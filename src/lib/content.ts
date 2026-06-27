@@ -259,6 +259,7 @@ export type AcervoArquivo = {
 export type AcervoItemData = {
   id: string;
   titulo: string;
+  area?: "emergencias" | "ti" | "anestesiologia" | "geral"; // especialidade (p/ hubs); default "geral"
   categoria: string; // badge livre (ex: Curiosidades, Saúde, Geral)
   descricao: string; // rich text (HTML)
   capaUrl: string; // imagem de capa
@@ -595,6 +596,9 @@ export const defaultVideoaulas: VideoaulaData[] = [
 
 export const defaultNavItems: NavItemData[] = [
   { label: "Início", href: "/" },
+  { label: "Emergências", href: "/especialidade/emergencias" },
+  { label: "Terapia Intensiva", href: "/especialidade/ti" },
+  { label: "Anestesiologia", href: "/especialidade/anestesiologia" },
   { label: "Apps", href: "#apps-assinatura" },
   { label: "Cursos", href: "/cursos" },
   { label: "Atualizações", href: "/atualizacoes" },
