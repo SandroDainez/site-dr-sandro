@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Vídeos de colaboradores",
-  description: "Conteúdo de médicos convidados, com crédito ao autor.",
+  title: "Profissionais parceiros",
+  description: "Materiais cedidos por colegas de outras instituições, com todo o crédito e nosso agradecimento.",
 };
 
 
@@ -12,6 +12,7 @@ import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
+import { Heart } from "lucide-react";
 import ColaboradoresList from "./ColaboradoresList";
 
 export default async function ColaboradoresPage() {
@@ -42,7 +43,11 @@ export default async function ColaboradoresPage() {
         <div className="mb-12">
           <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "page_colaboradores", "eyebrow")}</p>
           <h1 className="mt-3 text-4xl font-medium tracking-tight md:text-5xl">{secText(st, "page_colaboradores", "title")}</h1>
-          <p className="mt-3 max-w-2xl text-base text-white/50">{secText(st, "page_colaboradores", "desc")}</p>
+          {/* Agradecimento aos profissionais que cederam material */}
+          <div className="mt-6 flex max-w-2xl items-start gap-3 rounded-2xl border border-accent/25 bg-accent/[0.06] px-5 py-4">
+            <Heart className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+            <p className="text-sm leading-relaxed text-white/70">{secText(st, "page_colaboradores", "desc")}</p>
+          </div>
         </div>
 
         <ColaboradoresList items={items} />

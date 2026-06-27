@@ -23,7 +23,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Apps do dia a dia", href: "#apps-uteis" },
     ],
   },
-  { label: "Colaboradores", href: "/colaboradores" },
+  { label: "Parceiros", href: "/colaboradores" },
   { label: "Eventos", href: "#eventos" },
   { label: "Contato", href: "#contato" },
 ];

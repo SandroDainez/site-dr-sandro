@@ -153,8 +153,8 @@ const sections = [
   {
     href: "/admin/colaboradores",
     icon: Users,
-    label: "Vídeos de colaboradores",
-    desc: "Vídeos de outros médicos que autorizaram, com nome e especialidade.",
+    label: "Parceiros (material cedido)",
+    desc: "Materiais cedidos por outros profissionais — com crédito, mini-bio e contatos/redes deles.",
     color: "text-cyan-400",
     border: "hover:border-cyan-400/40",
   },

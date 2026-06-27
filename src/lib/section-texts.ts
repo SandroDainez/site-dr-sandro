@@ -14,7 +14,7 @@ export const SECTION_TEXTS: Entry[] = [
   { key: "atualizacoes", group: "Página inicial", label: "Atualizações (home)", eyebrow: "Conteúdo recente", title: "Atualizações clínicas" },
   { key: "protocolos", group: "Página inicial", label: "Protocolos (home)", eyebrow: "Condutas clínicas", title: "Protocolos Clínicos" },
   { key: "videoaulas", group: "Página inicial", label: "Videoaulas (home)", eyebrow: "Aulas em vídeo", title: "Videoaulas" },
-  { key: "colaboradores", group: "Página inicial", label: "Colaboradores (home)", eyebrow: "Comunidade médica", title: "Vídeos de colaboradores" },
+  { key: "colaboradores", group: "Página inicial", label: "Parceiros (home)", eyebrow: "Material de parceiros", title: "Profissionais parceiros" },
   { key: "cursos", group: "Página inicial", label: "Cursos / atualização contínua (home)", eyebrow: "Cursos presenciais, híbridos e online", title: "Atualização médica contínua" },
   { key: "podcast", group: "Página inicial", label: "Podcast (home)", eyebrow: "Áudio e vídeo", title: "Podcast" },
   { key: "contato", group: "Página inicial", label: "Contato (home)", eyebrow: "Contato", title: "Canais para inscrição e suporte" },
@@ -26,7 +26,7 @@ export const SECTION_TEXTS: Entry[] = [
   { key: "page_videoaulas", group: "Páginas internas", label: "Página Videoaulas", eyebrow: "Conteúdo em vídeo", title: "Videoaulas", desc: "Aulas médicas em vídeo por área" },
   { key: "page_cursos", group: "Páginas internas", label: "Página Cursos", eyebrow: "Formação médica", title: "Cursos", desc: "Cursos com aulas sequenciais, vídeos, slides e materiais para download. Conteúdo gratuito de acesso imediato — cursos completos por assinatura em breve." },
   { key: "page_podcast", group: "Páginas internas", label: "Página Podcast", eyebrow: "Áudio e vídeo", title: "Podcast", desc: "Episódios em áudio e vídeo — discussão de casos, condutas e atualizações. Assista ou ouça aqui, ou no seu app favorito." },
-  { key: "page_colaboradores", group: "Páginas internas", label: "Página Colaboradores", eyebrow: "Comunidade médica", title: "Vídeos de colaboradores", desc: "Conteúdo de outros médicos que autorizaram a publicação, com crédito ao autor." },
+  { key: "page_colaboradores", group: "Páginas internas", label: "Página Parceiros", eyebrow: "Parceiros do portal", title: "Profissionais parceiros", desc: "Materiais generosamente cedidos por colegas de outras instituições. O conteúdo é de autoria deles, com todo o crédito — nosso muito obrigado a cada profissional que compartilha conhecimento aqui." },
   { key: "page_acervo", group: "Páginas internas", label: "Página Acervo", eyebrow: "Conteúdos e materiais", title: "Acervo", desc: "Curiosidades, assuntos gerais e materiais para baixar — textos, vídeos, PDFs e livros." },
 ];
 

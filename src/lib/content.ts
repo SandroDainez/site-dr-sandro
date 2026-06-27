@@ -237,16 +237,24 @@ export type PodcastData = {
 
 // Vídeos de colaboradores: vídeos de outros médicos que autorizaram a publicação,
 // com crédito (nome + especialidade).
+export type ColaboradorLink = {
+  id: string;
+  label: string; // ex: "Instagram", "Site", "WhatsApp"
+  url: string; // link (https://..., mailto:, https://wa.me/...)
+};
+
 export type ColaboradorData = {
   id: string;
   titulo: string;
   descricao: string; // rich text
-  medico: string; // nome do médico colaborador
+  medico: string; // nome do profissional que cedeu o material
   especialidade: string; // ex: "Cardiologia"
   videoUrl: string; // YouTube ou /api/img de blob
   imageUrl: string; // thumbnail (opcional)
   duracao: string;
   data: string; // YYYY-MM-DD
+  bio?: string; // mini-bio do profissional (opcional, p/ marketing/contato)
+  links?: ColaboradorLink[]; // contatos/redes/site do profissional (opcional)
 };
 
 // Acervo: conteúdos gerais / curiosidades, com texto rico, capa, vídeo e

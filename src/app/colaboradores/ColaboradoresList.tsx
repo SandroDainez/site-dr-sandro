@@ -77,6 +77,22 @@ function Card({ item }: { item: ColaboradorData }) {
         {item.descricao && (
           <div className="mt-2 text-sm leading-relaxed text-white/55 [&_a]:text-accent" dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }} />
         )}
+
+        {(item.bio || (item.links && item.links.length > 0)) && (
+          <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Sobre o profissional</p>
+            {item.bio && <p className="text-xs leading-relaxed text-white/55">{item.bio}</p>}
+            {item.links && item.links.filter((l) => l.url).length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {item.links.filter((l) => l.url).map((l) => (
+                  <a key={l.id} href={l.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-[11px] font-medium text-accent transition hover:bg-accent/20">
+                    {l.label || "Link"} ↗
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </article>
   );
@@ -88,7 +104,7 @@ export default function ColaboradoresList({ items }: { items: ColaboradorData[] 
   if (sorted.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center">
-        <p className="text-sm text-white/50">Em breve, vídeos de médicos colaboradores.</p>
+        <p className="text-sm text-white/50">Em breve, materiais de profissionais parceiros.</p>
       </div>
     );
   }
