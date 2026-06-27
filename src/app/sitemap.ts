@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/especialidade/anestesiologia",
     "/cursos",
     "/atualizacoes",
+    "/atualizacoes-semanais",
     "/protocolos",
     "/videoaulas",
     "/podcast",

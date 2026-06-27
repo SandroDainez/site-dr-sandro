@@ -21,6 +21,7 @@ export default async function SiteFooter() {
     { label: "Protocolos", href: "/protocolos" },
     { label: "Videoaulas", href: "/videoaulas" },
     { label: "Atualizações", href: "/atualizacoes" },
+    { label: "Boletins da semana", href: "/atualizacoes-semanais" },
     { label: "Cursos", href: "/cursos" },
     { label: "Podcast", href: "/podcast" },
     { label: "Acervo", href: "/acervo" },
