@@ -29,6 +29,7 @@ import {
   type CursoData,
   type PodcastData,
   type ColaboradorData,
+  type AcervoItemData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -289,6 +290,18 @@ export async function saveUiTexts(
     await requireAdmin();
     await writeBlob("uiTexts", data);
     revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveAcervo(itens: AcervoItemData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("acervo", itens);
+    revalidatePath("/");
+    revalidatePath("/acervo");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };

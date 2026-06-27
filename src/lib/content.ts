@@ -248,6 +248,25 @@ export type ColaboradorData = {
   data: string; // YYYY-MM-DD
 };
 
+// Acervo: conteúdos gerais / curiosidades, com texto rico, capa, vídeo e
+// arquivos para download (PDFs, livros, imagens...).
+export type AcervoArquivo = {
+  id: string;
+  tipo: "pdf" | "livro" | "video" | "imagem" | "arquivo";
+  titulo: string;
+  url: string;
+};
+export type AcervoItemData = {
+  id: string;
+  titulo: string;
+  categoria: string; // badge livre (ex: Curiosidades, Saúde, Geral)
+  descricao: string; // rich text (HTML)
+  capaUrl: string; // imagem de capa
+  videoUrl: string; // YouTube ou vídeo enviado (destaque, opcional)
+  arquivos: AcervoArquivo[]; // downloads (PDF, livro, imagem, etc.)
+  data: string; // YYYY-MM-DD
+};
+
 export type ContentMap = {
   eventos: EventoData[];
   apps: AppData[];
@@ -266,6 +285,7 @@ export type ContentMap = {
   cursos: CursoData[];
   podcasts: PodcastData[];
   colaboradores: ColaboradorData[];
+  acervo: AcervoItemData[];
 };
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -581,6 +601,7 @@ export const defaultNavItems: NavItemData[] = [
   { label: "Protocolos", href: "/protocolos" },
   { label: "Videoaulas", href: "/videoaulas" },
   { label: "Podcast", href: "/podcast" },
+  { label: "Acervo", href: "/acervo" },
   { label: "Colaboradores", href: "/colaboradores" },
   { label: "Eventos", href: "#eventos" },
   { label: "Dia a dia", href: "#apps-uteis" },
@@ -758,6 +779,10 @@ export async function getPodcasts(): Promise<PodcastData[]> {
 
 export async function getColaboradores(): Promise<ColaboradorData[]> {
   return readBlob("colaboradores", []);
+}
+
+export async function getAcervo(): Promise<AcervoItemData[]> {
+  return readBlob("acervo", []);
 }
 
 export async function getSectionTexts(): Promise<import("./section-texts").SectionTextsData> {

@@ -12,6 +12,7 @@ import {
   ImageIcon,
   LayoutDashboard,
   Layers,
+  Library,
   LogOut,
   Mic,
   Newspaper,
@@ -74,6 +75,7 @@ const navGroups = [
       { href: "/admin/videoaulas", label: "Videoaulas", icon: PlayCircle, hint: "Videoaulas (link do YouTube ou vídeo enviado)." },
       { href: "/admin/podcast", label: "Podcast", icon: Mic, hint: "Episódios em áudio: suas gravações e/ou links (Spotify, YouTube)." },
       { href: "/admin/colaboradores", label: "Vídeos de colaboradores", icon: Users, hint: "Vídeos de outros médicos que autorizaram a publicação." },
+      { href: "/admin/acervo", label: "Acervo", icon: Library, hint: "Conteúdos gerais e curiosidades, com textos, fotos, vídeos e arquivos para baixar (PDFs, livros)." },
     ],
   },
   {

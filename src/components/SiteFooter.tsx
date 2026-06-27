@@ -10,6 +10,7 @@ const LINKS: { label: string; href: string }[] = [
   { label: "Videoaulas", href: "/videoaulas" },
   { label: "Podcast", href: "/podcast" },
   { label: "Colaboradores", href: "/colaboradores" },
+  { label: "Acervo", href: "/acervo" },
   { label: "Apps", href: "/#apps-assinatura" },
   { label: "Apps do dia a dia", href: "/#apps-uteis" },
   { label: "Eventos", href: "/#eventos" },

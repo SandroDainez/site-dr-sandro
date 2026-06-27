@@ -25,6 +25,7 @@ import HomeVideoCard from "@/components/HomeVideoCard";
 import PodcastList from "@/app/podcast/PodcastList";
 import SiteFooter from "@/components/SiteFooter";
 import ColaboradoresList from "@/app/colaboradores/ColaboradoresList";
+import AcervoList from "@/app/acervo/AcervoList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -48,6 +49,7 @@ import {
   getVideoaulas,
   getPodcasts,
   getColaboradores,
+  getAcervo,
   getSectionTexts,
   getUiTexts,
   getTypography,
@@ -67,7 +69,7 @@ const iconMap: Record<string, LucideIcon> = {
 const HOME_SECTIONS = [
   "apps-assinatura", "apps-gratis", "apps-uteis", "atualizacoes",
   "protocolos", "videoaulas", "colaboradores", "cursos",
-  "podcast", "eventos", "contato",
+  "podcast", "acervo", "eventos", "contato",
 ];
 function hrefToSectionId(href: string): string {
   const path = href.replace(/^https?:\/\/[^/]+/, "");
@@ -92,7 +94,7 @@ function computeHomeOrder(navItems: { href?: string }[]): Record<string, number>
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, st, ui, typo, navItems, navStyle] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, st, ui, typo, navItems, navStyle] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -108,6 +110,7 @@ export default async function Home() {
     getVideoaulas(),
     getPodcasts(),
     getColaboradores(),
+    getAcervo(),
     getSectionTexts(),
     getUiTexts(),
     getTypography(),
@@ -695,6 +698,25 @@ export default async function Home() {
             </div>
             <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
             <a href="/podcast" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
+              {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </section>
+        )}
+
+        {/* Acervo teaser */}
+        {acervo.filter((p) => p.titulo).length > 0 && (
+          <section id="acervo" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="acervo" style={{ order: homeOrder["acervo"] }}>
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "acervo", "eyebrow")}</p>
+                <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "acervo", "title")}</h2>
+              </div>
+              <a href="/acervo" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
+                {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+            <AcervoList itens={[...acervo].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
+            <a href="/acervo" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
