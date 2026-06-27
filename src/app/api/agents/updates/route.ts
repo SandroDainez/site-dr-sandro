@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import {
-  getSemanaAtual, pubmedUrl, verificarCronSecret,
+  getSemanaAtual, pubmedUrl, verificarCronSecret, PRINCIPIOS_AGENTE,
   MESH_QUERIES, ESPECIALIDADE_LABELS,
   RSS_FEEDS, RSS_TRANSVERSAIS,
   SITES_SOCIEDADES, SITES_REGULATORIOS_BR, SITES_SEGURANCA_PACIENTE,
@@ -197,6 +197,23 @@ Inclua APENAS itens com URL verificável. Retorne APENAS o array JSON.`,
 }
 
 // ── SÍNTESE FINAL com GPT-4o ──────────────────────────────────────────────────
+// Guarda ANTI-INVENÇÃO (no código, não confia só no prompt): garante que todo link
+// e PMID de um tópico realmente exista nas fontes coletadas. Se o modelo inventou
+// uma URL/PMID, ela é descartada — preferimos sem link a com link fabricado.
+function sanearTopicos(topicos: any[], fontes: any[]): any[] {
+  const urlsReais = new Set(fontes.map((f) => String(f.url || "").trim().toLowerCase()).filter(Boolean));
+  const pmidsReais = new Set(fontes.map((f) => String(f.pmid || "").trim()).filter(Boolean));
+  return (Array.isArray(topicos) ? topicos : []).map((t) => {
+    const pmid = t.pmid && pmidsReais.has(String(t.pmid).trim()) ? String(t.pmid).trim() : null;
+    const urlOk = t.fonte_url && urlsReais.has(String(t.fonte_url).trim().toLowerCase());
+    const fonte_url = urlOk
+      ? t.fonte_url                       // URL real coletada → mantém
+      : pmid ? pubmedUrl(pmid)            // tem PMID válido → link PubMed real
+      : null;                            // senão, sem link (nunca fabricado)
+    return { ...t, pmid, fonte_url };
+  });
+}
+
 async function sintetizar(especialidade: string, todasFontes: any[]): Promise<any> {
   const label = ESPECIALIDADE_LABELS[especialidade];
   const semana = getSemanaAtual();
@@ -216,6 +233,8 @@ async function sintetizar(especialidade: string, todasFontes: any[]): Promise<an
   }).join("\n");
 
   const prompt = `Você é especialista em ${label}, com foco em medicina baseada em evidências para médicos brasileiros especialistas.
+
+${PRINCIPIOS_AGENTE}
 
 Analise as seguintes atualizações reais coletadas de múltiplas fontes confiáveis (PubMed, journals especializados, sociedades médicas internacionais, LILACS/SciELO, regulatórios nacionais e internacionais):
 
@@ -259,7 +278,10 @@ Retorne APENAS JSON válido:
         temperature: 0.2,
         response_format: { type: "json_object" },
       });
-      return JSON.parse(r.choices[0].message.content ?? "{}");
+      const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+      // Trava no código: descarta links/PMIDs que não existem nas fontes coletadas.
+      parsed.topicos = sanearTopicos(parsed.topicos ?? [], ordenadas);
+      return parsed;
     } catch (err) {
       tentativas++;
       if (tentativas === 3) throw err;

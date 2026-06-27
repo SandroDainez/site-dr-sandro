@@ -1,5 +1,16 @@
 export type Especialidade = "anestesiologia" | "terapia_intensiva" | "emergencias";
 
+// ── PRINCÍPIOS DOS AGENTES ─────────────────────────────────────────────────────
+// A "atitude" obrigatória de todo agente do site: precisão acima de volume.
+// Vai no topo de todo prompt de agente. As travas de verdade são no CÓDIGO
+// (verificação na fonte, dedup, validação de links) — o prompt é só a primeira camada.
+export const PRINCIPIOS_AGENTE = `PRINCÍPIOS INEGOCIÁVEIS (precisão acima de quantidade):
+1. NUNCA invente. Datas, números, achados, URLs, nomes — só o que tiver fonte real e verificável. Na dúvida, OMITA.
+2. Toda afirmação precisa de fonte rastreável. Toda URL deve ser real (do site oficial / da referência), nunca construída de cabeça.
+3. Qualidade > volume. É melhor 3 itens corretos e relevantes do que 10 duvidosos. Descarte o tangencial.
+4. Não duplique. O mesmo evento/estudo/tópico aparece uma única vez.
+5. Se não tiver certeza de um dado, marque como "a confirmar" / omita — jamais apresente palpite como fato.`;
+
 // ── Helpers gerais ────────────────────────────────────────────────────────────
 export function getSemanaAtual(): string {
   const now = new Date();

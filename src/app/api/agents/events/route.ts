@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
-import { verificarCronSecret } from "@/lib/agents/utils";
+import { verificarCronSecret, PRINCIPIOS_AGENTE } from "@/lib/agents/utils";
 
 export const maxDuration = 300;
 
@@ -97,7 +97,7 @@ function getFocos(hoje: string, fimJanela: string): { id: string; instrucao: str
 
 // Uma busca focada: web search com retry + parsing robusto + fallback sem busca.
 async function buscarFoco(instrucao: string): Promise<any[]> {
-  const prompt = `Você é especialista em eventos científicos médicos. ${instrucao}`;
+  const prompt = `Você é especialista em eventos científicos médicos.\n\n${PRINCIPIOS_AGENTE}\n\n${instrucao}`;
   for (let t = 0; t < 2; t++) {
     try {
       const response = await (getOpenAI().chat.completions.create as any)({
