@@ -13,10 +13,10 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download } from "lucide-react";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
-const AREAS: Record<Area, { label: string; emoji: string; accent: string; tagline: string }> = {
-  emergencias: { label: "Emergências", emoji: "🚑", accent: "text-red-400", tagline: "Condutas, protocolos e materiais de medicina de urgência e emergência." },
-  ti: { label: "Terapia Intensiva", emoji: "🏥", accent: "text-blue-400", tagline: "Tudo de cuidados intensivos: protocolos, aulas, cursos e materiais." },
-  anestesiologia: { label: "Anestesiologia", emoji: "🩺", accent: "text-violet-400", tagline: "Condutas, documentos e conteúdo de anestesiologia num só lugar." },
+const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
+  emergencias: { label: "Emergências", emoji: "🚑", accent: "text-red-400", grad: "from-red-500/25 via-red-500/8 to-transparent", border: "border-red-400/30", tagline: "Condutas, protocolos e materiais de medicina de urgência e emergência." },
+  ti: { label: "Terapia Intensiva", emoji: "🏥", accent: "text-blue-400", grad: "from-blue-500/25 via-blue-500/8 to-transparent", border: "border-blue-400/30", tagline: "Tudo de cuidados intensivos: protocolos, aulas, cursos e materiais." },
+  anestesiologia: { label: "Anestesiologia", emoji: "🩺", accent: "text-violet-400", grad: "from-violet-500/25 via-violet-500/8 to-transparent", border: "border-violet-400/30", tagline: "Condutas, documentos e conteúdo de anestesiologia num só lugar." },
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ area: string }> }) {
@@ -84,10 +84,15 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
       </header>
 
       <main className="mx-auto w-full max-w-5xl px-6 py-14">
-        <div className="mb-10">
-          <p className={`text-xs uppercase tracking-[0.16em] ${cfg.accent}`}>Especialidade</p>
-          <h1 className="mt-2 text-4xl font-medium tracking-tight md:text-5xl">{cfg.emoji} {cfg.label}</h1>
-          <p className="mt-3 max-w-2xl text-base text-white/50">{cfg.tagline}</p>
+        <div className={`relative mb-10 overflow-hidden rounded-3xl border ${cfg.border} bg-white/[0.02] p-8 md:p-10`}>
+          <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${cfg.grad}`} />
+          <div className="pointer-events-none absolute -right-10 -top-10 text-[9rem] opacity-10 blur-[1px] md:text-[12rem]">{cfg.emoji}</div>
+          <div className="relative">
+            <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${cfg.accent}`}>Especialidade</p>
+            <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">{cfg.emoji} {cfg.label}</h1>
+            <p className="mt-3 max-w-2xl text-base text-white/65">{cfg.tagline}</p>
+            {total > 0 && <p className="mt-5 text-xs text-white/45">{total} {total === 1 ? "item" : "itens"} nesta especialidade</p>}
+          </div>
         </div>
 
         {total === 0 ? (

@@ -208,22 +208,26 @@ export default async function Home() {
 
         {/* Navegue por especialidade — hubs */}
         <section className="mx-auto w-full max-w-7xl px-6 pb-20" style={{ order: -90 }}>
-          <p className="mb-5 text-xs uppercase tracking-[0.16em] text-accent">Navegue por especialidade</p>
+          <div className="mb-5">
+            <p className="text-xs uppercase tracking-[0.16em] text-accent">Comece por aqui</p>
+            <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">Navegue por especialidade</h2>
+          </div>
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-red-500/15" },
-              { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-blue-500/15" },
-              { area: "anestesiologia", label: "Anestesiologia", emoji: "🩺", desc: "Anestesia e pré-operatório", grad: "from-violet-500/15" },
+              { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-red-500/25 via-red-500/8", accent: "text-red-400", border: "hover:border-red-400/50" },
+              { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-blue-500/25 via-blue-500/8", accent: "text-blue-400", border: "hover:border-blue-400/50" },
+              { area: "anestesiologia", label: "Anestesiologia", emoji: "🩺", desc: "Anestesia e pré-operatório", grad: "from-violet-500/25 via-violet-500/8", accent: "text-violet-400", border: "hover:border-violet-400/50" },
             ].map((s) => (
-              <a key={s.area} href={`/especialidade/${s.area}`} className="group relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-6 transition hover:-translate-y-1 hover:border-white/20">
-                <div className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${s.grad} to-transparent`} />
-                <div className="relative flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-2xl">{s.emoji}</p>
-                    <h3 className="mt-3 text-xl font-semibold text-white">{s.label}</h3>
-                    <p className="mt-1 text-sm text-white/50">{s.desc}</p>
-                  </div>
-                  <ArrowRight className="h-5 w-5 shrink-0 text-white/30 transition group-hover:translate-x-1 group-hover:text-white/70" />
+              <a key={s.area} href={`/especialidade/${s.area}`} className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition hover:-translate-y-1 ${s.border}`}>
+                <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${s.grad} to-transparent`} />
+                <div className="pointer-events-none absolute -right-6 -top-8 text-8xl opacity-10 transition group-hover:opacity-20">{s.emoji}</div>
+                <div className="relative">
+                  <p className="text-3xl">{s.emoji}</p>
+                  <h3 className="mt-4 text-xl font-semibold text-white">{s.label}</h3>
+                  <p className="mt-1 text-sm text-white/50">{s.desc}</p>
+                  <span className={`mt-5 inline-flex items-center gap-1.5 text-sm font-semibold ${s.accent}`}>
+                    Ver tudo <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
                 </div>
               </a>
             ))}
