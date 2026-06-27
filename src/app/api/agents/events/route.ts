@@ -49,11 +49,17 @@ Para CADA evento encontrado retorne:
   "organizador": "sigla da sociedade organizadora"
 }
 
+COBERTURA OBRIGATÓRIA (não pode faltar):
+- PRIORIZE os principais congressos do BRASIL: Congresso Brasileiro de Anestesiologia (CBA/SBA, ~novembro), Congresso Paulista de Anestesiologia (SAESP, ~abril), Congresso Brasileiro de Medicina Intensiva (CBMI/AMIB), Congresso Brasileiro de Medicina de Emergência (SBMU/ABRAMEDE) e os regionais relevantes.
+- Inclua também os principais da AMÉRICA LATINA (CLASA e sociedades nacionais).
+- E os grandes congressos MUNDIAIS (ASA, ESAIC, WFSA, ESICM, SCCM, ISICEM, ACEP, EuSEM, ERC, SAEM).
+- Pesquise ativamente nos sites das sociedades (sba.com.br, saesp.org.br, amib.org.br, sbmu.org.br, abramede.com.br) para achar as datas reais dos eventos brasileiros.
+- Busque de 15 a 30 eventos no total, bem distribuídos entre Brasil, América Latina e mundo.
+
 REGRAS CRÍTICAS:
-- url_oficial deve ser URL real e verificável — não invente
-- Eventos sem URL oficial verificável: OMITIR
+- url_oficial deve ser URL real e verificável — não invente. Se não achar a URL exata do congresso, use a do site da sociedade organizadora.
+- Eventos sem URL verificável: OMITIR
 - Não incluir eventos passados (anteriores a ${hoje})
-- Cobrir tanto eventos brasileiros quanto internacionais relevantes
 - Retorne APENAS array JSON, sem markdown`;
 
   let tentativas = 0;

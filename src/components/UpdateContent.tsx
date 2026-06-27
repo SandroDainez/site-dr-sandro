@@ -44,6 +44,17 @@ export default function UpdateContent({ update }: { update: any }) {
         <div className="mt-6 space-y-3">
           {update.topicos.map((topico: any, i: number) => {
             const isDestaque = TIPO_DESTAQUE.includes(topico.fonte_tipo);
+            // Link da fonte: URL direta do tópico, ou PubMed (PMID), ou casa o nome
+            // da fonte com a lista de referências (que tem as URLs).
+            const fontes = update.fontes ?? [];
+            const matchFonte = topico.fonte_nome
+              ? fontes.find((f: any) => f.journal && (f.journal === topico.fonte_nome || f.journal.includes(topico.fonte_nome) || topico.fonte_nome.includes(f.journal)))
+              : null;
+            const fonteUrl: string | null =
+              topico.fonte_url ||
+              (topico.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${topico.pmid}/` : null) ||
+              matchFonte?.url ||
+              null;
             return (
               <div key={i} className={`space-y-2 rounded-2xl p-4 ${isDestaque ? "border border-amber-400/30 bg-amber-400/[0.06]" : "border border-white/10 bg-white/[0.03]"}`}>
                 {isDestaque && (
@@ -59,12 +70,14 @@ export default function UpdateContent({ update }: { update: any }) {
                     <p className="text-sm text-white/60">{topico.relevancia_clinica}</p>
                   </div>
                 )}
-                {!isDestaque && topico.fonte_nome && <p className="text-xs text-white/35">Fonte: {topico.fonte_nome}</p>}
-                {topico.pmid && (
-                  <a href={`https://pubmed.ncbi.nlm.nih.gov/${topico.pmid}/`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-accent transition hover:opacity-80">
-                    PubMed PMID:{topico.pmid} ↗
-                  </a>
-                )}
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1">
+                  {topico.fonte_nome && <span className="text-xs text-white/35">Fonte: {topico.fonte_nome}</span>}
+                  {fonteUrl && (
+                    <a href={fonteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-medium text-accent transition hover:opacity-80">
+                      {topico.pmid ? `PubMed PMID:${topico.pmid}` : "Ver fonte"} ↗
+                    </a>
+                  )}
+                </div>
               </div>
             );
           })}

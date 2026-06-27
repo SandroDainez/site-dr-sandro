@@ -228,6 +228,7 @@ INSTRUÇÕES OBRIGATÓRIAS:
 4. Para cada tópico, indique: PMID (se PubMed), sigla da sociedade ou órgão, ou nome do journal
 5. Linguagem técnica, nível especialista — não explique conceitos básicos
 6. Foco em implicações clínicas práticas e mudanças de conduta
+6b. RELEVÂNCIA: inclua APENAS tópicos clinicamente relevantes para a prática de ${label}. Descarte itens administrativos, ambientais, de sustentabilidade ou tangenciais — a não ser que tenham impacto clínico/assistencial direto na ${label}. Cada tópico deve responder "o que muda na minha conduta?".
 7. Tópicos: de 3 a 4 como NORMA — SEMPRE os MAIS RELEVANTES da semana (consolide itens correlatos num único tópico para evitar repetição). Em semanas com mais itens de alto impacto (novos guidelines, alertas regulatórios, mudanças de conduta), pode chegar a 6. NUNCA ultrapasse 6 nem inclua itens de baixa relevância só para encher — relevância clínica acima de quantidade. Semana fraca pode ter só 2-3.
 
 Retorne APENAS JSON válido:
@@ -242,7 +243,8 @@ Retorne APENAS JSON válido:
       "relevancia_clinica": "impacto direto na prática clínica (2-3 frases)",
       "pmid": "PMID se disponível, senão null",
       "fonte_nome": "nome do journal, sigla da sociedade ou órgão",
-      "fonte_tipo": "journal | guideline | posicionamento | alerta | resolucao | trial | regulatorio"
+      "fonte_tipo": "journal | guideline | posicionamento | alerta | resolucao | trial | regulatorio",
+      "fonte_url": "a URL EXATA do item da lista acima que originou este tópico (copie o campo URL: do item). Obrigatório."
     }
   ]
 }`;

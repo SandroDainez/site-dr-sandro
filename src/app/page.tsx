@@ -20,7 +20,6 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import CalendarioEventos from "@/components/CalendarioEventos";
 import AgendaCientifica from "@/components/AgendaCientifica";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 import { fetchMedicalUpdates } from "@/lib/supabase/server";
@@ -721,13 +720,9 @@ export default async function Home() {
           </a>
         </section>
 
+        {/* Calendário ÚNICO: cursos/imersões + congressos científicos juntos */}
         <div data-typo="eventos" style={{ order: homeOrder["eventos"] }}>
-          <CalendarioEventos eventos={eventos} />
-        </div>
-
-        {/* Agenda de eventos científicos (congressos pesquisados + manuais) — some se vazio */}
-        <div style={{ order: homeOrder["eventos"] }}>
-          <AgendaCientifica />
+          <AgendaCientifica cursos={eventos} />
         </div>
 
         <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="contato" style={{ order: homeOrder["contato"] }}>

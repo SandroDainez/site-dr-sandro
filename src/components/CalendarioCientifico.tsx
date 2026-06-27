@@ -3,21 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 
-// Calendário + lista numerada cronológica dos eventos científicos (medical_events
-// do Supabase: congressos pesquisados pela IA + eventos seus/parceiros adicionados
-// no admin). Cada item leva ao site oficial.
+// Calendário ÚNICO de eventos: cursos/imersões do médico (link interno de inscrição)
+// + congressos científicos (link externo oficial, pesquisados pela IA ou manuais).
+// Calendário mensal + lista numerada cronológica com links.
 
-type Ev = {
+export type EventoUnificado = {
   id: string;
   titulo: string;
   data_inicio: string;
   data_fim?: string | null;
-  cidade?: string | null;
-  local_nome?: string | null;
+  local?: string | null;
   pais?: string | null;
   modalidade?: string | null;
-  organizador?: string | null;
-  url_oficial: string;
+  badge?: string | null; // tipo do curso ou organizador do congresso
+  href: string;
+  external: boolean; // true = site oficial (nova aba); false = inscrição interna
 };
 
 const semana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
@@ -38,7 +38,7 @@ function fmt(iso: string) {
   }
 }
 
-export default function CalendarioCientifico({ eventos }: { eventos: Ev[] }) {
+export default function CalendarioCientifico({ eventos }: { eventos: EventoUnificado[] }) {
   const [mesAtual, setMesAtual] = useState(() => {
     const h = new Date();
     return new Date(h.getFullYear(), h.getMonth(), 1);
@@ -47,7 +47,7 @@ export default function CalendarioCientifico({ eventos }: { eventos: Ev[] }) {
   useEffect(() => setHojeKey(key(new Date())), []);
 
   const porDia = useMemo(() => {
-    const m: Record<string, Ev[]> = {};
+    const m: Record<string, EventoUnificado[]> = {};
     for (const e of eventos) {
       if (!e.data_inicio) continue;
       (m[e.data_inicio] ??= []).push(e);
@@ -75,15 +75,15 @@ export default function CalendarioCientifico({ eventos }: { eventos: Ev[] }) {
   }, [mesAtual]);
 
   return (
-    <section id="agenda-cientifica" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
+    <section id="eventos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">
       <div className="finex-glass rounded-[2rem] p-8 md:p-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-[0.16em] text-accent">Agenda científica · automática</p>
-            <h3 className="mt-2 text-3xl font-medium tracking-tight md:text-4xl">Congressos e eventos científicos</h3>
-            <p className="mt-2 text-sm text-muted">Congressos do Brasil e do mundo (anestesiologia, terapia intensiva e emergências). Clique para ir ao site oficial.</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-accent-blue">Agenda de eventos</p>
+            <h3 className="mt-2 text-3xl font-medium tracking-tight md:text-4xl">Calendário de eventos</h3>
+            <p className="mt-2 text-sm text-muted">Seus cursos/imersões e os congressos de anestesiologia, terapia intensiva e emergências (Brasil e mundo). Clique para acessar.</p>
           </div>
-          <CalendarDays className="h-8 w-8 text-accent" />
+          <CalendarDays className="h-8 w-8 text-accent-blue" />
         </div>
 
         {/* Calendário */}
@@ -110,11 +110,12 @@ export default function CalendarioCientifico({ eventos }: { eventos: Ev[] }) {
               const evs = !fora ? porDia[dk] : undefined;
               if (evs && evs.length) {
                 const e = evs[0];
+                const cor = e.external ? "border-accent/30 bg-accent/10 hover:border-accent/60 hover:bg-accent/20 text-accent" : "border-accent-blue/30 bg-accent-blue/10 hover:border-accent-blue/60 hover:bg-accent-blue/20 text-accent-blue";
                 return (
-                  <a key={dk} href={e.url_oficial} target="_blank" rel="noopener noreferrer" className="group card-open relative min-h-20 rounded-xl border border-accent/30 bg-accent/10 p-2 transition hover:-translate-y-0.5 hover:border-accent/60 hover:bg-accent/20">
+                  <a key={dk} href={e.href} target={e.external ? "_blank" : undefined} rel={e.external ? "noopener noreferrer" : undefined} className={`group card-open relative min-h-20 rounded-xl border p-2 transition hover:-translate-y-0.5 ${cor}`}>
                     <p className="text-sm font-semibold text-white">{data.getDate()}</p>
-                    <p className="mt-1 line-clamp-2 text-[11px] leading-tight text-accent">{e.titulo}{evs.length > 1 ? ` +${evs.length - 1}` : ""}</p>
-                    <span className="absolute bottom-1.5 right-1.5 text-accent/80 transition group-hover:text-accent"><ArrowUpRight className="h-3.5 w-3.5" /></span>
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-tight">{e.titulo}{evs.length > 1 ? ` +${evs.length - 1}` : ""}</p>
+                    <span className="absolute bottom-1.5 right-1.5 transition"><ArrowUpRight className="h-3.5 w-3.5" /></span>
                   </a>
                 );
               }
@@ -135,18 +136,19 @@ export default function CalendarioCientifico({ eventos }: { eventos: Ev[] }) {
             <ol className="space-y-2">
               {ordenados.map((e, i) => (
                 <li key={e.id}>
-                  <a href={e.url_oficial} target="_blank" rel="noopener noreferrer" className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent/40">
+                  <a href={e.href} target={e.external ? "_blank" : undefined} rel={e.external ? "noopener noreferrer" : undefined} className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent/40">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/15 text-sm font-bold text-accent">{i + 1}</span>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold leading-snug text-white">{e.titulo}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/50">
                         <span>📅 {fmt(e.data_inicio)}{e.data_fim && e.data_fim !== e.data_inicio ? ` – ${fmt(e.data_fim)}` : ""}</span>
-                        {(e.cidade || e.local_nome) && <span>📍 {e.cidade || e.local_nome}{e.pais ? `, ${e.pais}` : ""}</span>}
-                        {e.organizador && <span>· {e.organizador}</span>}
+                        {e.local && <span>📍 {e.local}{e.pais ? `, ${e.pais}` : ""}</span>}
+                        {e.badge && <span>· {e.badge}</span>}
                         {e.modalidade && <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${MOD_BADGE[e.modalidade] ?? "border-white/15 text-white/50"}`}>{e.modalidade}</span>}
+                        {!e.external && <span className="rounded-full border border-accent-blue/30 bg-accent-blue/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-accent-blue">inscrição</span>}
                       </div>
                     </div>
-                    <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-xs font-medium text-accent transition group-hover:gap-1.5">Acessar <ArrowUpRight className="h-3.5 w-3.5" /></span>
+                    <span className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-xs font-medium text-accent transition group-hover:gap-1.5">{e.external ? "Acessar" : "Inscrição"} <ArrowUpRight className="h-3.5 w-3.5" /></span>
                   </a>
                 </li>
               ))}

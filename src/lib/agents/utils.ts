@@ -320,30 +320,31 @@ export const SITES_SEGURANCA_PACIENTE = [
 
 // ── Fontes de eventos para o agente de calendário ─────────────────────────────
 export const FONTES_EVENTOS_COMPLETAS = `
-BRASIL:
-- SBA (sba.com.br) — Congresso Brasileiro de Anestesiologia e eventos regionais
-- AMIB (amib.org.br) — Congresso Brasileiro de Medicina Intensiva
-- SBMU (sbmu.org.br) — Congresso Brasileiro de Medicina de Urgência
-- CFM/CRM — congressos de ética e regulação médica
-- SOBRAMFA, SBED, SBAD — sociedades afiliadas
+BRASIL — Anestesiologia (PRIORIDADE):
+- Congresso Brasileiro de Anestesiologia (CBA) — SBA (sba.com.br), geralmente em novembro
+- Congresso Paulista de Anestesiologia (COPA / "Paulista") — SAESP (saesp.org.br), geralmente em abril
+- Jornadas e congressos regionais da SBA (sul, nordeste, etc.) e das regionais (SAERJ, SAEMG, etc.)
+- SBARD — Sociedade Brasileira de Anestesia Regional e Dor
+
+BRASIL — Terapia Intensiva (PRIORIDADE):
+- Congresso Brasileiro de Medicina Intensiva (CBMI) — AMIB (amib.org.br)
+- CBMI Pediátrico, fóruns e congressos regionais da AMIB
+
+BRASIL — Emergências (PRIORIDADE):
+- Congresso Brasileiro de Medicina de Emergência (SBMU, sbmu.org.br)
+- Congresso Brasileiro de Medicina de Urgência e Emergência (ABRAMEDE, abramede.com.br)
+
+AMÉRICA LATINA:
+- CLASA — Confederación Latinoamericana de Sociedades de Anestesiología
+- Congressos das sociedades nacionais (Argentina AAARBA, México, Chile, Colômbia SCARE)
 
 INTERNACIONAL — Anestesiologia:
-- ASA Annual Meeting (asahq.org)
-- Euroanaesthesia ESA (euroanaesthesia.org)
-- ESRA Annual Congress (esraeurope.org)
-- WFSA World Congress (wfsahq.org)
-- ANZCA Annual Scientific Meeting (anzca.edu.au)
+- ASA Annual Meeting (asahq.org) · Euroanaesthesia/ESAIC (esaic.org) · ESRA Congress (esraeurope.org)
+- WFSA World Congress (wfsahq.org) · ANZCA ASM (anzca.edu.au)
 
 INTERNACIONAL — Terapia Intensiva:
-- ESICM LIVES Congress (esicm.org)
-- SCCM Critical Care Congress (sccm.org)
-- ISICEM Brussels (isicem.org)
-- ANZICS ASM (anzics.com.au)
+- ESICM LIVES (esicm.org) · SCCM Critical Care Congress (sccm.org) · ISICEM Brussels (isicem.org) · ANZICS ASM
 
 INTERNACIONAL — Emergências:
-- ACEP Scientific Assembly (acep.org)
-- EuSEM Congress (eusem.org)
-- ICEM International Congress
-- ERC Resuscitation Congress (erc.edu)
-- SAEM Annual Meeting (saem.org)
+- ACEP Scientific Assembly (acep.org) · EuSEM Congress (eusem.org) · ICEM (ifem.net) · ERC Resuscitation (erc.edu) · SAEM (saem.org)
 `;
