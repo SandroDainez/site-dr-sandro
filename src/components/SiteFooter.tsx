@@ -1,22 +1,31 @@
-import { getSiteConfig, getUiTexts, getNavItems } from "@/lib/content";
+import { getSiteConfig, getUiTexts } from "@/lib/content";
 import { uiText } from "@/lib/ui-texts";
+import { NAV_GROUPS, resolveHref } from "@/lib/nav-structure";
 import { Home } from "lucide-react";
 
 export default async function SiteFooter() {
-  const [cfg, ui, navItems] = await Promise.all([getSiteConfig(), getUiTexts(), getNavItems()]);
+  const [cfg, ui] = await Promise.all([getSiteConfig(), getUiTexts()]);
 
-  // Mapa do site = o menu do topo (editável em /admin/menu) + as páginas de
-  // tipo que ficam dentro dos hubs de especialidade (p/ continuarem acessíveis).
-  // Âncoras "#x" viram "/#x"; pula "Início" (já tem o botão "Voltar ao início").
-  const base = navItems
-    .filter((it) => (it.href || "/") !== "/")
-    .map((it) => ({ label: it.label, href: it.href?.startsWith("#") ? `/${it.href}` : it.href || "/" }));
+  // Mapa do site = a mesma estrutura do menu do topo (NAV_GROUPS), achatada,
+  // mais as páginas de tipo que vivem dentro de "Todo o conteúdo" (p/ continuarem
+  // acessíveis e indexáveis). Âncoras "#x" viram "/#x"; "Início" tem botão próprio.
+  const navLinks: { label: string; href: string }[] = [];
+  for (const g of NAV_GROUPS) {
+    if (g.children) {
+      for (const c of g.children) navLinks.push({ label: c.label, href: resolveHref(c.href, true) });
+    } else if ((g.href || "/") !== "/") {
+      navLinks.push({ label: g.label, href: resolveHref(g.href!, true) });
+    }
+  }
   const extras = [
     { label: "Protocolos", href: "/protocolos" },
     { label: "Videoaulas", href: "/videoaulas" },
     { label: "Atualizações", href: "/atualizacoes" },
-  ].filter((e) => !base.some((b) => b.href === e.href));
-  const links = [...base, ...extras];
+    { label: "Cursos", href: "/cursos" },
+    { label: "Podcast", href: "/podcast" },
+    { label: "Acervo", href: "/acervo" },
+  ].filter((e) => !navLinks.some((b) => b.href === e.href));
+  const links = [...navLinks, ...extras];
 
   return (
     <footer className="border-t border-white/10 bg-black/20 py-10" data-typo="footer">
