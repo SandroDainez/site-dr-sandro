@@ -118,6 +118,36 @@ async function pesquisarEventos(): Promise<any[]> {
   return unicos;
 }
 
+// Confirma uma data de congresso-marco SÓ se ela aparecer no site oficial.
+// Exige o DIA próximo do mês (pt/en), ou dd/mm/aaaa, ou ISO — e o ano na página.
+// Falso-negativo (não confirma) é o lado seguro: o evento segue "a confirmar".
+async function verificarDataNaFonte(url: string, dataISO: string): Promise<boolean> {
+  try {
+    const [y, mm, dd] = dataISO.split("-");
+    const dia = String(Number(dd));
+    const mesesPt = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+    const mesesEn = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    const mp = mesesPt[Number(mm) - 1], me = mesesEn[Number(mm) - 1];
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(url, { signal: ctrl.signal, headers: { "User-Agent": "Mozilla/5.0" } }).catch(() => null);
+    clearTimeout(tid);
+    if (!res || !res.ok) return false;
+    const html = (await res.text()).toLowerCase().replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+    if (!html.includes(y)) return false; // precisa do ano na página
+    const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const perto = (a: string, b: string) => new RegExp(`${esc(a)}[\\s\\S]{0,25}${esc(b)}`, "i").test(html);
+    return (
+      perto(dia, mp) || perto(mp, dia) ||
+      perto(dia, me) || perto(me, dia) ||
+      html.includes(`${dd}/${mm}/${y}`) || html.includes(`${dia}/${mm}/${y}`) ||
+      html.includes(dataISO)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   if (!verificarCronSecret(request)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
@@ -146,32 +176,46 @@ export async function POST(request: NextRequest) {
     // Casa primeiro pela chave de congresso-marco (slug_marco) — assim um marco que
     // estava "a confirmar" é atualizado com a data oficial. Senão, casa por URL/título.
     const slug = typeof ev.slug_marco === "string" && ev.slug_marco.trim() ? ev.slug_marco.trim() : null;
-    let existente: { id: string } | null = null;
+    const cols = "id,data_confirmada,data_inicio,data_fim";
+    let existente: { id: string; data_confirmada: boolean; data_inicio: string; data_fim: string | null } | null = null;
     if (slug) {
-      const { data } = await supabase.from("medical_events").select("id").eq("slug_marco", slug).maybeSingle();
-      existente = data ?? null;
+      const { data } = await supabase.from("medical_events").select(cols).eq("slug_marco", slug).maybeSingle();
+      existente = (data as any) ?? null;
     }
     if (!existente) {
       const { data } = await supabase
         .from("medical_events")
-        .select("id")
+        .select(cols)
         .or(`url_oficial.eq.${ev.url_oficial},and(titulo.eq.${ev.titulo},data_inicio.eq.${ev.data_inicio})`)
         .maybeSingle();
-      existente = data ?? null;
+      existente = (data as any) ?? null;
     }
 
     if (existente) {
-      // O agente trouxe uma data concreta → atualiza a data e marca como confirmada
-      // (corrige automaticamente os marcos que estavam "a confirmar").
+      // Congresso-marco AINDA não confirmado: só aceita/confirma a nova data se ela
+      // REALMENTE aparecer no site oficial (evita "confirmar" data chutada pelo modelo).
+      const marcoPendente = !!slug && existente.data_confirmada === false;
+      let novaData = ev.data_inicio;
+      let novaDataFim = ev.data_fim ?? null;
+      let confirmar = true;
+      if (marcoPendente) {
+        const verificada = await verificarDataNaFonte(ev.url_oficial, ev.data_inicio);
+        if (!verificada) {
+          // não confirma: mantém a data provisória e o status "a confirmar"
+          novaData = existente.data_inicio;
+          novaDataFim = existente.data_fim;
+          confirmar = false;
+        }
+      }
       await supabase.from("medical_events").update({
-        data_inicio: ev.data_inicio,
-        data_fim: ev.data_fim ?? null,
+        data_inicio: novaData,
+        data_fim: novaDataFim,
         local_nome: ev.local_nome ?? null,
         cidade: ev.cidade ?? null,
         modalidade: ev.modalidade ?? null,
         descricao: ev.descricao ?? null,
         ativo: true,
-        data_confirmada: true,
+        data_confirmada: confirmar,
         ultima_verificacao: new Date().toISOString(),
       }).eq("id", existente.id);
       atualizados++;
