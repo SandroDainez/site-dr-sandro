@@ -1,24 +1,19 @@
-import { getSiteConfig, getUiTexts } from "@/lib/content";
+import { getSiteConfig, getUiTexts, getNavItems } from "@/lib/content";
 import { uiText } from "@/lib/ui-texts";
 import { Home } from "lucide-react";
 
-// Links absolutos (funcionam de qualquer página: "/#x" vai pra home e rola até a seção)
-const LINKS: { label: string; href: string }[] = [
-  { label: "Cursos", href: "/cursos" },
-  { label: "Atualizações", href: "/atualizacoes" },
-  { label: "Protocolos", href: "/protocolos" },
-  { label: "Videoaulas", href: "/videoaulas" },
-  { label: "Podcast", href: "/podcast" },
-  { label: "Colaboradores", href: "/colaboradores" },
-  { label: "Acervo", href: "/acervo" },
-  { label: "Apps", href: "/#apps-assinatura" },
-  { label: "Apps do dia a dia", href: "/#apps-uteis" },
-  { label: "Eventos", href: "/#eventos" },
-  { label: "Contato", href: "/#contato" },
-];
-
 export default async function SiteFooter() {
-  const [cfg, ui] = await Promise.all([getSiteConfig(), getUiTexts()]);
+  const [cfg, ui, navItems] = await Promise.all([getSiteConfig(), getUiTexts(), getNavItems()]);
+
+  // Mapa do site = o MESMO menu do topo (editável em /admin/menu).
+  // Âncoras "#x" viram "/#x" (funcionam de qualquer página); pula o "Início"
+  // (já existe o botão "Voltar ao início" acima).
+  const links = navItems
+    .filter((it) => (it.href || "/") !== "/")
+    .map((it) => ({
+      label: it.label,
+      href: it.href?.startsWith("#") ? `/${it.href}` : it.href || "/",
+    }));
 
   return (
     <footer className="border-t border-white/10 bg-black/20 py-10" data-typo="footer">
@@ -35,8 +30,8 @@ export default async function SiteFooter() {
 
         {/* Mapa do site */}
         <nav className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-white/55">
-          {LINKS.map((l) => (
-            <a key={l.href} href={l.href} className="transition hover:text-white">
+          {links.map((l, i) => (
+            <a key={`${l.href}-${i}`} href={l.href} className="transition hover:text-white">
               {l.label}
             </a>
           ))}
