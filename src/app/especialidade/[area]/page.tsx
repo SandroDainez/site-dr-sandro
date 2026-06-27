@@ -175,6 +175,22 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
             )}
           </>
         )}
+
+        <div className="mt-14 border-t border-white/10 pt-8">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Outras especialidades</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {(Object.keys(AREAS) as Area[]).filter((k) => k !== a).map((k) => (
+              <a key={k} href={`/especialidade/${k}`} className={`group relative flex items-center justify-between overflow-hidden rounded-2xl border ${AREAS[k].border} bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]`}>
+                <span className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${AREAS[k].grad} opacity-60`} />
+                <span className="relative flex items-center gap-3">
+                  <span className="text-2xl">{AREAS[k].emoji}</span>
+                  <span className={`font-semibold ${AREAS[k].accent}`}>{AREAS[k].label}</span>
+                </span>
+                <ArrowRight className="relative h-4 w-4 text-white/40 transition group-hover:translate-x-1 group-hover:text-white/70" />
+              </a>
+            ))}
+          </div>
+        </div>
       </main>
 
       <SiteFooter />
