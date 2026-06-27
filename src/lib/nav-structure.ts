@@ -18,10 +18,13 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Apps",
     children: [
+      { label: "Apps gratuitos", href: "#apps-gratis" },
       { label: "Apps por assinatura", href: "#apps-assinatura" },
       { label: "Apps do dia a dia", href: "#apps-uteis" },
     ],
   },
+  { label: "Podcast", href: "/podcast" },
+  { label: "Acervo", href: "/acervo" },
   { label: "Parceiros", href: "/colaboradores" },
   { label: "Eventos", href: "#eventos" },
   { label: "Contato", href: "#contato" },
