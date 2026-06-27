@@ -5,15 +5,18 @@ import { Home } from "lucide-react";
 export default async function SiteFooter() {
   const [cfg, ui, navItems] = await Promise.all([getSiteConfig(), getUiTexts(), getNavItems()]);
 
-  // Mapa do site = o MESMO menu do topo (editável em /admin/menu).
-  // Âncoras "#x" viram "/#x" (funcionam de qualquer página); pula o "Início"
-  // (já existe o botão "Voltar ao início" acima).
-  const links = navItems
+  // Mapa do site = o menu do topo (editável em /admin/menu) + as páginas de
+  // tipo que ficam dentro dos hubs de especialidade (p/ continuarem acessíveis).
+  // Âncoras "#x" viram "/#x"; pula "Início" (já tem o botão "Voltar ao início").
+  const base = navItems
     .filter((it) => (it.href || "/") !== "/")
-    .map((it) => ({
-      label: it.label,
-      href: it.href?.startsWith("#") ? `/${it.href}` : it.href || "/",
-    }));
+    .map((it) => ({ label: it.label, href: it.href?.startsWith("#") ? `/${it.href}` : it.href || "/" }));
+  const extras = [
+    { label: "Protocolos", href: "/protocolos" },
+    { label: "Videoaulas", href: "/videoaulas" },
+    { label: "Atualizações", href: "/atualizacoes" },
+  ].filter((e) => !base.some((b) => b.href === e.href));
+  const links = [...base, ...extras];
 
   return (
     <footer className="border-t border-white/10 bg-black/20 py-10" data-typo="footer">
