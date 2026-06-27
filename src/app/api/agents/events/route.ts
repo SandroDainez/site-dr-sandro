@@ -43,6 +43,15 @@ const MARCOS: { slug: string; sigla: string; nome: string; chk: RegExp }[] = [
 ];
 const MAPA_MARCOS = MARCOS.map((m) => `${m.sigla}→'${m.slug}'`).join(", ");
 
+// Título normalizado (sem acento, sem ano, só letras) — base do dedup entre execuções.
+function normTitulo(t: string): string {
+  return (t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/20\d\d/g, "").replace(/[^a-z]+/g, " ").trim();
+}
+function diffDias(a: string, b: string): number {
+  return Math.abs((new Date(a + "T12:00:00").getTime() - new Date(b + "T12:00:00").getTime()) / 86400000);
+}
+
 // Esquema de cada evento + regras, compartilhados por todas as buscas focadas.
 function schemaERegras(hoje: string, fimJanela: string): string {
   return `Para CADA evento retorne um objeto:
@@ -200,6 +209,25 @@ export async function POST(request: NextRequest) {
 
   const eventos = await pesquisarEventos();
 
+  // Carrega os eventos ativos UMA vez e indexa por slug / url / título normalizado.
+  // O índice em memória é a base do dedup robusto entre execuções (evita cópias por
+  // pequenas variações de data ou URL que o modelo traz a cada rodada).
+  const { data: existentesRaw } = await supabase
+    .from("medical_events")
+    .select("id,titulo,data_inicio,data_fim,data_confirmada,url_oficial,slug_marco")
+    .eq("ativo", true)
+    .gte("data_inicio", hoje);
+  const porSlug = new Map<string, any>();
+  const porUrl = new Map<string, any>();
+  const porNorm = new Map<string, any[]>();
+  const indexar = (r: any) => {
+    if (r.slug_marco) porSlug.set(r.slug_marco, r);
+    if (r.url_oficial) porUrl.set(String(r.url_oficial).trim().toLowerCase(), r);
+    const k = normTitulo(r.titulo);
+    if (k) { const arr = porNorm.get(k) ?? []; arr.push(r); porNorm.set(k, arr); }
+  };
+  (existentesRaw ?? []).forEach(indexar);
+
   for (const ev of eventos) {
     if (!ev.url_oficial || !ev.data_inicio || !ev.titulo) { ignorados++; continue; }
     if (ev.data_inicio < hoje || ev.data_inicio > fimJanela) { ignorados++; continue; }
@@ -212,19 +240,13 @@ export async function POST(request: NextRequest) {
       const marco = MARCOS.find((m) => m.slug === slug);
       if (!marco || !marco.chk.test(ev.titulo || "")) slug = null;
     }
-    const cols = "id,data_confirmada,data_inicio,data_fim,url_oficial";
-    let existente: { id: string; data_confirmada: boolean; data_inicio: string; data_fim: string | null; url_oficial: string } | null = null;
-    if (slug) {
-      const { data } = await supabase.from("medical_events").select(cols).eq("slug_marco", slug).maybeSingle();
-      existente = (data as any) ?? null;
-    }
+    // Casa em memória: slug-marco → URL exata → título normalizado + data próxima (±75d).
+    let existente: any = null;
+    if (slug) existente = porSlug.get(slug) ?? null;
+    if (!existente) existente = porUrl.get(String(ev.url_oficial).trim().toLowerCase()) ?? null;
     if (!existente) {
-      const { data } = await supabase
-        .from("medical_events")
-        .select(cols)
-        .or(`url_oficial.eq.${ev.url_oficial},and(titulo.eq.${ev.titulo},data_inicio.eq.${ev.data_inicio})`)
-        .maybeSingle();
-      existente = (data as any) ?? null;
+      const cands = porNorm.get(normTitulo(ev.titulo)) ?? [];
+      existente = cands.find((c) => diffDias(c.data_inicio, ev.data_inicio) <= 75) ?? null;
     }
 
     if (existente) {
@@ -276,7 +298,12 @@ export async function POST(request: NextRequest) {
         destaque: false,
         ativo: true,
       });
-      error ? ignorados++ : inseridos++;
+      if (error) { ignorados++; }
+      else {
+        inseridos++;
+        // indexa o recém-inserido p/ não duplicar com uma variante na mesma rodada
+        indexar({ titulo: ev.titulo, data_inicio: ev.data_inicio, url_oficial: ev.url_oficial, slug_marco: slug });
+      }
     }
   }
 
