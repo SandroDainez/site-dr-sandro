@@ -23,21 +23,23 @@ function getJanelaEventos() {
 
 // Lista curada de congressos-MARCO (fonte de verdade). Cada um tem uma chave estável
 // (slug) usada para identidade/dedup e para a confirmação automática de data.
-const MARCOS: { slug: string; sigla: string; nome: string }[] = [
-  { slug: "cba", sigla: "CBA/SBA", nome: "Congresso Brasileiro de Anestesiologia" },
-  { slug: "copa-saesp", sigla: "COPA/SAESP", nome: "Congresso Paulista de Anestesiologia" },
-  { slug: "cbmi", sigla: "CBMI/AMIB", nome: "Congresso Brasileiro de Medicina Intensiva" },
-  { slug: "cbmede", sigla: "CBMEDE/ABRAMEDE", nome: "Congresso Brasileiro de Medicina de Emergência" },
-  { slug: "clasa", sigla: "CLASA", nome: "Congreso Latinoamericano de Anestesiología" },
-  { slug: "asa", sigla: "ASA", nome: "ASA Annual Meeting (American Society of Anesthesiologists)" },
-  { slug: "euroanaesthesia", sigla: "ESAIC", nome: "Euroanaesthesia (ESAIC)" },
-  { slug: "wca", sigla: "WFSA/WCA", nome: "World Congress of Anaesthesiologists" },
-  { slug: "esicm-lives", sigla: "ESICM", nome: "ESICM LIVES" },
-  { slug: "sccm", sigla: "SCCM", nome: "SCCM Critical Care Congress" },
-  { slug: "isicem", sigla: "ISICEM", nome: "ISICEM (Bruxelas)" },
-  { slug: "acep", sigla: "ACEP", nome: "ACEP Scientific Assembly" },
-  { slug: "eusem", sigla: "EuSEM", nome: "European Emergency Medicine Congress (EuSEM)" },
-  { slug: "saem", sigla: "SAEM", nome: "SAEM Annual Meeting" },
+// chk = padrão que o TÍTULO precisa casar para a tag ser aceita (evita mis-tag, ex.:
+// "Euro-Abu Dhabi" ser marcado como EuSEM). Validação feita pelo sistema, não pelo modelo.
+const MARCOS: { slug: string; sigla: string; nome: string; chk: RegExp }[] = [
+  { slug: "cba", sigla: "CBA/SBA", nome: "Congresso Brasileiro de Anestesiologia", chk: /\bcba\b|congresso brasileiro de anestesiolog/i },
+  { slug: "copa-saesp", sigla: "COPA/SAESP", nome: "Congresso Paulista de Anestesiologia", chk: /\bcopa\b|paulista de anestesiolog/i },
+  { slug: "cbmi", sigla: "CBMI/AMIB", nome: "Congresso Brasileiro de Medicina Intensiva", chk: /\bcbmi\b|brasileiro de medicina intensiva/i },
+  { slug: "cbmede", sigla: "CBMEDE/ABRAMEDE", nome: "Congresso Brasileiro de Medicina de Emergência", chk: /\bcbmede\b|brasileiro de medicina de emerg/i },
+  { slug: "clasa", sigla: "CLASA", nome: "Congreso Latinoamericano de Anestesiología", chk: /\bclasa\b|latinoamericano de anestesiolog/i },
+  { slug: "asa", sigla: "ASA", nome: "ASA Annual Meeting (American Society of Anesthesiologists)", chk: /\basa\b.*(annual|meeting)|american society of anesthesiolog/i },
+  { slug: "euroanaesthesia", sigla: "ESAIC", nome: "Euroanaesthesia (ESAIC)", chk: /euroanaesthesia|euroanestesia|\besaic\b/i },
+  { slug: "wca", sigla: "WFSA/WCA", nome: "World Congress of Anaesthesiologists", chk: /\bwca\b|world congress of anaesthesiolog/i },
+  { slug: "esicm-lives", sigla: "ESICM", nome: "ESICM LIVES", chk: /\besicm\b|\blives\b/i },
+  { slug: "sccm", sigla: "SCCM", nome: "SCCM Critical Care Congress", chk: /\bsccm\b|critical care congress/i },
+  { slug: "isicem", sigla: "ISICEM", nome: "ISICEM (Bruxelas)", chk: /\bisicem\b/i },
+  { slug: "acep", sigla: "ACEP", nome: "ACEP Scientific Assembly", chk: /\bacep\b/i },
+  { slug: "eusem", sigla: "EuSEM", nome: "European Emergency Medicine Congress (EuSEM)", chk: /\beusem\b|european emergency medicine congress/i },
+  { slug: "saem", sigla: "SAEM", nome: "SAEM Annual Meeting", chk: /\bsaem\b/i },
 ];
 const MAPA_MARCOS = MARCOS.map((m) => `${m.sigla}→'${m.slug}'`).join(", ");
 
@@ -204,7 +206,12 @@ export async function POST(request: NextRequest) {
 
     // Casa primeiro pela chave de congresso-marco (slug_marco) — assim um marco que
     // estava "a confirmar" é atualizado com a data oficial. Senão, casa por URL/título.
-    const slug = typeof ev.slug_marco === "string" && ev.slug_marco.trim() ? ev.slug_marco.trim() : null;
+    let slug = typeof ev.slug_marco === "string" && ev.slug_marco.trim() ? ev.slug_marco.trim() : null;
+    // Valida a tag: só aceita se o título realmente casar com o congresso-marco.
+    if (slug) {
+      const marco = MARCOS.find((m) => m.slug === slug);
+      if (!marco || !marco.chk.test(ev.titulo || "")) slug = null;
+    }
     const cols = "id,data_confirmada,data_inicio,data_fim,url_oficial";
     let existente: { id: string; data_confirmada: boolean; data_inicio: string; data_fim: string | null; url_oficial: string } | null = null;
     if (slug) {
