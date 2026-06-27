@@ -86,7 +86,7 @@ function UpdateCard({ item }: { item: AtualizacaoData }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img loading="lazy" decoding="async"
             src={item.imageUrl}
-            alt=""
+            alt={item.titulo}
             className="shrink-0 rounded-lg object-contain"
             style={{ width: item.imageSize ?? 56, height: item.imageSize ?? 56 }}
           />

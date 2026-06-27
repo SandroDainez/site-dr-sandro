@@ -100,7 +100,7 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
           {curso.capaUrl && (
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={curso.capaUrl} alt="" className="aspect-video w-full object-cover" />
+              <img src={curso.capaUrl} alt={`Capa do curso `} className="aspect-video w-full object-cover" />
             </div>
           )}
         </div>

@@ -567,7 +567,7 @@ export default async function Home() {
                           // Infográfico de fundo escuro — sem branco; funde no card
                           <div className="overflow-hidden border-b border-white/10 bg-black/20">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.imageUrl} alt="" className="aspect-square w-full object-contain" />
+                            <img src={item.imageUrl} alt={item.titulo} className="aspect-square w-full object-contain" />
                           </div>
                         )}
                         <div className="flex flex-1 flex-col p-5">
