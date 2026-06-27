@@ -23,14 +23,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Apps do dia a dia", href: "#apps-uteis" },
     ],
   },
-  {
-    label: "Sobre",
-    children: [
-      { label: "Colaboradores", href: "/colaboradores" },
-      { label: "Eventos", href: "#eventos" },
-      { label: "Contato", href: "#contato" },
-    ],
-  },
+  { label: "Colaboradores", href: "/colaboradores" },
+  { label: "Eventos", href: "#eventos" },
+  { label: "Contato", href: "#contato" },
 ];
 
 // Resolve href conforme a página: em páginas internas, âncoras "#x" viram "/#x".

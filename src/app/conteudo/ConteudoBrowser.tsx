@@ -3,22 +3,8 @@
 import { useState } from "react";
 import { ClipboardList, PlayCircle, Newspaper, GraduationCap, Mic, FolderOpen, Download } from "lucide-react";
 import { HubArticles, HubVideos } from "@/components/HubContent";
+import ProtocoloCard from "@/components/ProtocoloCard";
 import type { ProtocoloData, VideoaulaData, AtualizacaoData, CursoData, PodcastData, AcervoItemData } from "@/lib/content";
-
-type Area = "emergencias" | "ti" | "anestesiologia";
-
-// Conteúdo pode pertencer a mais de uma especialidade (campo opcional `areas`).
-function inArea(item: { area?: string; areas?: string[] }, area: Area | "todas"): boolean {
-  if (area === "todas") return true;
-  return item.area === area || (Array.isArray(item.areas) && item.areas.includes(area));
-}
-
-const AREA_TABS: { value: Area | "todas"; label: string }[] = [
-  { value: "todas", label: "Todas" },
-  { value: "emergencias", label: "🚑 Emergências" },
-  { value: "ti", label: "🏥 Terapia Intensiva" },
-  { value: "anestesiologia", label: "🩺 Anestesiologia" },
-];
 
 type TypeKey = "tudo" | "protocolos" | "videoaulas" | "atualizacoes" | "cursos" | "podcast" | "acervo";
 const TYPE_TABS: { value: TypeKey; label: string }[] = [
@@ -62,45 +48,32 @@ const cardCls = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 transiti
 
 export default function ConteudoBrowser({ protocolos, videoaulas, atualizacoes, cursos, podcasts, acervo }: Props) {
   const [type, setType] = useState<TypeKey>("tudo");
-  const [area, setArea] = useState<Area | "todas">("todas");
 
-  const proto = protocolos.filter((p) => p.titulo && inArea(p, area));
-  const vids = videoaulas.filter((v) => v.titulo && inArea(v, area));
-  const atu = [...atualizacoes].filter((x) => x.titulo && inArea(x, area)).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
-  const curs = cursos.filter((c) => c.titulo && inArea(c, area));
-  const docs = acervo.filter((d) => d.titulo && inArea(d, area));
-  // Podcast não tem especialidade: só aparece quando a área é "todas".
-  const pods = area === "todas" ? podcasts.filter((p) => p.titulo) : [];
+  // "Todo o conteúdo" mostra tudo de todas as especialidades; quem quer filtrar
+  // por área usa os hubs de Especialidade. Aqui só filtramos por tipo.
+  const proto = protocolos.filter((p) => p.titulo);
+  const vids = videoaulas.filter((v) => v.titulo);
+  const atu = [...atualizacoes].filter((x) => x.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  const curs = cursos.filter((c) => c.titulo);
+  const docs = acervo.filter((d) => d.titulo);
+  const pods = podcasts.filter((p) => p.titulo);
 
   const show = (t: TypeKey) => type === "tudo" || type === t;
   const total = (show("protocolos") ? proto.length : 0) + (show("videoaulas") ? vids.length : 0) + (show("atualizacoes") ? atu.length : 0) + (show("cursos") ? curs.length : 0) + (show("podcast") ? pods.length : 0) + (show("acervo") ? docs.length : 0);
 
   return (
     <div>
-      {/* filtros */}
-      <div className="mb-8 space-y-3">
-        <div className="flex flex-wrap gap-2">
-          {TYPE_TABS.map((t) => (
-            <button
-              key={t.value}
-              onClick={() => setType(t.value)}
-              className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition ${type === t.value ? "border-accent/50 bg-accent/15 text-accent" : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/25 hover:text-white"}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {AREA_TABS.map((t) => (
-            <button
-              key={t.value}
-              onClick={() => setArea(t.value)}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${area === t.value ? "border-white/30 bg-white/10 text-white" : "border-white/10 bg-transparent text-white/50 hover:text-white/80"}`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      {/* filtro por tipo */}
+      <div className="mb-8 flex flex-wrap gap-2">
+        {TYPE_TABS.map((t) => (
+          <button
+            key={t.value}
+            onClick={() => setType(t.value)}
+            className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition ${type === t.value ? "border-accent/50 bg-accent/15 text-accent" : "border-white/10 bg-white/[0.03] text-white/70 hover:border-white/25 hover:text-white"}`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {total === 0 ? (
@@ -111,14 +84,11 @@ export default function ConteudoBrowser({ protocolos, videoaulas, atualizacoes, 
         <>
           {show("protocolos") && proto.length > 0 && (
             <Section icon={ClipboardList} titulo="Protocolos" verHref="/protocolos">
-              <HubArticles
-                accent="text-accent"
-                items={proto.map((p) => ({
-                  id: p.id, titulo: p.titulo, conteudo: p.conteudo, resumo: p.descricao,
-                  imageUrl: p.imageUrl, imageCaption: p.imageCaption, imageSize: p.imageSize, data: p.data,
-                  download: p.arquivoUrl ? { url: p.arquivoUrl, label: p.arquivoLabel || "Abrir material" } : undefined,
-                }))}
-              />
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {proto.map((p) => (
+                  <ProtocoloCard key={p.id} item={p} />
+                ))}
+              </div>
             </Section>
           )}
 

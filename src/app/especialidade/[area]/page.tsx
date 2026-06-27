@@ -12,6 +12,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download } from "lucide-react";
 import { HubArticles, HubVideos } from "@/components/HubContent";
+import ProtocoloCard from "@/components/ProtocoloCard";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
 const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
@@ -104,20 +105,11 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           <>
             {proto.length > 0 && (
               <Section icon={ClipboardList} titulo="Protocolos" verHref="/protocolos" accent={cfg.accent}>
-                <HubArticles
-                  accent={cfg.accent}
-                  items={proto.map((p) => ({
-                    id: p.id,
-                    titulo: p.titulo,
-                    conteudo: p.conteudo,
-                    resumo: p.descricao,
-                    imageUrl: p.imageUrl,
-                    imageCaption: p.imageCaption,
-                    imageSize: p.imageSize,
-                    data: p.data,
-                    download: p.arquivoUrl ? { url: p.arquivoUrl, label: p.arquivoLabel || "Abrir material" } : undefined,
-                  }))}
-                />
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {proto.map((p) => (
+                    <ProtocoloCard key={p.id} item={p} />
+                  ))}
+                </div>
               </Section>
             )}
 
