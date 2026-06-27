@@ -1,4 +1,5 @@
 import { list, put } from "@vercel/blob";
+import { cache } from "react";
 import { unstable_noStore as noStore } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
@@ -654,17 +655,21 @@ async function writeLocal<T>(key: string, data: T): Promise<void> {
 // edições do admin NÃO muda: zero risco de conteúdo desatualizado.
 const blobUrlCache = new Map<string, string>();
 
-async function readBlob<T>(key: string, fallback: T): Promise<T> {
-  const token = process.env.BLOB_READ_WRITE_TOKEN;
-  if (!token) return readLocal(key, fallback);
+// Busca o JSON de um blob por chave. Envolto em React cache() para deduplicar
+// leituras da MESMA chave dentro de um único request (ex.: header/navItems/ui que
+// página, nav e rodapé leem em paralelo). É memo por-request: cada novo request
+// refaz o fetch no-store, então o frescor das edições do admin não muda.
+// Retorna undefined quando o blob não existe (o chamador aplica o fallback).
+const fetchBlobJson = cache(async (key: string): Promise<unknown | undefined> => {
   noStore();
+  const token = process.env.BLOB_READ_WRITE_TOKEN as string;
   const pathname = `${BLOB_PREFIX}${key}.json`;
   try {
     let url = blobUrlCache.get(key);
     if (!url) {
       const { blobs } = await list({ prefix: pathname });
       const blob = blobs.find((b) => b.pathname === pathname);
-      if (!blob) return fallback;
+      if (!blob) return undefined;
       url = blob.url;
       blobUrlCache.set(key, url);
     }
@@ -676,13 +681,19 @@ async function readBlob<T>(key: string, fallback: T): Promise<T> {
     if (!res.ok) {
       // URL memoizada pode ter ficado inválida — descarta e re-descobre no próximo request
       blobUrlCache.delete(key);
-      return fallback;
+      return undefined;
     }
-    return (await res.json()) as T;
+    return await res.json();
   } catch {
     blobUrlCache.delete(key);
-    return fallback;
+    return undefined;
   }
+});
+
+async function readBlob<T>(key: string, fallback: T): Promise<T> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) return readLocal(key, fallback);
+  const data = await fetchBlobJson(key);
+  return (data === undefined ? fallback : data) as T;
 }
 
 export async function writeBlob<T>(key: string, data: T): Promise<void> {
