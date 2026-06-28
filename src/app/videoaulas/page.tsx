@@ -9,6 +9,7 @@ import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLin
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
+import AuthButton from "@/components/AuthButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
@@ -33,7 +34,7 @@ export default async function VideoaulasPage() {
           </a>
 
           {/* Nav */}
-          <SiteNav items={navItems} style={navStyle} internal currentPath="/videoaulas" />
+          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/videoaulas" /><AuthButton /></div>
           <MobileNav items={navItems} style={navStyle} internal currentPath="/videoaulas" />
 
           {/* Mobile back */}

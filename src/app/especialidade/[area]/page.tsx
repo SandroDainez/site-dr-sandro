@@ -10,6 +10,7 @@ import { uiText } from "@/lib/ui-texts";
 import AcervoList from "@/app/acervo/AcervoList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
+import AuthButton from "@/components/AuthButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
@@ -93,7 +94,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
               {headerSubtitleLines(header)[0] && <p className="text-xs font-semibold text-accent leading-tight">{headerSubtitleLines(header)[0]}</p>}
             </div>
           </a>
-          <SiteNav items={navItems} style={navStyle} internal currentPath={`/especialidade/${a}`} />
+          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath={`/especialidade/${a}`} /><AuthButton /></div>
           <MobileNav items={navItems} style={navStyle} internal currentPath={`/especialidade/${a}`} />
           <a href="/" className="flex items-center gap-1 text-sm text-white/50 transition hover:text-white lg:hidden">← Início</a>
         </div>
