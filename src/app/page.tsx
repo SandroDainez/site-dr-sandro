@@ -157,7 +157,7 @@ export default async function Home() {
               </p>
               <div className="mt-10 flex flex-wrap gap-4">
                 <a
-                  href="#apps-assinatura"
+                  href="#especialidades"
                   className="finex-beam finex-beam-strong inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] transition"
                 >
                   {uiText(ui, "heroCtaPrimary")} <ArrowRight className="h-4 w-4" />
@@ -193,7 +193,7 @@ export default async function Home() {
         </section>
 
         {/* Navegue por especialidade — hubs */}
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20" style={{ order: -90 }}>
+        <section id="especialidades" className="scroll-mt-24 mx-auto w-full max-w-7xl px-6 pb-20" style={{ order: -90 }}>
           <div className="mb-5">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">Comece por aqui</p>
             <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">Navegue por especialidade</h2>
