@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Poppins, Lora } from "next/font/google";
 import { getHeader, getHero, headerSubtitleLines } from "@/lib/content";
+import { getUsuario } from "@/lib/supabase/auth-server";
 import TrackVisit from "@/components/TrackVisit";
+import PWARegister from "@/components/PWARegister";
+import MemberTabBar from "@/components/MemberTabBar";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -48,6 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: { type: "website", locale: "pt_BR", url: SITE_URL, siteName: name, title: full, description },
     twitter: { card: "summary_large_image", title: full, description },
     robots: { index: true, follow: true },
+    appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: name },
   };
 }
 
@@ -55,13 +59,15 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#07090f",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUsuario();
   return (
     <html
       lang="pt-BR"
@@ -69,6 +75,8 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-background text-foreground font-sans">
         {children}
+        {user && <MemberTabBar />}
+        <PWARegister />
         <TrackVisit />
         <Analytics />
       </body>
