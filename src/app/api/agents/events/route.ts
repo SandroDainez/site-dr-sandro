@@ -25,21 +25,21 @@ function getJanelaEventos() {
 // (slug) usada para identidade/dedup e para a confirmação automática de data.
 // chk = padrão que o TÍTULO precisa casar para a tag ser aceita (evita mis-tag, ex.:
 // "Euro-Abu Dhabi" ser marcado como EuSEM). Validação feita pelo sistema, não pelo modelo.
-const MARCOS: { slug: string; sigla: string; nome: string; chk: RegExp }[] = [
-  { slug: "cba", sigla: "CBA/SBA", nome: "Congresso Brasileiro de Anestesiologia", chk: /\bcba\b|congresso brasileiro de anestesiolog/i },
-  { slug: "copa-saesp", sigla: "COPA/SAESP", nome: "Congresso Paulista de Anestesiologia", chk: /\bcopa\b|paulista de anestesiolog/i },
-  { slug: "cbmi", sigla: "CBMI/AMIB", nome: "Congresso Brasileiro de Medicina Intensiva", chk: /\bcbmi\b|brasileiro de medicina intensiva/i },
-  { slug: "cbmede", sigla: "CBMEDE/ABRAMEDE", nome: "Congresso Brasileiro de Medicina de Emergência", chk: /\bcbmede\b|brasileiro de medicina de emerg/i },
-  { slug: "clasa", sigla: "CLASA", nome: "Congreso Latinoamericano de Anestesiología", chk: /\bclasa\b|latinoamericano de anestesiolog/i },
-  { slug: "asa", sigla: "ASA", nome: "ASA Annual Meeting (American Society of Anesthesiologists)", chk: /\basa\b.*(annual|meeting)|american society of anesthesiolog/i },
-  { slug: "euroanaesthesia", sigla: "ESAIC", nome: "Euroanaesthesia (ESAIC)", chk: /euroanaesthesia|euroanestesia|\besaic\b/i },
-  { slug: "wca", sigla: "WFSA/WCA", nome: "World Congress of Anaesthesiologists", chk: /\bwca\b|world congress of anaesthesiolog/i },
-  { slug: "esicm-lives", sigla: "ESICM", nome: "ESICM LIVES", chk: /\besicm\b|\blives\b/i },
-  { slug: "sccm", sigla: "SCCM", nome: "SCCM Critical Care Congress", chk: /\bsccm\b|critical care congress/i },
-  { slug: "isicem", sigla: "ISICEM", nome: "ISICEM (Bruxelas)", chk: /\bisicem\b/i },
-  { slug: "acep", sigla: "ACEP", nome: "ACEP Scientific Assembly", chk: /\bacep\b/i },
-  { slug: "eusem", sigla: "EuSEM", nome: "European Emergency Medicine Congress (EuSEM)", chk: /\beusem\b|european emergency medicine congress/i },
-  { slug: "saem", sigla: "SAEM", nome: "SAEM Annual Meeting", chk: /\bsaem\b/i },
+const MARCOS: { slug: string; sigla: string; nome: string; chk: RegExp; esp: string[] }[] = [
+  { slug: "cba", sigla: "CBA/SBA", nome: "Congresso Brasileiro de Anestesiologia", chk: /\bcba\b|congresso brasileiro de anestesiolog/i, esp: ["anestesiologia"] },
+  { slug: "copa-saesp", sigla: "COPA/SAESP", nome: "Congresso Paulista de Anestesiologia", chk: /\bcopa\b|paulista de anestesiolog/i, esp: ["anestesiologia"] },
+  { slug: "cbmi", sigla: "CBMI/AMIB", nome: "Congresso Brasileiro de Medicina Intensiva", chk: /\bcbmi\b|brasileiro de medicina intensiva/i, esp: ["terapia_intensiva"] },
+  { slug: "cbmede", sigla: "CBMEDE/ABRAMEDE", nome: "Congresso Brasileiro de Medicina de Emergência", chk: /\bcbmede\b|brasileiro de medicina de emerg/i, esp: ["emergencias"] },
+  { slug: "clasa", sigla: "CLASA", nome: "Congreso Latinoamericano de Anestesiología", chk: /\bclasa\b|latinoamericano de anestesiolog/i, esp: ["anestesiologia"] },
+  { slug: "asa", sigla: "ASA", nome: "ASA Annual Meeting (American Society of Anesthesiologists)", chk: /\basa\b.*(annual|meeting)|american society of anesthesiolog/i, esp: ["anestesiologia"] },
+  { slug: "euroanaesthesia", sigla: "ESAIC", nome: "Euroanaesthesia (ESAIC)", chk: /euroanaesthesia|euroanestesia|\besaic\b/i, esp: ["anestesiologia"] },
+  { slug: "wca", sigla: "WFSA/WCA", nome: "World Congress of Anaesthesiologists", chk: /\bwca\b|world congress of anaesthesiolog/i, esp: ["anestesiologia"] },
+  { slug: "esicm-lives", sigla: "ESICM", nome: "ESICM LIVES", chk: /\besicm\b|\blives\b/i, esp: ["terapia_intensiva"] },
+  { slug: "sccm", sigla: "SCCM", nome: "SCCM Critical Care Congress", chk: /\bsccm\b|critical care congress/i, esp: ["terapia_intensiva"] },
+  { slug: "isicem", sigla: "ISICEM", nome: "ISICEM (Bruxelas)", chk: /\bisicem\b/i, esp: ["terapia_intensiva", "emergencias"] },
+  { slug: "acep", sigla: "ACEP", nome: "ACEP Scientific Assembly", chk: /\bacep\b/i, esp: ["emergencias"] },
+  { slug: "eusem", sigla: "EuSEM", nome: "European Emergency Medicine Congress (EuSEM)", chk: /\beusem\b|european emergency medicine congress/i, esp: ["emergencias"] },
+  { slug: "saem", sigla: "SAEM", nome: "SAEM Annual Meeting", chk: /\bsaem\b/i, esp: ["emergencias"] },
 ];
 const MAPA_MARCOS = MARCOS.map((m) => `${m.sigla}→'${m.slug}'`).join(", ");
 
@@ -301,14 +301,24 @@ export async function POST(request: NextRequest) {
     if (slug) {
       const marco = MARCOS.find((m) => m.slug === slug);
       if (!marco || !marco.chk.test(ev.titulo || "")) slug = null;
+      else ev.especialidades = marco.esp; // especialidade CANÔNICA do marco (autoridade)
     }
     // Casa em memória: slug-marco → URL exata → título normalizado + data próxima (±75d).
     let existente: any = null;
     if (slug) existente = porSlug.get(slug) ?? null;
     if (!existente) existente = porUrl.get(String(ev.url_oficial).trim().toLowerCase()) ?? null;
     if (!existente) {
-      const cands = porNorm.get(normTitulo(ev.titulo)) ?? [];
+      const nk = normTitulo(ev.titulo);
+      const cands = porNorm.get(nk) ?? [];
       existente = cands.find((c) => diffDias(c.data_inicio, ev.data_inicio) <= 75) ?? null;
+      // Fallback: título variante (um contém o outro, ex.: "X" vs "X (sigla)" vs "sigla - X")
+      if (!existente && nk.length >= 12) {
+        for (const [k, arr] of porNorm) {
+          if (k === nk || (!k.includes(nk) && !nk.includes(k))) continue;
+          const m = arr.find((c) => diffDias(c.data_inicio, ev.data_inicio) <= 75);
+          if (m) { existente = m; break; }
+        }
+      }
     }
 
     if (existente) {
