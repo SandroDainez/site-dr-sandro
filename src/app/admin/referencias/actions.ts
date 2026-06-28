@@ -75,7 +75,7 @@ export async function extrairTextoPdf(url: string): Promise<Result> {
     const { text } = await extractText(pdf, { mergePages: true });
     const limpo = String(text || "").replace(/\s+/g, " ").trim();
     if (!limpo) return { ok: false, error: "Não foi possível extrair texto (PDF pode ser só imagem/escaneado)." };
-    return { ok: true, data: limpo.slice(0, 200000) };
+    return { ok: true, data: limpo.slice(0, 5000000) }; // ~livro inteiro
   } catch (e) { return { ok: false, error: "Falha ao ler o PDF: " + (e instanceof Error ? e.message : String(e)) }; }
 }
 
