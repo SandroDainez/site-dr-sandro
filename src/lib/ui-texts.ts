@@ -6,6 +6,16 @@ export type UiTextsData = Record<string, string>;
 export const UI_TEXTS: { key: string; group: string; label: string; default: string }[] = [
   { key: "heroCtaPrimary", group: "Botões do topo (destaque)", label: "Botão principal", default: "Explorar plataforma" },
   { key: "heroCtaSecondary", group: "Botões do topo (destaque)", label: "Botão secundário", default: "Ver agenda de eventos" },
+  { key: "heroChip", group: "Botões do topo (destaque)", label: "Selo flutuante do topo (canto)", default: "Segurança" },
+
+  { key: "seloAtualizacao1", group: "Selos da página Atualizações", label: "Selo 1", default: "⚡ Revisão rápida" },
+  { key: "seloAtualizacao2", group: "Selos da página Atualizações", label: "Selo 2", default: "🔄 Atualizada semanalmente" },
+  { key: "seloAtualizacao3", group: "Selos da página Atualizações", label: "Selo 3", default: "📈 Baseada em evidência recente" },
+
+  { key: "vazioProtocolosTitulo", group: "Textos de “em breve” (seção vazia)", label: "Protocolos vazio — título", default: "Protocolos em breve" },
+  { key: "vazioProtocolosTexto", group: "Textos de “em breve” (seção vazia)", label: "Protocolos vazio — texto", default: "Condutas clínicas passo a passo por área — Emergências, Terapia Intensiva e Anestesiologia." },
+  { key: "vazioHub", group: "Textos de “em breve” (seção vazia)", label: "Hub de especialidade vazio", default: "Conteúdo desta especialidade em breve." },
+  { key: "hubOutrasEspecialidades", group: "Textos de “em breve” (seção vazia)", label: "Rótulo “Outras especialidades” (hub)", default: "Outras especialidades" },
 
   { key: "verMais", group: "Links e botões gerais", label: "Link “Ver todos” das seções da home", default: "Ver todos" },
   { key: "footerVoltar", group: "Links e botões gerais", label: "Botão “Voltar ao início” (rodapé)", default: "Voltar ao início" },

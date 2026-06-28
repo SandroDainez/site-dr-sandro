@@ -3,9 +3,10 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import {
   getProtocolos, getVideoaulas, getCursos, getAtualizacoes, getAcervo, getProcedimentos,
-  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts,
+  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getUiTexts,
 } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
+import { uiText } from "@/lib/ui-texts";
 import AcervoList from "@/app/acervo/AcervoList";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -58,9 +59,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const a = area as Area;
   const cfg = AREAS[a];
 
-  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st] = await Promise.all([
+  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st, ui] = await Promise.all([
     getProtocolos(), getVideoaulas(), getCursos(), getAtualizacoes(), getAcervo(), getProcedimentos(),
-    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(),
+    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(),
   ]);
   const hubKey = `hub_${a}`;
 
@@ -113,7 +114,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
         {total === 0 ? (
           <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center">
-            <p className="text-sm text-white/50">Conteúdo de {cfg.label} em breve.</p>
+            <p className="text-sm text-white/50">{uiText(ui, "vazioHub")}</p>
           </div>
         ) : (
           <>
@@ -196,7 +197,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
         </div>
 
         <div className="mt-14 border-t border-white/10 pt-8">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/40">Outras especialidades</p>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.16em] text-white/40">{uiText(ui, "hubOutrasEspecialidades")}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {(Object.keys(AREAS) as Area[]).filter((k) => k !== a).map((k) => (
               <a key={k} href={`/especialidade/${k}`} className={`group relative flex items-center justify-between overflow-hidden rounded-2xl border ${AREAS[k].border} bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]`}>

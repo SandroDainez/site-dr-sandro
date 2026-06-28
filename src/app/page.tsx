@@ -172,7 +172,7 @@ export default async function Home() {
             </div>
 
             <div className="pointer-events-none absolute right-4 bottom-[16%] hidden rounded-full border border-accent/35 bg-accent/10 px-4 py-2 text-[10px] uppercase tracking-[0.14em] text-accent lg:block finex-chip">
-              Segurança
+              {uiText(ui, "heroChip")}
             </div>
           </div>
         </section>
@@ -553,10 +553,8 @@ export default async function Home() {
                 </>
               ) : (
                 <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-12 text-center">
-                  <p className="text-sm font-medium text-white/70">Protocolos em breve</p>
-                  <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-white/40">
-                    Condutas clínicas passo a passo por área — Emergências, Terapia Intensiva e Anestesiologia.
-                  </p>
+                  <p className="text-sm font-medium text-white/70">{uiText(ui, "vazioProtocolosTitulo")}</p>
+                  <p className="mx-auto mt-1 max-w-md text-sm leading-relaxed text-white/40">{uiText(ui, "vazioProtocolosTexto")}</p>
                 </div>
               )}
             </section>
