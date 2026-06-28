@@ -29,6 +29,7 @@ import {
   Wallet,
   ListOrdered,
   Menu,
+  Brain,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
 
@@ -74,6 +75,7 @@ const navGroups = [
     title: "Conteúdo",
     items: [
       { href: "/admin/cursos", label: "Cursos", icon: GraduationCap, hint: "Cursos completos com aulas, vídeos, slides e PDF." },
+      { href: "/admin/banco-questoes", label: "Banco de questões", icon: Brain, hint: "Questões para praticar em /estudar (repetição espaçada). Crie manual ou gere por IA do seu conteúdo." },
       { href: "/admin/topicos-estudo", label: "Tópicos de estudo (home)", icon: BookOpen, hint: "Lista simples de tópicos exibida na home (não é o curso completo)." },
       { href: "/admin/atualizacoes", label: "Atualizações clínicas", icon: Newspaper, hint: "Novidades por área: emergências, TI, anestesiologia." },
       { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList, hint: "Protocolos clínicos com PDF e infográfico." },

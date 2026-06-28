@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
 import { getCursos } from "@/lib/content";
 import { sair } from "@/app/entrar/actions";
-import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight, Sparkles, Search, Play } from "lucide-react";
+import { getPendentesHoje } from "@/app/estudar/actions";
+import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight, Sparkles, Brain, Play } from "lucide-react";
 import PerfilForm from "./PerfilForm";
 import InstallButton from "@/components/InstallButton";
 
@@ -43,6 +44,7 @@ export default async function MinhaAreaPage() {
     meusCursos.sort((a, b) => b.pct - a.pct);
   } catch { /* vazio */ }
 
+  const pendentes = await getPendentesHoje().catch(() => 0);
   const primeiroNome = (perfil.nome || user.email || "").split(" ")[0] || "médico(a)";
 
   return (
@@ -76,9 +78,19 @@ export default async function MinhaAreaPage() {
               </a>
             );
           })()}
+          {pendentes > 0 && (
+            <a href="/estudar" className="flex items-center justify-between gap-3 rounded-2xl border border-amber-400/30 bg-amber-400/[0.07] p-4 transition hover:bg-amber-400/10">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-300">Revisão de hoje</p>
+                <p className="mt-0.5 text-sm font-semibold text-white">{pendentes} {pendentes === 1 ? "questão pendente" : "questões pendentes"}</p>
+                <p className="text-[11px] text-white/45">Repetição espaçada — fixa o que você aprendeu</p>
+              </div>
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[#07090f]"><Brain className="h-5 w-5" /></span>
+            </a>
+          )}
           <div className="grid grid-cols-2 gap-3">
+            <a href="/estudar" className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm font-semibold text-white transition hover:border-accent/40"><Brain className="h-5 w-5 text-accent" /> Questões</a>
             <a href="/assistente" className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm font-semibold text-white transition hover:border-accent/40"><Sparkles className="h-5 w-5 text-accent" /> Assistente</a>
-            <a href="/busca" className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm font-semibold text-white transition hover:border-accent/40"><Search className="h-5 w-5 text-accent" /> Buscar</a>
           </div>
           <InstallButton />
         </div>

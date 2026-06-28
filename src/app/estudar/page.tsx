@@ -1,0 +1,39 @@
+export const dynamic = "force-dynamic";
+
+import { redirect } from "next/navigation";
+import { getUsuario } from "@/lib/supabase/auth-server";
+import { getHeader } from "@/lib/content";
+import SiteLogo from "@/components/SiteLogo";
+import AuthButton from "@/components/AuthButton";
+import AssistenteButton from "@/components/AssistenteButton";
+import { Brain } from "lucide-react";
+import EstudoSession from "./EstudoSession";
+
+export const metadata = { title: "Questões" };
+
+export default async function EstudarPage() {
+  const [user, header] = await Promise.all([getUsuario(), getHeader()]);
+  if (!user) redirect("/entrar?next=/estudar");
+
+  return (
+    <div className="min-h-screen bg-[#07090f] text-white">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07090f]/80 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-6 py-4">
+          <a href="/minha-area" className="flex items-center gap-3"><SiteLogo header={header} variant="sm" />{header.name && <p className="hidden text-lg font-bold tracking-tight text-white sm:block">{header.name}</p>}</a>
+          <div className="flex items-center gap-2"><AssistenteButton /><AuthButton /></div>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-3xl px-6 py-6">
+        <div className="mb-5 flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/15 text-accent"><Brain className="h-5 w-5" /></span>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight">Questões & revisão</h1>
+            <p className="text-xs text-white/45">Pratique e revise com repetição espaçada — o método que fixa o conhecimento.</p>
+          </div>
+        </div>
+        <EstudoSession />
+      </main>
+    </div>
+  );
+}

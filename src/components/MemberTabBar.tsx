@@ -1,13 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Home, GraduationCap, Sparkles, Search, User } from "lucide-react";
+import { Home, GraduationCap, Brain, Sparkles, User } from "lucide-react";
 
 const TABS = [
   { href: "/minha-area", label: "Início", icon: Home },
   { href: "/cursos", label: "Cursos", icon: GraduationCap },
+  { href: "/estudar", label: "Questões", icon: Brain },
   { href: "/assistente", label: "Assistente", icon: Sparkles },
-  { href: "/busca", label: "Buscar", icon: Search },
   { href: "/minha-area#perfil", label: "Perfil", icon: User },
 ];
 
