@@ -41,7 +41,7 @@ export default function AutoPanel({ config, status, labels, especialidades, even
   // formulário de evento manual
   const [form, setForm] = useState({
     titulo: "", especialidades: [] as string[], data_inicio: "", data_fim: "",
-    local_nome: "", cidade: "", pais: "Brasil", modalidade: "presencial", url_oficial: "", organizador: "",
+    local_nome: "", cidade: "", pais: "Brasil", modalidade: "presencial", url_oficial: "", organizador: "", selo: "",
   });
 
   const pronto = config.supabase && config.openai && config.service;
@@ -62,7 +62,7 @@ export default function AutoPanel({ config, status, labels, especialidades, even
     setErr(null); setMsg(null);
     startTransition(async () => {
       const r = await addEvento(form);
-      if (r.ok) { setMsg("Evento adicionado."); setForm({ titulo: "", especialidades: [], data_inicio: "", data_fim: "", local_nome: "", cidade: "", pais: "Brasil", modalidade: "presencial", url_oficial: "", organizador: "" }); router.refresh(); }
+      if (r.ok) { setMsg("Evento adicionado."); setForm({ titulo: "", especialidades: [], data_inicio: "", data_fim: "", local_nome: "", cidade: "", pais: "Brasil", modalidade: "presencial", url_oficial: "", organizador: "", selo: "" }); router.refresh(); }
       else setErr(r.error ?? "Falha ao adicionar.");
     });
   }
@@ -187,8 +187,17 @@ export default function AutoPanel({ config, status, labels, especialidades, even
               <option value="hibrido">Híbrido</option>
             </select>
           </div>
-          <div><label className={labelCls}>Organizador (sigla)</label><input className={inputCls} value={form.organizador} onChange={(e) => setForm({ ...form, organizador: e.target.value })} placeholder="SBA" /></div>
+          <div><label className={labelCls}>Organizador / Parceiro</label><input className={inputCls} value={form.organizador} onChange={(e) => setForm({ ...form, organizador: e.target.value })} placeholder="SBA, ou nome do parceiro" /></div>
           <div className="sm:col-span-2"><label className={labelCls}>URL oficial *</label><input className={inputCls} value={form.url_oficial} onChange={(e) => setForm({ ...form, url_oficial: e.target.value })} placeholder="https://..." /></div>
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Destaque (evento próprio ou de parceiro)</label>
+            <select className={inputCls} value={form.selo} onChange={(e) => setForm({ ...form, selo: e.target.value })}>
+              <option value="">Sem destaque (congresso comum)</option>
+              <option value="proprio">★ Evento próprio (meu / da minha equipe)</option>
+              <option value="parceiro">★ Evento de parceiro</option>
+            </select>
+            <p className="mt-1 text-[11px] text-white/40">Eventos próprios ou de parceiros aparecem destacados, em cor diferente e com selo explícito no calendário das 3 áreas.</p>
+          </div>
         </div>
         <button type="button" disabled={pending} onClick={salvarEvento} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
           <Plus className="h-4 w-4" /> {pending ? "Salvando…" : "Adicionar evento"}

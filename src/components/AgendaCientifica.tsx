@@ -46,7 +46,7 @@ export default async function AgendaCientifica({
       const supabase = createPublicClient();
       let query = supabase
         .from("medical_events")
-        .select("id,titulo,data_inicio,data_fim,cidade,local_nome,pais,modalidade,organizador,url_oficial,data_confirmada")
+        .select("id,titulo,data_inicio,data_fim,cidade,local_nome,pais,modalidade,organizador,url_oficial,data_confirmada,selo")
         .eq("ativo", true)
         .gte("data_inicio", hojeISO)
         .order("data_inicio", { ascending: true })
@@ -65,6 +65,7 @@ export default async function AgendaCientifica({
         href: e.url_oficial,
         external: true,
         data_confirmada: e.data_confirmada !== false,
+        selo: e.selo === "proprio" || e.selo === "parceiro" ? e.selo : null,
       }));
     } catch {
       dosCongressos = [];

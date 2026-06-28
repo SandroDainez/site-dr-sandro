@@ -74,6 +74,7 @@ export async function addEvento(ev: {
   modalidade?: string;
   url_oficial: string;
   organizador?: string;
+  selo?: string; // "proprio" | "parceiro" | "" — evento próprio/parceiro entra em destaque
 }): Promise<Result> {
   try {
     await requireAdmin();
@@ -81,6 +82,7 @@ export async function addEvento(ev: {
     if (!ev.titulo || !ev.data_inicio || !ev.url_oficial || !ev.especialidades?.length) {
       return { ok: false, error: "Preencha título, especialidade, data e URL oficial." };
     }
+    const selo = ev.selo === "proprio" || ev.selo === "parceiro" ? ev.selo : null;
     const supabase = createServiceClient();
     const { error } = await supabase.from("medical_events").insert({
       titulo: ev.titulo,
@@ -94,7 +96,8 @@ export async function addEvento(ev: {
       url_oficial: ev.url_oficial,
       organizador: ev.organizador || null,
       ativo: true,
-      destaque: false,
+      selo,
+      destaque: !!selo, // próprio/parceiro → destaque
     });
     if (error) throw error;
     return { ok: true };

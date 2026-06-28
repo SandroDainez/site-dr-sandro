@@ -19,6 +19,23 @@ export type EventoUnificado = {
   href: string;
   external: boolean; // true = site oficial (nova aba); false = inscrição interna
   data_confirmada?: boolean; // false = data ainda provisória ("a confirmar")
+  selo?: "proprio" | "parceiro" | null; // evento próprio/parceiro → destaque colorido
+};
+
+// Selo de evento próprio/parceiro: rótulo + cores (célula da grade e lista).
+const SELO: Record<"proprio" | "parceiro", { label: string; cell: string; pill: string; num: string }> = {
+  proprio: {
+    label: "Evento próprio",
+    cell: "border-amber-400/60 bg-amber-400/15 hover:border-amber-300 hover:bg-amber-400/25 text-amber-200",
+    pill: "border-amber-400/50 bg-amber-400/15 text-amber-200",
+    num: "bg-amber-400/25 text-amber-200",
+  },
+  parceiro: {
+    label: "Parceiro",
+    cell: "border-fuchsia-400/60 bg-fuchsia-400/15 hover:border-fuchsia-300 hover:bg-fuchsia-400/25 text-fuchsia-200",
+    pill: "border-fuchsia-400/50 bg-fuchsia-400/15 text-fuchsia-200",
+    num: "bg-fuchsia-400/25 text-fuchsia-200",
+  },
 };
 
 // Mês/ano por extenso a partir de YYYY-MM-DD (p/ eventos com data a confirmar).
@@ -140,10 +157,12 @@ export default function CalendarioCientifico({
               const evs = !fora ? porDia[dk] : undefined;
               if (evs && evs.length) {
                 const e = evs[0];
-                const cor = e.external ? "border-accent/30 bg-accent/10 hover:border-accent/60 hover:bg-accent/20 text-accent" : "border-accent-blue/30 bg-accent-blue/10 hover:border-accent-blue/60 hover:bg-accent-blue/20 text-accent-blue";
+                const cor = e.selo
+                  ? SELO[e.selo].cell
+                  : e.external ? "border-accent/30 bg-accent/10 hover:border-accent/60 hover:bg-accent/20 text-accent" : "border-accent-blue/30 bg-accent-blue/10 hover:border-accent-blue/60 hover:bg-accent-blue/20 text-accent-blue";
                 return (
                   <a key={dk} href={e.href} target={e.external ? "_blank" : undefined} rel={e.external ? "noopener noreferrer" : undefined} className={`group card-open relative min-h-20 rounded-xl border p-2 transition hover:-translate-y-0.5 ${cor}`}>
-                    <p className="text-sm font-semibold text-white">{data.getDate()}</p>
+                    <p className="text-sm font-semibold text-white">{data.getDate()}{e.selo && <span className="ml-1">★</span>}</p>
                     <p className="mt-1 line-clamp-2 text-[11px] leading-tight">{e.titulo}{evs.length > 1 ? ` +${evs.length - 1}` : ""}</p>
                     <span className="absolute bottom-1.5 right-1.5 transition"><ArrowUpRight className="h-3.5 w-3.5" /></span>
                   </a>
@@ -166,10 +185,13 @@ export default function CalendarioCientifico({
             <ol className="space-y-2">
               {ordenados.map((e, i) => (
                 <li key={e.id}>
-                  <a href={e.href} target={e.external ? "_blank" : undefined} rel={e.external ? "noopener noreferrer" : undefined} className="group flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-accent/40">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/15 text-sm font-bold text-accent">{i + 1}</span>
+                  <a href={e.href} target={e.external ? "_blank" : undefined} rel={e.external ? "noopener noreferrer" : undefined} className={`group flex items-start gap-3 rounded-xl border p-4 transition ${e.selo ? `${SELO[e.selo].pill} bg-opacity-[0.06]` : "border-white/10 bg-white/[0.03] hover:border-accent/40"}`}>
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${e.selo ? SELO[e.selo].num : "bg-accent/15 text-accent"}`}>{i + 1}</span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold leading-snug text-white">{e.titulo}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {e.selo && <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${SELO[e.selo].pill}`}>★ {SELO[e.selo].label}</span>}
+                        <p className="text-sm font-semibold leading-snug text-white">{e.titulo}</p>
+                      </div>
                       <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/50">
                         {e.data_confirmada === false ? (
                           <span className="inline-flex items-center gap-1">📅 {fmtMes(e.data_inicio)} <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-300">data a confirmar</span></span>
