@@ -2,8 +2,9 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
+import { getCursos } from "@/lib/content";
 import { sair } from "@/app/entrar/actions";
-import { BookOpen, Bookmark, GraduationCap, LogOut } from "lucide-react";
+import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight } from "lucide-react";
 import PerfilForm from "./PerfilForm";
 
 export const metadata = { title: "Minha área" };
@@ -13,11 +14,33 @@ export default async function MinhaAreaPage() {
   if (!user) redirect("/entrar?next=/minha-area");
 
   let perfil: { nome?: string; especialidade?: string; crm?: string } = {};
+  let meusCursos: { id: string; titulo: string; feitas: number; total: number; pct: number; completo: boolean }[] = [];
   try {
     const supabase = await createAuthClient();
-    const { data } = await supabase.from("profiles").select("nome,especialidade,crm").eq("id", user.id).maybeSingle();
-    if (data) perfil = data;
-  } catch { /* perfil vazio */ }
+    const [{ data: prof }, { data: prog }, cursos] = await Promise.all([
+      supabase.from("profiles").select("nome,especialidade,crm").eq("id", user.id).maybeSingle(),
+      supabase.from("course_progress").select("curso_id,aula_id").eq("user_id", user.id),
+      getCursos(),
+    ]);
+    if (prof) perfil = prof;
+    // agrupa progresso por curso
+    const porCurso = new Map<string, Set<string>>();
+    for (const r of prog ?? []) {
+      const s = porCurso.get(r.curso_id) ?? new Set<string>();
+      s.add(r.aula_id);
+      porCurso.set(r.curso_id, s);
+    }
+    for (const c of cursos) {
+      const feitasSet = porCurso.get(c.id);
+      if (!feitasSet || !c.titulo) continue;
+      const total = c.aulas?.length ?? 0;
+      const feitas = c.aulas?.filter((a) => feitasSet.has(a.id)).length ?? 0;
+      if (feitas === 0) continue;
+      const pct = total ? Math.round((feitas / total) * 100) : 0;
+      meusCursos.push({ id: c.id, titulo: c.titulo, feitas, total, pct, completo: total > 0 && feitas === total });
+    }
+    meusCursos.sort((a, b) => b.pct - a.pct);
+  } catch { /* vazio */ }
 
   const primeiroNome = (perfil.nome || user.email || "").split(" ")[0] || "médico(a)";
 
@@ -37,16 +60,38 @@ export default async function MinhaAreaPage() {
           </form>
         </div>
 
-        {/* Próximas fases: progresso e salvos (placeholders já visíveis) */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <div className="mb-2 flex items-center gap-2 text-accent"><GraduationCap className="h-5 w-5" /><h2 className="text-sm font-semibold text-white">Meus cursos</h2></div>
-            <p className="text-sm text-white/45">Seu progresso nos cursos vai aparecer aqui. (em construção)</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <div className="mb-2 flex items-center gap-2 text-accent"><Bookmark className="h-5 w-5" /><h2 className="text-sm font-semibold text-white">Salvos</h2></div>
-            <p className="text-sm text-white/45">Protocolos, atualizações e materiais que você salvar. (em construção)</p>
-          </div>
+        {/* Meus cursos — progresso real */}
+        <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="mb-3 flex items-center gap-2 text-accent"><GraduationCap className="h-5 w-5" /><h2 className="text-sm font-semibold text-white">Meus cursos</h2></div>
+          {meusCursos.length === 0 ? (
+            <p className="text-sm text-white/45">Você ainda não começou nenhum curso. <a href="/cursos" className="text-accent">Ver cursos →</a></p>
+          ) : (
+            <div className="space-y-3">
+              {meusCursos.map((c) => (
+                <div key={c.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <a href={`/cursos/${c.id}`} className="text-sm font-semibold text-white transition hover:text-accent">{c.titulo}</a>
+                    <span className="shrink-0 text-xs font-bold text-accent">{c.pct}%</span>
+                  </div>
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-accent" style={{ width: `${c.pct}%` }} /></div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-white/45">
+                    <span>{c.feitas} de {c.total} aulas</span>
+                    {c.completo ? (
+                      <a href={`/certificado/${c.id}`} className="inline-flex items-center gap-1 font-semibold text-accent"><Award className="h-3.5 w-3.5" /> Certificado</a>
+                    ) : (
+                      <a href={`/cursos/${c.id}`} className="inline-flex items-center gap-1 text-white/60 hover:text-white">Continuar <ArrowRight className="h-3 w-3" /></a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Salvos (próxima fase) */}
+        <div className="mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div className="mb-2 flex items-center gap-2 text-accent"><Bookmark className="h-5 w-5" /><h2 className="text-sm font-semibold text-white">Salvos</h2></div>
+          <p className="text-sm text-white/45">Protocolos, atualizações e materiais que você salvar. (em breve)</p>
         </div>
 
         {/* Perfil */}
