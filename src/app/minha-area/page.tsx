@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
 import { getCursos } from "@/lib/content";
 import { sair } from "@/app/entrar/actions";
-import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight } from "lucide-react";
+import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight, Sparkles, Search, Play } from "lucide-react";
 import PerfilForm from "./PerfilForm";
+import InstallButton from "@/components/InstallButton";
 
 export const metadata = { title: "Minha área" };
 
@@ -60,6 +61,28 @@ export default async function MinhaAreaPage() {
           </form>
         </div>
 
+        {/* App do aluno: continuar + atalhos + instalar */}
+        <div className="mb-6 space-y-3">
+          {meusCursos.find((c) => !c.completo) && (() => {
+            const c = meusCursos.find((x) => !x.completo)!;
+            return (
+              <a href={`/cursos/${c.id}`} className="flex items-center justify-between gap-3 rounded-2xl border border-accent/30 bg-accent/[0.07] p-4 transition hover:bg-accent/10">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-accent">Continuar de onde parou</p>
+                  <p className="mt-0.5 truncate text-sm font-semibold text-white">{c.titulo}</p>
+                  <p className="text-[11px] text-white/45">{c.feitas} de {c.total} aulas · {c.pct}%</p>
+                </div>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-[#07090f]"><Play className="h-5 w-5" /></span>
+              </a>
+            );
+          })()}
+          <div className="grid grid-cols-2 gap-3">
+            <a href="/assistente" className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm font-semibold text-white transition hover:border-accent/40"><Sparkles className="h-5 w-5 text-accent" /> Assistente</a>
+            <a href="/busca" className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm font-semibold text-white transition hover:border-accent/40"><Search className="h-5 w-5 text-accent" /> Buscar</a>
+          </div>
+          <InstallButton />
+        </div>
+
         {/* Meus cursos — progresso real */}
         <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <div className="mb-3 flex items-center gap-2 text-accent"><GraduationCap className="h-5 w-5" /><h2 className="text-sm font-semibold text-white">Meus cursos</h2></div>
@@ -95,7 +118,7 @@ export default async function MinhaAreaPage() {
         </div>
 
         {/* Perfil */}
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+        <div id="perfil" className="scroll-mt-20 rounded-2xl border border-white/10 bg-white/[0.03] p-6">
           <div className="mb-4 flex items-center gap-2"><BookOpen className="h-5 w-5 text-accent" /><h2 className="text-base font-semibold text-white">Meu perfil</h2></div>
           <PerfilForm perfil={perfil} />
         </div>
