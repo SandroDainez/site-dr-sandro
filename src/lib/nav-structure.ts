@@ -24,11 +24,17 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Apps do dia a dia", href: "#apps-uteis" },
     ],
   },
-  { label: "Procedimentos", href: "/procedimentos" },
-  { label: "Podcast", href: "/podcast" },
-  { label: "Outros assuntos", href: "/acervo" },
-  { label: "Parceiros", href: "/colaboradores" },
   { label: "Eventos", href: "#eventos" },
+  // Secundários recolhidos em "Mais" para a barra caber numa linha só.
+  {
+    label: "Mais",
+    children: [
+      { label: "Procedimentos", href: "/procedimentos" },
+      { label: "Podcast", href: "/podcast" },
+      { label: "Parceiros", href: "/colaboradores" },
+      { label: "Outros assuntos", href: "/acervo" },
+    ],
+  },
   { label: "Contato", href: "#contato" },
 ];
 
