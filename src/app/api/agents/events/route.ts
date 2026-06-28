@@ -34,7 +34,7 @@ const MARCOS: { slug: string; sigla: string; nome: string; chk: RegExp; esp: str
   { slug: "asa", sigla: "ASA", nome: "ASA Annual Meeting (American Society of Anesthesiologists)", chk: /\basa\b.*(annual|meeting)|american society of anesthesiolog/i, esp: ["anestesiologia"] },
   { slug: "euroanaesthesia", sigla: "ESAIC", nome: "Euroanaesthesia (ESAIC)", chk: /euroanaesthesia|euroanestesia|\besaic\b/i, esp: ["anestesiologia"] },
   { slug: "wca", sigla: "WFSA/WCA", nome: "World Congress of Anaesthesiologists", chk: /\bwca\b|world congress of anaesthesiolog/i, esp: ["anestesiologia"] },
-  { slug: "esicm-lives", sigla: "ESICM", nome: "ESICM LIVES", chk: /\besicm\b|\blives\b/i, esp: ["terapia_intensiva"] },
+  { slug: "esicm-lives", sigla: "ESICM", nome: "ESICM LIVES", chk: /\besicm\b/i, esp: ["terapia_intensiva"] },
   { slug: "sccm", sigla: "SCCM", nome: "SCCM Critical Care Congress", chk: /\bsccm\b|critical care congress/i, esp: ["terapia_intensiva"] },
   { slug: "isicem", sigla: "ISICEM", nome: "ISICEM (Bruxelas)", chk: /\bisicem\b/i, esp: ["terapia_intensiva", "emergencias"] },
   { slug: "acep", sigla: "ACEP", nome: "ACEP Scientific Assembly", chk: /\bacep\b/i, esp: ["emergencias"] },
@@ -296,13 +296,11 @@ export async function POST(request: NextRequest) {
 
     // Casa primeiro pela chave de congresso-marco (slug_marco) — assim um marco que
     // estava "a confirmar" é atualizado com a data oficial. Senão, casa por URL/título.
-    let slug = typeof ev.slug_marco === "string" && ev.slug_marco.trim() ? ev.slug_marco.trim() : null;
-    // Valida a tag: só aceita se o título realmente casar com o congresso-marco.
-    if (slug) {
-      const marco = MARCOS.find((m) => m.slug === slug);
-      if (!marco || !marco.chk.test(ev.titulo || "")) slug = null;
-      else ev.especialidades = marco.esp; // especialidade CANÔNICA do marco (autoridade)
-    }
+    // Identidade de congresso-marco derivada do TÍTULO (determinístico — não depende
+    // do modelo lembrar do slug). Marco define também a especialidade canônica.
+    let slug: string | null = null;
+    const marco = MARCOS.find((m) => m.chk.test(ev.titulo || ""));
+    if (marco) { slug = marco.slug; ev.especialidades = marco.esp; }
     // Casa em memória: slug-marco → URL exata → título normalizado + data próxima (±75d).
     let existente: any = null;
     if (slug) existente = porSlug.get(slug) ?? null;
