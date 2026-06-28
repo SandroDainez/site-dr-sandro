@@ -1,7 +1,10 @@
 import { createPublicClient, supabaseConfigured } from "@/lib/supabase/server";
+import { getCursos } from "@/lib/content";
 import type { EventoData } from "@/lib/content";
 import type { Especialidade } from "@/types/medical";
 import CalendarioCientifico, { type EventoUnificado } from "./CalendarioCientifico";
+
+const espToSite = (e?: Especialidade): string | null => (!e ? null : e === "terapia_intensiva" ? "ti" : e);
 
 // Agenda ÚNICA: junta os cursos/imersões do médico (EventoData, Blob) com os
 // congressos científicos (medical_events, Supabase) num só calendário + lista.
@@ -72,7 +75,33 @@ export default async function AgendaCientifica({
     }
   }
 
-  const eventos = [...dosCursos, ...dosCongressos];
+  // 3) Cursos do médico (/admin/cursos, CursoData) → calendário com selo "evento próprio",
+  //    link para a página do curso. Assim você cadastra em um lugar só.
+  let dasFormacoes: EventoUnificado[] = [];
+  try {
+    const cursosPagina = await getCursos();
+    const siteArea = espToSite(especialidade);
+    dasFormacoes = cursosPagina
+      .filter((c) => c.titulo && c.data && c.data >= hojeISO)
+      .filter((c) => !siteArea || c.area === siteArea || c.area === "geral" || (c.areas?.includes(siteArea as any) ?? false))
+      .map((c) => ({
+        id: `cursopg-${c.id}`,
+        titulo: c.titulo,
+        data_inicio: c.data,
+        local: null,
+        pais: null,
+        modalidade: c.acesso === "gratis" ? "online" : null,
+        badge: c.professor || "Curso",
+        href: `/cursos/${c.id}`,
+        external: false,
+        data_confirmada: true,
+        selo: "proprio",
+      }));
+  } catch {
+    dasFormacoes = [];
+  }
+
+  const eventos = [...dosCursos, ...dasFormacoes, ...dosCongressos];
   if (eventos.length === 0) return null;
 
   return (
