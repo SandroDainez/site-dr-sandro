@@ -35,8 +35,22 @@ export async function POST(request: NextRequest) {
   for (const c of cursos) if (c.titulo) for (const ch of pedacos(c.titulo, strip(`${c.resumo} ${c.descricao}`))) chunks.push({ conteudo: ch, fonte_tipo: "Curso", fonte_titulo: c.titulo, fonte_url: `/cursos/${c.id}`, area: c.area });
   for (const a of atus) if (a.titulo) for (const c of pedacos(a.titulo, strip((a as any).conteudo || (a as any).resumo))) chunks.push({ conteudo: c, fonte_tipo: "Atualização", fonte_titulo: a.titulo, fonte_url: "/atualizacoes", area: a.area });
 
-  // 2) Boletins clínicos da IA (medical_updates) — conteúdo mais rico e verificado
   const supabase = createServiceClient();
+
+  // 1b) Biblioteca de referência (livros, artigos, PDFs, diretrizes) cadastrada no admin
+  try {
+    const { data: refs } = await supabase.from("kb_referencias").select("titulo,tipo,autor,fonte_url,arquivo_url,conteudo,area").eq("ativo", true).limit(2000);
+    for (const r of refs ?? []) {
+      const texto = strip(r.conteudo);
+      if (!r.titulo || !texto) continue;
+      const titulo = r.autor ? `${r.titulo} — ${r.autor}` : r.titulo;
+      for (const c of pedacos(titulo, texto)) {
+        chunks.push({ conteudo: c, fonte_tipo: r.tipo || "Referência", fonte_titulo: r.titulo, fonte_url: r.fonte_url || r.arquivo_url || "/assistente", area: r.area });
+      }
+    }
+  } catch { /* ignora */ }
+
+  // 2) Boletins clínicos da IA (medical_updates) — conteúdo mais rico e verificado
   try {
     const { data: ups } = await supabase.from("medical_updates").select("especialidade,topicos").eq("publicado", true).limit(200);
     for (const u of ups ?? []) {
