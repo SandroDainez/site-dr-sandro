@@ -68,12 +68,16 @@ export async function gerarQuestoesIA(tema: string, area: string, quantidade: nu
 
     const prompt = `Você é um elaborador de questões de prova para médicos especialistas em ${area || "medicina"}.
 Gere ${n} questões de MÚLTIPLA ESCOLHA sobre "${tema}", BASEADAS SOMENTE no CONTEXTO abaixo (conteúdo curado do portal). Não invente fatos fora do contexto.
-Cada questão: enunciado (pode ser caso clínico), 4 alternativas, 1 correta, e explicação citando o porquê.
+Cada questão: enunciado (pode ser caso clínico), 4 alternativas e explicação.
+
+FORMATO ESTRITO de cada item:
+- "opcoes": array de strings SEM prefixo de letra (NÃO escreva "A)", "B)" — só o texto da alternativa).
+- "correta": NÚMERO inteiro = o ÍNDICE (começando em 0) da alternativa correta dentro de "opcoes".
 
 CONTEXTO:
 ${contexto}
 
-Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["A","B","C","D"],"correta":0,"explicacao":"..."}]}`;
+Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["texto 1","texto 2","texto 3","texto 4"],"correta":0,"explicacao":"..."}]}`;
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const r = await openai.chat.completions.create({ model: "gpt-4o", messages: [{ role: "user", content: prompt }], temperature: 0.3, max_tokens: 2500, response_format: { type: "json_object" } });
@@ -81,10 +85,23 @@ Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["A","B","C","D"],
     const qs: any[] = Array.isArray(parsed.questoes) ? parsed.questoes : [];
     if (qs.length === 0) return { ok: false, error: "A IA não gerou questões. Tente outro tema." };
 
-    const linhas = qs.filter((q) => q.enunciado && Array.isArray(q.opcoes) && q.opcoes.length >= 2).map((q) => ({
-      enunciado: String(q.enunciado), opcoes: q.opcoes.map((o: any) => String(o)), correta: Math.min(Number(q.correta) || 0, q.opcoes.length - 1),
-      explicacao: q.explicacao ? String(q.explicacao) : null, area: area || null, tema: tema.trim(), nivel: null, fonte_url: null, ativo: false,
-    }));
+    // remove prefixo "A) " / "1. " das opções
+    const limpaOp = (o: any) => String(o).replace(/^\s*([A-Ea-e]\s*[).:-]|\d+\s*[).:-])\s*/, "").trim();
+    // resolve a correta seja índice, letra ("B") ou o texto da alternativa
+    const resolveCorreta = (c: any, ops: string[]): number => {
+      if (typeof c === "number" && c >= 0 && c < ops.length) return c;
+      const s = String(c ?? "").trim();
+      if (/^\d+$/.test(s)) return Math.min(Number(s), ops.length - 1);
+      const letra = s.match(/^[A-Ea-e]\b/);
+      if (letra) { const i = letra[0].toUpperCase().charCodeAt(0) - 65; if (i >= 0 && i < ops.length) return i; }
+      const txt = limpaOp(s);
+      const i = ops.findIndex((o) => o.toLowerCase() === txt.toLowerCase());
+      return i >= 0 ? i : 0;
+    };
+    const linhas = qs.filter((q) => q.enunciado && Array.isArray(q.opcoes) && q.opcoes.length >= 2).map((q) => {
+      const opcoes = q.opcoes.map(limpaOp);
+      return { enunciado: String(q.enunciado), opcoes, correta: resolveCorreta(q.correta, opcoes), explicacao: q.explicacao ? String(q.explicacao) : null, area: area || null, tema: tema.trim(), nivel: null, fonte_url: null, ativo: false };
+    });
     const { error } = await sb.from("questoes").insert(linhas);
     if (error) throw error;
     return { ok: true, data: { criadas: linhas.length } };
