@@ -150,6 +150,62 @@ async function pesquisarEventos(): Promise<any[]> {
   return unicos;
 }
 
+// Blocklist DETERMINÍSTICA: derruba na hora eventos claramente fora do escopo
+// (outras profissões ou outras especialidades médicas). Barato e à prova de erro do modelo.
+const TERMOS_FORA_ESCOPO = [
+  "fisioterap", "enfermag", "enfermeir", "nursing", "odontolog", "dentíst", "dentist",
+  "fonoaudiol", "nutriç", "nutrición", "nutrition", "psicolog", "veterinár", "biomédic",
+  "farmacêut", "farmacia", "farmacia", "auditoria", "auditor", "gestão hospitalar",
+  "gestão em saúde", "administração hospitalar", "nefrolog", "cardiolog", "neurolog",
+  "ginecolog", "obstetr", "ortoped", "dermatolog", "oftalmolog", "urolog", "psiquiatr",
+  "radiolog", "oncolog", "endocrinolog", "reumatolog", "geriatr", "estética",
+];
+function foraDoEscopo(ev: any): boolean {
+  const txt = `${ev.titulo || ""} ${ev.organizador || ""} ${ev.descricao || ""}`.toLowerCase();
+  return TERMOS_FORA_ESCOPO.some((t) => txt.includes(t));
+}
+
+// CLASSIFICADOR (passe dedicado, estrito): decide MANTER e atribui a especialidade
+// CORRETA — não confia na escolha do buscador. Só anestesiologia / terapia intensiva /
+// medicina de emergência PARA MÉDICOS; conservador (especialidade primária do evento).
+async function classificarEventos(eventos: any[]): Promise<any[]> {
+  if (eventos.length === 0) return [];
+  const lista = eventos.map((e, i) => `[${i}] "${e.titulo}" | organizador: ${e.organizador || "?"} | ${e.descricao || ""}`).join("\n");
+  const prompt = `Você classifica eventos científicos para um site de médicos das especialidades ANESTESIOLOGIA, TERAPIA INTENSIVA (medicina intensiva) e MEDICINA DE EMERGÊNCIA.
+
+Para CADA evento abaixo, decida:
+- "manter": true SOMENTE se o público-alvo PRIMÁRIO forem MÉDICOS dessas 3 áreas. Marque false se for primariamente de outra profissão (fisioterapia, enfermagem, farmácia, odontologia, nutrição) OU de outra especialidade médica (nefrologia, cardiologia, neurologia, auditoria/gestão médica, etc.), mesmo que tenha algum tema de UTI/emergência.
+- "especialidades": atribua APENAS a(s) área(s) que o evento realmente cobre, de forma CONSERVADORA. Use a especialidade PRIMÁRIA do evento; só inclua uma segunda se o evento for genuinamente das duas. Valores válidos: "anestesiologia", "terapia_intensiva", "emergencias". Ex.: congresso de anestesiologia → ["anestesiologia"] (NÃO marque emergências só por citar trauma).
+
+EVENTOS:
+${lista}
+
+Retorne APENAS JSON: {"itens":[{"i":0,"manter":true,"especialidades":["anestesiologia"]}, ...]} com um item por índice.`;
+  try {
+    const r = await getOpenAI().chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 3000,
+      temperature: 0,
+      response_format: { type: "json_object" },
+    });
+    const data = JSON.parse(r.choices[0].message.content ?? "{}");
+    const itens: any[] = Array.isArray(data.itens) ? data.itens : [];
+    const porIdx = new Map<number, any>(itens.map((x) => [Number(x.i), x]));
+    const validas = new Set(["anestesiologia", "terapia_intensiva", "emergencias"]);
+    const out: any[] = [];
+    eventos.forEach((ev, i) => {
+      const c = porIdx.get(i);
+      if (c && c.manter === false) return; // fora de escopo → descarta
+      const esp = (c?.especialidades ?? ev.especialidades ?? []).filter((x: string) => validas.has(x));
+      out.push({ ...ev, especialidades: esp.length ? esp : ev.especialidades });
+    });
+    return out;
+  } catch {
+    return eventos; // fail-safe: mantém o que veio (blocklist já filtrou o óbvio)
+  }
+}
+
 // Confirma uma data de congresso-marco SÓ se ela aparecer no site oficial.
 // Exige o DIA próximo do mês (pt/en), ou dd/mm/aaaa, ou ISO — e o ano na página.
 // Falso-negativo (não confirma) é o lado seguro: o evento segue "a confirmar".
@@ -207,7 +263,13 @@ export async function POST(request: NextRequest) {
     .lt("data_inicio", hoje)
     .eq("ativo", true);
 
-  const eventos = await pesquisarEventos();
+  let eventos = await pesquisarEventos();
+  // Escopo/qualidade: (1) blocklist determinística derruba fora de escopo óbvio;
+  // (2) classificador estrito decide manter + corrige a especialidade (não o buscador).
+  const antesEscopo = eventos.length;
+  eventos = eventos.filter((ev) => !foraDoEscopo(ev));
+  eventos = await classificarEventos(eventos);
+  const removidosEscopo = antesEscopo - eventos.length;
 
   // Carrega os eventos ativos UMA vez e indexa por slug / url / título normalizado.
   // O índice em memória é a base do dedup robusto entre execuções (evita cópias por
@@ -274,6 +336,8 @@ export async function POST(request: NextRequest) {
         cidade: ev.cidade ?? null,
         modalidade: ev.modalidade ?? null,
         descricao: ev.descricao ?? null,
+        // corrige a especialidade de linhas já existentes (classificador é a autoridade)
+        ...(Array.isArray(ev.especialidades) && ev.especialidades.length ? { especialidades: ev.especialidades } : {}),
         ativo: true,
         data_confirmada: confirmar,
         // marca a linha como marco (sem sobrescrever com null se não vier chave)
@@ -308,7 +372,7 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({
-    status: "ok", inseridos, atualizados, ignorados,
+    status: "ok", inseridos, atualizados, ignorados, removidosEscopo,
     janela: { de: hoje, ate: fimJanela },
   });
 }
