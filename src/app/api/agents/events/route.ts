@@ -175,7 +175,7 @@ async function classificarEventos(eventos: any[]): Promise<any[]> {
 
 Para CADA evento abaixo, decida:
 - "manter": true SOMENTE se o público-alvo PRIMÁRIO forem MÉDICOS dessas 3 áreas. Marque false se for primariamente de outra profissão (fisioterapia, enfermagem, farmácia, odontologia, nutrição) OU de outra especialidade médica (nefrologia, cardiologia, neurologia, auditoria/gestão médica, etc.), mesmo que tenha algum tema de UTI/emergência.
-- "especialidades": atribua APENAS a(s) área(s) que o evento realmente cobre, de forma CONSERVADORA. Use a especialidade PRIMÁRIA do evento; só inclua uma segunda se o evento for genuinamente das duas. Valores válidos: "anestesiologia", "terapia_intensiva", "emergencias". Ex.: congresso de anestesiologia → ["anestesiologia"] (NÃO marque emergências só por citar trauma).
+- "especialidades": atribua a área do evento de forma ESTRITA. A REGRA: a MAIORIA dos congressos pertence a UMA ÚNICA especialidade — aquela cujos médicos o consideram "o congresso deles". Só atribua DUAS quando o evento for explícita e igualmente das duas (ex.: ISICEM = terapia intensiva E emergência; congresso de neuroanestesia E neurointensivismo). Um congresso de ANESTESIOLOGIA é ["anestesiologia"] APENAS, mesmo que tenha sessões de UTI ou cite trauma (NÃO marque terapia_intensiva nem emergencias). Um congresso de MEDICINA INTENSIVA é ["terapia_intensiva"] apenas. Valores válidos: "anestesiologia", "terapia_intensiva", "emergencias".
 
 EVENTOS:
 ${lista}
