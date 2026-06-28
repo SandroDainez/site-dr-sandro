@@ -6,7 +6,7 @@ import {
   Video, FileText, Presentation, BookOpen,
 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
-import type { CursoData, CursoAula, CursoMaterial } from "@/lib/content";
+import type { CursoData, CursoAula, CursoMaterial, CursoQuestao } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import AreasExtra from "@/components/admin/AreasExtra";
 import { saveCursos } from "@/app/admin/actions";
@@ -136,6 +136,30 @@ export default function CursosEditor({ initialCursos }: Props) {
       [next[ai], next[j]] = [next[j], next[ai]];
       return next;
     });
+  }
+
+  // ── Quiz / avaliação ───────────────────────────────────
+  function setQuiz(ci: number, fn: (q: CursoQuestao[]) => CursoQuestao[]) {
+    setCursos((prev) => prev.map((c, i) => (i === ci ? { ...c, quiz: fn(c.quiz ?? []) } : c)));
+    touch();
+  }
+  function addQuestao(ci: number) {
+    setQuiz(ci, (q) => [...q, { id: uid("q"), enunciado: "", opcoes: ["", ""], correta: 0, explicacao: "" }]);
+  }
+  function updateQuestao(ci: number, qi: number, patch: Partial<CursoQuestao>) {
+    setQuiz(ci, (q) => q.map((x, i) => (i === qi ? { ...x, ...patch } : x)));
+  }
+  function removeQuestao(ci: number, qi: number) {
+    setQuiz(ci, (q) => q.filter((_, i) => i !== qi));
+  }
+  function updateOpcao(ci: number, qi: number, oi: number, val: string) {
+    setQuiz(ci, (q) => q.map((x, i) => (i === qi ? { ...x, opcoes: x.opcoes.map((o, k) => (k === oi ? val : o)) } : x)));
+  }
+  function addOpcao(ci: number, qi: number) {
+    setQuiz(ci, (q) => q.map((x, i) => (i === qi ? { ...x, opcoes: [...x.opcoes, ""] } : x)));
+  }
+  function removeOpcao(ci: number, qi: number, oi: number) {
+    setQuiz(ci, (q) => q.map((x, i) => (i === qi ? { ...x, opcoes: x.opcoes.filter((_, k) => k !== oi), correta: x.correta > oi ? x.correta - 1 : x.correta } : x)));
   }
 
   // ── Materiais ──────────────────────────────────────────
@@ -453,6 +477,39 @@ export default function CursosEditor({ initialCursos }: Props) {
                   >
                     <Plus className="h-4 w-4" /> Adicionar aula
                   </button>
+
+                  {/* Avaliação / Quiz (casos clínicos) */}
+                  <div className="mt-6 border-t border-white/10 pt-4">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-sm font-semibold text-white">Avaliação — {(curso.quiz ?? []).length} {(curso.quiz ?? []).length === 1 ? "questão" : "questões"}</p>
+                      <label className="flex items-center gap-2 text-xs text-white/50">
+                        Nota mínima p/ aprovar
+                        <input type="number" min={0} max={100} value={curso.notaMinima ?? 70} onChange={(e) => updateCurso(ci, { notaMinima: Math.max(0, Math.min(100, Number(e.target.value))) })} className="w-16 rounded-lg border border-white/15 bg-black/30 px-2 py-1 text-center text-sm text-white outline-none focus:border-accent/50" />%
+                      </label>
+                    </div>
+                    {(curso.quiz ?? []).map((q, qi) => (
+                      <div key={q.id} className="mb-3 space-y-2 rounded-xl border border-white/10 bg-black/20 p-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-semibold text-white/40">Questão {qi + 1}</span>
+                          <button type="button" onClick={() => removeQuestao(ci, qi)} className="rounded-md p-1 text-white/40 transition hover:bg-red-400/10 hover:text-red-400" title="Remover questão"><Trash2 className="h-3.5 w-3.5" /></button>
+                        </div>
+                        <textarea value={q.enunciado} onChange={(e) => updateQuestao(ci, qi, { enunciado: e.target.value })} rows={2} placeholder="Enunciado (pode ser um caso clínico)" className={inputCls} />
+                        <p className="text-[11px] text-white/40">Alternativas — marque a correta:</p>
+                        {q.opcoes.map((op, oi) => (
+                          <div key={oi} className="flex items-center gap-2">
+                            <input type="radio" name={`correta-${ci}-${qi}`} checked={q.correta === oi} onChange={() => updateQuestao(ci, qi, { correta: oi })} className="h-4 w-4 accent-[var(--accent,#2ce6b8)]" title="Correta" />
+                            <input value={op} onChange={(e) => updateOpcao(ci, qi, oi, e.target.value)} placeholder={`Alternativa ${String.fromCharCode(65 + oi)}`} className={`${inputCls} flex-1`} />
+                            {q.opcoes.length > 2 && <button type="button" onClick={() => removeOpcao(ci, qi, oi)} className="px-1 text-white/30 transition hover:text-red-400" title="Remover">✕</button>}
+                          </div>
+                        ))}
+                        <button type="button" onClick={() => addOpcao(ci, qi)} className="text-xs font-medium text-accent/80 transition hover:text-accent">+ alternativa</button>
+                        <input value={q.explicacao ?? ""} onChange={(e) => updateQuestao(ci, qi, { explicacao: e.target.value })} placeholder="Comentário/explicação (aparece após responder) — opcional" className={inputCls} />
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => addQuestao(ci)} className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-white/20 py-2 text-xs text-white/50 transition hover:border-white/40 hover:text-white/80">
+                      <Plus className="h-3.5 w-3.5" /> Adicionar questão
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

@@ -16,6 +16,7 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import { sanitizeRichText } from "@/lib/rich-text";
 import { Lock } from "lucide-react";
 import CursoView from "./CursoView";
+import QuizView from "./QuizView";
 import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
 
 const areaBadge: Record<string, string> = {
@@ -54,13 +55,19 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
   // Progresso do usuário (se logado): quais aulas deste curso já concluiu.
   const user = await getUsuario();
   let concluidas: string[] = [];
+  let quizAprovado = false;
   if (user) {
     try {
       const supabase = await createAuthClient();
-      const { data } = await supabase.from("course_progress").select("aula_id").eq("user_id", user.id).eq("curso_id", curso.id);
-      concluidas = (data ?? []).map((r: any) => r.aula_id);
+      const [{ data: prog }, { data: ap }] = await Promise.all([
+        supabase.from("course_progress").select("aula_id").eq("user_id", user.id).eq("curso_id", curso.id),
+        supabase.from("quiz_attempts").select("id").eq("user_id", user.id).eq("curso_id", curso.id).eq("aprovado", true).limit(1),
+      ]);
+      concluidas = (prog ?? []).map((r: any) => r.aula_id);
+      quizAprovado = (ap ?? []).length > 0;
     } catch { concluidas = []; }
   }
+  const quiz = curso.quiz ?? [];
 
   const pago = curso.acesso === "pago";
 
@@ -144,7 +151,14 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
           ) : curso.aulas.length === 0 ? (
             <p className="text-sm text-white/40">As aulas deste curso estão sendo preparadas.</p>
           ) : (
-            <CursoView aulas={curso.aulas} cursoId={curso.id} logado={!!user} concluidasIniciais={concluidas} />
+            <>
+              <CursoView aulas={curso.aulas} cursoId={curso.id} logado={!!user} concluidasIniciais={concluidas} temQuiz={quiz.length > 0} quizAprovado={quizAprovado} />
+              {quiz.length > 0 && (
+                <div className="mt-6">
+                  <QuizView quiz={quiz} cursoId={curso.id} notaMinima={curso.notaMinima ?? 70} logado={!!user} />
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

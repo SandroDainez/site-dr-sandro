@@ -248,8 +248,19 @@ export type CursoData = {
   preco: string; // ex "R$ 297" (guardado p/ Fase 2; vazio = sem preço)
   destaque: boolean;
   aulas: CursoAula[];
+  quiz?: CursoQuestao[]; // avaliação (casos clínicos / múltipla escolha) — opcional
+  notaMinima?: number;   // % para aprovação (padrão 70)
   data: string; // YYYY-MM-DD
   areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
+};
+
+// Questão da avaliação do curso (múltipla escolha; o enunciado pode ser uma vinheta clínica).
+export type CursoQuestao = {
+  id: string;
+  enunciado: string;   // pergunta ou caso clínico + pergunta
+  opcoes: string[];    // alternativas
+  correta: number;     // índice (0-based) da alternativa correta
+  explicacao?: string; // comentário mostrado após responder
 };
 
 // Podcast: episódios com gravação enviada (áudio do PC) e/ou link externo

@@ -18,13 +18,16 @@ export default async function CertificadoPage({ params }: { params: Promise<{ cu
 
   // Valida no servidor: concluiu TODAS as aulas?
   const supabase = await createAuthClient();
-  const [{ data: prog }, { data: perfil }] = await Promise.all([
+  const temQuiz = (curso.quiz?.length ?? 0) > 0;
+  const [{ data: prog }, { data: perfil }, { data: ap }] = await Promise.all([
     supabase.from("course_progress").select("aula_id").eq("user_id", user.id).eq("curso_id", cursoId),
     supabase.from("profiles").select("nome").eq("id", user.id).maybeSingle(),
+    supabase.from("quiz_attempts").select("id").eq("user_id", user.id).eq("curso_id", cursoId).eq("aprovado", true).limit(1),
   ]);
   const feitas = new Set((prog ?? []).map((r: any) => r.aula_id));
   const total = curso.aulas.length;
-  const completo = total > 0 && curso.aulas.every((a) => feitas.has(a.id));
+  const quizAprovado = !temQuiz || (ap ?? []).length > 0;
+  const completo = total > 0 && curso.aulas.every((a) => feitas.has(a.id)) && quizAprovado;
 
   if (!completo) {
     return (

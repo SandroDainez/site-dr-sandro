@@ -90,8 +90,8 @@ function AulaItem({ aula, index, done, onToggle }: { aula: CursoAula; index: num
   );
 }
 
-export default function CursoView({ aulas, cursoId, logado, concluidasIniciais = [] }: {
-  aulas: CursoAula[]; cursoId: string; logado: boolean; concluidasIniciais?: string[];
+export default function CursoView({ aulas, cursoId, logado, concluidasIniciais = [], temQuiz = false, quizAprovado = false }: {
+  aulas: CursoAula[]; cursoId: string; logado: boolean; concluidasIniciais?: string[]; temQuiz?: boolean; quizAprovado?: boolean;
 }) {
   const [done, setDone] = useState<Set<string>>(new Set(logado ? concluidasIniciais : []));
 
@@ -113,7 +113,8 @@ export default function CursoView({ aulas, cursoId, logado, concluidasIniciais =
   const total = aulas.length;
   const feitas = aulas.filter((a) => done.has(a.id)).length;
   const pct = total ? Math.round((feitas / total) * 100) : 0;
-  const completo = total > 0 && feitas === total;
+  const aulasOk = total > 0 && feitas === total;
+  const completo = aulasOk && (!temQuiz || quizAprovado);
 
   return (
     <div className="space-y-3">
@@ -131,6 +132,9 @@ export default function CursoView({ aulas, cursoId, logado, concluidasIniciais =
           <a href={`/entrar?next=/cursos/${cursoId}`} className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-accent transition hover:opacity-80">
             <LogIn className="h-3.5 w-3.5" /> Entre para salvar seu progresso e emitir certificado
           </a>
+        )}
+        {logado && aulasOk && temQuiz && !quizAprovado && (
+          <p className="mt-3 text-xs font-medium text-amber-300">Aulas concluídas ✓ — faça a <strong>avaliação</strong> abaixo para emitir o certificado.</p>
         )}
         {logado && completo && (
           <a href={`/certificado/${cursoId}`} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#07090f] transition hover:opacity-90">
