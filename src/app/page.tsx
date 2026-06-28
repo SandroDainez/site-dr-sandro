@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import AgendaCientifica from "@/components/AgendaCientifica";
 import AuthButton from "@/components/AuthButton";
+import SearchButton from "@/components/SearchButton";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 import { fetchMedicalUpdates } from "@/lib/supabase/server";
 import HomeVideoCard from "@/components/HomeVideoCard";
@@ -136,7 +137,7 @@ export default async function Home() {
 
           <div className="flex items-center gap-2">
             <SiteNav items={navItems} style={navStyle} />
-            <AuthButton />
+            <SearchButton /><AuthButton />
           </div>
 
           <MobileNav items={navItems} style={navStyle} />
