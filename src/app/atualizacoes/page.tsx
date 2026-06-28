@@ -12,6 +12,7 @@ import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
+import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
@@ -42,7 +43,7 @@ export default async function AtualizacoesPage({
           </a>
 
           {/* Nav */}
-          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/atualizacoes" /><SearchButton /><AuthButton /></div>
+          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/atualizacoes" /><AssistenteButton /><SearchButton /><AuthButton /></div>
           <MobileNav items={navItems} style={navStyle} internal currentPath="/atualizacoes" />
 
           {/* Mobile back */}

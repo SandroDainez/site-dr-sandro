@@ -11,6 +11,7 @@ import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
+import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
@@ -33,7 +34,7 @@ export default async function ProtocolosPage() {
             </div>
           </a>
 
-          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/protocolos" /><SearchButton /><AuthButton /></div>
+          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/protocolos" /><AssistenteButton /><SearchButton /><AuthButton /></div>
           <MobileNav items={navItems} style={navStyle} internal currentPath="/protocolos" />
 
           <a href="/" className="flex items-center gap-1 text-sm text-white/50 transition hover:text-white lg:hidden">

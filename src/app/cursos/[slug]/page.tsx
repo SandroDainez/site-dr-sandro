@@ -9,6 +9,7 @@ import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
+import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
@@ -75,7 +76,7 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
               {headerSubtitleLines(header)[0] && <p className="text-xs font-semibold text-accent leading-tight">{headerSubtitleLines(header)[0]}</p>}
             </div>
           </a>
-          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/cursos" /><SearchButton /><AuthButton /></div>
+          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/cursos" /><AssistenteButton /><SearchButton /><AuthButton /></div>
           <MobileNav items={navItems} style={navStyle} internal currentPath="/cursos" />
           <a href="/cursos" className="flex items-center gap-1 text-sm text-white/50 transition hover:text-white lg:hidden">← Cursos</a>
         </div>

@@ -6,6 +6,7 @@ import { buscarTudo } from "@/lib/search";
 import SiteLogo from "@/components/SiteLogo";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
+import AssistenteButton from "@/components/AssistenteButton";
 import SiteFooter from "@/components/SiteFooter";
 
 export const metadata = { title: "Busca" };
@@ -35,7 +36,7 @@ export default async function BuscaPage({ searchParams }: { searchParams: Promis
             <SiteLogo header={header} variant="sm" />
             {header.name && <p className="hidden text-lg font-bold tracking-tight text-white sm:block">{header.name}</p>}
           </a>
-          <SearchButton /><AuthButton />
+          <AssistenteButton /><SearchButton /><AuthButton />
         </div>
       </header>
 
