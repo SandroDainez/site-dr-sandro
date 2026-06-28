@@ -13,7 +13,7 @@ const LABELS: Record<string, string> = {
   cursos: "Cursos",
   podcast: "Podcast",
   colaboradores: "Parceiros",
-  acervo: "Acervo",
+  acervo: "Outros assuntos",
   "apps-assinatura": "Apps por assinatura",
   "apps-gratis": "Apps grátis",
   "apps-uteis": "Apps do dia a dia",

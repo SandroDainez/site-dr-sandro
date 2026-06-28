@@ -28,6 +28,7 @@ import {
   Users,
   Wallet,
   ListOrdered,
+  Menu,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
 
@@ -50,6 +51,7 @@ const navGroups = [
     title: "Aparência do site",
     items: [
       { href: "/admin/header", label: "Cabeçalho e logo", icon: UserCircle, hint: "Nome, CRM/RQE e o logo que aparecem no topo do site." },
+      { href: "/admin/menu", label: "Menu do topo (tamanho)", icon: Menu, hint: "Ajuste o tamanho/espaçamento da barra de menu para caber na tela." },
       { href: "/admin/titulos", label: "Títulos das seções", icon: Heading, hint: "Rótulo e título de cada seção da home (ex: 'Apps médicos para decisão clínica')." },
       { href: "/admin/textos-botoes", label: "Textos e botões", icon: Pilcrow, hint: "Frases e botões soltos: 'Explorar plataforma', 'Ver todos', rodapé, curso pago." },
       { href: "/admin/tipografia", label: "Fontes e cores do texto", icon: Type, hint: "Tamanho, fonte, cor e peso das letras de cada seção." },
