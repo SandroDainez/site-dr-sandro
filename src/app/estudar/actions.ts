@@ -63,6 +63,8 @@ export async function responder(questaoId: string, resposta: number): Promise<{ 
     user_id: user.id, questao_id: questaoId, ease, intervalo, repeticoes, lapsos,
     proxima_revisao: prox.toISOString().slice(0, 10), total_respostas, total_acertos, atualizado_em: new Date().toISOString(),
   });
+  // registra no log do dia (ofensiva/XP/analytics) — não bloqueia se falhar
+  try { await supabase.rpc("registrar_estudo", { p_acerto: certo }); } catch {}
 
   return { ok: true, certo, correta: q.correta, explicacao: q.explicacao ?? undefined };
 }

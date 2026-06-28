@@ -5,7 +5,8 @@ import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
 import { getCursos } from "@/lib/content";
 import { sair } from "@/app/entrar/actions";
 import { getPendentesHoje } from "@/app/estudar/actions";
-import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight, Sparkles, Brain, Play } from "lucide-react";
+import { getDesempenho } from "@/app/desempenho/analytics";
+import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight, Sparkles, Brain, Play, Flame, Trophy, BarChart3 } from "lucide-react";
 import PerfilForm from "./PerfilForm";
 import InstallButton from "@/components/InstallButton";
 
@@ -45,6 +46,7 @@ export default async function MinhaAreaPage() {
   } catch { /* vazio */ }
 
   const pendentes = await getPendentesHoje().catch(() => 0);
+  const desemp = await getDesempenho().catch(() => null);
   const primeiroNome = (perfil.nome || user.email || "").split(" ")[0] || "médico(a)";
 
   return (
@@ -65,6 +67,16 @@ export default async function MinhaAreaPage() {
 
         {/* App do aluno: continuar + atalhos + instalar */}
         <div className="mb-6 space-y-3">
+          {desemp && desemp.totalRespostas > 0 && (
+            <a href="/desempenho" className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 transition hover:border-accent/40">
+              <div className="flex items-center gap-4">
+                <span className="inline-flex items-center gap-1.5 text-sm font-bold text-amber-300"><Flame className="h-4 w-4" /> {desemp.ofensiva}</span>
+                <span className="inline-flex items-center gap-1.5 text-sm font-bold text-accent"><Trophy className="h-4 w-4" /> Nível {desemp.nivel}</span>
+                <span className="text-sm font-semibold text-white/70">{desemp.pctGeral}% acerto</span>
+              </div>
+              <span className="inline-flex items-center gap-1 text-xs text-white/45">Desempenho <BarChart3 className="h-3.5 w-3.5" /></span>
+            </a>
+          )}
           {meusCursos.find((c) => !c.completo) && (() => {
             const c = meusCursos.find((x) => !x.completo)!;
             return (
