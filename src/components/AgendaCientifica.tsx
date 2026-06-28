@@ -26,7 +26,8 @@ export default async function AgendaCientifica({
 }) {
   const hojeISO = new Date().toISOString().split("T")[0];
 
-  // 1) Cursos/imersões → link interno de inscrição
+  // 1) Aulas/imersões do médico → link interno de inscrição + selo "evento próprio"
+  //    (são eventos dele; ficam destacados igual aos cursos de /admin/cursos).
   const dosCursos: EventoUnificado[] = (cursos ?? [])
     .filter((c) => c.titulo && c.data)
     .map((c) => ({
@@ -40,6 +41,7 @@ export default async function AgendaCientifica({
       href: `/inscricao?evento=${c.slug}&data=${c.data}`,
       external: false,
       data_confirmada: true,
+      selo: "proprio",
     }));
 
   // 2) Congressos científicos (Supabase)
