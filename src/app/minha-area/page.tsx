@@ -9,6 +9,7 @@ import { getDesempenho } from "@/app/desempenho/analytics";
 import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight, Sparkles, Brain, Play, Flame, Trophy, BarChart3 } from "lucide-react";
 import PerfilForm from "./PerfilForm";
 import InstallButton from "@/components/InstallButton";
+import NotificacoesToggle from "@/components/NotificacoesToggle";
 
 export const metadata = { title: "Minha área" };
 
@@ -105,6 +106,7 @@ export default async function MinhaAreaPage() {
             <a href="/assistente" className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm font-semibold text-white transition hover:border-accent/40"><Sparkles className="h-5 w-5 text-accent" /> Assistente</a>
           </div>
           <InstallButton />
+          <NotificacoesToggle />
         </div>
 
         {/* Meus cursos — progresso real */}

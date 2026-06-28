@@ -2,6 +2,7 @@
   "crons": [
     { "path": "/api/agents/updates", "schedule": "0 9 * * 1" },
     { "path": "/api/agents/index-kb", "schedule": "0 10 * * 1" },
+    { "path": "/api/agents/lembretes", "schedule": "0 12 * * *" },
     { "path": "/api/agents/events", "schedule": "0 9 * * 3" }
   ]
 }
