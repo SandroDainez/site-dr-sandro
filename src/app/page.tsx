@@ -21,6 +21,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import AgendaCientifica from "@/components/AgendaCientifica";
+import AuthButton from "@/components/AuthButton";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 import { fetchMedicalUpdates } from "@/lib/supabase/server";
 import HomeVideoCard from "@/components/HomeVideoCard";
@@ -133,7 +134,10 @@ export default async function Home() {
             </div>
           </div>
 
-          <SiteNav items={navItems} style={navStyle} />
+          <div className="flex items-center gap-2">
+            <SiteNav items={navItems} style={navStyle} />
+            <AuthButton />
+          </div>
 
           <MobileNav items={navItems} style={navStyle} />
         </div>
