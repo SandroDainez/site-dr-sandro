@@ -195,8 +195,8 @@ export default async function Home() {
         {/* Navegue por especialidade — hubs */}
         <section id="especialidades" className="scroll-mt-24 mx-auto w-full max-w-7xl px-6 pb-20" style={{ order: -90 }}>
           <div className="mb-5">
-            <p className="text-xs uppercase tracking-[0.16em] text-accent">Comece por aqui</p>
-            <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">Navegue por especialidade</h2>
+            <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "especialidades_band", "eyebrow")}</p>
+            <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "especialidades_band", "title")}</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             {[

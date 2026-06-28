@@ -8,6 +8,7 @@ type Entry = { key: string; group: string; label: string; eyebrow: string; title
 
 export const SECTION_TEXTS: Entry[] = [
   // ── Página inicial ───────────────────────────────────────────────
+  { key: "especialidades_band", group: "Página inicial", label: "Navegue por especialidade (home)", eyebrow: "Comece por aqui", title: "Navegue por especialidade" },
   { key: "apps", group: "Página inicial", label: "Apps por assinatura", eyebrow: "Aplicativos por assinatura", title: "Apps médicos para decisão clínica", desc: "Ferramentas de apoio à decisão clínica. Não substituem a avaliação, o julgamento e a responsabilidade do médico. A palavra final é sempre do profissional responsável." },
   { key: "freeApps", group: "Página inicial", label: "Apps grátis", eyebrow: "Aplicativos gratuitos", title: "Acesso aberto imediato" },
   { key: "utilApps", group: "Página inicial", label: "Apps do dia a dia", eyebrow: "Para o seu dia a dia", title: "Apps para organização e finanças pessoais", desc: "Ferramentas que ajudam no dia a dia — controle de gastos, organização pessoal, planejamento financeiro e mais. Úteis também fora da medicina, pra facilitar a sua rotina." },
@@ -23,6 +24,7 @@ export const SECTION_TEXTS: Entry[] = [
 
   // ── Páginas internas (topo de cada página) ───────────────────────
   { key: "page_atualizacoes", group: "Páginas internas", label: "Página Atualizações", eyebrow: "Conteúdo clínico", title: "Atualizações", desc: "Revisão rápida e direto ao ponto da evidência mais recente, por área clínica." },
+  { key: "page_atualizacoes_semanais", group: "Páginas internas", label: "Página Atualizações — histórico semanal", eyebrow: "Boletins clínicos · automático", title: "Atualizações clínicas da semana", desc: "Histórico de todas as atualizações geradas semanalmente, por especialidade — com tópicos, relevância clínica e todas as fontes consultadas. Consulte qualquer semana anterior." },
   { key: "page_protocolos", group: "Páginas internas", label: "Página Protocolos", eyebrow: "Condutas clínicas", title: "Protocolos Clínicos", desc: "Algoritmos e condutas por área" },
   { key: "page_videoaulas", group: "Páginas internas", label: "Página Videoaulas", eyebrow: "Conteúdo em vídeo", title: "Videoaulas", desc: "Aulas médicas em vídeo por área" },
   { key: "page_cursos", group: "Páginas internas", label: "Página Cursos", eyebrow: "Formação médica", title: "Cursos", desc: "Cursos com aulas sequenciais, vídeos, slides e materiais para download. Conteúdo gratuito de acesso imediato — cursos completos por assinatura em breve." },

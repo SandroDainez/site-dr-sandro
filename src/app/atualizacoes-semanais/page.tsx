@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
+import { getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { secText } from "@/lib/section-texts";
 import { createPublicClient, supabaseConfigured } from "@/lib/supabase/server";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -15,8 +16,8 @@ export const metadata = {
 };
 
 export default async function AtualizacoesSemanaisPage({ searchParams }: { searchParams: Promise<{ area?: string }> }) {
-  const [{ area }, header, navItems, typo, navStyle] = await Promise.all([
-    searchParams, getHeader(), getNavItems(), getTypography(), getNavStyle(),
+  const [{ area }, header, navItems, typo, navStyle, st] = await Promise.all([
+    searchParams, getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(),
   ]);
 
   let updates: any[] = [];
@@ -55,11 +56,9 @@ export default async function AtualizacoesSemanaisPage({ searchParams }: { searc
 
       <main className="mx-auto w-full max-w-4xl px-6 py-14">
         <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Boletins clínicos · automático</p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">Atualizações clínicas da semana</h1>
-          <p className="mt-3 max-w-2xl text-base text-white/65">
-            Histórico de todas as atualizações geradas semanalmente, por especialidade — com tópicos, relevância clínica e todas as fontes consultadas. Consulte qualquer semana anterior.
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">{secText(st, "page_atualizacoes_semanais", "eyebrow")}</p>
+          <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">{secText(st, "page_atualizacoes_semanais", "title")}</h1>
+          <p className="mt-3 max-w-2xl text-base text-white/65">{secText(st, "page_atualizacoes_semanais", "desc")}</p>
         </div>
 
         <AtualizacoesSemanaisBrowser updates={updates} initialArea={area ?? "todas"} />
