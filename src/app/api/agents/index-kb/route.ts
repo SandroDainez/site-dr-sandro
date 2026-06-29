@@ -67,54 +67,74 @@ export async function POST(request: NextRequest) {
     }
   } catch { /* ignora */ }
 
-  // ---- INCREMENTAL: compara hash do que existe com o que há agora ----
+  // ---- INCREMENTAL + RESUMÍVEL POR TRECHO ----
+  // Cada fonte é fatiada de forma DETERMINÍSTICA (mesmo texto → mesma ordem de trechos).
+  // Guardamos quantos trechos já existem por fonte e com qual hash. Com isso dá pra:
+  //  • pular fontes já 100% indexadas,
+  //  • RETOMAR uma fonte indexada pela metade exatamente de onde parou (sem recomeçar),
+  //  • apagar só o que ficou velho (hash diferente) — nunca o que está em progresso.
   const hashAtual = (f: Fonte) => hashDe(f.texto + "|" + f.meta.fonte_titulo);
   const { data: existRows } = await supabase.from("kb_chunks").select("fonte_id,hash");
   const existHash = new Map<string, string>();
-  for (const r of existRows ?? []) if (r.fonte_id) existHash.set(r.fonte_id, r.hash);
+  const existCount = new Map<string, number>();
+  for (const r of existRows ?? []) if (r.fonte_id) {
+    existHash.set(r.fonte_id, r.hash);
+    existCount.set(r.fonte_id, (existCount.get(r.fonte_id) ?? 0) + 1);
+  }
   const idsAtuais = new Set(fontes.map((f) => f.fonteId));
 
-  const mudaram = fontes.filter((f) => existHash.get(f.fonteId) !== hashAtual(f));
+  // pré-fatia tudo (string slicing é barato) p/ saber o total esperado de cada fonte
+  const comChunks = fontes.map((f) => ({ f, h: hashAtual(f), cs: pedacos(f.meta.fonte_titulo, f.texto) }));
+  // "incompletas" = nova / mudou (hash diferente) OU parcial (tem menos trechos que o esperado)
+  const incompletas = comChunks.filter(({ f, h, cs }) => {
+    const sh = existHash.get(f.fonteId);
+    if (sh !== h) return true;
+    return (existCount.get(f.fonteId) ?? 0) < cs.length;
+  });
   const sumiram = [...existHash.keys()].filter((id) => !idsAtuais.has(id));
 
-  // apaga chunks das fontes que mudaram (p/ regravar) + das que sumiram
-  const apagar = [...new Set([...mudaram.map((f) => f.fonteId), ...sumiram])];
-  for (let i = 0; i < apagar.length; i += 100) await supabase.from("kb_chunks").delete().in("fonte_id", apagar.slice(i, i + 100));
-  // legado: chunks antigos sem fonte_id (da 1ª versão) — limpa uma vez
+  // apaga só fontes que sumiram + legado sem fonte_id (NÃO mexe no que está em progresso)
+  for (let i = 0; i < sumiram.length; i += 100) await supabase.from("kb_chunks").delete().in("fonte_id", sumiram.slice(i, i + 100));
   if (existRows?.some((r: any) => !r.fonte_id)) await supabase.from("kb_chunks").delete().is("fonte_id", null);
 
-  // Processa UMA FONTE POR VEZ, com ORÇAMENTO de trechos por chamada. Cada fonte é
-  // gravada por inteiro (atômica). Se não couber tudo, devolve "pendentes" e o admin
-  // chama de novo (resumível) — assim NUNCA estoura o limite de 300s nem perde material.
-  const CHUNK_BUDGET = 1200;
-  let inseridas = 0, fontesOk = 0, chunksNaChamada = 0, falhas = 0;
-  for (const f of mudaram) {
-    const cs = pedacos(f.meta.fonte_titulo, f.texto);
-    // se já processou algo e a próxima fonte estouraria o orçamento, para (continua na próxima chamada)
-    if (chunksNaChamada > 0 && chunksNaChamada + cs.length > CHUNK_BUDGET) break;
-    const h = hashAtual(f);
+  // Orçamento PEQUENO por chamada → cada requisição é curta e segura (sem timeout).
+  // O admin chama em loop até "pendentes" zerar; nada se perde no caminho.
+  const CHUNK_BUDGET = 400;
+  let inseridas = 0, fontesOk = 0, chunksNaChamada = 0, falhas = 0, pendentes = 0;
+  for (const { f, h, cs } of incompletas) {
+    if (chunksNaChamada >= CHUNK_BUDGET) { pendentes++; continue; } // não coube nesta chamada
+    const sh = existHash.get(f.fonteId);
+    let feitos = 0;
+    if (sh === h) {
+      feitos = existCount.get(f.fonteId) ?? 0;                      // retoma de onde parou
+    } else if (sh !== undefined) {
+      await supabase.from("kb_chunks").delete().eq("fonte_id", f.fonteId); // versão velha → recomeça do zero
+    }
+    if (feitos >= cs.length) { fontesOk++; continue; }
+    const fatia = cs.slice(feitos, feitos + (CHUNK_BUDGET - chunksNaChamada));
     let vetores: number[][];
-    try { vetores = await embedTextos(cs); }
-    catch { falhas++; continue; } // falha numa fonte não trava as demais; mantém o que já tinha
-    // só agora apaga o antigo e grava o novo (se o embed falhar, não perdemos o que existia)
-    await supabase.from("kb_chunks").delete().eq("fonte_id", f.fonteId);
-    const pecas = cs.map((c, j) => ({ conteudo: c, ...f.meta, area: f.meta.area ?? null, fonte_id: f.fonteId, hash: h, embedding: toVector(vetores[j]) }));
+    try { vetores = await embedTextos(fatia); }
+    catch { falhas++; pendentes++; break; }                        // embed falhou → para; próxima chamada retoma
+    const pecas = fatia.map((c, j) => ({ conteudo: c, ...f.meta, area: f.meta.area ?? null, fonte_id: f.fonteId, hash: h, embedding: toVector(vetores[j]) }));
+    let okFonte = true;
     for (let i = 0; i < pecas.length; i += 100) {
       const lote = pecas.slice(i, i + 100);
       let { error } = await supabase.from("kb_chunks").insert(lote);
       if (error) ({ error } = await supabase.from("kb_chunks").insert(lote)); // 1 retry
-      if (!error) inseridas += lote.length; else falhas++;
+      if (!error) { inseridas += lote.length; chunksNaChamada += lote.length; }
+      else { falhas++; okFonte = false; break; }
     }
-    fontesOk++; chunksNaChamada += cs.length;
+    if (!okFonte) { pendentes++; break; }                          // insert falhou → para; retoma depois
+    if (feitos + fatia.length >= cs.length) fontesOk++;            // fonte concluída
+    else pendentes++;                                              // ainda falta (continua na próxima chamada)
   }
 
-  const pendentes = mudaram.length - fontesOk;
   const { count: totalNoBanco } = await supabase.from("kb_chunks").select("*", { count: "exact", head: true });
   return NextResponse.json({
     status: "ok",
     trechos: inseridas,           // gravados NESTA chamada
-    fontes: fontesOk,             // fontes processadas nesta chamada
-    pendentes,                    // fontes que faltam (chame de novo até zerar)
+    fontes: fontesOk,             // fontes concluídas nesta chamada
+    pendentes,                    // fontes que ainda faltam (chame de novo até zerar)
     falhas,
     removidas: sumiram.length,
     total: totalNoBanco ?? 0,     // total de trechos no banco

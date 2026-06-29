@@ -7,8 +7,19 @@ export async function embedTextos(textos: string[]): Promise<number[][]> {
   // lotes de 96 p/ não estourar o limite
   for (let i = 0; i < textos.length; i += 96) {
     const lote = textos.slice(i, i + 96).map((t) => t.slice(0, 8000));
-    const r = await openai.embeddings.create({ model: "text-embedding-3-small", input: lote });
-    for (const d of r.data) out.push(d.embedding as number[]);
+    // RETRY com backoff: uma queda momentânea (rate limit/rede) não pode descartar
+    // um livro inteiro. Tenta até 4x antes de desistir.
+    let tent = 0;
+    while (true) {
+      try {
+        const r = await openai.embeddings.create({ model: "text-embedding-3-small", input: lote });
+        for (const d of r.data) out.push(d.embedding as number[]);
+        break;
+      } catch (e) {
+        if (++tent >= 4) throw e;
+        await new Promise((res) => setTimeout(res, 800 * tent));
+      }
+    }
   }
   return out;
 }

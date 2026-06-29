@@ -55,18 +55,29 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
   async function reindexar() {
     setErr(null); setMsg(null); setReindexando(true);
     let totalFalhas = 0;
+    let concluido = false;
+    let houveErro = false;
+    let ultimoTotal = 0;
     try {
-      for (let volta = 0; volta < 60; volta++) {
+      // Cada chamada processa um lote curto e RESUMÍVEL; repetimos até a fila zerar.
+      // Limite alto p/ aguentar bibliotecas grandes numa só sessão (retoma de onde parou).
+      for (let volta = 0; volta < 300; volta++) {
         const r = await reindexarAssistente();
-        if (!r.ok) { setErr(r.error ?? "Falha ao reindexar."); break; }
+        if (!r.ok) { setErr(r.error ?? "Falha ao reindexar."); houveErro = true; break; }
         const d = r.data || {};
         totalFalhas += d.falhas ?? 0;
+        ultimoTotal = Number(d.total ?? ultimoTotal);
         if (d.pendentes && d.pendentes > 0) {
-          setMsg(`Indexando… ${Number(d.total ?? 0).toLocaleString("pt-BR")} trechos · ${d.pendentes} material(is) na fila`);
+          setMsg(`Indexando… ${ultimoTotal.toLocaleString("pt-BR")} trechos · ${d.pendentes} material(is) na fila`);
         } else {
-          setMsg(`✅ Concluído — ${Number(d.total ?? 0).toLocaleString("pt-BR")} trechos indexados no total${totalFalhas ? ` · ⚠️ ${totalFalhas} falha(s), reindexe de novo` : ""}.`);
+          concluido = true;
+          setMsg(`✅ Concluído — ${ultimoTotal.toLocaleString("pt-BR")} trechos indexados no total${totalFalhas ? ` · ⚠️ ${totalFalhas} falha(s), reindexe de novo` : ""}.`);
           break;
         }
+      }
+      if (!concluido && !houveErro) {
+        // saiu do loop ainda com fila (biblioteca enorme): nada se perdeu, é só continuar
+        setMsg(`Pausado em ${ultimoTotal.toLocaleString("pt-BR")} trechos — clique em “Reindexar” de novo para continuar de onde parou.`);
       }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Falha ao reindexar.");
