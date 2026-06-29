@@ -375,7 +375,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
               />
               <div className="mt-2 mb-3 flex flex-wrap items-center gap-2">
                 <label className="text-[11px] text-white/45">Nº de questões:</label>
-                <input type="number" min={3} max={12} value={quizN} onChange={(e) => setQuizN(Math.min(12, Math.max(3, Number(e.target.value) || 5)))} className="w-16 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-sm text-white outline-none focus:border-accent/50" />
+                <input type="number" min={1} max={12} value={quizN} onChange={(e) => setQuizN(Math.min(12, Math.max(1, Number(e.target.value) || 1)))} className="w-16 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-sm text-white outline-none focus:border-accent/50" />
                 <button
                   type="button" onClick={() => gerarQuizIA(idx, quizN)} disabled={gerandoQuizIdx === idx}
                   className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50"

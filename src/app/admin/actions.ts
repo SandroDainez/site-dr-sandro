@@ -395,7 +395,7 @@ export async function gerarQuizVideoaula(input: { titulo: string; descricao: str
   try {
     await requireAdmin();
     if (!process.env.OPENAI_API_KEY) return { ok: false, error: "OpenAI não configurado no servidor." };
-    const n = Math.min(Math.max(input.n ?? 5, 3), 12);
+    const n = Math.min(Math.max(input.n ?? 5, 1), 12);
     const desc = (input.descricao || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 1500);
     const orientacao = (input.instrucoes || "").trim().slice(0, 2000);
 
