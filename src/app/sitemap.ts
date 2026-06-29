@@ -3,7 +3,7 @@ import { getCursos } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
-const SITE_URL = "https://site-dr-sandro.vercel.app";
+const SITE_URL = "https://medcampus.com.br";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [

@@ -27,7 +27,7 @@ const poppins = Poppins({
 });
 const lora = Lora({ variable: "--font-lora", subsets: ["latin"] });
 
-const SITE_URL = "https://site-dr-sandro.vercel.app";
+const SITE_URL = "https://medcampus.com.br";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [header, hero] = await Promise.all([getHeader(), getHero()]);

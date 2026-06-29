@@ -8,7 +8,7 @@ type R = { ok: boolean; error?: string; msg?: string };
 
 async function origin(): Promise<string> {
   const h = await headers();
-  const host = h.get("x-forwarded-host") || h.get("host") || "site-dr-sandro.vercel.app";
+  const host = h.get("x-forwarded-host") || h.get("host") || "medcampus.com.br";
   const proto = h.get("x-forwarded-proto") || "https";
   return `${proto}://${host}`;
 }

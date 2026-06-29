@@ -7,7 +7,7 @@ import type { AtualizacaoData } from "@/lib/content";
 // Para usar: POST com header x-api-key e JSON body.
 //
 // Exemplo:
-//   curl -X POST https://site-dr-sandro.vercel.app/api/atualizacoes \
+//   curl -X POST https://medcampus.com.br/api/atualizacoes \
 //     -H "x-api-key: Jiujitsu#47" \
 //     -H "Content-Type: application/json" \
 //     -d '{
