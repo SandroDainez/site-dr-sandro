@@ -169,6 +169,14 @@ const sections = [
     border: "hover:border-teal-400/40",
   },
   {
+    href: "/admin/acervo",
+    icon: Layers,
+    label: "Documentos e materiais (Acervo)",
+    desc: "PDFs e materiais úteis por especialidade (ex.: jejum p/ canetinhas, suspensão de medicamentos). Aparecem na seção \"Documentos e materiais\" de cada especialidade.",
+    color: "text-amber-400",
+    border: "hover:border-amber-400/40",
+  },
+  {
     href: "/admin/videoaulas",
     icon: PlayCircle,
     label: "Videoaulas",
