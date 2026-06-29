@@ -165,6 +165,19 @@ function foraDoEscopo(ev: any): boolean {
   return TERMOS_FORA_ESCOPO.some((t) => txt.includes(t));
 }
 
+// Correção DETERMINÍSTICA da especialidade (à prova de erro do classificador LLM).
+// Se o TÍTULO nomeia claramente UMA única das 3 áreas, força essa área. Quando o
+// título aponta zero ou múltiplas áreas (ex.: ISICEM = intensiva+emergência), mantém
+// a escolha do LLM. Conserta casos como "Congreso de Anestesiología" rotulado errado.
+function corrigirEspecialidadePorTitulo(ev: any, espLLM: string[]): string[] {
+  const t = `${ev.titulo || ""}`.toLowerCase();
+  const hits: string[] = [];
+  if (/anest|anaest/.test(t)) hits.push("anestesiologia");
+  if (/intensiv|critical care/.test(t)) hits.push("terapia_intensiva");
+  if (/emerg|urgênc|urgenc/.test(t)) hits.push("emergencias");
+  return hits.length === 1 ? hits : espLLM;
+}
+
 // CLASSIFICADOR (passe dedicado, estrito): decide MANTER e atribui a especialidade
 // CORRETA — não confia na escolha do buscador. Só anestesiologia / terapia intensiva /
 // medicina de emergência PARA MÉDICOS; conservador (especialidade primária do evento).
@@ -198,7 +211,8 @@ Retorne APENAS JSON: {"itens":[{"i":0,"manter":true,"especialidades":["anestesio
       const c = porIdx.get(i);
       if (c && c.manter === false) return; // fora de escopo → descarta
       const esp = (c?.especialidades ?? ev.especialidades ?? []).filter((x: string) => validas.has(x));
-      out.push({ ...ev, especialidades: esp.length ? esp : ev.especialidades });
+      const base = esp.length ? esp : (ev.especialidades ?? []);
+      out.push({ ...ev, especialidades: corrigirEspecialidadePorTitulo(ev, base) });
     });
     return out;
   } catch {
