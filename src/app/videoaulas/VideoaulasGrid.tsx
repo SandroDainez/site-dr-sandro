@@ -162,29 +162,12 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
           </div>
         ) : (
           <div
-            className="relative aspect-[4/5] cursor-pointer group overflow-hidden bg-black"
+            className="relative aspect-[4/5] cursor-pointer group overflow-hidden bg-gradient-to-br from-[#10151f] to-black"
             onClick={() => hasQuiz ? setQuizOpen(true) : setInlinePlaying(true)}
           >
-            {/* Preview do próprio vídeo (primeiro frame) — pointer-events-none faz o toque
-                cair no container (play inline) em vez do player nativo do navegador */}
-            <video
-              src={`${item.videoUrl}#t=0.5`}
-              muted
-              playsInline
-              preload="metadata"
-              style={objPos}
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-            />
-            {/* Aula COM prova: camada invisível por cima captura o toque e abre o teste —
-                garante que o iOS não dispare o player nativo do vídeo antes do nosso clique. */}
-            {hasQuiz && (
-              <button
-                type="button"
-                aria-label="Assistir com teste de conhecimento"
-                onClick={(e) => { e.stopPropagation(); setQuizOpen(true); }}
-                className="absolute inset-0 z-20 h-full w-full"
-              />
-            )}
+            {/* Placeholder ESTÁTICO (sem elemento <video> no preview): o <video muted>
+                causava erro de hidratação do React (#418) — que quebrava o clique — e o
+                iOS sequestrava o toque pro player nativo. Sem ele, o clique é 100% confiável. */}
             <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">
                 <span className="text-white text-xl">▶</span>
