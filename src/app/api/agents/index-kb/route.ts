@@ -11,6 +11,10 @@ type Meta = { fonte_tipo: string; fonte_titulo: string; fonte_url: string; area?
 type Fonte = { fonteId: string; texto: string; meta: Meta };
 
 const strip = (s?: string) => (s || "").replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/gi, " ").replace(/\s+/g, " ").trim();
+// Para texto que NÃO é HTML (PDF/livros/boletins): só normaliza espaços.
+// NÃO remove "<...>", senão inequações médicas (PA <90, FC >140, pH <7,35) viram
+// um "tag" gigante e apagam tudo entre dois sinais — chegou a sumir METADE de um livro.
+const stripTexto = (s?: string) => (s || "").replace(/\s+/g, " ").trim();
 const hashDe = (s: string) => createHash("sha1").update(s).digest("hex");
 
 // quebra um texto longo em pedaços de ~1400 chars COM SOBREPOSIÇÃO de ~200 chars
@@ -29,7 +33,8 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServiceClient();
   const fontes: Fonte[] = [];
-  const add = (fonteId: string, texto: string, meta: Meta) => { const t = strip(texto); if (t) fontes.push({ fonteId, texto: t, meta }); };
+  // html=true → conteúdo do editor (protocolos etc.), remove tags. html=false → texto puro (PDF/livro/boletim).
+  const add = (fonteId: string, texto: string, meta: Meta, html = true) => { const t = html ? strip(texto) : stripTexto(texto); if (t) fontes.push({ fonteId, texto: t, meta }); };
 
   // 1) Conteúdo manual (Vercel Blob)
   const [protos, procs, acervo, cursos, atus] = await Promise.all([
@@ -46,7 +51,7 @@ export async function POST(request: NextRequest) {
     const { data: refs } = await supabase.from("kb_referencias").select("id,titulo,tipo,autor,fonte_url,arquivo_url,conteudo,area").eq("ativo", true).limit(5000);
     for (const r of refs ?? []) {
       if (!r.titulo) continue;
-      add(`ref:${r.id}`, r.conteudo, { fonte_tipo: r.tipo || "Referência", fonte_titulo: r.titulo, fonte_url: r.fonte_url || r.arquivo_url || "/assistente", area: r.area });
+      add(`ref:${r.id}`, r.conteudo, { fonte_tipo: r.tipo || "Referência", fonte_titulo: r.titulo, fonte_url: r.fonte_url || r.arquivo_url || "/assistente", area: r.area }, false);
     }
   } catch { /* ignora */ }
 
@@ -57,7 +62,7 @@ export async function POST(request: NextRequest) {
       const tps = Array.isArray(u.topicos) ? u.topicos : [];
       tps.forEach((t: any, i: number) => {
         const texto = `${t.descricao || ""} ${t.relevancia_clinica || ""}${t.nivel_evidencia ? ` [Nível: ${t.nivel_evidencia}]` : ""}`;
-        if (t.titulo && strip(texto)) add(`bol:${u.id}:${i}`, `${t.titulo}\n${texto}`, { fonte_tipo: "Boletim clínico", fonte_titulo: t.fonte_nome || t.titulo, fonte_url: t.fonte_url || "/atualizacoes-semanais", area: u.especialidade });
+        if (t.titulo && stripTexto(texto)) add(`bol:${u.id}:${i}`, `${t.titulo}\n${texto}`, { fonte_tipo: "Boletim clínico", fonte_titulo: t.fonte_nome || t.titulo, fonte_url: t.fonte_url || "/atualizacoes-semanais", area: u.especialidade }, false);
       });
     }
   } catch { /* ignora */ }
