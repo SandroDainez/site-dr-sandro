@@ -2,6 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { verificarCronSecret } from "@/lib/agents/utils";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
+import { getContato } from "@/lib/content";
+
+// Envia o relatório por e-mail via Resend (só se RESEND_API_KEY estiver configurado).
+// Destinatário: RELATORIO_EMAIL ou, na falta, o e-mail de contato do site.
+async function enviarPorEmail(resumo: string, conteudo: any, gerado_em: string): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return false;
+  let dest = process.env.RELATORIO_EMAIL || "";
+  if (!dest) { try { dest = (await getContato()).email || ""; } catch {} }
+  if (!dest) return false;
+  const esc = (s: string) => String(s ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const lac = (conteudo.lacunas ?? []).map((l: any) => `<li><b>${esc(l.tema)}</b> <i>(${esc(l.prioridade)})</i> — ${esc(l.sugestao)}</li>`).join("");
+  const acoes = (conteudo.acoes ?? []).map((a: any) => `<li>${esc(a)}</li>`).join("");
+  const html = `<div style="font-family:system-ui,Arial,sans-serif;max-width:600px">
+    <h2 style="margin:0 0 8px">📊 Sugestões de melhoria — MedCampus</h2>
+    <p style="color:#555">${esc(gerado_em)}</p>
+    <p>${esc(resumo)}</p>
+    ${lac ? `<h3>Lacunas de conteúdo</h3><ul>${lac}</ul>` : ""}
+    ${acoes ? `<h3>Ações prioritárias</h3><ol>${acoes}</ol>` : ""}
+    <p style="color:#999;font-size:12px;margin-top:24px">Gerado automaticamente pelo agente de melhoria. Veja completo em medcampus.com.br/admin/melhoria</p>
+  </div>`;
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: "MedCampus <nao-responda@medcampus.com.br>", to: [dest], subject: `📊 Sugestões de melhoria — ${gerado_em}`, html }),
+    });
+    return r.ok;
+  } catch { return false; }
+}
 
 export const maxDuration = 120;
 
@@ -73,7 +103,8 @@ Retorne APENAS JSON:
 
   const gerado_em = new Date().toISOString().slice(0, 10);
   await sb.from("improvement_reports").insert({ gerado_em, resumo, conteudo });
-  return NextResponse.json({ status: "ok", gerado_em, resumo, lacunas: conteudo.lacunas?.length ?? 0 });
+  const emailed = await enviarPorEmail(resumo, conteudo, gerado_em);
+  return NextResponse.json({ status: "ok", gerado_em, resumo, lacunas: conteudo.lacunas?.length ?? 0, emailed });
 }
 
 export async function GET(request: NextRequest) { return POST(request); }

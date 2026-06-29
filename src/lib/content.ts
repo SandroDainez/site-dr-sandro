@@ -916,6 +916,18 @@ export async function getAnalytics(): Promise<AnalyticsData> {
   return readBlob<AnalyticsData>("analytics", {});
 }
 
+// Agregados detalhados (acumulados): páginas mais vistas, origem do tráfego e dispositivo.
+export type AnalyticsDetail = {
+  paths: Record<string, number>;
+  refs: Record<string, number>;
+  dev: Record<string, number>;
+};
+const defaultAnalyticsDetail: AnalyticsDetail = { paths: {}, refs: {}, dev: {} };
+
+export async function getAnalyticsDetail(): Promise<AnalyticsDetail> {
+  return readBlob<AnalyticsDetail>("analyticsDetail", defaultAnalyticsDetail);
+}
+
 export async function uploadImageToBlob(file: File): Promise<string> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     throw new Error("BLOB_READ_WRITE_TOKEN não configurado.");

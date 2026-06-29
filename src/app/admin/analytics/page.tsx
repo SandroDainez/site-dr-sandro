@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { getAnalytics } from "@/lib/content";
+import { getAnalytics, getAnalyticsDetail } from "@/lib/content";
 
 function brTodayParts(): { y: number; m: number; d: number } {
   const d = new Date(Date.now() - 3 * 3600 * 1000);
@@ -50,6 +50,17 @@ export default async function AdminAnalyticsPage() {
     { label: "Últimos 30 dias", v: sumV(days), u: sumU(days), accent: "text-accent-violet" },
     { label: "Total (desde o início)", v: allViews, u: allVisitors, accent: "text-amber-400" },
   ];
+
+  // Detalhes acumulados: páginas, origem, dispositivo
+  const detalhe = await getAnalyticsDetail();
+  const topList = (m: Record<string, number>, n = 8) =>
+    Object.entries(m).map(([k, v]) => ({ k, v })).sort((a, b) => b.v - a.v).slice(0, n);
+  const topPaths = topList(detalhe.paths);
+  const topRefs = topList(detalhe.refs);
+  const topDev = topList(detalhe.dev, 3);
+  const totRefs = topRefs.reduce((a, x) => a + x.v, 0) || 1;
+  const diretoPct = Math.round(((detalhe.refs["Direto"] || 0) / (Object.values(detalhe.refs).reduce((a, b) => a + b, 0) || 1)) * 100);
+  const temDetalhe = topPaths.length > 0 || topRefs.length > 0;
 
   return (
     <div className="max-w-3xl">
@@ -113,13 +124,64 @@ export default async function AdminAnalyticsPage() {
         )}
       </div>
 
+      {/* Detalhes: de onde vêm, o que veem, em que aparelho */}
+      {temDetalhe && (
+        <>
+          {/* "É gente de verdade ou sou eu?" */}
+          <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-white/75">
+            {diretoPct >= 80 ? (
+              <p>🔎 <strong className="text-white">{diretoPct}%</strong> dos acessos são <strong>diretos</strong> (digitaram o endereço ou é você testando). Quando aparecerem origens como <strong>Google</strong> ou <strong>Instagram</strong> abaixo, são pessoas <strong>descobrindo</strong> o site de fora.</p>
+            ) : (
+              <p>🎉 Boa parte do tráfego vem de <strong className="text-accent">fontes externas</strong> (veja abaixo) — ou seja, são pessoas chegando de fora, não só você testando.</p>
+            )}
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {/* Origem do tráfego */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <p className="mb-3 text-sm font-semibold text-white">De onde vêm (origem)</p>
+              <div className="space-y-2.5">
+                {topRefs.map((r) => (
+                  <div key={r.k}>
+                    <div className="mb-1 flex items-center justify-between text-xs"><span className="text-white/75">{r.k}</span><span className="font-semibold text-white/55">{r.v}</span></div>
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-accent" style={{ width: `${Math.round((r.v / totRefs) * 100)}%` }} /></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Páginas mais vistas */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <p className="mb-3 text-sm font-semibold text-white">Páginas mais vistas</p>
+              <div className="space-y-2 text-sm">
+                {topPaths.map((p) => (
+                  <div key={p.k} className="flex items-center justify-between gap-2">
+                    <span className="truncate text-white/75">{p.k === "/" ? "/ (início)" : p.k}</span>
+                    <span className="shrink-0 font-semibold text-white/55">{p.v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Dispositivo */}
+          {topDev.length > 0 && (
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <p className="mb-3 text-sm font-semibold text-white">Aparelho usado</p>
+              <div className="flex flex-wrap gap-3">
+                {topDev.map((d) => (
+                  <span key={d.k} className="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-sm text-white/75">{d.k}: <strong className="text-white">{d.v}</strong></span>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
       <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-accent/25 bg-accent/[0.05] px-4 py-3 text-xs leading-relaxed text-white/70">
         <span aria-hidden>✅</span>
         <p>
-          <strong className="text-accent">Vercel Web Analytics ativo.</strong> Os números acima são a contagem própria do
-          site (sem rastrear pessoas). Para dados mais precisos e com <strong className="text-white/80">origem do tráfego</strong>
-          {" "}(Google, Instagram, direto…), páginas mais vistas e dispositivos, veja em{" "}
-          <strong className="text-white/80">vercel.com → projeto site-dr-sandro → aba Analytics</strong>.
+          <strong className="text-accent">Como ler isto:</strong> <strong className="text-white/80">Visualizações</strong> = quantas páginas foram abertas. <strong className="text-white/80">Visitantes</strong> = pessoas distintas no dia. <strong className="text-white/80">Origem</strong> = de onde a pessoa veio (Direto = digitou o endereço ou é você; Google/Instagram = veio de fora). Robôs são ignorados. Para um painel ainda mais completo, há também <strong className="text-white/80">vercel.com → site-dr-sandro → Analytics</strong>.
         </p>
       </div>
     </div>
