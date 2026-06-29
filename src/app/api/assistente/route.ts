@@ -17,6 +17,11 @@ export async function POST(request: NextRequest) {
   if (pergunta.length < 3) return NextResponse.json({ error: "Escreva sua pergunta." }, { status: 400 });
 
   const supabase = createServiceClient();
+
+  // Gate de aprovação: só membros liberados pelo admin usam o assistente.
+  const { data: perfil } = await supabase.from("profiles").select("liberado").eq("id", user.id).maybeSingle();
+  if (!perfil?.liberado) return NextResponse.json({ error: "Sua conta está aguardando liberação do administrador." }, { status: 403 });
+
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   try {

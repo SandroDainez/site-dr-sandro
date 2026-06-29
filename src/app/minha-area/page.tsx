@@ -17,12 +17,12 @@ export default async function MinhaAreaPage() {
   const user = await getUsuario();
   if (!user) redirect("/entrar?next=/minha-area");
 
-  let perfil: { nome?: string; especialidade?: string; crm?: string } = {};
+  let perfil: { nome?: string; especialidade?: string; crm?: string; liberado?: boolean } = {};
   let meusCursos: { id: string; titulo: string; feitas: number; total: number; pct: number; completo: boolean }[] = [];
   try {
     const supabase = await createAuthClient();
     const [{ data: prof }, { data: prog }, cursos] = await Promise.all([
-      supabase.from("profiles").select("nome,especialidade,crm").eq("id", user.id).maybeSingle(),
+      supabase.from("profiles").select("nome,especialidade,crm,liberado").eq("id", user.id).maybeSingle(),
       supabase.from("course_progress").select("curso_id,aula_id").eq("user_id", user.id),
       getCursos(),
     ]);
@@ -45,6 +45,27 @@ export default async function MinhaAreaPage() {
     }
     meusCursos.sort((a, b) => b.pct - a.pct);
   } catch { /* vazio */ }
+
+  // GATE de aprovação: conta confirmada mas ainda não liberada pelo admin.
+  if (!perfil.liberado) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#07090f] px-6 py-12 text-white">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15 text-amber-300 text-2xl">⏳</div>
+          <h1 className="text-xl font-semibold">Conta em análise</h1>
+          <p className="mt-2 text-sm leading-relaxed text-white/60">
+            Seu e-mail foi confirmado! 🎉 Agora sua conta está <strong>aguardando a liberação</strong> da nossa equipe. Você receberá acesso à área de membro assim que for aprovada.
+          </p>
+          <p className="mt-3 text-xs text-white/40">{user.email}</p>
+          <form action={sair} className="mt-6">
+            <button className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2 text-sm text-white/70 transition hover:text-white">
+              <LogOut className="h-4 w-4" /> Sair
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   const pendentes = await getPendentesHoje().catch(() => 0);
   const desemp = await getDesempenho().catch(() => null);

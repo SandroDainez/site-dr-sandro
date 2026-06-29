@@ -13,6 +13,10 @@ export async function getSessao(area?: string, tamanho = 15): Promise<{ questoes
   if (!user) return { questoes: [], pendentes: 0 };
   const supabase = await createAuthClient();
 
+  // Gate: só membros liberados pelo admin estudam.
+  const { data: perfilLib } = await supabase.from("profiles").select("liberado").eq("id", user.id).maybeSingle();
+  if (!perfilLib?.liberado) return { questoes: [], pendentes: 0 };
+
   const [{ data: cards }, qResp] = await Promise.all([
     supabase.from("srs_cards").select("questao_id,proxima_revisao").eq("user_id", user.id),
     (area && area !== "todas"

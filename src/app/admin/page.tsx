@@ -25,6 +25,14 @@ import {
 
 const sections = [
   {
+    href: "/admin/usuarios",
+    icon: Users,
+    label: "Usuários (liberar acesso)",
+    desc: "Aprove, bloqueie, cadastre ou exclua usuários. Novos cadastros entram como PENDENTES até você liberar.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
+  },
+  {
     href: "/admin/analytics",
     icon: BarChart3,
     label: "Acessos ao site",
