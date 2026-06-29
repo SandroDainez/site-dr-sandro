@@ -1,11 +1,38 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { entrarComSenha, cadastrar, enviarLinkMagico } from "./actions";
 
 type Modo = "entrar" | "criar" | "magico";
 const inputCls = "w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2.5 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50";
 const labelCls = "mb-1 block text-xs uppercase tracking-[0.1em] text-white/45";
+
+// Campo de senha com o "olhinho" pra mostrar/ocultar.
+function SenhaInput({ autoComplete, placeholder }: { autoComplete: string; placeholder: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        name="senha"
+        type={show ? "text" : "password"}
+        autoComplete={autoComplete}
+        required
+        className={`${inputCls} pr-10`}
+        placeholder={placeholder}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((v) => !v)}
+        aria-label={show ? "Ocultar senha" : "Mostrar senha"}
+        title={show ? "Ocultar senha" : "Mostrar senha"}
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 transition hover:text-white"
+      >
+        {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </button>
+    </div>
+  );
+}
 
 export default function EntrarForm() {
   const [modo, setModo] = useState<Modo>("entrar");
@@ -37,7 +64,7 @@ export default function EntrarForm() {
       {modo === "entrar" && (
         <form action={aEntrar} className="space-y-4">
           <div><label className={labelCls}>E-mail</label><input name="email" type="email" autoComplete="email" required className={inputCls} placeholder="voce@exemplo.com" /></div>
-          <div><label className={labelCls}>Senha</label><input name="senha" type="password" autoComplete="current-password" required className={inputCls} placeholder="••••••••" /></div>
+          <div><label className={labelCls}>Senha</label><SenhaInput autoComplete="current-password" placeholder="••••••••" /></div>
           {stEntrar.error && <p className="text-sm text-red-400">{stEntrar.error}</p>}
           <button disabled={pEntrar} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">{pEntrar ? "Entrando…" : "Entrar"}</button>
         </form>
@@ -60,7 +87,7 @@ export default function EntrarForm() {
             <div><label className={labelCls}>CRM (opcional)</label><input name="crm" type="text" className={inputCls} placeholder="CRM/UF 00000" /></div>
           </div>
           <div><label className={labelCls}>E-mail</label><input name="email" type="email" autoComplete="email" required className={inputCls} placeholder="voce@exemplo.com" /></div>
-          <div><label className={labelCls}>Senha</label><input name="senha" type="password" autoComplete="new-password" required className={inputCls} placeholder="mínimo 6 caracteres" /></div>
+          <div><label className={labelCls}>Senha</label><SenhaInput autoComplete="new-password" placeholder="mínimo 6 caracteres" /></div>
           {stCriar.error && <p className="text-sm text-red-400">{stCriar.error}</p>}
           {stCriar.msg && <p className="text-sm text-accent">{stCriar.msg}</p>}
           <button disabled={pCriar} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">{pCriar ? "Criando…" : "Criar conta"}</button>
