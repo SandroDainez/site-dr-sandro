@@ -220,6 +220,8 @@ export type VideoaulaData = {
   zoom?: number; // aproximação do vídeo no card (%, 100=normal). >100 cria folga p/ enquadrar na vertical
   areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
   mostrarInteiro?: boolean; // true = object-fit contain (mostra o vídeo inteiro, sem cortar — p/ vídeo vertical com legendas)
+  pdfUrl?: string;      // material de apoio em PDF (admin sobe; servido via /api/img)
+  pdfLabel?: string;    // rótulo do botão do PDF (default "Material da aula (PDF)")
   data: string;         // YYYY-MM-DD
 };
 

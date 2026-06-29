@@ -39,6 +39,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [uploadingVideoIdx, setUploadingVideoIdx] = useState<number | null>(null);
   const [videoProgress, setVideoProgress] = useState<number>(0);
+  const [uploadingPdfIdx, setUploadingPdfIdx] = useState<number | null>(null);
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const videoFileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -120,6 +121,22 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
     } finally {
       setUploadingVideoIdx(null);
       setVideoProgress(0);
+    }
+  }
+
+  async function handlePdfUpload(idx: number, file: File) {
+    setUploadingPdfIdx(idx);
+    setError(null);
+    try {
+      const blob = await upload(`videoaulas-pdf/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+      });
+      updateItem(idx, "pdfUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao enviar PDF");
+    } finally {
+      setUploadingPdfIdx(null);
     }
   }
 
@@ -281,6 +298,42 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                 Descrição
               </label>
               <RichTextEditor value={item.descricao} onChange={(html) => updateItem(idx, "descricao", html)} />
+            </div>
+
+            {/* Material em PDF (opcional) — você cria o PDF e sobe aqui */}
+            <div>
+              <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
+                Material da aula (PDF) — opcional
+              </label>
+              <div className="flex flex-wrap items-center gap-3">
+                {item.pdfUrl ? (
+                  <a href={item.pdfUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent">
+                    📄 Ver PDF atual
+                  </a>
+                ) : (
+                  <span className="text-xs text-white/30">Nenhum PDF enviado</span>
+                )}
+                <input
+                  type="file" accept="application/pdf" id={`pdf-${idx}`} className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) handlePdfUpload(idx, f); e.target.value = ""; }}
+                />
+                <label htmlFor={`pdf-${idx}`} className={`flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-4 py-2 text-xs font-medium text-white transition hover:bg-white/[0.10] ${uploadingPdfIdx === idx ? "opacity-50 pointer-events-none" : ""}`}>
+                  {uploadingPdfIdx === idx ? (<><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando...</>) : (<><Upload className="h-3.5 w-3.5" /> {item.pdfUrl ? "Trocar PDF" : "Enviar PDF"}</>)}
+                </label>
+                {item.pdfUrl && (
+                  <button type="button" onClick={() => updateItem(idx, "pdfUrl", "")} className="flex items-center gap-1.5 text-xs text-red-300/80 transition hover:text-red-300">
+                    <Trash2 className="h-3.5 w-3.5" /> Remover
+                  </button>
+                )}
+              </div>
+              {item.pdfUrl && (
+                <input
+                  type="text" placeholder='Rótulo do botão (ex.: "Resumo da aula")'
+                  value={item.pdfLabel ?? ""}
+                  onChange={(e) => updateItem(idx, "pdfLabel", e.target.value)}
+                  className="mt-2 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50"
+                />
+              )}
             </div>
 
             {/* Video upload section */}

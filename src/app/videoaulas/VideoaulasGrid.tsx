@@ -232,6 +232,20 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
           )}
         </div>
 
+        {/* Material em PDF (se houver) */}
+        {item.pdfUrl && (
+          <div className="mt-3">
+            <a
+              href={item.pdfUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/75 transition hover:border-accent/40 hover:text-white"
+            >
+              📄 {item.pdfLabel?.trim() || "Material da aula (PDF)"}
+            </a>
+          </div>
+        )}
+
         {/* Action buttons */}
         {hasVideo && (
           <div className="mt-4 flex flex-wrap gap-2">
