@@ -6,12 +6,12 @@ import { getContato } from "@/lib/content";
 
 // Envia o relatório por e-mail via Resend (só se RESEND_API_KEY estiver configurado).
 // Destinatário: RELATORIO_EMAIL ou, na falta, o e-mail de contato do site.
-async function enviarPorEmail(resumo: string, conteudo: any, gerado_em: string): Promise<boolean> {
+async function enviarPorEmail(resumo: string, conteudo: any, gerado_em: string): Promise<{ ok: boolean; reason: string }> {
   const key = process.env.RESEND_API_KEY;
-  if (!key) return false;
+  if (!key) return { ok: false, reason: "sem_RESEND_API_KEY_no_ambiente" };
   let dest = process.env.RELATORIO_EMAIL || "";
   if (!dest) { try { dest = (await getContato()).email || ""; } catch {} }
-  if (!dest) return false;
+  if (!dest) return { ok: false, reason: "sem_destinatario (defina RELATORIO_EMAIL ou e-mail de contato)" };
   const esc = (s: string) => String(s ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   const lac = (conteudo.lacunas ?? []).map((l: any) => `<li><b>${esc(l.tema)}</b> <i>(${esc(l.prioridade)})</i> — ${esc(l.sugestao)}</li>`).join("");
   const acoes = (conteudo.acoes ?? []).map((a: any) => `<li>${esc(a)}</li>`).join("");
@@ -29,8 +29,11 @@ async function enviarPorEmail(resumo: string, conteudo: any, gerado_em: string):
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({ from: "MedCampus <nao-responda@medcampus.com.br>", to: [dest], subject: `📊 Sugestões de melhoria — ${gerado_em}`, html }),
     });
-    return r.ok;
-  } catch { return false; }
+    if (r.ok) return { ok: true, reason: "enviado" };
+    let detalhe = "";
+    try { detalhe = JSON.stringify(await r.json()).slice(0, 200); } catch {}
+    return { ok: false, reason: `resend_${r.status}: ${detalhe}` };
+  } catch (e) { return { ok: false, reason: "excecao: " + (e instanceof Error ? e.message : "erro") }; }
 }
 
 export const maxDuration = 120;
@@ -103,8 +106,8 @@ Retorne APENAS JSON:
 
   const gerado_em = new Date().toISOString().slice(0, 10);
   await sb.from("improvement_reports").insert({ gerado_em, resumo, conteudo });
-  const emailed = await enviarPorEmail(resumo, conteudo, gerado_em);
-  return NextResponse.json({ status: "ok", gerado_em, resumo, lacunas: conteudo.lacunas?.length ?? 0, emailed });
+  const email = await enviarPorEmail(resumo, conteudo, gerado_em);
+  return NextResponse.json({ status: "ok", gerado_em, resumo, lacunas: conteudo.lacunas?.length ?? 0, emailed: email.ok, emailReason: email.reason });
 }
 
 export async function GET(request: NextRequest) { return POST(request); }
