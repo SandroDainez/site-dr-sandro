@@ -280,6 +280,32 @@ Retorne APENAS JSON: {"topicos": [ ...os aprovados e corrigidos, mesmos campos d
   }
 }
 
+// Reescreve o RESUMO do topo a partir dos tópicos JÁ FINALIZADOS (pós-revisão e
+// saneamento). Sem isso, o resumo descrevia o rascunho antigo e ficava desconectado
+// do que aparece embaixo. Fail-safe: em erro mantém o resumo original.
+async function resumirDosTopicos(topicos: any[], label: string, semana: string, original: string): Promise<string> {
+  if (!Array.isArray(topicos) || topicos.length === 0) return original;
+  const lista = topicos.map((t, i) => `${i + 1}. ${t.titulo}${t.descricao ? ` — ${t.descricao}` : ""}`).join("\n");
+  const prompt = `Estes são os tópicos FINAIS do boletim de ${label} desta semana (${semana}):
+
+${lista}
+
+Escreva um RESUMO de 2-3 frases que sintetize FIELMENTE o que está nesses tópicos — e somente eles. Não cite nada que não esteja na lista. Priorize, na ordem, novos guidelines/posicionamentos e alertas regulatórios. Tom sóbrio de evidência, sem hype. Retorne APENAS JSON: {"resumo": "..."}`;
+  try {
+    const r = await getOpenAI().chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 350,
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+    });
+    const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+    return typeof parsed.resumo === "string" && parsed.resumo.trim() ? parsed.resumo.trim() : original;
+  } catch {
+    return original;
+  }
+}
+
 async function sintetizar(especialidade: string, todasFontes: any[]): Promise<any> {
   const label = ESPECIALIDADE_LABELS[especialidade];
   const semana = getSemanaAtual();
@@ -352,6 +378,8 @@ Retorne APENAS JSON válido:
       // guarda de links (descarta URL/PMID que não exista nas fontes coletadas).
       parsed.topicos = await revisarTopicos(parsed.topicos ?? [], fontesTexto, label);
       parsed.topicos = sanearTopicos(parsed.topicos ?? [], ordenadas);
+      // resumo do topo SEMPRE reescrito a partir dos tópicos finais (senão fica desconectado)
+      parsed.resumo = await resumirDosTopicos(parsed.topicos ?? [], label, semana, parsed.resumo ?? "");
       return parsed;
     } catch (err) {
       tentativas++;
