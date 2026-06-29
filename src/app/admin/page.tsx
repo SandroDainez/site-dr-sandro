@@ -49,6 +49,14 @@ const sections = [
     border: "hover:border-accent/40",
   },
   {
+    href: "/admin/referencias",
+    icon: BookOpen,
+    label: "Biblioteca da IA (alimentar o assistente)",
+    desc: "Adicione livros, artigos, diretrizes e PDFs (cola o texto ou envia o PDF — o texto é extraído). Depois clique em \"Reindexar\" para o assistente passar a usar. Ele só responde com base no que está aqui.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
+  },
+  {
     href: "/admin/header",
     icon: UserCircle,
     label: "Cabeçalho",
