@@ -71,6 +71,7 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${poppins.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground font-sans">
