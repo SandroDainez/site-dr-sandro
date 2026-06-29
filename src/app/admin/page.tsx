@@ -171,8 +171,8 @@ const sections = [
   {
     href: "/admin/acervo",
     icon: Layers,
-    label: "Documentos e materiais (Acervo)",
-    desc: "PDFs e materiais úteis por especialidade (ex.: jejum p/ canetinhas, suspensão de medicamentos). Aparecem na seção \"Documentos e materiais\" de cada especialidade.",
+    label: "Outros assuntos / Materiais",
+    desc: "PDFs e materiais úteis (ex.: jejum p/ canetinhas, suspensão de medicamentos). Cada item tem uma ÁREA: aparece na página geral \"Outros assuntos\" E na seção \"Documentos e materiais\" da especialidade escolhida.",
     color: "text-amber-400",
     border: "hover:border-amber-400/40",
   },

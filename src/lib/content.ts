@@ -665,7 +665,7 @@ export const defaultNavItems: NavItemData[] = [
   { label: "Anestesiologia", href: "/especialidade/anestesiologia" },
   { label: "Cursos", href: "/cursos" },
   { label: "Colaboradores", href: "/colaboradores" },
-  { label: "Acervo", href: "/acervo" },
+  { label: "Outros assuntos", href: "/acervo" },
   { label: "Apps", href: "#apps-assinatura" },
   { label: "Dia a dia", href: "#apps-uteis" },
   { label: "Podcast", href: "/podcast" },

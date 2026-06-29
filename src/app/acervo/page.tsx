@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Acervo",
+  title: "Outros assuntos",
   description: "Conteúdos, curiosidades e materiais para baixar: PDFs, livros e mais.",
 };
 
