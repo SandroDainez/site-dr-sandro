@@ -11,6 +11,8 @@ export type Desempenho = {
   porArea: { area: string; label: string; respostas: number; acertos: number; pct: number }[];
   atividade: { dia: string; respostas: number }[]; // últimos 14 dias
   conquistas: { id: string; titulo: string; desc: string; obtida: boolean }[];
+  // Evolução pré/pós das videoaulas (última tentativa por aula)
+  videoaulas: { id: string; titulo: string; total: number; pctPre: number | null; pctPos: number; ganho: number | null }[];
 };
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -20,9 +22,10 @@ export async function getDesempenho(): Promise<Desempenho | null> {
   if (!user) return null;
   const supabase = await createAuthClient();
 
-  const [{ data: logs }, { data: cards }] = await Promise.all([
+  const [{ data: logs }, { data: cards }, { data: vqa }] = await Promise.all([
     supabase.from("study_log").select("dia,respostas,acertos").eq("user_id", user.id),
     supabase.from("srs_cards").select("total_respostas,total_acertos,questoes(area)").eq("user_id", user.id),
+    supabase.from("videoaula_quiz_attempts").select("videoaula_id,titulo,total,score_pre,score_pos,created_at").eq("user_id", user.id).order("created_at", { ascending: false }),
   ]);
 
   const log = logs ?? [];
@@ -70,5 +73,23 @@ export async function getDesempenho(): Promise<Desempenho | null> {
     { id: "esp", titulo: melhorArea ? `Craque em ${melhorArea.label}` : "Especialista", desc: "≥90% numa área (mín. 20 questões)", obtida: !!melhorArea },
   ];
 
-  return { totalRespostas, totalAcertos, pctGeral, ofensiva, xp, nivel, xpNivel, xpProxNivel, diasAtivos, porArea, atividade, conquistas };
+  // Videoaulas: última tentativa por aula (vqa já vem do mais recente p/ o mais antigo)
+  const vistos = new Set<string>();
+  const videoaulas: Desempenho["videoaulas"] = [];
+  for (const a of vqa ?? []) {
+    const id = (a as any).videoaula_id;
+    if (!id || vistos.has(id)) continue;
+    vistos.add(id);
+    const total = (a as any).total || 0;
+    const pre = (a as any).score_pre;
+    const pos = (a as any).score_pos ?? 0;
+    const pctPre = total && typeof pre === "number" ? Math.round((pre / total) * 100) : null;
+    const pctPos = total ? Math.round((pos / total) * 100) : 0;
+    videoaulas.push({
+      id, titulo: (a as any).titulo || "Videoaula", total,
+      pctPre, pctPos, ganho: pctPre === null ? null : pctPos - pctPre,
+    });
+  }
+
+  return { totalRespostas, totalAcertos, pctGeral, ofensiva, xp, nivel, xpNivel, xpProxNivel, diasAtivos, porArea, atividade, conquistas, videoaulas };
 }

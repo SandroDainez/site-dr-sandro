@@ -32,10 +32,10 @@ export default async function DesempenhoPage() {
           <div><h1 className="text-xl font-semibold tracking-tight">Meu desempenho</h1><p className="text-xs text-white/45">Sua evolução, forças e fraquezas.</p></div>
         </div>
 
-        {!d || d.totalRespostas === 0 ? (
+        {!d || (d.totalRespostas === 0 && d.videoaulas.length === 0) ? (
           <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center">
             <Brain className="mx-auto mb-3 h-8 w-8 text-white/30" />
-            <p className="text-sm text-white/55">Responda questões em <a href="/estudar" className="text-accent">/estudar</a> para ver sua evolução aqui.</p>
+            <p className="text-sm text-white/55">Responda questões em <a href="/estudar" className="text-accent">/estudar</a> ou faça o teste de uma <a href="/videoaulas" className="text-accent">videoaula</a> para ver sua evolução aqui.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -85,6 +85,36 @@ export default async function DesempenhoPage() {
                     <div key={a.area}>
                       <div className="mb-1 flex items-center justify-between text-xs"><span className="text-white/75">{a.label}</span><span className="font-semibold text-white/55">{a.pct}% · {a.respostas} q.</span></div>
                       <div className="h-2 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${a.pct >= 70 ? "bg-accent" : a.pct >= 50 ? "bg-amber-400" : "bg-red-400"}`} style={{ width: `${a.pct}%` }} /></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* evolução pré/pós das videoaulas */}
+            {d.videoaulas.length > 0 && (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/55">Evolução nas videoaulas (pré → pós)</p>
+                <div className="space-y-3">
+                  {d.videoaulas.map((v) => (
+                    <div key={v.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                      <p className="mb-2 text-sm font-medium text-white">{v.titulo}</p>
+                      <div className="flex items-center gap-3 text-sm">
+                        {v.pctPre !== null ? (
+                          <>
+                            <span className="text-white/55">Antes <span className="font-bold text-white/80">{v.pctPre}%</span></span>
+                            <span className="text-accent">→</span>
+                            <span className="text-white/55">Depois <span className="font-bold text-accent">{v.pctPos}%</span></span>
+                            {v.ganho !== null && (
+                              <span className={`ml-auto rounded-full px-2 py-0.5 text-xs font-bold ${v.ganho > 0 ? "bg-accent/15 text-accent" : v.ganho === 0 ? "bg-white/10 text-white/60" : "bg-amber-400/15 text-amber-300"}`}>
+                                {v.ganho > 0 ? `📈 +${v.ganho}` : v.ganho === 0 ? "= 0" : `▼ ${v.ganho}`} pts
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-white/55">Pós-teste: <span className="font-bold text-accent">{v.pctPos}%</span> <span className="text-[11px] text-white/35">(sem pré-teste)</span></span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
