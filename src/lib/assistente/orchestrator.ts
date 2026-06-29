@@ -14,6 +14,31 @@ export type AssistResult = {
 
 type SupabaseLike = { rpc: (fn: string, args: Record<string, unknown>) => any };
 
+export const RECUSA_FORA_ESCOPO =
+  "Sou um assistente especializado em Anestesiologia, Medicina Intensiva e Medicina de Emergência. Posso ajudar com dúvidas clínicas, farmacologia, ventilação, protocolos e o conteúdo da plataforma — mas não respondo assuntos fora da área médica.";
+
+// Filtro de escopo (STEP 0): classificador barato que barra pergunta não-médica
+// ANTES de gastar RAG/PubMed/gpt-4o. Saudações e perguntas sobre o próprio
+// assistente contam como dentro do escopo. Falha → libera (fail-open: não bloqueia
+// usuário legítimo por erro de API; o system prompt ainda reforça o escopo).
+async function dentroDoEscopo(openai: OpenAI, pergunta: string): Promise<boolean> {
+  try {
+    const r = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0,
+      max_tokens: 3,
+      messages: [{
+        role: "user",
+        content: `Você filtra um assistente médico (anestesiologia, terapia intensiva, emergência, clínica, farmacologia, ensino médico). A mensagem abaixo está DENTRO desse escopo? Saudações ("oi", "obrigado") e perguntas sobre o próprio assistente contam como SIM. Assuntos não-médicos (política, notícias, entretenimento, esportes, programação, finanças, receitas, etc.) são NÃO. Responda APENAS "SIM" ou "NAO".\n\nMensagem: "${pergunta}"`,
+      }],
+    });
+    const v = (r.choices[0].message.content ?? "").trim().toUpperCase();
+    return !v.startsWith("NAO") && !v.startsWith("NÃO");
+  } catch {
+    return true;
+  }
+}
+
 function pubmedLabel(p: PubmedHit): string {
   const partes = [p.autores, p.titulo + ".", [p.journal, p.ano].filter(Boolean).join(". ")].filter(Boolean);
   return partes.join(" ");
@@ -40,6 +65,11 @@ export async function handleMedicalQuery(
   openai: OpenAI,
   pergunta: string,
 ): Promise<AssistResult> {
+  // STEP 0 — filtro de escopo: barra assunto fora da medicina antes de gastar RAG/PubMed/LLM
+  if (!(await dentroDoEscopo(openai, pergunta))) {
+    return { resposta: RECUSA_FORA_ESCOPO, fontes: [], usouPubmed: false, semFonte: true };
+  }
+
   // STEP 1 — biblioteca interna
   let lib: LibraryHit[] = [];
   try { lib = await searchInternalLibrary(supabase, pergunta); } catch { lib = []; }
