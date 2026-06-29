@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Save, Upload, Loader2, Trash2 } from "lucide-react";
+import { Save, Upload, Loader2, Trash2, Plus } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { ContatoData } from "@/lib/content";
 import { saveContato } from "@/app/admin/actions";
@@ -47,6 +47,22 @@ export default function ContatoEditor({ initialContato }: Props) {
     });
   }
 
+  // Canais sociais flexíveis (YouTube, TikTok, Telegram, LinkedIn, ...)
+  const canais = contato.canais ?? [];
+  function setCanais(next: ContatoData["canais"]) {
+    setContato((prev) => ({ ...prev, canais: next }));
+    setSaved(false);
+  }
+  function addCanal() {
+    setCanais([...canais, { label: "", valor: "", url: "" }]);
+  }
+  function updateCanal(i: number, field: "label" | "valor" | "url", value: string) {
+    setCanais(canais.map((c, idx) => (idx === i ? { ...c, [field]: value } : c)));
+  }
+  function removeCanal(i: number) {
+    setCanais(canais.filter((_, idx) => idx !== i));
+  }
+
   const fields: Array<{ key: keyof ContatoData; label: string; placeholder: string; type?: string }> = [
     { key: "email", label: "E-mail", placeholder: "contato@drsandro.com.br", type: "email" },
     { key: "whatsapp", label: "WhatsApp (exibido)", placeholder: "+55 (11) 99999-9999" },
@@ -68,12 +84,44 @@ export default function ContatoEditor({ initialContato }: Props) {
             <input
               type={type ?? "text"}
               placeholder={placeholder}
-              value={contato[key]}
+              value={(contato[key] as string) ?? ""}
               onChange={(e) => update(key, e.target.value)}
               className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent-violet/50"
             />
           </div>
         ))}
+      </div>
+
+      {/* Canais sociais extras — YouTube, TikTok, Telegram, LinkedIn, e outros */}
+      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
+        <p className="text-sm font-semibold text-white">Canais e redes (opcional)</p>
+        <p className="text-xs text-white/45">Adicione quantos quiser: YouTube, TikTok, Telegram, LinkedIn, etc. Aparecem na seção de contato do site. Deixe vazio para não exibir.</p>
+        {canais.length === 0 && <p className="text-xs text-white/30">Nenhum canal adicionado.</p>}
+        {canais.map((c, i) => (
+          <div key={i} className="grid grid-cols-1 gap-2 rounded-xl border border-white/10 bg-black/20 p-3 md:grid-cols-[1fr_1fr_1.4fr_auto]">
+            <input
+              type="text" placeholder="Nome (ex.: YouTube)" value={c.label}
+              onChange={(e) => updateCanal(i, "label", e.target.value)}
+              className="rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent-violet/50"
+            />
+            <input
+              type="text" placeholder="Exibido (ex.: @drsandro)" value={c.valor}
+              onChange={(e) => updateCanal(i, "valor", e.target.value)}
+              className="rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent-violet/50"
+            />
+            <input
+              type="text" placeholder="Link (https://...)" value={c.url}
+              onChange={(e) => updateCanal(i, "url", e.target.value)}
+              className="rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent-violet/50"
+            />
+            <button type="button" onClick={() => removeCanal(i)} className="flex items-center justify-center rounded-lg border border-white/15 px-3 py-2 text-red-300/80 transition hover:border-red-400/40 hover:text-red-300" title="Remover">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+        <button type="button" onClick={addCanal} className="flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-4 py-2 text-xs font-medium text-white transition hover:bg-white/[0.10]">
+          <Plus className="h-3.5 w-3.5" /> Adicionar canal
+        </button>
       </div>
 
       {/* QR code opcional — você gera o QR (WhatsApp, PIX, vCard...) e sobe aqui */}

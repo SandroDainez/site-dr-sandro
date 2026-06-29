@@ -757,7 +757,10 @@ export default async function Home() {
                   value: contato.instagram,
                   href: contato.instagramLink,
                 },
-              ].map((item) => (
+                ...(contato.canais ?? [])
+                  .filter((c) => c.label && c.url)
+                  .map((c) => ({ label: c.label, value: c.valor || c.url, href: c.url })),
+              ].filter((item) => item.value || item.href).map((item) => (
                 <div
                   key={item.label}
                   className="rounded-2xl border border-white/10 bg-black/20 p-4 transition hover:border-accent/35 hover:bg-black/30"

@@ -8,7 +8,7 @@ import type { AtualizacaoData } from "@/lib/content";
 //
 // Exemplo:
 //   curl -X POST https://medcampus.com.br/api/atualizacoes \
-//     -H "x-api-key: Jiujitsu#47" \
+//     -H "x-api-key: SUA_SENHA_ADMIN" \
 //     -H "Content-Type: application/json" \
 //     -d '{
 //       "titulo": "Nova atualização",

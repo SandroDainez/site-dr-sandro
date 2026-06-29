@@ -92,6 +92,9 @@ export type ContatoData = {
   qrUrl?: string;     // imagem do QR (servida via /api/img)
   qrLabel?: string;   // título acima do QR, ex.: "Fale no WhatsApp"
   qrLegenda?: string; // texto pequeno abaixo, ex.: "Aponte a câmera do celular"
+  // Canais sociais extras e flexíveis (YouTube, TikTok, Telegram, LinkedIn, ...).
+  // Admin adiciona quantos quiser sem mudar código.
+  canais?: { label: string; valor: string; url: string }[];
 };
 
 export type HeroData = {
