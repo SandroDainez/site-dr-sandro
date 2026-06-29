@@ -222,6 +222,9 @@ export type VideoaulaData = {
   mostrarInteiro?: boolean; // true = object-fit contain (mostra o vídeo inteiro, sem cortar — p/ vídeo vertical com legendas)
   pdfUrl?: string;      // material de apoio em PDF (admin sobe; servido via /api/img)
   pdfLabel?: string;    // rótulo do botão do PDF (default "Material da aula (PDF)")
+  // Prova pré/pós aula (opcional). MESMAS perguntas antes e depois do vídeo;
+  // mede a evolução do conhecimento. IA rascunha, admin edita.
+  quiz?: { enunciado: string; opcoes: string[]; correta: number }[];
   data: string;         // YYYY-MM-DD
 };
 

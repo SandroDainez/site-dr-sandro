@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
+import OpenAI from "openai";
 import {
   writeBlob,
   getTypography,
@@ -384,5 +385,44 @@ export async function uploadPublicImage(
     return { ok: true, url };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+// Gera um RASCUNHO de prova (pré/pós) para uma videoaula com IA. O admin edita depois.
+export async function gerarQuizVideoaula(input: { titulo: string; descricao: string; area: string; n?: number }):
+  Promise<{ ok: true; questoes: { enunciado: string; opcoes: string[]; correta: number }[] } | { ok: false; error: string }> {
+  try {
+    await requireAdmin();
+    if (!process.env.OPENAI_API_KEY) return { ok: false, error: "OpenAI não configurado no servidor." };
+    const n = Math.min(Math.max(input.n ?? 5, 3), 10);
+    const desc = (input.descricao || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 1500);
+    const prompt = `Você é professor de medicina (anestesiologia, terapia intensiva, medicina de emergência). Crie ${n} questões de múltipla escolha para uma PROVA aplicada ANTES e DEPOIS de uma videoaula, para medir a evolução do conhecimento. Nível: médico especialista/residente. Cada questão com 4 alternativas e UMA correta. Foque no conteúdo do tema da aula; evite pegadinhas triviais.
+
+TÍTULO: ${input.titulo}
+DESCRIÇÃO: ${desc}
+ÁREA: ${input.area}
+
+Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["...","...","...","..."],"correta":0}]} onde "correta" é o ÍNDICE (0 a 3) da alternativa certa. NÃO use prefixos como "A)" ou "1." nas alternativas.`;
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const r = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+      max_tokens: 1800,
+      response_format: { type: "json_object" },
+    });
+    const data = JSON.parse(r.choices[0].message.content ?? "{}");
+    const arr = Array.isArray(data.questoes) ? data.questoes : [];
+    const questoes = arr.map((q: any) => ({
+      enunciado: String(q.enunciado ?? "").trim(),
+      opcoes: (Array.isArray(q.opcoes) ? q.opcoes : [])
+        .map((o: any) => String(o).replace(/^\s*[A-Da-d0-9][).\.\s-]+/, "").trim())
+        .filter(Boolean),
+      correta: Number.isInteger(q.correta) ? q.correta : 0,
+    })).filter((q: any) => q.enunciado && q.opcoes.length >= 2 && q.correta >= 0 && q.correta < q.opcoes.length);
+    if (questoes.length === 0) return { ok: false, error: "A IA não retornou questões válidas. Tente novamente." };
+    return { ok: true, questoes };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erro ao gerar a prova." };
   }
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, type CSSProperties } from "react";
 import type { VideoaulaData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
+import AulaQuizModal from "./AulaQuizModal";
 
 type Props = {
   videoaulas: VideoaulaData[];
@@ -97,10 +98,12 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
   const [descExpanded, setDescExpanded] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
   const [inlinePlaying, setInlinePlaying] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
   const cfg = areaConfig[item.area];
   const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
   const isProxyVideo = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
+  const hasQuiz = (item.quiz?.length ?? 0) > 0;
   const isLong = item.descricao.replace(/<[^>]*>/g, "").length > 140;
   const objPos: CSSProperties = item.mostrarInteiro
     ? { objectFit: "contain" }
@@ -120,14 +123,15 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
       {playerOpen && isProxyVideo && (
         <VideoModal item={item} onClose={() => setPlayerOpen(false)} />
       )}
+      {quizOpen && <AulaQuizModal item={item} onClose={() => setQuizOpen(false)} />}
     <article className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:border-white/20">
       {thumbSrc ? (
         <div
           className={`relative aspect-[4/5] overflow-hidden ${hasVideo ? "cursor-pointer group" : ""}`}
-          onClick={() => hasVideo && !ytId && setPlayerOpen(true)}
+          onClick={() => { if (!hasVideo) return; if (hasQuiz) setQuizOpen(true); else if (!ytId) setPlayerOpen(true); }}
         >
           <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
-          {hasVideo && !ytId && (
+          {hasVideo && (!ytId || hasQuiz) && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
                 <span className="text-white text-lg">▶</span>
@@ -247,7 +251,18 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
         )}
 
         {/* Action buttons */}
-        {hasVideo && (
+        {hasVideo && hasQuiz && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setQuizOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+            >
+              ▶ Assistir + teste de conhecimento
+            </button>
+          </div>
+        )}
+        {hasVideo && !hasQuiz && (
           <div className="mt-4 flex flex-wrap gap-2">
             {ytId ? (
               <a

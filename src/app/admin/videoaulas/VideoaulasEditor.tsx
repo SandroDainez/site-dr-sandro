@@ -6,7 +6,8 @@ import { upload } from "@vercel/blob/client";
 import type { VideoaulaData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import AreasExtra from "@/components/admin/AreasExtra";
-import { saveVideoaulas } from "@/app/admin/actions";
+import { saveVideoaulas, gerarQuizVideoaula } from "@/app/admin/actions";
+import { Sparkles } from "lucide-react";
 
 type Props = {
   initialVideoaulas: VideoaulaData[];
@@ -40,6 +41,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
   const [uploadingVideoIdx, setUploadingVideoIdx] = useState<number | null>(null);
   const [videoProgress, setVideoProgress] = useState<number>(0);
   const [uploadingPdfIdx, setUploadingPdfIdx] = useState<number | null>(null);
+  const [gerandoQuizIdx, setGerandoQuizIdx] = useState<number | null>(null);
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const videoFileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -122,6 +124,25 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
       setUploadingVideoIdx(null);
       setVideoProgress(0);
     }
+  }
+
+  // ── Prova pré/pós aula ──────────────────────────────────────────────
+  type Questao = { enunciado: string; opcoes: string[]; correta: number };
+  function setQuiz(idx: number, quiz: Questao[]) { updateItem(idx, "quiz", quiz); }
+  function addQuestao(idx: number) { setQuiz(idx, [...(items[idx].quiz ?? []), { enunciado: "", opcoes: ["", "", "", ""], correta: 0 }]); }
+  function removeQuestao(idx: number, qi: number) { setQuiz(idx, (items[idx].quiz ?? []).filter((_, i) => i !== qi)); }
+  function updateEnunciado(idx: number, qi: number, v: string) { setQuiz(idx, (items[idx].quiz ?? []).map((q, i) => i === qi ? { ...q, enunciado: v } : q)); }
+  function updateOpcao(idx: number, qi: number, oi: number, v: string) { setQuiz(idx, (items[idx].quiz ?? []).map((q, i) => i === qi ? { ...q, opcoes: q.opcoes.map((o, j) => j === oi ? v : o) } : q)); }
+  function setCorreta(idx: number, qi: number, oi: number) { setQuiz(idx, (items[idx].quiz ?? []).map((q, i) => i === qi ? { ...q, correta: oi } : q)); }
+  async function gerarQuizIA(idx: number) {
+    setGerandoQuizIdx(idx); setError(null);
+    try {
+      const it = items[idx];
+      const res = await gerarQuizVideoaula({ titulo: it.titulo, descricao: it.descricao, area: it.area });
+      if (res.ok) setQuiz(idx, [...(items[idx].quiz ?? []), ...res.questoes]);
+      else setError(res.error);
+    } catch (e) { setError(e instanceof Error ? e.message : "Erro ao gerar"); }
+    finally { setGerandoQuizIdx(null); }
   }
 
   async function handlePdfUpload(idx: number, file: File) {
@@ -334,6 +355,51 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                   className="mt-2 w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50"
                 />
               )}
+            </div>
+
+            {/* Prova pré/pós aula (opcional) — IA rascunha, admin edita */}
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <label className="text-xs uppercase tracking-[0.1em] text-white/40">Prova pré/pós aula (opcional)</label>
+                <button
+                  type="button" onClick={() => gerarQuizIA(idx)} disabled={gerandoQuizIdx === idx}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50"
+                >
+                  {gerandoQuizIdx === idx ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando…</> : <><Sparkles className="h-3.5 w-3.5" /> Gerar com IA</>}
+                </button>
+              </div>
+              <p className="mb-3 text-[11px] text-white/40">As MESMAS perguntas são aplicadas antes e depois da aula para medir a evolução. A IA cria um rascunho — revise e ajuste. Deixe vazio para não ter prova.</p>
+              <div className="space-y-3">
+                {(item.quiz ?? []).map((q, qi) => (
+                  <div key={qi} className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <div className="mb-2 flex items-start gap-2">
+                      <span className="mt-2 text-[11px] font-bold text-accent">{qi + 1}.</span>
+                      <textarea
+                        value={q.enunciado} onChange={(e) => updateEnunciado(idx, qi, e.target.value)}
+                        placeholder="Enunciado da questão" rows={2}
+                        className="flex-1 rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50"
+                      />
+                      <button type="button" onClick={() => removeQuestao(idx, qi)} className="mt-1 text-red-300/70 hover:text-red-300" title="Remover questão"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                    <div className="space-y-1.5 pl-5">
+                      {q.opcoes.map((o, oi) => (
+                        <div key={oi} className="flex items-center gap-2">
+                          <input type="radio" name={`correta-${idx}-${qi}`} checked={q.correta === oi} onChange={() => setCorreta(idx, qi, oi)} title="Marcar como correta" className="accent-accent" />
+                          <input
+                            type="text" value={o} onChange={(e) => updateOpcao(idx, qi, oi, e.target.value)}
+                            placeholder={`Alternativa ${String.fromCharCode(65 + oi)}`}
+                            className={`flex-1 rounded-lg border bg-black/30 px-3 py-1.5 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50 ${q.correta === oi ? "border-accent/50" : "border-white/15"}`}
+                          />
+                        </div>
+                      ))}
+                      <p className="text-[10px] text-white/30">Marque o círculo da alternativa correta.</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => addQuestao(idx)} className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.05] px-4 py-1.5 text-xs font-medium text-white transition hover:bg-white/[0.10]">
+                <Plus className="h-3.5 w-3.5" /> Adicionar questão
+              </button>
             </div>
 
             {/* Video upload section */}
