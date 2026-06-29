@@ -74,12 +74,16 @@ export async function POST(request: NextRequest) {
   //  • RETOMAR uma fonte indexada pela metade exatamente de onde parou (sem recomeçar),
   //  • apagar só o que ficou velho (hash diferente) — nunca o que está em progresso.
   const hashAtual = (f: Fonte) => hashDe(f.texto + "|" + f.meta.fonte_titulo);
-  const { data: existRows } = await supabase.from("kb_chunks").select("fonte_id,hash");
+  // Status agregado por fonte via RPC: devolve {fonte_id, hash, n} num único JSONB.
+  // CRÍTICO: um SELECT cru de kb_chunks é truncado em 1000 linhas pelo PostgREST,
+  // o que fazia a contagem de "retomada" ficar errada e DUPLICAR trechos em escala.
+  const { data: statusRaw } = await supabase.rpc("kb_fontes_status");
+  const statusRows: { fonte_id: string; hash: string; n: number }[] = Array.isArray(statusRaw) ? statusRaw : [];
   const existHash = new Map<string, string>();
   const existCount = new Map<string, number>();
-  for (const r of existRows ?? []) if (r.fonte_id) {
+  for (const r of statusRows) if (r.fonte_id) {
     existHash.set(r.fonte_id, r.hash);
-    existCount.set(r.fonte_id, (existCount.get(r.fonte_id) ?? 0) + 1);
+    existCount.set(r.fonte_id, Number(r.n) || 0);
   }
   const idsAtuais = new Set(fontes.map((f) => f.fonteId));
 
@@ -93,9 +97,8 @@ export async function POST(request: NextRequest) {
   });
   const sumiram = [...existHash.keys()].filter((id) => !idsAtuais.has(id));
 
-  // apaga só fontes que sumiram + legado sem fonte_id (NÃO mexe no que está em progresso)
+  // apaga só fontes que sumiram (NÃO mexe no que está em progresso)
   for (let i = 0; i < sumiram.length; i += 100) await supabase.from("kb_chunks").delete().in("fonte_id", sumiram.slice(i, i + 100));
-  if (existRows?.some((r: any) => !r.fonte_id)) await supabase.from("kb_chunks").delete().is("fonte_id", null);
 
   // Orçamento PEQUENO por chamada → cada requisição é curta e segura (sem timeout).
   // O admin chama em loop até "pendentes" zerar; nada se perde no caminho.

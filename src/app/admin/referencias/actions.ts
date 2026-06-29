@@ -24,11 +24,10 @@ export async function listarReferencias(): Promise<Result> {
     // quantos trechos cada referência gerou no índice (pra confirmar que indexou)
     const counts = new Map<string, number>();
     try {
-      const { data: ids } = await supabase.from("kb_chunks").select("fonte_id");
-      for (const c of ids ?? []) {
-        const fid = (c as any).fonte_id as string | null;
-        if (fid?.startsWith("ref:")) counts.set(fid, (counts.get(fid) ?? 0) + 1);
-      }
+      // via RPC agregada (um SELECT cru é truncado em 1000 linhas → contagem errada em escala)
+      const { data: statusRaw } = await supabase.rpc("kb_fontes_status");
+      const rows: any[] = Array.isArray(statusRaw) ? statusRaw : [];
+      for (const r of rows) if (typeof r.fonte_id === "string" && r.fonte_id.startsWith("ref:")) counts.set(r.fonte_id, Number(r.n) || 0);
     } catch { /* contagem é opcional */ }
     const comTrechos = (data ?? []).map((r: any) => ({ ...r, _trechos: counts.get(`ref:${r.id}`) ?? 0 }));
     return { ok: true, data: comTrechos };
