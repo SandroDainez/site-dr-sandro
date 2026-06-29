@@ -16,7 +16,7 @@ import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
-import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Download, Stethoscope } from "lucide-react";
+import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Stethoscope } from "lucide-react";
 import ProtocoloCard from "@/components/ProtocoloCard";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
@@ -139,22 +139,8 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {docs.length > 0 && (
               <Section icon={FileText} titulo="Documentos e materiais" verHref="/acervo" accent={cfg.accent}>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {docs.map((d) => (
-                    <div key={d.id} className={card}>
-                      <p className="text-sm font-semibold text-white">{d.titulo}</p>
-                      {d.arquivos.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {d.arquivos.filter((x) => x.url).map((arq) => (
-                            <a key={arq.id} href={arq.url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2.5 py-1 text-[11px] font-semibold text-accent transition hover:bg-accent/20">
-                              <Download className="h-3 w-3" /> {arq.titulo || arq.tipo}
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                {/* mesma experiência da página "Outros assuntos": Ler / Tela cheia / Baixar */}
+                <AcervoList itens={docs} />
               </Section>
             )}
 

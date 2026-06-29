@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, BookOpen, ImageIcon, Video, File, Download, Library } from "lucide-react";
 import type { AcervoItemData, AcervoArquivo } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
@@ -17,6 +17,7 @@ function formatDate(iso: string): string {
 }
 const arqIcon = { pdf: FileText, livro: BookOpen, imagem: ImageIcon, video: Video, arquivo: File };
 
+// Arquivos NÃO-PDF: botão simples de baixar/abrir.
 function ArqButton({ arq }: { arq: AcervoArquivo }) {
   if (!arq.url) return null;
   const Icon = arqIcon[arq.tipo] || File;
@@ -34,11 +35,41 @@ function ArqButton({ arq }: { arq: AcervoArquivo }) {
   );
 }
 
+// PDF: mesma experiência do protocolo — Ler (na página), Tela cheia e Baixar.
+function PdfButtons({ arq, aberto, onLer, onFull }: { arq: AcervoArquivo; aberto: boolean; onLer: () => void; onFull: () => void }) {
+  const nome = arq.titulo || "PDF";
+  return (
+    <div className="flex flex-wrap gap-2">
+      <button type="button" onClick={onLer} className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/15 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25">
+        {aberto ? "Fechar leitura ↑" : `📄 Ler ${nome}`}
+      </button>
+      <button type="button" onClick={onFull} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
+        ⛶ Tela cheia
+      </button>
+      <a href={arq.url} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
+        Baixar PDF ↓
+      </a>
+    </div>
+  );
+}
+
 function Card({ item }: { item: AcervoItemData }) {
   const [playing, setPlaying] = useState(false);
+  const [pdfInline, setPdfInline] = useState<string | null>(null); // url do PDF aberto na página
+  const [full, setFull] = useState<string | null>(null);            // url do PDF em tela cheia
   const yt = item.videoUrl ? ytId(item.videoUrl) : null;
   const thumb = item.capaUrl || (yt ? `https://img.youtube.com/vi/${yt}/hqdefault.jpg` : "");
   const hasVideo = !!item.videoUrl;
+  const arquivos = item.arquivos.filter((a) => a.url);
+
+  // fecha a tela cheia com Esc + trava o scroll do fundo
+  useEffect(() => {
+    if (!full) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(null); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [full]);
 
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-white/20">
@@ -48,6 +79,7 @@ function Card({ item }: { item: AcervoItemData }) {
             yt ? (
               <iframe src={`https://www.youtube.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`} title={item.titulo} className="absolute inset-0 h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
             ) : (
+              // eslint-disable-next-line jsx-a11y/media-has-caption
               <video src={item.videoUrl} controls autoPlay playsInline className="absolute inset-0 h-full w-full bg-black object-contain" />
             )
           ) : (
@@ -79,12 +111,45 @@ function Card({ item }: { item: AcervoItemData }) {
         {item.descricao && (
           <div className="mt-2 text-sm leading-relaxed text-white/60 [&_a]:text-accent" dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }} />
         )}
-        {item.arquivos.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {item.arquivos.map((arq) => <ArqButton key={arq.id} arq={arq} />)}
+        {arquivos.length > 0 && (
+          <div className="mt-4 flex flex-col gap-2">
+            {arquivos.map((arq) =>
+              arq.tipo === "pdf" ? (
+                <PdfButtons
+                  key={arq.id}
+                  arq={arq}
+                  aberto={pdfInline === arq.url}
+                  onLer={() => setPdfInline((p) => (p === arq.url ? null : arq.url))}
+                  onFull={() => setFull(arq.url)}
+                />
+              ) : (
+                <div key={arq.id}><ArqButton arq={arq} /></div>
+              )
+            )}
           </div>
         )}
+        {pdfInline && (
+          <iframe src={pdfInline} title={item.titulo} allowFullScreen className="mt-3 w-full rounded-xl border border-white/10 bg-white" style={{ height: "70vh" }} />
+        )}
       </div>
+
+      {/* Tela cheia do PDF */}
+      {full && (
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-black/95 p-3 backdrop-blur-sm sm:p-5">
+          <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
+            <h3 className="min-w-0 truncate text-base font-semibold text-white">{item.titulo}</h3>
+            <div className="flex shrink-0 items-center gap-2">
+              <a href={full} target="_blank" rel="noreferrer" download className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/15">
+                Baixar ↓
+              </a>
+              <button type="button" onClick={() => setFull(null)} className="rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25">
+                ✕ Fechar (Esc)
+              </button>
+            </div>
+          </div>
+          <iframe src={`${full}#view=FitH`} title={item.titulo} className="min-h-0 w-full flex-1 rounded-xl bg-white" />
+        </div>
+      )}
     </article>
   );
 }
