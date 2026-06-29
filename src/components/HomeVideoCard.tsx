@@ -90,14 +90,20 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   // Aula COM prova: clicar abre o teste. Senão, toca embutido.
   const abrir = () => (hasQuiz ? setQuizOpen(true) : setInlinePlaying(true));
 
-  // Prévia clicável. SEM elemento <video> no preview (causava erro de hidratação #418
-  // e o iOS sequestrava o toque). Quando não há imagem, usamos placeholder estático.
+  // Prévia clicável = imagem própria, ou o PRIMEIRO FRAME do vídeo (imagem cheia do card).
+  // pointer-events-none no <video> manda o toque ao container. O #418 não vinha daqui
+  // (era o dpl do logo, já corrigido), então é seguro mostrar o frame do vídeo.
   const thumb = (
-    <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-gradient-to-br from-[#10151f] to-black group/thumb" onClick={abrir}>
+    <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-black group/thumb" onClick={abrir}>
       {thumbSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
-      ) : null}
+      ) : isProxy ? (
+        // eslint-disable-next-line jsx-a11y/media-has-caption
+        <video src={`${item.videoUrl}#t=0.5`} muted playsInline preload="metadata" style={objPos} className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center bg-white/[0.03]"><PlayCircle className="h-10 w-10 text-white/25" /></div>
+      )}
       <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition group-hover/thumb:bg-black/45">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
           <span className="text-xl text-white">▶</span>

@@ -162,12 +162,21 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
           </div>
         ) : (
           <div
-            className="relative aspect-[4/5] cursor-pointer group overflow-hidden bg-gradient-to-br from-[#10151f] to-black"
+            className="relative aspect-[4/5] cursor-pointer group overflow-hidden bg-black"
             onClick={() => hasQuiz ? setQuizOpen(true) : setInlinePlaying(true)}
           >
-            {/* Placeholder ESTÁTICO (sem elemento <video> no preview): o <video muted>
-                causava erro de hidratação do React (#418) — que quebrava o clique — e o
-                iOS sequestrava o toque pro player nativo. Sem ele, o clique é 100% confiável. */}
+            {/* Preview = primeiro frame do vídeo (imagem cheia do card). pointer-events-none
+                manda o toque ao container (abre quiz/toca inline). O #418 NÃO vinha daqui
+                (era o dpl do logo, já corrigido), então é seguro mostrar o frame. */}
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+            <video
+              src={`${item.videoUrl}#t=0.5`}
+              muted
+              playsInline
+              preload="metadata"
+              style={objPos}
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            />
             <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">
                 <span className="text-white text-xl">▶</span>
