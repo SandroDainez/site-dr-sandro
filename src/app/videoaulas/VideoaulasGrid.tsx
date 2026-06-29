@@ -175,6 +175,16 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
               style={objPos}
               className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             />
+            {/* Aula COM prova: camada invisível por cima captura o toque e abre o teste —
+                garante que o iOS não dispare o player nativo do vídeo antes do nosso clique. */}
+            {hasQuiz && (
+              <button
+                type="button"
+                aria-label="Assistir com teste de conhecimento"
+                onClick={(e) => { e.stopPropagation(); setQuizOpen(true); }}
+                className="absolute inset-0 z-20 h-full w-full"
+              />
+            )}
             <div className="absolute inset-0 flex items-center justify-center bg-black/35 transition group-hover:bg-black/45">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover:scale-110">
                 <span className="text-white text-xl">▶</span>
