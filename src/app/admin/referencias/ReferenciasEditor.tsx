@@ -6,7 +6,7 @@ import { upload } from "@vercel/blob/client";
 import { Save, Trash2, Upload, Plus, RefreshCw, FileText, Pencil, X } from "lucide-react";
 import { salvarReferencia, excluirReferencia, extrairTextoPdf, reindexarAssistente } from "./actions";
 
-type Ref = { id?: string; titulo: string; tipo?: string; autor?: string; fonte_url?: string; arquivo_url?: string; conteudo?: string; area?: string; ativo?: boolean };
+type Ref = { id?: string; titulo: string; tipo?: string; autor?: string; fonte_url?: string; arquivo_url?: string; conteudo?: string; area?: string; ativo?: boolean; _trechos?: number };
 
 const vazio: Ref = { titulo: "", tipo: "Artigo", autor: "", fonte_url: "", arquivo_url: "", conteudo: "", area: "" };
 const inputCls = "w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50";
@@ -50,14 +50,30 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
     start(async () => { await excluirReferencia(id); router.refresh(); });
   }
 
-  function reindexar() {
+  // Reindexa em LOOP: cada chamada processa um lote (resumível) e devolve "pendentes".
+  // Repete até a fila zerar, mostrando o progresso — nunca estoura o tempo nem perde material.
+  async function reindexar() {
     setErr(null); setMsg(null); setReindexando(true);
-    reindexarAssistente().then((r) => {
+    let totalFalhas = 0;
+    try {
+      for (let volta = 0; volta < 60; volta++) {
+        const r = await reindexarAssistente();
+        if (!r.ok) { setErr(r.error ?? "Falha ao reindexar."); break; }
+        const d = r.data || {};
+        totalFalhas += d.falhas ?? 0;
+        if (d.pendentes && d.pendentes > 0) {
+          setMsg(`Indexando… ${Number(d.total ?? 0).toLocaleString("pt-BR")} trechos · ${d.pendentes} material(is) na fila`);
+        } else {
+          setMsg(`✅ Concluído — ${Number(d.total ?? 0).toLocaleString("pt-BR")} trechos indexados no total${totalFalhas ? ` · ⚠️ ${totalFalhas} falha(s), reindexe de novo` : ""}.`);
+          break;
+        }
+      }
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Falha ao reindexar.");
+    } finally {
       setReindexando(false);
-      if (r.ok) setMsg(`Assistente reindexado: ${r.data?.indexados ?? 0} trechos.`);
-      else setErr(r.error ?? "Falha ao reindexar.");
       router.refresh();
-    });
+    }
   }
 
   return (
@@ -132,6 +148,11 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-white">{r.titulo}</p>
                   <p className="text-xs text-white/45">{r.tipo}{r.autor ? ` · ${r.autor}` : ""}{r.area ? ` · ${r.area}` : ""} · {(r.conteudo || "").length.toLocaleString("pt-BR")} car.</p>
+                  <p className="mt-1 text-[11px]">
+                    {(r._trechos ?? 0) > 0
+                      ? <span className="text-accent">✓ {(r._trechos ?? 0).toLocaleString("pt-BR")} trechos indexados</span>
+                      : <span className="text-amber-300">⚠ não indexado — clique em “Reindexar”</span>}
+                  </p>
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <button type="button" onClick={() => setForm(r)} className="rounded-lg p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white" title="Editar"><Pencil className="h-4 w-4" /></button>

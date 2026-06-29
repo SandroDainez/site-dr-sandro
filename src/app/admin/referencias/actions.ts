@@ -21,7 +21,17 @@ export async function listarReferencias(): Promise<Result> {
     const supabase = createServiceClient();
     const { data, error } = await supabase.from("kb_referencias").select("*").order("criado_em", { ascending: false });
     if (error) throw error;
-    return { ok: true, data };
+    // quantos trechos cada referência gerou no índice (pra confirmar que indexou)
+    const counts = new Map<string, number>();
+    try {
+      const { data: ids } = await supabase.from("kb_chunks").select("fonte_id");
+      for (const c of ids ?? []) {
+        const fid = (c as any).fonte_id as string | null;
+        if (fid?.startsWith("ref:")) counts.set(fid, (counts.get(fid) ?? 0) + 1);
+      }
+    } catch { /* contagem é opcional */ }
+    const comTrechos = (data ?? []).map((r: any) => ({ ...r, _trechos: counts.get(`ref:${r.id}`) ?? 0 }));
+    return { ok: true, data: comTrechos };
   } catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
 }
 
