@@ -4,9 +4,9 @@ import { useState, useTransition, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { Save, Trash2, Upload, Plus, RefreshCw, FileText, Pencil, X } from "lucide-react";
-import { salvarReferencia, excluirReferencia, extrairTextoPdf, reindexarAssistente } from "./actions";
+import { salvarReferencia, salvarReferenciaPdf, excluirReferencia, reindexarAssistente } from "./actions";
 
-type Ref = { id?: string; titulo: string; tipo?: string; autor?: string; fonte_url?: string; arquivo_url?: string; conteudo?: string; area?: string; ativo?: boolean; _trechos?: number };
+type Ref = { id?: string; titulo: string; tipo?: string; autor?: string; fonte_url?: string; arquivo_url?: string; conteudo?: string; area?: string; ativo?: boolean; _trechos?: number; _chars?: number };
 
 const vazio: Ref = { titulo: "", tipo: "Artigo", autor: "", fonte_url: "", arquivo_url: "", conteudo: "", area: "" };
 const inputCls = "w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50";
@@ -26,13 +26,12 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
   async function onPdf(file: File) {
     setErr(null); setMsg(null); setEnviando(true);
     try {
+      // Só envia o PDF pro armazenamento. A EXTRAÇÃO do texto acontece no servidor, na
+      // hora de salvar (salvarReferenciaPdf) — o texto gigante nunca vem pro navegador.
       const blob = await upload(`referencias/${Date.now()}-${file.name}`, file, { access: "private", handleUploadUrl: "/api/upload" });
       set("arquivo_url", blob.url);
       if (!form.titulo) set("titulo", file.name.replace(/\.pdf$/i, ""));
-      setMsg("PDF enviado. Extraindo texto…");
-      const r = await extrairTextoPdf(blob.url);
-      if (r.ok) { set("conteudo", r.data); setMsg("Texto extraído do PDF — confira e salve."); }
-      else setErr(r.error ?? "Não extraí o texto; cole manualmente abaixo.");
+      setMsg("PDF anexado ✓ — clique em “Adicionar referência” para extrair e salvar (feito no servidor).");
     } catch (e) { setErr("Falha no upload do PDF."); }
     finally { setEnviando(false); }
   }
@@ -40,9 +39,15 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
   function salvar() {
     setErr(null); setMsg(null);
     start(async () => {
-      const r = await salvarReferencia(form);
-      if (r.ok) { setMsg("Referência salva. Lembre de reindexar o assistente."); setForm(vazio); router.refresh(); }
-      else setErr(r.error ?? "Erro ao salvar.");
+      // Com PDF anexado e sem texto colado à mão → extrai e salva no servidor.
+      const usaPdf = !!form.arquivo_url && !(form.conteudo && form.conteudo.trim());
+      const r = usaPdf ? await salvarReferenciaPdf(form, form.arquivo_url!) : await salvarReferencia(form);
+      if (r.ok) {
+        setMsg(usaPdf
+          ? `Referência salva (${Number(r.data?.chars ?? 0).toLocaleString("pt-BR")} caracteres extraídos). Agora clique em “Reindexar assistente”.`
+          : "Referência salva. Lembre de reindexar o assistente.");
+        setForm(vazio); router.refresh();
+      } else setErr(r.error ?? "Erro ao salvar.");
     });
   }
 
@@ -133,9 +138,12 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
         </div>
 
         <div>
-          <label className={labelCls}>Texto da referência (o que o assistente vai usar) *</label>
-          <textarea className={`${inputCls} min-h-40`} value={form.conteudo} onChange={(e) => set("conteudo", e.target.value)} placeholder="Cole aqui o texto / resumo / trechos relevantes (ou envie um PDF acima para extrair)." />
-          <p className="mt-1 text-[11px] text-white/35">{(form.conteudo || "").length.toLocaleString("pt-BR")} caracteres</p>
+          <label className={labelCls}>Texto da referência {form.arquivo_url ? "(opcional — será extraído do PDF)" : "(ou envie um PDF acima)"}</label>
+          <textarea className={`${inputCls} min-h-40`} value={form.conteudo ?? ""} onChange={(e) => set("conteudo", e.target.value)} placeholder={form.arquivo_url ? "Deixe em branco para extrair automaticamente do PDF no servidor." : "Cole o texto / resumo / trechos relevantes — ou envie um PDF acima."} />
+          <p className="mt-1 text-[11px] text-white/35">
+            {form.id ? "Editando: deixe em branco para manter o texto já salvo. " : ""}
+            {(form.conteudo || "").length.toLocaleString("pt-BR")} caracteres digitados
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -158,7 +166,7 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
               <div key={r.id} className="flex items-start justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-white">{r.titulo}</p>
-                  <p className="text-xs text-white/45">{r.tipo}{r.autor ? ` · ${r.autor}` : ""}{r.area ? ` · ${r.area}` : ""} · {(r.conteudo || "").length.toLocaleString("pt-BR")} car.</p>
+                  <p className="text-xs text-white/45">{r.tipo}{r.autor ? ` · ${r.autor}` : ""}{r.area ? ` · ${r.area}` : ""} · {(r._chars ?? 0).toLocaleString("pt-BR")} car.</p>
                   <p className="mt-1 text-[11px]">
                     {(r._trechos ?? 0) > 0
                       ? <span className="text-accent">✓ {(r._trechos ?? 0).toLocaleString("pt-BR")} trechos indexados</span>
