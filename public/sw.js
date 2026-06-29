@@ -1,6 +1,6 @@
 // Service worker do PWA. ESTRATÉGIA: rede-primeiro (nunca serve versão velha;
 // só cai no cache quando offline). Bump o CACHE ao mudar a estratégia.
-const CACHE = "portal-v4";
+const CACHE = "portal-v5";
 
 self.addEventListener("install", () => self.skipWaiting());
 
@@ -15,9 +15,18 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;        // só mesmo domínio
+
+  // NÃO interceptar páginas/navegação, documentos e dados do React (RSC). Com o
+  // Next.js App Router, servir HTML/RSC do cache deixa o documento fora de sincronia
+  // com o JS → erro de hidratação (#418) e cliques que param de funcionar.
+  // Deixamos o navegador buscar isso direto na rede, sempre.
+  if (req.mode === "navigate") return;
+  if (req.destination === "document") return;
   if (url.pathname.startsWith("/api/")) return;            // nunca cacheia API
   if (url.pathname.startsWith("/admin")) return;           // admin sempre fresco
+  if (url.search.includes("_rsc")) return;                 // payload RSC do Next
 
+  // Só assets estáticos (imagens, fontes, css/js com hash imutável): network-first.
   event.respondWith(
     fetch(req)
       .then((res) => {
@@ -27,9 +36,7 @@ self.addEventListener("fetch", (event) => {
         }
         return res;
       })
-      .catch(() =>
-        caches.match(req).then((cached) => cached || (req.mode === "navigate" ? caches.match("/minha-area") : Response.error()))
-      )
+      .catch(() => caches.match(req))
   );
 });
 
