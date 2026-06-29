@@ -163,7 +163,7 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
         ) : (
           <div
             className="relative aspect-[4/5] cursor-pointer group overflow-hidden bg-black"
-            onClick={() => setInlinePlaying(true)}
+            onClick={() => hasQuiz ? setQuizOpen(true) : setInlinePlaying(true)}
           >
             {/* Preview do próprio vídeo (primeiro frame) — pointer-events-none faz o toque
                 cair no container (play inline) em vez do player nativo do navegador */}

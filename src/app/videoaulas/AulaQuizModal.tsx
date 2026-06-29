@@ -111,6 +111,11 @@ export default function AulaQuizModal({ item, onClose }: { item: VideoaulaData; 
                 Pular e assistir
               </button>
             </div>
+            {item.pdfUrl && (
+              <a href={item.pdfUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-white/60 underline decoration-white/25 underline-offset-4 transition hover:text-white">
+                📄 {item.pdfLabel?.trim() || "Material da aula (PDF)"}
+              </a>
+            )}
           </div>
         )}
 
