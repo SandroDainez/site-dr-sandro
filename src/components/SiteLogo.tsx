@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import type { HeaderData } from "@/lib/content";
 
@@ -59,13 +58,16 @@ export default function SiteLogo({ header: h, variant = "lg" }: Props) {
 
   return (
     <div className="flex shrink-0 items-center justify-center overflow-hidden" style={frameStyle}>
-      <Image
+      {/* <img> normal (NÃO next/image): na Vercel o next/image recebe "&dpl=<deploy>"
+          no src do HTML do servidor, mas o cliente renderiza sem — divergência que
+          causava erro de hidratação (#418) e quebrava os cliques da página inteira. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={h.logoUrl}
         alt="Logo"
         width={192}
         height={192}
-        priority={variant === "lg"}
-        unoptimized
+        decoding="async"
         className="h-full w-full object-contain"
         style={imgStyle}
       />
