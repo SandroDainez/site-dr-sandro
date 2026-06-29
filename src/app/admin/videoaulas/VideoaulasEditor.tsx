@@ -42,6 +42,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
   const [videoProgress, setVideoProgress] = useState<number>(0);
   const [uploadingPdfIdx, setUploadingPdfIdx] = useState<number | null>(null);
   const [gerandoQuizIdx, setGerandoQuizIdx] = useState<number | null>(null);
+  const [quizN, setQuizN] = useState(5);
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const videoFileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -127,18 +128,19 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
   }
 
   // ── Prova pré/pós aula ──────────────────────────────────────────────
-  type Questao = { enunciado: string; opcoes: string[]; correta: number };
+  type Questao = { enunciado: string; opcoes: string[]; correta: number; justificativa?: string };
   function setQuiz(idx: number, quiz: Questao[]) { updateItem(idx, "quiz", quiz); }
-  function addQuestao(idx: number) { setQuiz(idx, [...(items[idx].quiz ?? []), { enunciado: "", opcoes: ["", "", "", ""], correta: 0 }]); }
+  function addQuestao(idx: number) { setQuiz(idx, [...(items[idx].quiz ?? []), { enunciado: "", opcoes: ["", "", "", ""], correta: 0, justificativa: "" }]); }
   function removeQuestao(idx: number, qi: number) { setQuiz(idx, (items[idx].quiz ?? []).filter((_, i) => i !== qi)); }
   function updateEnunciado(idx: number, qi: number, v: string) { setQuiz(idx, (items[idx].quiz ?? []).map((q, i) => i === qi ? { ...q, enunciado: v } : q)); }
   function updateOpcao(idx: number, qi: number, oi: number, v: string) { setQuiz(idx, (items[idx].quiz ?? []).map((q, i) => i === qi ? { ...q, opcoes: q.opcoes.map((o, j) => j === oi ? v : o) } : q)); }
   function setCorreta(idx: number, qi: number, oi: number) { setQuiz(idx, (items[idx].quiz ?? []).map((q, i) => i === qi ? { ...q, correta: oi } : q)); }
-  async function gerarQuizIA(idx: number) {
+  function updateJustificativa(idx: number, qi: number, v: string) { setQuiz(idx, (items[idx].quiz ?? []).map((q, i) => i === qi ? { ...q, justificativa: v } : q)); }
+  async function gerarQuizIA(idx: number, n: number) {
     setGerandoQuizIdx(idx); setError(null);
     try {
       const it = items[idx];
-      const res = await gerarQuizVideoaula({ titulo: it.titulo, descricao: it.descricao, area: it.area });
+      const res = await gerarQuizVideoaula({ titulo: it.titulo, descricao: it.descricao, area: it.area, instrucoes: it.quizInstrucoes, n });
       if (res.ok) setQuiz(idx, [...(items[idx].quiz ?? []), ...res.questoes]);
       else setError(res.error);
     } catch (e) { setError(e instanceof Error ? e.message : "Erro ao gerar"); }
@@ -359,16 +361,29 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
 
             {/* Prova pré/pós aula (opcional) — IA rascunha, admin edita */}
             <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <label className="text-xs uppercase tracking-[0.1em] text-white/40">Prova pré/pós aula (opcional)</label>
+              <label className="text-xs uppercase tracking-[0.1em] text-white/40">Prova pré/pós aula (opcional)</label>
+              <p className="mb-3 mt-1 text-[11px] text-white/40">As MESMAS perguntas são aplicadas antes e depois da aula para medir a evolução. Deixe vazio para não ter prova.</p>
+
+              {/* Orientação para a IA — assuntos e pontos-chave que VOCÊ quer cobrar */}
+              <label className="mb-1 block text-[11px] font-semibold text-accent">Oriente a IA (assuntos e pontos-chave a cobrar)</label>
+              <textarea
+                value={item.quizInstrucoes ?? ""}
+                onChange={(e) => updateItem(idx, "quizInstrucoes", e.target.value)}
+                rows={3}
+                placeholder="Ex.: Foco em doses de droga vasoativa no choque séptico, alvo de PAM ≥65, momento de iniciar noradrenalina, lactato como meta, corticoide. Nível residente. Evite epidemiologia."
+                className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent/50"
+              />
+              <div className="mt-2 mb-3 flex flex-wrap items-center gap-2">
+                <label className="text-[11px] text-white/45">Nº de questões:</label>
+                <input type="number" min={3} max={12} value={quizN} onChange={(e) => setQuizN(Math.min(12, Math.max(3, Number(e.target.value) || 5)))} className="w-16 rounded-lg border border-white/15 bg-black/30 px-2 py-1.5 text-sm text-white outline-none focus:border-accent/50" />
                 <button
-                  type="button" onClick={() => gerarQuizIA(idx)} disabled={gerandoQuizIdx === idx}
+                  type="button" onClick={() => gerarQuizIA(idx, quizN)} disabled={gerandoQuizIdx === idx}
                   className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50"
                 >
                   {gerandoQuizIdx === idx ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Gerando…</> : <><Sparkles className="h-3.5 w-3.5" /> Gerar com IA</>}
                 </button>
+                <span className="text-[10px] text-white/30">a IA segue sua orientação · revise sempre antes de salvar</span>
               </div>
-              <p className="mb-3 text-[11px] text-white/40">As MESMAS perguntas são aplicadas antes e depois da aula para medir a evolução. A IA cria um rascunho — revise e ajuste. Deixe vazio para não ter prova.</p>
               <div className="space-y-3">
                 {(item.quiz ?? []).map((q, qi) => (
                   <div key={qi} className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
@@ -393,6 +408,11 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         </div>
                       ))}
                       <p className="text-[10px] text-white/30">Marque o círculo da alternativa correta.</p>
+                      <textarea
+                        value={q.justificativa ?? ""} onChange={(e) => updateJustificativa(idx, qi, e.target.value)}
+                        rows={2} placeholder="Justificativa (por que a correta está certa) — confira a confiabilidade; o aluno vê no fim da prova"
+                        className="mt-1 w-full rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs text-white/80 placeholder:text-white/25 outline-none focus:border-accent/40"
+                      />
                     </div>
                   </div>
                 ))}

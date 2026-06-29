@@ -224,7 +224,8 @@ export type VideoaulaData = {
   pdfLabel?: string;    // rótulo do botão do PDF (default "Material da aula (PDF)")
   // Prova pré/pós aula (opcional). MESMAS perguntas antes e depois do vídeo;
   // mede a evolução do conhecimento. IA rascunha, admin edita.
-  quiz?: { enunciado: string; opcoes: string[]; correta: number }[];
+  quiz?: { enunciado: string; opcoes: string[]; correta: number; justificativa?: string }[];
+  quizInstrucoes?: string; // orientação do admin p/ a IA gerar a prova (assuntos, pontos-chave)
   data: string;         // YYYY-MM-DD
 };
 

@@ -388,27 +388,42 @@ export async function uploadPublicImage(
   }
 }
 
-// Gera um RASCUNHO de prova (pré/pós) para uma videoaula com IA. O admin edita depois.
-export async function gerarQuizVideoaula(input: { titulo: string; descricao: string; area: string; n?: number }):
-  Promise<{ ok: true; questoes: { enunciado: string; opcoes: string[]; correta: number }[] } | { ok: false; error: string }> {
+// Gera um RASCUNHO de prova (pré/pós) para uma videoaula com IA, seguindo a
+// ORIENTAÇÃO do admin (assuntos/pontos-chave). O admin edita depois.
+export async function gerarQuizVideoaula(input: { titulo: string; descricao: string; area: string; n?: number; instrucoes?: string }):
+  Promise<{ ok: true; questoes: { enunciado: string; opcoes: string[]; correta: number; justificativa?: string }[] } | { ok: false; error: string }> {
   try {
     await requireAdmin();
     if (!process.env.OPENAI_API_KEY) return { ok: false, error: "OpenAI não configurado no servidor." };
-    const n = Math.min(Math.max(input.n ?? 5, 3), 10);
+    const n = Math.min(Math.max(input.n ?? 5, 3), 12);
     const desc = (input.descricao || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 1500);
-    const prompt = `Você é professor de medicina (anestesiologia, terapia intensiva, medicina de emergência). Crie ${n} questões de múltipla escolha para uma PROVA aplicada ANTES e DEPOIS de uma videoaula, para medir a evolução do conhecimento. Nível: médico especialista/residente. Cada questão com 4 alternativas e UMA correta. Foque no conteúdo do tema da aula; evite pegadinhas triviais.
+    const orientacao = (input.instrucoes || "").trim().slice(0, 2000);
 
-TÍTULO: ${input.titulo}
-DESCRIÇÃO: ${desc}
-ÁREA: ${input.area}
+    const prompt = `Você é professor titular de medicina (anestesiologia, terapia intensiva, medicina de emergência) e elaborador de questões de prova de título de especialista. Elabore ${n} questões de múltipla escolha para uma PROVA aplicada ANTES e DEPOIS de uma videoaula (as mesmas perguntas medem a evolução do conhecimento).
 
-Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["...","...","...","..."],"correta":0}]} onde "correta" é o ÍNDICE (0 a 3) da alternativa certa. NÃO use prefixos como "A)" ou "1." nas alternativas.`;
+AULA
+- Título: ${input.titulo}
+- Descrição: ${desc || "(sem descrição)"}
+- Área: ${input.area}
+
+${orientacao ? `ORIENTAÇÃO DO PROFESSOR (SIGA À RISCA — estes são os assuntos e pontos-chave que DEVEM ser cobrados):\n${orientacao}\n` : ""}
+REGRAS DE QUALIDADE (obrigatórias):
+- Cubra os PONTOS DE ALTO RENDIMENTO do tema (condutas, doses, critérios, indicações, contraindicações, valores de corte) — o que muda a prática.${orientacao ? " Priorize ESTRITAMENTE o que o professor pediu acima." : ""}
+- Conteúdo CORRETO e atual, baseado em diretrizes consolidadas. NÃO crie questão sobre ponto controverso/ambíguo. Se não tiver certeza de um dado, não use.
+- Cada questão: enunciado clínico claro, 4 alternativas, EXATAMENTE UMA inequivocamente correta; as outras 3 plausíveis mas claramente erradas (sem "todas acima", sem pegadinha de redação).
+- Nível: médico especialista/residente. Sem perguntas triviais nem decoreba irrelevante.
+- Para CADA questão, escreva uma "justificativa" curta (1-2 frases) explicando por que a correta está certa — para o professor conferir a confiabilidade.
+
+Retorne APENAS JSON:
+{"questoes":[{"enunciado":"...","opcoes":["...","...","...","..."],"correta":0,"justificativa":"..."}]}
+"correta" = ÍNDICE (0 a 3) da alternativa certa. NÃO use prefixos "A)"/"1." nas alternativas.`;
+
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const r = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-      max_tokens: 1800,
+      temperature: 0.2,
+      max_tokens: 2600,
       response_format: { type: "json_object" },
     });
     const data = JSON.parse(r.choices[0].message.content ?? "{}");
@@ -419,6 +434,7 @@ Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["...","...","..."
         .map((o: any) => String(o).replace(/^\s*[A-Da-d0-9][).\.\s-]+/, "").trim())
         .filter(Boolean),
       correta: Number.isInteger(q.correta) ? q.correta : 0,
+      justificativa: q.justificativa ? String(q.justificativa).trim() : "",
     })).filter((q: any) => q.enunciado && q.opcoes.length >= 2 && q.correta >= 0 && q.correta < q.opcoes.length);
     if (questoes.length === 0) return { ok: false, error: "A IA não retornou questões válidas. Tente novamente." };
     return { ok: true, questoes };

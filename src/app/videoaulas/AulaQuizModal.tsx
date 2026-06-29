@@ -177,6 +177,26 @@ export default function AulaQuizModal({ item, onClose }: { item: VideoaulaData; 
               </p>
             )}
             {pulouPre && <p className="mt-4 text-sm text-white/60">Você pulou o pré-teste. Da próxima vez, faça o pré pra ver sua evolução completa.</p>}
+
+            {/* Gabarito comentado — revisão de cada questão (baseado no pós-teste) */}
+            <div className="mt-6 space-y-2 text-left">
+              <p className="text-sm font-semibold text-white">Gabarito comentado</p>
+              {quiz.map((q, qi) => {
+                const escolha = resPos[qi];
+                const acertou = escolha === q.correta;
+                return (
+                  <div key={qi} className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <p className="text-sm font-medium text-white">{qi + 1}. {q.enunciado}</p>
+                    <p className={`mt-1 text-xs ${acertou ? "text-accent" : "text-red-300"}`}>
+                      {acertou ? "✓ Você acertou" : `✗ Você marcou: ${q.opcoes[escolha] ?? "—"}`}
+                    </p>
+                    {!acertou && <p className="text-xs text-white/75">Correta: <strong>{q.opcoes[q.correta]}</strong></p>}
+                    {q.justificativa && <p className="mt-1 text-xs leading-relaxed text-white/55">💡 {q.justificativa}</p>}
+                  </div>
+                );
+              })}
+            </div>
+
             <button type="button" onClick={onClose} className="mt-6 rounded-full border border-white/15 px-6 py-2.5 text-sm font-medium text-white/80 transition hover:text-white">
               Fechar
             </button>
