@@ -431,7 +431,9 @@ Retorne APENAS JSON:
     const questoes = arr.map((q: any) => ({
       enunciado: String(q.enunciado ?? "").trim(),
       opcoes: (Array.isArray(q.opcoes) ? q.opcoes : [])
-        .map((o: any) => String(o).replace(/^\s*[A-Da-d0-9][).\.\s-]+/, "").trim())
+        // remove SÓ rótulos de enumeração reais ("A)", "1.", "(A)") — exige terminador )/. + espaço.
+        // NÃO mexe em valores que começam com número (ex.: "0,3 mg/kg", "2 mg/kg").
+        .map((o: any) => String(o).replace(/^\s*\(?[A-Da-d0-9]{1,2}\)?[).\-]\s+/, "").trim())
         .filter(Boolean),
       correta: Number.isInteger(q.correta) ? q.correta : 0,
       justificativa: q.justificativa ? String(q.justificativa).trim() : "",
