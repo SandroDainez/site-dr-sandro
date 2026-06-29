@@ -3,6 +3,7 @@
 import { useState, useEffect, type CSSProperties } from "react";
 import { PlayCircle } from "lucide-react";
 import type { VideoaulaData } from "@/lib/content";
+import AulaQuizModal from "@/app/videoaulas/AulaQuizModal";
 
 const areaConfig: Record<string, { badge: string; label: string }> = {
   geral: { badge: "bg-teal-400/15 text-teal-400 border-teal-400/30", label: "Geral" },
@@ -48,6 +49,7 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
         >
           ✕ Fechar (Esc)
         </button>
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
         <video
           src={item.videoUrl}
           controls
@@ -65,13 +67,13 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
 export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   const [playerOpen, setPlayerOpen] = useState(false);
   const [inlinePlaying, setInlinePlaying] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   const cfg = areaConfig[item.area] ?? { badge: "text-white/60 border-white/20", label: item.area };
   const ytId = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
   const isProxy = item.videoUrl.startsWith("/api/img");
   const hasVideo = !!item.videoUrl;
-  // posição horizontal do conteúdo no recorte 4:5 (vídeos com personagem fora do centro)
-  // mostrarInteiro = mostra o vídeo todo (contain); senão recorta (cover) com X/zoom/Y
+  const hasQuiz = (item.quiz?.length ?? 0) > 0;
   const objPos: CSSProperties = item.mostrarInteiro
     ? { objectFit: "contain" }
     : {
@@ -85,27 +87,17 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   if (item.imageUrl) thumbSrc = item.imageUrl;
   else if (ytId) thumbSrc = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
 
-  // Prévia clicável (thumb ou primeiro frame do vídeo enviado)
+  // Aula COM prova: clicar abre o teste. Senão, toca embutido.
+  const abrir = () => (hasQuiz ? setQuizOpen(true) : setInlinePlaying(true));
+
+  // Prévia clicável. SEM elemento <video> no preview (causava erro de hidratação #418
+  // e o iOS sequestrava o toque). Quando não há imagem, usamos placeholder estático.
   const thumb = (
-    <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-black group/thumb" onClick={() => setInlinePlaying(true)}>
+    <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-gradient-to-br from-[#10151f] to-black group/thumb" onClick={abrir}>
       {thumbSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
-      ) : isProxy ? (
-        // pointer-events-none manda o clique ao container (toca inline) em vez do player nativo
-        <video
-          src={`${item.videoUrl}#t=0.5`}
-          muted
-          playsInline
-          preload="metadata"
-          style={objPos}
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center bg-white/[0.03]">
-          <PlayCircle className="h-10 w-10 text-white/25" />
-        </div>
-      )}
+      ) : null}
       <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition group-hover/thumb:bg-black/45">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/40 transition group-hover/thumb:scale-110">
           <span className="text-xl text-white">▶</span>
@@ -121,11 +113,11 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
 
   return (
     <>
-      {/* Tela cheia é opcional (só p/ vídeo enviado), nunca automática */}
       {playerOpen && isProxy && <VideoModal item={item} onClose={() => setPlayerOpen(false)} />}
+      {quizOpen && <AulaQuizModal item={item} onClose={() => setQuizOpen(false)} />}
 
       <article className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20">
-        {/* Mídia — sempre toca embutida no card */}
+        {/* Mídia */}
         {!hasVideo ? (
           <div className="flex aspect-[4/5] w-full items-center justify-center bg-white/[0.03]">
             <PlayCircle className="h-10 w-10 text-white/20" />
@@ -133,7 +125,6 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
         ) : !inlinePlaying ? (
           thumb
         ) : ytId ? (
-          // YouTube embutido (iframe) — toca no card, sem sair do site
           <div className="relative aspect-video w-full bg-black">
             <iframe
               src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&playsinline=1`}
@@ -144,8 +135,8 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
             />
           </div>
         ) : (
-          // Vídeo enviado — toca no card (cortado em 4:5 p/ esconder as tarjas brancas do vídeo)
           <div className="relative aspect-[4/5] overflow-hidden bg-black">
+            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video src={item.videoUrl} controls autoPlay playsInline style={objPos} className="absolute inset-0 h-full w-full object-cover" />
             <button
               type="button"
@@ -182,15 +173,40 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
 
           <h3 className="flex-1 text-sm font-semibold leading-snug text-white">{item.titulo}</h3>
 
+          {/* Material em PDF (se houver) */}
+          {item.pdfUrl && (
+            <div className="mt-3">
+              <a
+                href={item.pdfUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/75 transition hover:border-accent/40 hover:text-white"
+              >
+                📄 {item.pdfLabel?.trim() || "Material da aula (PDF)"}
+              </a>
+            </div>
+          )}
+
+          {/* Botão de ação: com prova abre o teste; senão toca embutido */}
           {hasVideo && !inlinePlaying && (
             <div className="mt-3">
-              <button
-                type="button"
-                onClick={() => setInlinePlaying(true)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
-              >
-                ▶ Assistir
-              </button>
+              {hasQuiz ? (
+                <button
+                  type="button"
+                  onClick={() => setQuizOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+                >
+                  ▶ Assistir + teste de conhecimento
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setInlinePlaying(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1] hover:text-white"
+                >
+                  ▶ Assistir
+                </button>
+              )}
             </div>
           )}
         </div>
