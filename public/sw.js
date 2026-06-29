@@ -1,6 +1,6 @@
 // Service worker do PWA. ESTRATÉGIA: rede-primeiro (nunca serve versão velha;
 // só cai no cache quando offline). Bump o CACHE ao mudar a estratégia.
-const CACHE = "portal-v2";
+const CACHE = "portal-v3";
 
 self.addEventListener("install", () => self.skipWaiting());
 
