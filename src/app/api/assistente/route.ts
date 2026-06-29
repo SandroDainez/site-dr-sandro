@@ -21,7 +21,9 @@ export async function POST(request: NextRequest) {
 
   try {
     // Pipeline: biblioteca interna (RAG) → PubMed (se preciso) → gpt-4o → guardrails.
-    const { resposta, fontes } = await handleMedicalQuery(supabase, openai, pergunta);
+    const { resposta, fontes, semFonte, usouPubmed } = await handleMedicalQuery(supabase, openai, pergunta);
+    // Log de demanda p/ o agente de melhoria (fire-and-forget; não bloqueia a resposta).
+    supabase.from("assistant_queries").insert({ pergunta: pergunta.slice(0, 500), sem_fonte: !!semFonte, usou_pubmed: !!usouPubmed }).then(() => {}, () => {});
     return NextResponse.json({ resposta, fontes });
   } catch {
     return NextResponse.json({ error: "Falha ao consultar o assistente. Tente de novo." }, { status: 502 });

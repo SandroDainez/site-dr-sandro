@@ -1,0 +1,86 @@
+import { NextRequest, NextResponse } from "next/server";
+import OpenAI from "openai";
+import { verificarCronSecret } from "@/lib/agents/utils";
+import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
+
+export const maxDuration = 120;
+
+// AGENTE DE MELHORIA: lê a DEMANDA real (buscas sem resultado + perguntas que o
+// assistente não soube responder) dos últimos 30 dias e sugere o que adicionar ao
+// portal. Apenas SUGERE — não altera nada. Roda semanal (cron) ou sob demanda.
+export async function POST(request: NextRequest) {
+  if (!verificarCronSecret(request)) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  if (!serviceConfigured() || !process.env.OPENAI_API_KEY) {
+    return NextResponse.json({ error: "Supabase ou OpenAI não configurados" }, { status: 503 });
+  }
+  const sb = createServiceClient();
+  const desde = new Date(Date.now() - 30 * 86400000).toISOString();
+
+  // 1) Buscas SEM resultado (lacunas de conteúdo mais diretas)
+  const { data: buscas } = await sb.from("search_queries").select("termo").eq("resultados", 0).gte("created_at", desde);
+  const buscasTop = contar((buscas ?? []).map((b: any) => String(b.termo || "").toLowerCase().trim())).slice(0, 20);
+
+  // 2) Perguntas que o assistente NÃO respondeu (sem fonte no portal)
+  const { data: perg } = await sb.from("assistant_queries").select("pergunta").eq("sem_fonte", true).gte("created_at", desde);
+  const pergTop = contar((perg ?? []).map((p: any) => String(p.pergunta || "").trim())).slice(0, 20);
+
+  // 3) Volume geral (pra contexto)
+  const { count: totalBuscas } = await sb.from("search_queries").select("*", { count: "exact", head: true }).gte("created_at", desde);
+  const { count: totalPerg } = await sb.from("assistant_queries").select("*", { count: "exact", head: true }).gte("created_at", desde);
+
+  const semDados = buscasTop.length === 0 && pergTop.length === 0;
+  let conteudo: any;
+  let resumo: string;
+
+  if (semDados) {
+    resumo = "Sem demanda registrada ainda nos últimos 30 dias (poucas buscas/perguntas). Conforme o uso crescer, este relatório aponta lacunas de conteúdo.";
+    conteudo = { resumo, lacunas: [], perguntas_sem_resposta: [], acoes: [], dados: { totalBuscas: totalBuscas ?? 0, totalPerguntas: totalPerg ?? 0 } };
+  } else {
+    const lista = (arr: { item: string; n: number }[]) => arr.map((x) => `- "${x.item}" (${x.n}x)`).join("\n") || "(nenhum)";
+    const prompt = `Você é um estrategista de conteúdo de uma plataforma médica (anestesiologia, terapia intensiva, medicina de emergência). Com base na DEMANDA REAL abaixo, sugira o que ADICIONAR ao portal. Baseie-se SOMENTE nestes dados — não invente demanda.
+
+BUSCAS SEM RESULTADO (últimos 30 dias):
+${lista(buscasTop)}
+
+PERGUNTAS QUE O ASSISTENTE NÃO SOUBE RESPONDER:
+${lista(pergTop)}
+
+Agrupe temas parecidos. Para cada lacuna, diga o tema, a evidência (o que os usuários procuraram), o tipo de conteúdo sugerido (protocolo, videoaula, boletim, referência na biblioteca) e a prioridade (alta/média/baixa).
+
+Retorne APENAS JSON:
+{
+  "resumo": "2-3 frases com o panorama da semana",
+  "lacunas": [{"tema":"...","evidencia":"...","sugestao":"...","tipo":"protocolo|videoaula|boletim|referencia|outro","prioridade":"alta|media|baixa"}],
+  "perguntas_sem_resposta": ["...as perguntas mais relevantes que merecem material..."],
+  "acoes": ["...3 a 5 ações concretas e priorizadas..."]
+}`;
+    try {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const r = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2000,
+        response_format: { type: "json_object" },
+      });
+      conteudo = JSON.parse(r.choices[0].message.content ?? "{}");
+      conteudo.dados = { totalBuscas: totalBuscas ?? 0, totalPerguntas: totalPerg ?? 0, buscasSemResultado: buscasTop.length, perguntasSemFonte: pergTop.length };
+      resumo = String(conteudo.resumo ?? "Relatório de melhoria gerado.");
+    } catch (e) {
+      return NextResponse.json({ error: "Falha na síntese: " + (e instanceof Error ? e.message : "erro") }, { status: 502 });
+    }
+  }
+
+  const gerado_em = new Date().toISOString().slice(0, 10);
+  await sb.from("improvement_reports").insert({ gerado_em, resumo, conteudo });
+  return NextResponse.json({ status: "ok", gerado_em, resumo, lacunas: conteudo.lacunas?.length ?? 0 });
+}
+
+export async function GET(request: NextRequest) { return POST(request); }
+
+// Conta ocorrências e ordena por frequência.
+function contar(itens: string[]): { item: string; n: number }[] {
+  const m = new Map<string, number>();
+  for (const it of itens) { if (!it || it.length < 2) continue; m.set(it, (m.get(it) ?? 0) + 1); }
+  return [...m.entries()].map(([item, n]) => ({ item, n })).sort((a, b) => b.n - a.n);
+}

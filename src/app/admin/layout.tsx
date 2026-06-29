@@ -47,6 +47,7 @@ const navGroups = [
       { href: "/admin/analytics", label: "Acessos", icon: BarChart3, hint: "Quantas pessoas acessaram o site, com gráfico de visitas." },
       { href: "/admin/conteudo-automatico", label: "Conteúdo automático (IA)", icon: Sparkles, hint: "Agentes de IA: atualizações clínicas semanais e eventos científicos. Status e executar agora." },
       { href: "/admin/referencias", label: "Biblioteca do Assistente (IA)", icon: BookOpen, hint: "Livros, artigos, diretrizes e PDFs que alimentam o assistente clínico. Reindexar após adicionar." },
+      { href: "/admin/melhoria", label: "Sugestões de melhoria (IA)", icon: Sparkles, hint: "Relatório: o que os usuários buscam e o assistente não responde → o que adicionar ao portal." },
     ],
   },
   {

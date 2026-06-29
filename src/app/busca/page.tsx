@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { Search, ArrowUpRight } from "lucide-react";
 import { getHeader } from "@/lib/content";
 import { buscarTudo } from "@/lib/search";
+import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import SiteLogo from "@/components/SiteLogo";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
@@ -27,6 +28,11 @@ export default async function BuscaPage({ searchParams }: { searchParams: Promis
   const [{ q }, header] = await Promise.all([searchParams, getHeader()]);
   const termo = (q || "").trim();
   const resultados = termo ? await buscarTudo(termo) : [];
+
+  // Log de demanda p/ o agente de melhoria (fire-and-forget; não bloqueia a página).
+  if (termo.length >= 2 && serviceConfigured()) {
+    try { createServiceClient().from("search_queries").insert({ termo: termo.slice(0, 200), resultados: resultados.length }).then(() => {}, () => {}); } catch {}
+  }
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
