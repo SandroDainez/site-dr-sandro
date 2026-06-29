@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, ArrowUpRight, Stethoscope } from "lucide-react";
 
-type Fonte = { titulo: string; url: string; tipo: string };
+type Fonte = { titulo: string; url: string | null; tipo: string; pmid?: string };
 type Msg = { autor: "voce" | "ia"; texto: string; fontes?: Fonte[] };
 
 const SUGESTOES = [
@@ -44,7 +44,7 @@ export default function AssistenteChat() {
         {msgs.length === 0 && (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <div className="mb-2 flex items-center gap-2 text-accent"><Sparkles className="h-5 w-5" /><p className="font-semibold text-white">Pergunte sobre o conteúdo do portal</p></div>
-            <p className="text-sm text-white/55">Respondo com base nos boletins, protocolos e materiais curados — sempre com a fonte. Não invento: se não estiver no portal, eu aviso.</p>
+            <p className="text-sm text-white/55">Respondo primeiro com o conteúdo curado do portal (sempre com a fonte) e, quando preciso, busco no PubMed. Não invento: se não houver referência, eu aviso.</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {SUGESTOES.map((s) => (
                 <button key={s} onClick={() => enviar(s)} className="rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs text-white/70 transition hover:border-accent/40 hover:text-white">{s}</button>
@@ -60,13 +60,24 @@ export default function AssistenteChat() {
               <p className="whitespace-pre-wrap">{m.texto}</p>
               {m.fontes && m.fontes.length > 0 && (
                 <div className="mt-3 border-t border-white/10 pt-2">
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-white/40">Fontes no portal</p>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-white/40">Fontes</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {m.fontes.map((f, j) => (
-                      <a key={j} href={f.url} target={f.url.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] text-accent transition hover:bg-accent/20">
-                        {f.titulo} <ArrowUpRight className="h-3 w-3" />
-                      </a>
-                    ))}
+                    {m.fontes.map((f, j) => {
+                      const isPub = f.tipo === "pubmed";
+                      const tag = isPub ? "PubMed" : "Portal";
+                      const cls = `inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] transition ${isPub ? "border-sky-400/30 bg-sky-400/10 text-sky-300 hover:bg-sky-400/20" : "border-accent/30 bg-accent/10 text-accent hover:bg-accent/20"}`;
+                      const conteudo = (
+                        <>
+                          <span className="font-semibold opacity-70">{tag}</span> {f.titulo}
+                          {f.url && <ArrowUpRight className="h-3 w-3" />}
+                        </>
+                      );
+                      return f.url ? (
+                        <a key={j} href={f.url} target={f.url.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className={cls}>{conteudo}</a>
+                      ) : (
+                        <span key={j} className={cls}>{conteudo}</span>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -77,7 +88,7 @@ export default function AssistenteChat() {
         {carregando && (
           <div className="flex gap-3">
             <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent"><Stethoscope className="h-4 w-4" /></span>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/50">Consultando o conteúdo do portal…</div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white/50">Consultando o portal e o PubMed…</div>
           </div>
         )}
         <div ref={fimRef} />
@@ -94,7 +105,7 @@ export default function AssistenteChat() {
           <Send className="h-4 w-4" />
         </button>
       </form>
-      <p className="mt-2 shrink-0 text-center text-[11px] text-white/35">Apoio à decisão — a palavra final é sempre do médico. Respostas baseadas no conteúdo do portal, com fonte.</p>
+      <p className="mt-2 shrink-0 text-center text-[11px] text-white/35">Apoio à decisão — a palavra final é sempre do médico. Fontes: conteúdo do portal e PubMed.</p>
     </div>
   );
 }

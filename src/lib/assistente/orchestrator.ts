@@ -1,0 +1,95 @@
+import type OpenAI from "openai";
+import { MEDICAL_ASSISTANT_SYSTEM_PROMPT } from "./system-prompt";
+import { searchInternalLibrary, libraryIsConfident, type LibraryHit } from "./search-library";
+import { searchPubMed, type PubmedHit } from "./search-pubmed";
+import { stripFabricatedPmids, garantirDisclaimer } from "./guardrails";
+
+export type Fonte = { titulo: string; url: string | null; tipo: string; pmid?: string };
+export type AssistResult = {
+  resposta: string;
+  fontes: Fonte[];
+  usouPubmed: boolean;
+  semFonte: boolean;
+};
+
+type SupabaseLike = { rpc: (fn: string, args: Record<string, unknown>) => any };
+
+function pubmedLabel(p: PubmedHit): string {
+  const partes = [p.autores, p.titulo + ".", [p.journal, p.ano].filter(Boolean).join(". ")].filter(Boolean);
+  return partes.join(" ");
+}
+
+// Monta o CONTEXTO numerado [1], [2]... (interno primeiro, depois PubMed).
+function buildContext(lib: LibraryHit[], pubmed: PubmedHit[]): string {
+  const linhas: string[] = [];
+  let n = 0;
+  for (const t of lib) {
+    n++;
+    linhas.push(`[${n}] BIBLIOTECA INTERNA — ${t.fonte_tipo}${t.fonte_titulo ? ` · ${t.fonte_titulo}` : ""}\n${t.conteudo}`);
+  }
+  for (const p of pubmed) {
+    n++;
+    linhas.push(`[${n}] PUBMED — ${pubmedLabel(p)} | PMID: ${p.pmid}\n${p.resumo || "(sem abstract disponível)"}`);
+  }
+  return linhas.join("\n\n");
+}
+
+// Pipeline: biblioteca interna → (se insuficiente) PubMed → LLM → guardrails → fontes.
+export async function handleMedicalQuery(
+  supabase: SupabaseLike,
+  openai: OpenAI,
+  pergunta: string,
+): Promise<AssistResult> {
+  // STEP 1 — biblioteca interna
+  let lib: LibraryHit[] = [];
+  try { lib = await searchInternalLibrary(supabase, pergunta); } catch { lib = []; }
+
+  // STEP 2 — PubMed só se a biblioteca não for suficiente
+  let pubmed: PubmedHit[] = [];
+  if (!libraryIsConfident(lib)) {
+    pubmed = await searchPubMed(openai, pergunta).catch(() => []);
+  }
+
+  const semFonte = lib.length === 0 && pubmed.length === 0;
+  const contexto = buildContext(lib, pubmed);
+
+  // STEP 3 — LLM com system prompt + contexto recuperado
+  const userContent = semFonte
+    ? `CONTEXTO RECUPERADO: (nenhum trecho da biblioteca nem do PubMed cobriu esta pergunta)\n\nPERGUNTA DO USUÁRIO:\n${pergunta}`
+    : `CONTEXTO RECUPERADO:\n${contexto}\n\nPERGUNTA DO USUÁRIO:\n${pergunta}`;
+
+  const r = await openai.chat.completions.create({
+    model: "gpt-4o",
+    temperature: 0.2,
+    max_tokens: 1000,
+    messages: [
+      { role: "system", content: MEDICAL_ASSISTANT_SYSTEM_PROMPT },
+      { role: "user", content: userContent },
+    ],
+  });
+  let resposta = r.choices[0].message.content ?? "";
+
+  // STEP 4 — guardrails: PMID inventado é removido; resposta clínica sem fonte recebe aviso.
+  const pmidsReais = new Set(pubmed.map((p) => p.pmid));
+  resposta = stripFabricatedPmids(resposta, pmidsReais).texto;
+  resposta = garantirDisclaimer(resposta, lib.length > 0 || pubmed.length > 0);
+
+  // STEP 5 — fontes para a UI (internas + PubMed), sem duplicar título
+  const vistas = new Set<string>();
+  const fontes: Fonte[] = [];
+  for (const t of lib) {
+    if (t.fonte_titulo && !vistas.has(t.fonte_titulo)) {
+      vistas.add(t.fonte_titulo);
+      fontes.push({ titulo: t.fonte_titulo, url: t.fonte_url, tipo: t.fonte_tipo });
+    }
+  }
+  for (const p of pubmed) {
+    const titulo = pubmedLabel(p);
+    if (!vistas.has(titulo)) {
+      vistas.add(titulo);
+      fontes.push({ titulo, url: p.url, tipo: "pubmed", pmid: p.pmid });
+    }
+  }
+
+  return { resposta, fontes, usouPubmed: pubmed.length > 0, semFonte };
+}
