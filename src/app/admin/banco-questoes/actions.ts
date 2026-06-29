@@ -85,8 +85,9 @@ Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["texto 1","texto 
     const qs: any[] = Array.isArray(parsed.questoes) ? parsed.questoes : [];
     if (qs.length === 0) return { ok: false, error: "A IA não gerou questões. Tente outro tema." };
 
-    // remove prefixo "A) " / "1. " das opções
-    const limpaOp = (o: any) => String(o).replace(/^\s*([A-Ea-e]\s*[).:-]|\d+\s*[).:-])\s*/, "").trim();
+    // remove SÓ rótulo de enumeração ("A) ", "1. ", "(B) ") — exige terminador )/./: + ESPAÇO.
+    // NÃO remove número que faz parte do valor (ex.: "0,3 mg/kg", "2 mg/kg", "0.2 mg/kg").
+    const limpaOp = (o: any) => String(o).replace(/^\s*\(?[A-Ea-e0-9]{1,2}\)?\s*[).:-]\s+/, "").trim();
     // resolve a correta seja índice, letra ("B") ou o texto da alternativa
     const resolveCorreta = (c: any, ops: string[]): number => {
       if (typeof c === "number" && c >= 0 && c < ops.length) return c;
