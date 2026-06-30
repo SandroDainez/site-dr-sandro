@@ -78,5 +78,65 @@
     "dificuldade": "facil",
     "respondivel_pela_base": true,
     "revisar_clinicamente": false
+  },
+  {
+    "id": "q09",
+    "pergunta": "Conduta no tromboembolismo pulmonar (TEP) agudo no adulto",
+    "resposta_correta": "Estratificar pelo risco/instabilidade. TEP de ALTO RISCO (choque/hipotensão): trombólise sistêmica (ex.: alteplase 100 mg IV em 2 h) se sem contraindicação, ou embolectomia/trombólise dirigida. TEP sem instabilidade: anticoagulação plena (HNF, enoxaparina 1 mg/kg SC 12/12h, ou DOAC). Suporte, O2; confirmar com angio-TC quando viável. ARMADILHA: não atrasar anticoagulação por exame em alta suspeita; trombólise só no alto risco (sangramento).",
+    "doc_fonte_esperado": "Tratado ABRAMEDE / Medicina Intensiva / Manual USP",
+    "categoria": "conduta",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q10",
+    "pergunta": "Conduta no AVC isquêmico agudo, incluindo janela de trombólise",
+    "resposta_correta": "Neuroimagem urgente (excluir hemorragia). Trombólise IV com alteplase 0,9 mg/kg (máx 90 mg; 10% em bolus, restante em 1 h) se ≤ 4,5 h do início e sem contraindicações (tenecteplase é alternativa). Trombectomia mecânica na oclusão de grande vaso até 6 h (até 24 h em casos selecionados por imagem). PA: se candidato a trombólise, manter < 185/110 antes; se não trombolisar, permissivo até ~220/120. Glicemia, NIHSS. ARMADILHA: respeitar a janela e a PA-alvo antes de trombolisar.",
+    "doc_fonte_esperado": "Tratado ABRAMEDE / Manual USP / Medicina Intensiva",
+    "categoria": "conduta",
+    "dificuldade": "dificil",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q11",
+    "pergunta": "Conduta na cetoacidose diabética (CAD) no adulto",
+    "resposta_correta": "Três pilares: (1) HIDRATAÇÃO com cristaloide (SF 0,9% ~15-20 mL/kg/h inicial, depois ajustar); (2) INSULINA regular IV 0,1 U/kg/h (bolus opcional) — só APÓS garantir K+ ≥ 3,3; (3) POTÁSSIO: repor se K+ < 5,2 com diurese; se K+ < 3,3 NÃO iniciar insulina (risco de arritmia) — repor K+ primeiro. Acrescentar glicose à solução quando glicemia ~200-250. Tratar o fator precipitante; monitorar K+, glicemia, gap, pH. ARMADILHA: K+ antes da insulina.",
+    "doc_fonte_esperado": "Medicina Intensiva / Manual USP / Tratado ABRAMEDE",
+    "categoria": "conduta",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q12",
+    "pergunta": "Conduta na emergência hipertensiva no adulto",
+    "resposta_correta": "Emergência hipertensiva = PA muito elevada COM lesão aguda de órgão-alvo → reduzir de forma CONTROLADA com anti-hipertensivo IV titulável (nitroprussiato, nitroglicerina, labetalol, esmolol conforme contexto), meta reduzir ~10-20% da PAM na 1ª hora (não normalizar rápido — risco de isquemia). Exceções com metas próprias: dissecção de aorta (PAS ~100-120, FC < 60, betabloqueador primeiro), AVC, eclâmpsia. Urgência hipertensiva (sem lesão de órgão) = VO/ambulatorial. ARMADILHA: não usar nifedipino sublingual; não baixar rápido demais.",
+    "doc_fonte_esperado": "Tratado ABRAMEDE / Manual USP / Medicina Intensiva",
+    "categoria": "conduta",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q13",
+    "pergunta": "Doses dos fármacos no estado de mal epiléptico no adulto",
+    "resposta_correta": "1ª linha BENZODIAZEPÍNICO: midazolam 10 mg IM (ou 0,2 mg/kg), OU diazepam 0,15-0,2 mg/kg IV (até 10 mg), OU lorazepam 0,1 mg/kg IV. 2ª linha (antiepiléptico IV): fenitoína 20 mg/kg, OU ácido valproico 40 mg/kg, OU levetiracetam 60 mg/kg. 3ª linha (refratário): IOT + infusão anestésica (midazolam/propofol). ABCDE, glicemia capilar, tiamina se etilismo/desnutrição.",
+    "doc_fonte_esperado": "Tratado ABRAMEDE / Manual USP / Medicina Intensiva",
+    "categoria": "dose",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q14",
+    "pergunta": "Conduta na hipercalemia com alterações no ECG",
+    "resposta_correta": "(1) ESTABILIZAR MEMBRANA: gluconato de cálcio 10% 10-20 mL IV (ou cloreto de cálcio) — efeito rápido, não baixa o K+; (2) DESLOCAR K+ para intracelular: insulina regular 10 U IV + glicose (25-50 g se não hiperglicêmico), beta-2 inalatório (salbutamol), bicarbonato se acidose; (3) REMOVER K+: diurético de alça, resina trocadora, DIÁLISE se grave/refratária ou IRA. Suspender fontes de K+ e drogas hipercalemiantes; monitorar ECG e K+. ARMADILHA: cálcio estabiliza mas não reduz o K+.",
+    "doc_fonte_esperado": "Medicina Intensiva / Manual USP / Tratado ABRAMEDE",
+    "categoria": "conduta",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
   }
 ]
