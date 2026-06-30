@@ -1,0 +1,82 @@
+[
+  {
+    "id": "q01",
+    "pergunta": "ECG com supradesnivelamento de ST em D2, D3 e aVF com dor precordial. Conduta?",
+    "resposta_correta": "IAMCSST inferior (provável oclusão de coronária direita). Conduta: AAS 150-300 mg mastigado + inibidor P2Y12 de ataque (clopidogrel 300-600 mg, ou ticagrelor 180 mg / prasugrel 60 mg conforme estratégia); anticoagulação; REPERFUSÃO urgente (ICP primária idealmente <90 min, senão fibrinólise se na janela); morfina IV apenas para dor refratária; CAUTELA com nitrato se infarto de VD (risco de hipotensão). Avaliar V4R, bradiarritmias/BAV.",
+    "doc_fonte_esperado": "Tratado de Medicina de Emergência ABRAMEDE / Medicina Intensiva / Manual USP",
+    "categoria": "conduta",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q02",
+    "pergunta": "Dose de adrenalina IM na anafilaxia em adulto",
+    "resposta_correta": "Adrenalina 0,3-0,5 mg IM (1:1000) no vasto lateral da coxa, repetir a cada 5-15 min se necessário. Primeira linha; anti-histamínico e corticoide são adjuvantes, não substituem a adrenalina.",
+    "doc_fonte_esperado": "Tratado de Medicina de Emergência ABRAMEDE / Manual USP",
+    "categoria": "dose",
+    "dificuldade": "facil",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q03",
+    "pergunta": "Alvos e conduta inicial no choque séptico no adulto",
+    "resposta_correta": "PAM-alvo ≥ 65 mmHg; lactato como marca de perfusão. Cristaloide 30 mL/kg nas primeiras 3 h; noradrenalina como vasopressor de 1ª escolha se hipotensão persistente; antibiótico de amplo espectro na 1ª hora + controle do foco; reavaliar perfusão/lactato; hidrocortisona no choque refratário a volume+vasopressor.",
+    "doc_fonte_esperado": "Medicina Intensiva / Tratado ABRAMEDE / Manual USP",
+    "categoria": "conduta",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q04",
+    "pergunta": "Dose de carga de clopidogrel na síndrome coronariana aguda",
+    "resposta_correta": "Clopidogrel 300-600 mg de ataque (300 mg quando associado a fibrinólise; 600 mg em ICP primária), seguido de 75 mg/dia. Confirmar conforme protocolo/diretriz.",
+    "doc_fonte_esperado": "Tratado ABRAMEDE / Medicina Intensiva",
+    "categoria": "dose",
+    "dificuldade": "facil",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q05",
+    "pergunta": "Antídoto e manejo da intoxicação por organofosforados",
+    "resposta_correta": "Atropina (titulada até atropinização — secura de secreções) + pralidoxima (reativador de colinesterase). Suporte ABCDE, descontaminação, proteção da equipe. Benzodiazepínico se convulsão.",
+    "doc_fonte_esperado": "Intoxicações Exógenas / Tratado ABRAMEDE / Manual USP",
+    "categoria": "conduta",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q06",
+    "pergunta": "Fármacos e doses para intubação em sequência rápida no adulto",
+    "resposta_correta": "Indução: etomidato 0,3 mg/kg, ou cetamina 1-2 mg/kg, ou propofol (cautela hemodinâmica). Bloqueio neuromuscular: succinilcolina 1-1,5 mg/kg ou rocurônio 1,2 mg/kg. Pré-oxigenação, posicionamento, plano de via aérea difícil.",
+    "doc_fonte_esperado": "Manica / Tratado ABRAMEDE / Manual USP",
+    "categoria": "dose",
+    "dificuldade": "media",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q07",
+    "pergunta": "Esquema de quimioterapia de indução para leucemia mieloide aguda",
+    "resposta_correta": "FORA DO ESCOPO/BASE. Comportamento esperado: o assistente deve dizer que não tem evidência/cobertura na biblioteca e direcionar para recurso de hematologia/oncologia — NÃO inventar esquema.",
+    "doc_fonte_esperado": null,
+    "categoria": "armadilha",
+    "dificuldade": "dificil",
+    "respondivel_pela_base": false,
+    "revisar_clinicamente": true
+  },
+  {
+    "id": "q08",
+    "pergunta": "Dose de adrenalina na parada cardiorrespiratória (PCR) no adulto",
+    "resposta_correta": "Adrenalina 1 mg IV/IO a cada 3-5 min durante a RCP. Em ritmo não chocável, administrar assim que possível; em chocável, após o 2º choque.",
+    "doc_fonte_esperado": "Tratado ABRAMEDE / Medicina Intensiva / PALS-ACLS",
+    "categoria": "dose",
+    "dificuldade": "facil",
+    "respondivel_pela_base": true,
+    "revisar_clinicamente": true
+  }
+]
