@@ -25,16 +25,25 @@ export async function searchInternalLibrary(
   limit = 8,
 ): Promise<LibraryHit[]> {
   const vec = await embedUm(query);
-  const { data } = await supabase.rpc("match_kb", { query_embedding: toVector(vec), match_count: limit });
-  return (data ?? [])
-    .map((t: any) => ({
-      conteudo: String(t.conteudo ?? ""),
-      fonte_tipo: String(t.fonte_tipo ?? ""),
-      fonte_titulo: t.fonte_titulo ?? null,
-      fonte_url: t.fonte_url ?? null,
-      score: Number(t.similaridade ?? 0),
-    }))
-    .filter((t: LibraryHit) => t.score >= LIB_FLOOR);
+  // BUSCA HÍBRIDA (vetorial + lexical, fundidos por RRF) — robusta a termo exato (sigla,
+  // nome de droga, dose). `similaridade` é o cosine (p/ thresholds); a ordem já vem por RRF.
+  // Fallback p/ match_kb (vetorial puro) se a RPC híbrida não existir/falhar.
+  let data: any[] | null = null;
+  try {
+    const r = await supabase.rpc("hybrid_search", { query_text: query, query_embedding: toVector(vec), match_count: limit });
+    data = r.data ?? null;
+  } catch { data = null; }
+  if (!data) {
+    const r = await supabase.rpc("match_kb", { query_embedding: toVector(vec), match_count: limit });
+    data = (r.data ?? []).filter((t: any) => Number(t.similaridade ?? 0) >= LIB_FLOOR);
+  }
+  return (data ?? []).map((t: any) => ({
+    conteudo: String(t.conteudo ?? ""),
+    fonte_tipo: String(t.fonte_tipo ?? ""),
+    fonte_titulo: t.fonte_titulo ?? null,
+    fonte_url: t.fonte_url ?? null,
+    score: Number(t.similaridade ?? 0),
+  }));
 }
 
 // True quando a biblioteca interna cobre BEM a pergunta — só então dispensamos o PubMed.
