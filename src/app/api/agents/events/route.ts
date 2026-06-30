@@ -258,6 +258,42 @@ async function verificarDataNaFonte(url: string, dataISO: string): Promise<boole
   }
 }
 
+// A URL realmente abre? Aceita 2xx/3xx; trata 401/403/405/429 como "vivo" (o domínio
+// existe, só bloqueia robô). DNS/conexão falha, 404/410/5xx → morto. Evita salvar
+// link quebrado (ex.: subdomínio de evento ainda não publicado que o modelo inventa).
+async function urlViva(url: string): Promise<boolean> {
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(url, {
+      method: "GET", redirect: "follow", signal: ctrl.signal,
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" },
+    }).catch(() => null);
+    clearTimeout(tid);
+    if (!res) return false;
+    if (res.status >= 200 && res.status < 400) return true;
+    return [401, 403, 405, 429].includes(res.status);
+  } catch { return false; }
+}
+
+// Devolve uma URL que ABRE: a original se viva; senão sobe pros domínios-pai
+// (paulista2026.amib.org.br → amib.org.br). Se nada abrir, devolve null (descarta o evento).
+async function urlUsavel(url: string): Promise<string | null> {
+  if (!url || !/^https?:\/\//i.test(url)) return null;
+  if (await urlViva(url)) return url;
+  try {
+    const u = new URL(url);
+    const labels = u.host.replace(/^www\./, "").split(".");
+    for (let i = 1; i <= labels.length - 2; i++) {
+      const cand = labels.slice(i).join(".");
+      for (const pref of ["https://www.", "https://"]) {
+        if (await urlViva(`${pref}${cand}/`)) return `${pref}${cand}/`;
+      }
+    }
+  } catch { /* url malformada */ }
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   if (!verificarCronSecret(request)) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
@@ -351,6 +387,13 @@ export async function POST(request: NextRequest) {
           confirmar = false;
         }
       }
+      // AUTO-CURA: se a URL salva não abre mais (subdomínio saiu do ar etc.), troca por
+      // uma que funcione — a nova do agente ou o domínio-pai da atual. Mantém só links vivos.
+      let urlReparada: string | null = null;
+      const urlAtual = existente.url_oficial as string | null;
+      if (urlAtual && !(await urlViva(urlAtual))) {
+        urlReparada = (await urlUsavel(ev.url_oficial)) || (await urlUsavel(urlAtual));
+      }
       await supabase.from("medical_events").update({
         data_inicio: novaData,
         data_fim: novaDataFim,
@@ -360,6 +403,7 @@ export async function POST(request: NextRequest) {
         descricao: ev.descricao ?? null,
         // corrige a especialidade de linhas já existentes (classificador é a autoridade)
         ...(Array.isArray(ev.especialidades) && ev.especialidades.length ? { especialidades: ev.especialidades } : {}),
+        ...(urlReparada ? { url_oficial: urlReparada } : {}),
         ativo: true,
         data_confirmada: confirmar,
         // marca a linha como marco (sem sobrescrever com null se não vier chave)
@@ -368,6 +412,9 @@ export async function POST(request: NextRequest) {
       }).eq("id", existente.id);
       atualizados++;
     } else {
+      // Só insere se a URL REALMENTE abrir (senão tenta o domínio-pai; se nada abrir, descarta).
+      const urlOk = await urlUsavel(ev.url_oficial);
+      if (!urlOk) { ignorados++; continue; }
       const { error } = await supabase.from("medical_events").insert({
         titulo: ev.titulo,
         descricao: ev.descricao ?? null,
@@ -378,7 +425,7 @@ export async function POST(request: NextRequest) {
         cidade: ev.cidade ?? null,
         pais: ev.pais ?? "Brasil",
         modalidade: ev.modalidade ?? "presencial",
-        url_oficial: ev.url_oficial,
+        url_oficial: urlOk,
         organizador: ev.organizador ?? null,
         slug_marco: slug,
         destaque: false,
@@ -388,7 +435,7 @@ export async function POST(request: NextRequest) {
       else {
         inseridos++;
         // indexa o recém-inserido p/ não duplicar com uma variante na mesma rodada
-        indexar({ titulo: ev.titulo, data_inicio: ev.data_inicio, url_oficial: ev.url_oficial, slug_marco: slug });
+        indexar({ titulo: ev.titulo, data_inicio: ev.data_inicio, url_oficial: urlOk, slug_marco: slug });
       }
     }
   }
