@@ -2,12 +2,12 @@
   {
     "id": "q01",
     "pergunta": "ECG com supradesnivelamento de ST em D2, D3 e aVF com dor precordial. Conduta?",
-    "resposta_correta": "IAMCSST inferior (provável oclusão de coronária direita). Conduta: AAS 150-300 mg mastigado + inibidor P2Y12 de ataque (clopidogrel 300-600 mg, ou ticagrelor 180 mg / prasugrel 60 mg conforme estratégia); anticoagulação; REPERFUSÃO urgente (ICP primária idealmente <90 min, senão fibrinólise se na janela); morfina IV apenas para dor refratária; CAUTELA com nitrato se infarto de VD (risco de hipotensão). Avaliar V4R, bradiarritmias/BAV.",
+    "resposta_correta": "IAMCSST inferior (provável oclusão de coronária direita). Conduta: AAS 150-300 mg VO mastigado + inibidor P2Y12 de ataque (clopidogrel 300-600 mg, ou ticagrelor 180 mg / prasugrel 60 mg conforme estratégia); anticoagulação; REPERFUSÃO urgente — ICP primária em até 90 min do primeiro contato médico quando o paciente chega direto a centro com hemodinâmica, ou em até 120 min quando há necessidade de transferência; fibrinólise quando a ICP não estiver disponível em tempo adequado e dentro da janela; morfina IV apenas para dor refratária; CAUTELA com nitrato se infarto de VD (risco de hipotensão). Avaliar derivações direitas (V3R/V4R), bradiarritmias/BAV.",
     "doc_fonte_esperado": "Tratado de Medicina de Emergência ABRAMEDE / Medicina Intensiva / Manual USP",
     "categoria": "conduta",
     "dificuldade": "media",
     "respondivel_pela_base": true,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   },
   {
     "id": "q02",
@@ -17,27 +17,27 @@
     "categoria": "dose",
     "dificuldade": "facil",
     "respondivel_pela_base": true,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   },
   {
     "id": "q03",
     "pergunta": "Alvos e conduta inicial no choque séptico no adulto",
-    "resposta_correta": "PAM-alvo ≥ 65 mmHg; lactato como marca de perfusão. Cristaloide 30 mL/kg nas primeiras 3 h; noradrenalina como vasopressor de 1ª escolha se hipotensão persistente; antibiótico de amplo espectro na 1ª hora + controle do foco; reavaliar perfusão/lactato; hidrocortisona no choque refratário a volume+vasopressor.",
+    "resposta_correta": "PAM-alvo ≥ 65 mmHg; lactato como marca de perfusão. Cristaloide 30 mL/kg nas primeiras 3 h; noradrenalina como vasopressor de 1ª escolha se hipotensão persistente; antibiótico de amplo espectro O MAIS RÁPIDO POSSÍVEL (idealmente na 1ª hora no choque séptico ou alta suspeita) + controle do foco; reavaliar perfusão/lactato; hidrocortisona no choque refratário a volume+vasopressor.",
     "doc_fonte_esperado": "Medicina Intensiva / Tratado ABRAMEDE / Manual USP",
     "categoria": "conduta",
     "dificuldade": "media",
     "respondivel_pela_base": true,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   },
   {
     "id": "q04",
     "pergunta": "Dose de carga de clopidogrel na síndrome coronariana aguda",
-    "resposta_correta": "Clopidogrel 300-600 mg de ataque (300 mg quando associado a fibrinólise; 600 mg em ICP primária), seguido de 75 mg/dia. Confirmar conforme protocolo/diretriz.",
+    "resposta_correta": "Clopidogrel 300-600 mg de ataque (300 mg quando associado a fibrinólise; 600 mg em ICP primária), seguido de 75 mg/dia. EXCEÇÃO: em pacientes ≥75 anos submetidos a fibrinólise, geralmente NÃO se faz dose de ataque — iniciar direto 75 mg/dia. Confirmar conforme protocolo/diretriz.",
     "doc_fonte_esperado": "Tratado ABRAMEDE / Medicina Intensiva",
     "categoria": "dose",
     "dificuldade": "facil",
     "respondivel_pela_base": true,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   },
   {
     "id": "q05",
@@ -47,7 +47,7 @@
     "categoria": "conduta",
     "dificuldade": "media",
     "respondivel_pela_base": true,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   },
   {
     "id": "q06",
@@ -57,7 +57,7 @@
     "categoria": "dose",
     "dificuldade": "media",
     "respondivel_pela_base": true,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   },
   {
     "id": "q07",
@@ -67,7 +67,7 @@
     "categoria": "armadilha",
     "dificuldade": "dificil",
     "respondivel_pela_base": false,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   },
   {
     "id": "q08",
@@ -77,6 +77,6 @@
     "categoria": "dose",
     "dificuldade": "facil",
     "respondivel_pela_base": true,
-    "revisar_clinicamente": true
+    "revisar_clinicamente": false
   }
 ]

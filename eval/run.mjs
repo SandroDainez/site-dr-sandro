@@ -51,7 +51,7 @@ const fonteBate = (esperado, titulos) => {
   const alvos = esperado.split("/").map((x) => norm(x).replace(/[^a-z0-9 ]/g, " ").trim()).filter(Boolean);
   return alvos.some((a) => titulos.some((t) => a.split(" ").filter((w) => w.length > 3).some((w) => norm(t).includes(w))));
 };
-const ehFallback = (resp) => /n[aã]o cont[eé]m evid[eê]ncia|n[aã]o tenho evid[eê]ncia|n[aã]o encontrei refer|fora do escopo|especializado em anestesiolog|recomendo recursos direcionados/i.test(resp);
+const ehFallback = (resp) => /n[aã]o cont[eé]m evid[eê]ncia|n[aã]o tenho evid[eê]ncia|n[aã]o encontrei refer|n[aã]o cobre|fora do escopo|outra especialidade|recomendo (consultar|recursos)|especializado em (anestesiolog|oncolog|hematolog|outr)/i.test(resp);
 
 const gabarito = JSON.parse(readFileSync("eval/gabarito.json", "utf8"));
 const filtro = process.argv[2];
