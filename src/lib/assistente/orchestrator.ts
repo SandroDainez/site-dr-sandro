@@ -39,23 +39,28 @@ async function dentroDoEscopo(openai: OpenAI, pergunta: string): Promise<boolean
   }
 }
 
-// Expansão de consulta: reescreve a pergunta numa busca clínica RICA (sinônimos, classes
-// farmacológicas, termos relacionados, PT+EN). Sem isso, "clopidogrel" recuperava trechos
-// perioperatórios em vez de SCA/antiagregação. Devolve [original, expandida]; em falha,
-// só a original (fail-safe).
-async function expandirConsulta(openai: OpenAI, pergunta: string): Promise<string[]> {
+// PLANEJAMENTO DE BUSCA (decomposição): para cobrir TODA a literatura de forma
+// organizada, o sistema quebra a pergunta nas suas FACETAS clínicas (diagnóstico,
+// conduta, doses, classes de fármacos, contraindicações, complicações, monitorização)
+// e gera uma consulta de busca para cada. Cada consulta varre a biblioteca inteira;
+// depois unimos tudo. Assim uma resposta de "sepse" recupera antibiótico + volume +
+// vasopressor + lactato + foco, não só o trecho mais óbvio. Fail-safe → [pergunta].
+async function planejarBusca(openai: OpenAI, pergunta: string): Promise<string[]> {
   try {
     const r = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0,
-      max_tokens: 120,
+      max_tokens: 300,
+      response_format: { type: "json_object" },
       messages: [{
         role: "user",
-        content: `Reescreva a pergunta clínica abaixo como UMA consulta de busca rica para recuperar trechos de livros médicos. Inclua sinônimos, classes farmacológicas, condições e termos relacionados, e equivalentes em inglês. Responda só a consulta (uma linha, sem aspas).\n\nPergunta: ${pergunta}`,
+        content: `Você planeja a RECUPERAÇÃO de um assistente médico que precisa responder de forma COMPLETA com base em livros. Para a pergunta abaixo, gere de 3 a 6 CONSULTAS DE BUSCA curtas e específicas que, JUNTAS, cubram todas as facetas necessárias (ex.: diagnóstico/critérios, conduta/passos, doses e fármacos, contraindicações/cautelas, complicações, monitorização). Cada consulta com sinônimos e termos em inglês quando útil. Se a pergunta for simples e pontual, 1-2 consultas bastam. Responda APENAS JSON: {"consultas": ["...", "..."]}.\n\nPergunta: ${pergunta}`,
       }],
     });
-    const q = (r.choices[0].message.content ?? "").trim();
-    return q && q.toLowerCase() !== pergunta.toLowerCase() ? [pergunta, q] : [pergunta];
+    const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+    const consultas: string[] = Array.isArray(parsed.consultas) ? parsed.consultas.filter((q: any) => typeof q === "string" && q.trim()).slice(0, 6) : [];
+    // sempre inclui a pergunta original como uma das consultas
+    return [pergunta, ...consultas.filter((q) => q.toLowerCase() !== pergunta.toLowerCase())];
   } catch {
     return [pergunta];
   }
@@ -92,14 +97,15 @@ export async function handleMedicalQuery(
     return { resposta: RECUSA_FORA_ESCOPO, fontes: [], usouPubmed: false, semFonte: true };
   }
 
-  // STEP 1 — biblioteca interna, com EXPANSÃO de consulta (recupera bem mais e no tema certo)
+  // STEP 1 — biblioteca interna com BUSCA POR DECOMPOSIÇÃO: cada faceta da pergunta vira
+  // uma consulta que varre toda a biblioteca; unimos tudo p/ cobertura completa e organizada.
   let lib: LibraryHit[] = [];
   try {
-    const consultas = await expandirConsulta(openai, pergunta);
+    const consultas = await planejarBusca(openai, pergunta);
     const grupos = await Promise.all(
-      consultas.map((q) => searchInternalLibrary(supabase, q, 12).catch(() => [] as LibraryHit[])),
+      consultas.map((q) => searchInternalLibrary(supabase, q, 8).catch(() => [] as LibraryHit[])),
     );
-    lib = unirHits(grupos, 12);
+    lib = unirHits(grupos, 20);
   } catch { lib = []; }
 
   // STEP 2 — PubMed só se a biblioteca não for suficiente
@@ -119,7 +125,7 @@ export async function handleMedicalQuery(
   const r = await openai.chat.completions.create({
     model: "gpt-4o",
     temperature: 0.2,
-    max_tokens: 1000,
+    max_tokens: 1800,
     messages: [
       { role: "system", content: MEDICAL_ASSISTANT_SYSTEM_PROMPT },
       { role: "user", content: userContent },
