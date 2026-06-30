@@ -17,7 +17,7 @@ export default async function AssistentePage() {
   if (!user) redirect("/entrar?next=/assistente");
 
   return (
-    <div className="min-h-screen bg-[#07090f] text-white">
+    <div className="flex min-h-[100dvh] flex-col bg-[#07090f] text-white">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#07090f]/80 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3 px-6 py-4">
           <a href="/" className="flex items-center gap-3"><SiteLogo header={header} variant="sm" />{header.name && <p className="hidden text-lg font-bold tracking-tight text-white sm:block">{header.name}</p>}</a>
@@ -25,7 +25,7 @@ export default async function AssistentePage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-6 py-6">
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-6 min-h-0">
         <div className="mb-4 flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/15 text-accent"><Sparkles className="h-5 w-5" /></span>
           <div>

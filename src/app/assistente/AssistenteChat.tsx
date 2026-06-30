@@ -39,8 +39,8 @@ export default function AssistenteChat() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-9rem)] flex-col">
-      <div className="flex-1 space-y-4 overflow-y-auto pb-4">
+    <div className="flex flex-1 min-h-0 flex-col">
+      <div className="flex-1 min-h-0 space-y-4 overflow-y-auto pb-4">
         {msgs.length === 0 && (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <div className="mb-2 flex items-center gap-2 text-accent"><Sparkles className="h-5 w-5" /><p className="font-semibold text-white">Pergunte sobre o conteúdo do portal</p></div>
