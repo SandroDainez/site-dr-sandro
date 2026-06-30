@@ -37,7 +37,23 @@ export async function searchInternalLibrary(
     .filter((t: LibraryHit) => t.score >= LIB_FLOOR);
 }
 
-// True quando o melhor trecho interno é forte o suficiente para não precisar de PubMed.
+// True quando a biblioteca interna cobre BEM a pergunta — só então dispensamos o PubMed.
+// Exige o melhor trecho forte E pelo menos 2 trechos acima do CONFIDENT: assim um único
+// trecho tangencial (ex.: "clopidogrel" caindo num trecho perioperatório) NÃO bloqueia a
+// busca de diretrizes no PubMed.
 export function libraryIsConfident(hits: LibraryHit[]): boolean {
-  return hits.length > 0 && hits[0].score >= LIB_CONFIDENT;
+  if (hits.length === 0 || hits[0].score < LIB_CONFIDENT) return false;
+  return hits.filter((h) => h.score >= LIB_CONFIDENT).length >= 2;
+}
+
+// Une resultados de várias consultas (expansão semântica): dedup por conteúdo,
+// mantém o MAIOR score de cada trecho e ordena do mais forte ao mais fraco.
+export function unirHits(grupos: LibraryHit[][], limit = 12): LibraryHit[] {
+  const porChave = new Map<string, LibraryHit>();
+  for (const g of grupos) for (const h of g) {
+    const chave = h.conteudo.slice(0, 200);
+    const atual = porChave.get(chave);
+    if (!atual || h.score > atual.score) porChave.set(chave, h);
+  }
+  return [...porChave.values()].sort((a, b) => b.score - a.score).slice(0, limit);
 }

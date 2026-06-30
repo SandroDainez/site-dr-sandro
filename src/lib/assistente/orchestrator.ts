@@ -1,6 +1,6 @@
 import type OpenAI from "openai";
 import { MEDICAL_ASSISTANT_SYSTEM_PROMPT } from "./system-prompt";
-import { searchInternalLibrary, libraryIsConfident, type LibraryHit } from "./search-library";
+import { searchInternalLibrary, libraryIsConfident, unirHits, type LibraryHit } from "./search-library";
 import { searchPubMed, type PubmedHit } from "./search-pubmed";
 import { stripFabricatedPmids, garantirDisclaimer } from "./guardrails";
 
@@ -39,6 +39,28 @@ async function dentroDoEscopo(openai: OpenAI, pergunta: string): Promise<boolean
   }
 }
 
+// Expansão de consulta: reescreve a pergunta numa busca clínica RICA (sinônimos, classes
+// farmacológicas, termos relacionados, PT+EN). Sem isso, "clopidogrel" recuperava trechos
+// perioperatórios em vez de SCA/antiagregação. Devolve [original, expandida]; em falha,
+// só a original (fail-safe).
+async function expandirConsulta(openai: OpenAI, pergunta: string): Promise<string[]> {
+  try {
+    const r = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0,
+      max_tokens: 120,
+      messages: [{
+        role: "user",
+        content: `Reescreva a pergunta clínica abaixo como UMA consulta de busca rica para recuperar trechos de livros médicos. Inclua sinônimos, classes farmacológicas, condições e termos relacionados, e equivalentes em inglês. Responda só a consulta (uma linha, sem aspas).\n\nPergunta: ${pergunta}`,
+      }],
+    });
+    const q = (r.choices[0].message.content ?? "").trim();
+    return q && q.toLowerCase() !== pergunta.toLowerCase() ? [pergunta, q] : [pergunta];
+  } catch {
+    return [pergunta];
+  }
+}
+
 function pubmedLabel(p: PubmedHit): string {
   const partes = [p.autores, p.titulo + ".", [p.journal, p.ano].filter(Boolean).join(". ")].filter(Boolean);
   return partes.join(" ");
@@ -70,9 +92,15 @@ export async function handleMedicalQuery(
     return { resposta: RECUSA_FORA_ESCOPO, fontes: [], usouPubmed: false, semFonte: true };
   }
 
-  // STEP 1 — biblioteca interna
+  // STEP 1 — biblioteca interna, com EXPANSÃO de consulta (recupera bem mais e no tema certo)
   let lib: LibraryHit[] = [];
-  try { lib = await searchInternalLibrary(supabase, pergunta); } catch { lib = []; }
+  try {
+    const consultas = await expandirConsulta(openai, pergunta);
+    const grupos = await Promise.all(
+      consultas.map((q) => searchInternalLibrary(supabase, q, 12).catch(() => [] as LibraryHit[])),
+    );
+    lib = unirHits(grupos, 12);
+  } catch { lib = []; }
 
   // STEP 2 — PubMed só se a biblioteca não for suficiente
   let pubmed: PubmedHit[] = [];
