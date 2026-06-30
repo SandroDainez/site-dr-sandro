@@ -138,13 +138,21 @@ export async function handleMedicalQuery(
   resposta = stripFabricatedPmids(resposta, pmidsReais).texto;
   resposta = garantirDisclaimer(resposta, lib.length > 0 || pubmed.length > 0);
 
-  // STEP 5 — fontes para a UI (internas + PubMed), sem duplicar título
+  // STEP 5 — fontes para a UI (internas + PubMed), sem duplicar título.
+  // Link da fonte interna: só expõe URL EXTERNA real (diretriz/DOI/site). NÃO linka o PDF
+  // do livro no blob privado (dava "Forbidden" e exporia obra com direitos autorais) nem o
+  // placeholder "/assistente": nesses casos o chip é só ATRIBUIÇÃO (de qual obra veio).
+  const urlFonteSegura = (url: string | null): string | null => {
+    if (!url || url === "/assistente") return null;
+    if (url.includes("blob.vercel-storage.com") || url.startsWith("/api/img")) return null;
+    return /^https?:\/\//i.test(url) ? url : null;
+  };
   const vistas = new Set<string>();
   const fontes: Fonte[] = [];
   for (const t of lib) {
     if (t.fonte_titulo && !vistas.has(t.fonte_titulo)) {
       vistas.add(t.fonte_titulo);
-      fontes.push({ titulo: t.fonte_titulo, url: t.fonte_url, tipo: t.fonte_tipo });
+      fontes.push({ titulo: t.fonte_titulo, url: urlFonteSegura(t.fonte_url), tipo: t.fonte_tipo });
     }
   }
   for (const p of pubmed) {
