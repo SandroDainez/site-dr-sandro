@@ -14,6 +14,28 @@ async function requireAdmin() {
 
 type Result = { ok: boolean; data?: any; error?: string };
 
+// Erros do Supabase/PostgREST são OBJETOS (não Error) — String(obj) vira "[object Object]".
+// Esta função extrai a mensagem de verdade, em qualquer formato.
+function msgErro(e: any): string {
+  if (e instanceof Error) return e.message;
+  if (e && typeof e === "object") return e.message || e.details || e.hint || e.error_description || e.error || JSON.stringify(e);
+  return String(e);
+}
+
+// Remove o que o Postgres NÃO aceita em coluna text: byte nulo e demais caracteres
+// de controle — vinham de PDFs e davam "unsupported Unicode escape sequence".
+// O padrão é montado com fromCharCode (sem caractere de controle no código-fonte).
+const CTRL_RE = new RegExp(
+  "[" + String.fromCharCode(0) + "-" + String.fromCharCode(8) +
+  String.fromCharCode(11) + String.fromCharCode(12) +
+  String.fromCharCode(14) + "-" + String.fromCharCode(31) +
+  String.fromCharCode(127) + "]",
+  "g"
+);
+function limparTexto(s: string): string {
+  return (s || "").replace(CTRL_RE, " ").replace(/\s+/g, " ").trim();
+}
+
 export async function listarReferencias(): Promise<Result> {
   try {
     await requireAdmin();
@@ -35,7 +57,7 @@ export async function listarReferencias(): Promise<Result> {
     } catch { /* status é opcional */ }
     const comStatus = (data ?? []).map((r: any) => ({ ...r, _chars: chars.get(r.id) ?? 0, _trechos: trechos.get(r.id) ?? 0 }));
     return { ok: true, data: comStatus };
-  } catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
+  } catch (e) { return { ok: false, error: msgErro(e) }; }
 }
 
 export async function salvarReferencia(ref: {
@@ -64,7 +86,7 @@ export async function salvarReferencia(ref: {
       : await supabase.from("kb_referencias").insert(linha);
     if (error) throw error;
     return { ok: true };
-  } catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
+  } catch (e) { return { ok: false, error: msgErro(e) }; }
 }
 
 // Salva a referência EXTRAINDO o texto do PDF NO SERVIDOR (a partir do blob URL).
@@ -81,7 +103,7 @@ export async function salvarReferenciaPdf(ref: {
     if (!ext.ok || !ext.data?.trim()) return { ok: false, error: ext.error ?? "Não consegui extrair texto do PDF (pode ser escaneado/imagem)." };
     const r = await salvarReferencia({ ...ref, arquivo_url: blobUrl, conteudo: ext.data });
     return r.ok ? { ok: true, data: { chars: ext.data.length } } : r;
-  } catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
+  } catch (e) { return { ok: false, error: msgErro(e) }; }
 }
 
 export async function excluirReferencia(id: string): Promise<Result> {
@@ -91,7 +113,7 @@ export async function excluirReferencia(id: string): Promise<Result> {
     const { error } = await supabase.from("kb_referencias").delete().eq("id", id);
     if (error) throw error;
     return { ok: true };
-  } catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
+  } catch (e) { return { ok: false, error: msgErro(e) }; }
 }
 
 // Extrai o texto de um PDF (blob privado) para preencher o conteúdo.
@@ -105,10 +127,10 @@ export async function extrairTextoPdf(url: string): Promise<Result> {
     const { extractText, getDocumentProxy } = await import("unpdf");
     const pdf = await getDocumentProxy(buf);
     const { text } = await extractText(pdf, { mergePages: true });
-    const limpo = String(text || "").replace(/\s+/g, " ").trim();
+    const limpo = limparTexto(String(text || ""));
     if (!limpo) return { ok: false, error: "Não foi possível extrair texto (PDF pode ser só imagem/escaneado)." };
     return { ok: true, data: limpo.slice(0, 18000000) }; // teto alto p/ livros gigantes (ex.: Manica) entrarem inteiros
-  } catch (e) { return { ok: false, error: "Falha ao ler o PDF: " + (e instanceof Error ? e.message : String(e)) }; }
+  } catch (e) { return { ok: false, error: "Falha ao ler o PDF: " + (msgErro(e)) }; }
 }
 
 // Reindexa o assistente (chama o indexador em processo, com o CRON_SECRET).
@@ -122,5 +144,5 @@ export async function reindexarAssistente(): Promise<Result> {
     const mod = await import("@/app/api/agents/index-kb/route");
     const res = await mod.POST(req);
     return { ok: res.ok, data: await res.json() };
-  } catch (e) { return { ok: false, error: e instanceof Error ? e.message : String(e) }; }
+  } catch (e) { return { ok: false, error: msgErro(e) }; }
 }
