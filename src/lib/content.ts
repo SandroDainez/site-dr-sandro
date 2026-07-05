@@ -1,6 +1,6 @@
 import { list, put } from "@vercel/blob";
 import { cache } from "react";
-import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER } from "./home-sections";
+import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER, CARD_COL_SECTIONS, DEFAULT_CARD_COLS } from "./home-sections";
 import { NAV_GROUPS, applyNavOverride, type NavGroup, type NavOverride } from "./nav-structure";
 import { unstable_noStore as noStore } from "next/cache";
 import fs from "fs/promises";
@@ -854,7 +854,18 @@ export async function getNavStyle(): Promise<NavStyleData> {
 
 // Ordem das seções da home (editável no admin). Constantes em ./home-sections
 // (módulo puro, reusável no cliente). Padrão: clínico → mídia → comunidade → apps.
-export { HOME_SECTION_IDS, DEFAULT_HOME_ORDER };
+export { HOME_SECTION_IDS, DEFAULT_HOME_ORDER, CARD_COL_SECTIONS, DEFAULT_CARD_COLS };
+
+// Cards por linha (colunas no desktop) por seção — editável no admin.
+export async function getCardCols(): Promise<Record<string, number>> {
+  const saved = await readBlob<Record<string, number>>("cardCols", {});
+  const out: Record<string, number> = { ...DEFAULT_CARD_COLS };
+  for (const s of CARD_COL_SECTIONS) {
+    const v = Math.round(Number((saved as Record<string, unknown>)?.[s.key]));
+    if (Number.isFinite(v) && v >= 1 && v <= 6) out[s.key] = v;
+  }
+  return out;
+}
 
 export async function getHomeOrder(): Promise<string[]> {
   const saved = await readBlob<string[]>("homeOrder", DEFAULT_HOME_ORDER);

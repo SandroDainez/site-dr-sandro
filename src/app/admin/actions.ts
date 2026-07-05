@@ -56,6 +56,17 @@ export async function saveHomeOrder(order: string[]): Promise<Result> {
   }
 }
 
+export async function saveCardCols(cols: Record<string, number>): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("cardCols", cols);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erro ao salvar" };
+  }
+}
+
 export async function saveEventos(eventos: EventoData[]): Promise<Result> {
   try {
     await requireAdmin();

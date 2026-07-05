@@ -46,6 +46,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Grade de cards com nº de colunas configurável por seção (admin → "Cards por linha").
+   --cols = colunas no desktop; --cols-t = no tablet (default 2); celular sempre 1. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+}
+@media (max-width: 1023px) {
+  .card-grid { grid-template-columns: repeat(var(--cols-t, 2), minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

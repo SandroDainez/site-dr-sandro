@@ -63,8 +63,16 @@ import {
   getNavItems,
   getNavStyle,
   getHomeOrder,
+  getCardCols,
   headerSubtitleLines,
 } from "@/lib/content";
+import type { CSSProperties } from "react";
+
+// Estilo da grade configurável: N colunas no desktop, 2 no tablet, 1 no celular (via .card-grid).
+function colStyle(n?: number): CSSProperties {
+  const c = n ?? 3;
+  return { "--cols": c, "--cols-t": Math.min(c, 2) } as CSSProperties;
+}
 
 const iconMap: Record<string, LucideIcon> = {
   Layers, CalendarClock, FileText, Zap, HeartPulse, BookOpen, AudioLines,
@@ -81,7 +89,7 @@ function computeHomeOrder(list: string[]): Record<string, number> {
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -105,6 +113,7 @@ export default async function Home() {
     getNavItems(),
     getNavStyle(),
     getHomeOrder(),
+    getCardCols(),
   ]);
   const homeOrder = computeHomeOrder(homeOrderList);
   const aiBoletins = await fetchMedicalUpdates();
@@ -205,7 +214,7 @@ export default async function Home() {
             <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "especialidades_band", "eyebrow")}</p>
             <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "especialidades_band", "title")}</h2>
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="card-grid gap-4" style={colStyle(cardCols["especialidades"])}>
             {[
               { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-emerg/25 via-emerg/8", accent: "text-emerg", border: "hover:border-emerg/50" },
               { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-inten/25 via-inten/8", accent: "text-inten", border: "hover:border-inten/50" },
@@ -239,7 +248,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="card-grid gap-5" style={colStyle(cardCols["apps-assinatura"])}>
             {apps.map((app, idx) => {
               const AppIcon = iconMap[app.icon] ?? Layers;
               return (
@@ -317,7 +326,7 @@ export default async function Home() {
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "freeApps", "title")}</h2>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="card-grid gap-5" style={colStyle(cardCols["apps-gratis"])}>
             {freeApps.map((item) => {
               const FreeIcon = iconMap[item.icon] ?? BookOpen;
               const inner = (
@@ -379,7 +388,7 @@ export default async function Home() {
             <p className="mt-3 max-w-2xl text-sm text-white/50">{secText(st, "utilApps", "desc")}</p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="card-grid gap-5" style={colStyle(cardCols["apps-uteis"])}>
             {utilApps.map((item) => {
               const UtilIcon = iconMap[item.icon] ?? Wallet;
               const inner = (
@@ -508,7 +517,7 @@ export default async function Home() {
                 <>
                   {/* Mesmo card da página /protocolos e das especialidades: expande NO LOCAL
                       (Ver protocolo ↓ / Ler / ⛶ Tela cheia / Baixar), sem abrir outra página. */}
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="card-grid gap-4" style={colStyle(cardCols["protocolos"])}>
                     {recent.map((item) => (
                       <ProtocoloCard key={item.id} item={item} />
                     ))}
@@ -554,7 +563,7 @@ export default async function Home() {
                 </a>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="card-grid gap-4" style={colStyle(cardCols["videoaulas"])}>
                 {recent.map((item) => (
                   <HomeVideoCard key={item.id} item={item} />
                 ))}
