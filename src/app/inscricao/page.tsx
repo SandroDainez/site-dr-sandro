@@ -153,7 +153,7 @@ export default async function InscricaoPage({ searchParams }: InscricaoPageProps
                     href={eventoData.inscricaoUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="finex-beam finex-beam-strong mt-5 inline-flex w-full items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold text-white"
+                    className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition hover:opacity-90"
                   >
                     Fazer inscrição →
                   </a>
@@ -180,7 +180,7 @@ export default async function InscricaoPage({ searchParams }: InscricaoPageProps
                   />
                   <button
                     type="button"
-                    className="finex-beam finex-beam-strong w-full rounded-2xl px-6 py-3 text-sm font-semibold text-white"
+                    className="w-full rounded-2xl bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition hover:opacity-90"
                   >
                     Confirmar interesse
                   </button>

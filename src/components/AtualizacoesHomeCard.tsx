@@ -4,9 +4,9 @@ import { useState } from "react";
 import type { AtualizacaoData } from "@/lib/content";
 
 const areaConfig: Record<AtualizacaoData["area"], { label: string; color: string; border: string }> = {
-  emergencias: { label: "🚑 Emergências", color: "text-red-400", border: "border-red-400/30" },
-  ti: { label: "🏥 Terapia Intensiva", color: "text-blue-400", border: "border-blue-400/30" },
-  anestesiologia: { label: "🩺 Anestesiologia", color: "text-violet-400", border: "border-violet-400/30" },
+  emergencias: { label: "🚑 Emergências", color: "text-emerg", border: "border-emerg/30" },
+  ti: { label: "🏥 Terapia Intensiva", color: "text-inten", border: "border-inten/30" },
+  anestesiologia: { label: "🩺 Anestesiologia", color: "text-anest", border: "border-anest/30" },
 };
 
 function formatDate(iso: string): string {

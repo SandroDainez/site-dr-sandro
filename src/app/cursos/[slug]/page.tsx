@@ -20,9 +20,9 @@ import QuizView from "./QuizView";
 import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
 
 const areaBadge: Record<string, string> = {
-  emergencias: "bg-red-400/15 text-red-400 border-red-400/30",
-  ti: "bg-blue-400/15 text-blue-400 border-blue-400/30",
-  anestesiologia: "bg-violet-400/15 text-violet-400 border-violet-400/30",
+  emergencias: "bg-emerg/15 text-emerg border-emerg/30",
+  ti: "bg-inten/15 text-inten border-inten/30",
+  anestesiologia: "bg-anest/15 text-anest border-anest/30",
   geral: "bg-teal-400/15 text-teal-400 border-teal-400/30",
 };
 const areaLabel: Record<string, string> = {

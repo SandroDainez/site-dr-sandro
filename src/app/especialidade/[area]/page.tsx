@@ -26,9 +26,9 @@ import { fetchMedicalUpdates } from "@/lib/supabase/server";
 
 type Area = "emergencias" | "ti" | "anestesiologia";
 const AREAS: Record<Area, { label: string; emoji: string; accent: string; grad: string; border: string; tagline: string }> = {
-  emergencias: { label: "Emergências", emoji: "🚑", accent: "text-red-400", grad: "from-red-500/25 via-red-500/8 to-transparent", border: "border-red-400/30", tagline: "Condutas, protocolos e materiais de medicina de urgência e emergência." },
-  ti: { label: "Terapia Intensiva", emoji: "🏥", accent: "text-blue-400", grad: "from-blue-500/25 via-blue-500/8 to-transparent", border: "border-blue-400/30", tagline: "Tudo de cuidados intensivos: protocolos, aulas, cursos e materiais." },
-  anestesiologia: { label: "Anestesiologia", emoji: "🩺", accent: "text-violet-400", grad: "from-violet-500/25 via-violet-500/8 to-transparent", border: "border-violet-400/30", tagline: "Condutas, documentos e conteúdo de anestesiologia num só lugar." },
+  emergencias: { label: "Emergências", emoji: "🚑", accent: "text-emerg", grad: "from-emerg/25 via-emerg/8 to-transparent", border: "border-emerg/30", tagline: "Condutas, protocolos e materiais de medicina de urgência e emergência." },
+  ti: { label: "Terapia Intensiva", emoji: "🏥", accent: "text-inten", grad: "from-inten/25 via-inten/8 to-transparent", border: "border-inten/30", tagline: "Tudo de cuidados intensivos: protocolos, aulas, cursos e materiais." },
+  anestesiologia: { label: "Anestesiologia", emoji: "🩺", accent: "text-anest", grad: "from-anest/25 via-anest/8 to-transparent", border: "border-anest/30", tagline: "Condutas, documentos e conteúdo de anestesiologia num só lugar." },
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ area: string }> }) {

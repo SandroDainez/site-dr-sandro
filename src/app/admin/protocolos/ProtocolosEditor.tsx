@@ -19,9 +19,9 @@ const areaLabels: Record<ProtocoloData["area"], string> = {
 };
 
 const areaColors: Record<ProtocoloData["area"], string> = {
-  emergencias: "text-red-400 border-red-400/30",
-  ti: "text-blue-400 border-blue-400/30",
-  anestesiologia: "text-violet-400 border-violet-400/30",
+  emergencias: "text-emerg border-emerg/30",
+  ti: "text-inten border-inten/30",
+  anestesiologia: "text-anest border-anest/30",
 };
 
 export default function ProtocolosEditor({ initialProtocolos }: Props) {

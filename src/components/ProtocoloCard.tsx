@@ -9,9 +9,9 @@ import { sanitizeRichText } from "@/lib/rich-text";
 // estado (ler texto, ler PDF inline, tela cheia) — abrir é igual em todo lugar.
 
 const areaBadge: Record<ProtocoloData["area"], string> = {
-  emergencias: "bg-red-400/15 text-red-400 border-red-400/30",
-  ti: "bg-blue-400/15 text-blue-400 border-blue-400/30",
-  anestesiologia: "bg-violet-400/15 text-violet-400 border-violet-400/30",
+  emergencias: "bg-emerg/15 text-emerg border-emerg/30",
+  ti: "bg-inten/15 text-inten border-inten/30",
+  anestesiologia: "bg-anest/15 text-anest border-anest/30",
 };
 const areaLabel: Record<ProtocoloData["area"], string> = {
   emergencias: "Emergências",

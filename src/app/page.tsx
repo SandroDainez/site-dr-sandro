@@ -165,13 +165,13 @@ export default async function Home() {
               <div className="mt-10 flex flex-wrap gap-4">
                 <a
                   href="#especialidades"
-                  className="finex-beam finex-beam-strong inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] transition"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition hover:opacity-90"
                 >
                   {uiText(ui, "heroCtaPrimary")} <ArrowRight className="h-4 w-4" />
                 </a>
                 <a
                   href="#eventos"
-                  className="finex-beam inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.9)] transition"
+                  className="inline-flex items-center gap-2 rounded-2xl border border-accent/55 bg-accent/[0.08] px-6 py-3 text-sm font-semibold text-accent transition hover:border-accent/80 hover:bg-accent/15"
                 >
                   {uiText(ui, "heroCtaSecondary")}
                 </a>
@@ -207,9 +207,9 @@ export default async function Home() {
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             {[
-              { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-red-500/25 via-red-500/8", accent: "text-red-400", border: "hover:border-red-400/50" },
-              { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-blue-500/25 via-blue-500/8", accent: "text-blue-400", border: "hover:border-blue-400/50" },
-              { area: "anestesiologia", label: "Anestesiologia", emoji: "🩺", desc: "Anestesia e pré-operatório", grad: "from-violet-500/25 via-violet-500/8", accent: "text-violet-400", border: "hover:border-violet-400/50" },
+              { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-emerg/25 via-emerg/8", accent: "text-emerg", border: "hover:border-emerg/50" },
+              { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-inten/25 via-inten/8", accent: "text-inten", border: "hover:border-inten/50" },
+              { area: "anestesiologia", label: "Anestesiologia", emoji: "🩺", desc: "Anestesia e pré-operatório", grad: "from-anest/25 via-anest/8", accent: "text-anest", border: "hover:border-anest/50" },
             ].map((s) => (
               <a key={s.area} href={`/especialidade/${s.area}`} className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition hover:-translate-y-1 ${s.border}`}>
                 <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${s.grad} to-transparent`} />
@@ -439,9 +439,9 @@ export default async function Home() {
         {(atualizacoes.length > 0 || aiBoletins.length > 0) && (() => {
           type AreaKey = "emergencias" | "ti" | "anestesiologia";
           const areaConfig: { key: AreaKey; label: string; emoji: string; badge: string; border: string; color: string }[] = [
-            { key: "emergencias", label: "Emergências",      emoji: "🚑", badge: "bg-red-400/15 text-red-400 border-red-400/30",    border: "hover:border-red-400/40",    color: "text-red-400" },
-            { key: "ti",          label: "Terapia Intensiva",emoji: "🏥", badge: "bg-blue-400/15 text-blue-400 border-blue-400/30",  border: "hover:border-blue-400/40",   color: "text-blue-400" },
-            { key: "anestesiologia", label: "Anestesiologia",emoji: "🩺", badge: "bg-violet-400/15 text-violet-400 border-violet-400/30", border: "hover:border-violet-400/40", color: "text-violet-400" },
+            { key: "emergencias", label: "Emergências",      emoji: "🚑", badge: "bg-emerg/15 text-emerg border-emerg/30",    border: "hover:border-emerg/40",    color: "text-emerg" },
+            { key: "ti",          label: "Terapia Intensiva",emoji: "🏥", badge: "bg-inten/15 text-inten border-inten/30",  border: "hover:border-inten/40",   color: "text-inten" },
+            { key: "anestesiologia", label: "Anestesiologia",emoji: "🩺", badge: "bg-anest/15 text-anest border-anest/30", border: "hover:border-anest/40", color: "text-anest" },
           ];
           const grouped: Record<AreaKey, typeof atualizacoes> = { emergencias: [], ti: [], anestesiologia: [] };
           for (const item of atualizacoes) {

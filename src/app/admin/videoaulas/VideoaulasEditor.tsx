@@ -21,9 +21,9 @@ const areaLabels: Record<VideoaulaData["area"], string> = {
 };
 
 const areaColors: Record<VideoaulaData["area"], string> = {
-  emergencias: "text-red-400 border-red-400/30",
-  ti: "text-blue-400 border-blue-400/30",
-  anestesiologia: "text-violet-400 border-violet-400/30",
+  emergencias: "text-emerg border-emerg/30",
+  ti: "text-inten border-inten/30",
+  anestesiologia: "text-anest border-anest/30",
   geral: "text-teal-400 border-teal-400/30",
 };
 

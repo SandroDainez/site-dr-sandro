@@ -21,21 +21,21 @@ const tabs: { value: FilterArea; label: string }[] = [
 const areaConfig = {
   emergencias: {
     label: "🚑 Emergências",
-    badge: "bg-red-400/15 text-red-400 border-red-400/30",
-    border: "border-red-400/25",
-    sectionTitle: "text-red-400",
+    badge: "bg-emerg/15 text-emerg border-emerg/30",
+    border: "border-emerg/25",
+    sectionTitle: "text-emerg",
   },
   ti: {
     label: "🏥 Terapia Intensiva",
-    badge: "bg-blue-400/15 text-blue-400 border-blue-400/30",
-    border: "border-blue-400/25",
-    sectionTitle: "text-blue-400",
+    badge: "bg-inten/15 text-inten border-inten/30",
+    border: "border-inten/25",
+    sectionTitle: "text-inten",
   },
   anestesiologia: {
     label: "🩺 Anestesiologia",
-    badge: "bg-violet-400/15 text-violet-400 border-violet-400/30",
-    border: "border-violet-400/25",
-    sectionTitle: "text-violet-400",
+    badge: "bg-anest/15 text-anest border-anest/30",
+    border: "border-anest/25",
+    sectionTitle: "text-anest",
   },
 };
 

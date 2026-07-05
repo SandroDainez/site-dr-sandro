@@ -7,9 +7,14 @@
   --line: rgba(255, 255, 255, 0.1);
   --panel: #111722;
   --panel-soft: rgba(255, 255, 255, 0.04);
-  --accent: #2ce6b8;
+  --accent: #2ce6b8;        /* teal-menta da MARCA (CTAs, Assistente) */
+  --on-accent: #06231c;     /* texto escuro sobre o accent (contraste ~13:1) */
   --accent-blue: #5f8fff;
   --accent-violet: #8d7bff;
+  /* Paleta por ESPECIALIDADE, ancorada na logo (vermelho/azul/teal) */
+  --emerg: #f2555f;         /* Emergência — vermelho/coral da logo */
+  --inten: #3b9ee5;         /* Terapia Intensiva — azul da logo */
+  --anest: #10b98a;         /* Anestesiologia — teal-esmeralda (≠ marca, p/ não confundir) */
 }
 
 @theme inline {
@@ -20,8 +25,12 @@
   --color-panel: var(--panel);
   --color-panel-soft: var(--panel-soft);
   --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
   --color-accent-blue: var(--accent-blue);
   --color-accent-violet: var(--accent-violet);
+  --color-emerg: var(--emerg);
+  --color-inten: var(--inten);
+  --color-anest: var(--anest);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

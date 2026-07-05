@@ -7,9 +7,9 @@ import AulaQuizModal from "@/app/videoaulas/AulaQuizModal";
 
 const areaConfig: Record<string, { badge: string; label: string }> = {
   geral: { badge: "bg-teal-400/15 text-teal-400 border-teal-400/30", label: "Geral" },
-  emergencias: { badge: "bg-red-400/15 text-red-400 border-red-400/30", label: "Emergências" },
-  ti: { badge: "bg-blue-400/15 text-blue-400 border-blue-400/30", label: "TI" },
-  anestesiologia: { badge: "bg-violet-400/15 text-violet-400 border-violet-400/30", label: "Anestesiologia" },
+  emergencias: { badge: "bg-emerg/15 text-emerg border-emerg/30", label: "Emergências" },
+  ti: { badge: "bg-inten/15 text-inten border-inten/30", label: "TI" },
+  anestesiologia: { badge: "bg-anest/15 text-anest border-anest/30", label: "Anestesiologia" },
 };
 
 const nivelLabel: Record<string, string> = {

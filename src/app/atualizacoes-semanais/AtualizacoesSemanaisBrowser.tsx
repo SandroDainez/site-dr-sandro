@@ -14,9 +14,9 @@ const TABS: { value: Area; label: string }[] = [
 ];
 
 const ESP_BADGE: Record<string, string> = {
-  anestesiologia: "border-violet-400/30 bg-violet-400/10 text-violet-300",
-  terapia_intensiva: "border-blue-400/30 bg-blue-400/10 text-blue-300",
-  emergencias: "border-red-400/30 bg-red-400/10 text-red-300",
+  anestesiologia: "border-anest/30 bg-anest/10 text-anest",
+  terapia_intensiva: "border-inten/30 bg-inten/10 text-inten",
+  emergencias: "border-emerg/30 bg-emerg/10 text-emerg",
 };
 const ESP_LABEL: Record<string, string> = {
   anestesiologia: "Anestesiologia",
