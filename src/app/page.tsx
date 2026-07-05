@@ -31,6 +31,7 @@ import PodcastList from "@/app/podcast/PodcastList";
 import SiteFooter from "@/components/SiteFooter";
 import ColaboradoresList from "@/app/colaboradores/ColaboradoresList";
 import AcervoList from "@/app/acervo/AcervoList";
+import ProtocoloCard from "@/components/ProtocoloCard";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import MobileNav from "@/components/MobileNav";
@@ -484,16 +485,6 @@ export default async function Home() {
           );
           const recent = sorted.slice(0, 3);
           const hasContent = protocolos.length > 0;
-          const areaBadge: Record<string, string> = {
-            emergencias: "bg-red-400/15 text-red-400 border-red-400/30",
-            ti: "bg-blue-400/15 text-blue-400 border-blue-400/30",
-            anestesiologia: "bg-violet-400/15 text-violet-400 border-violet-400/30",
-          };
-          const areaLabel: Record<string, string> = {
-            emergencias: "Emergências",
-            ti: "Terapia Intensiva",
-            anestesiologia: "Anestesiologia",
-          };
           return (
             <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos" style={{ order: homeOrder["protocolos"] }}>
               <div className="mb-8 flex items-end justify-between">
@@ -515,38 +506,11 @@ export default async function Home() {
 
               {hasContent ? (
                 <>
+                  {/* Mesmo card da página /protocolos e das especialidades: expande NO LOCAL
+                      (Ver protocolo ↓ / Ler / ⛶ Tela cheia / Baixar), sem abrir outra página. */}
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {recent.map((item) => (
-                      <a
-                        key={item.id}
-                        href={`/protocolos#${item.id}`}
-                        className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:-translate-y-0.5 hover:border-white/20"
-                      >
-                        {item.imageUrl && (
-                          // Infográfico de fundo escuro — sem branco; funde no card
-                          <div className="overflow-hidden border-b border-white/10 bg-black/20">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.imageUrl} alt={item.titulo} className="aspect-square w-full object-contain" />
-                          </div>
-                        )}
-                        <div className="flex flex-1 flex-col p-5">
-                        <span
-                          className={`self-start rounded-full border px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${areaBadge[item.area] ?? "text-white/60 border-white/20"}`}
-                        >
-                          {areaLabel[item.area] ?? item.area}
-                        </span>
-                        <h3 className="mt-3 text-base font-semibold leading-snug text-white">
-                          {item.titulo}
-                        </h3>
-                        <p
-                          className="mt-2 text-sm leading-relaxed text-white/50 flex-1"
-                          dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }}
-                        />
-                        <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-accent/80 transition group-hover:text-accent">
-                          Ver protocolo <ArrowRight className="h-3 w-3" />
-                        </span>
-                        </div>
-                      </a>
+                      <ProtocoloCard key={item.id} item={item} />
                     ))}
                   </div>
 
