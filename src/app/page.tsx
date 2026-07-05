@@ -116,7 +116,7 @@ export default async function Home() {
       {/* Tipografia por seção definida no admin (tamanho, fonte, cor, peso) */}
       <style dangerouslySetInnerHTML={{ __html: buildTypographyCss(typo) }} />
       <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(70%_45%_at_8%_0%,rgba(44,230,184,0.22),transparent_60%),radial-gradient(60%_40%_at_95%_0%,rgba(95,143,255,0.22),transparent_62%),linear-gradient(180deg,#07090f_0%,#0a1020_55%,#07090f_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(70%_45%_at_8%_0%,rgba(44,230,184,0.22),transparent_60%),radial-gradient(60%_40%_at_95%_0%,rgba(95,143,255,0.22),transparent_62%),linear-gradient(180deg,#0f1420_0%,#0a1020_55%,#0f1420_100%)]" />
         <div className="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:72px_72px]" />
         <div className="rain-overlay absolute inset-0" />
         <div className="rain-overlay-soft absolute inset-0" />
@@ -150,7 +150,7 @@ export default async function Home() {
       </header>
 
       <main className="flex flex-col">
-        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-12 md:pt-20" data-typo="hero" style={{ order: -200 }}>
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20 pt-4 md:pt-8" data-typo="hero" style={{ order: -200 }}>
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0A0A0C] p-6 shadow-2xl">
             <div className="finex-aura-mask pointer-events-none absolute inset-0 bg-[radial-gradient(50%_40%_at_25%_0%,rgba(44,230,184,0.18),transparent_65%),radial-gradient(45%_35%_at_80%_0%,rgba(59,130,246,0.22),transparent_60%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-20 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.08)_1px,transparent_1px,transparent_10px)]" />

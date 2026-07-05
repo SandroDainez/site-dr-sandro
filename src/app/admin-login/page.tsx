@@ -8,7 +8,7 @@ export default function AdminLoginPage() {
   const [state, action, isPending] = useActionState(adminLogin, null);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#07090f] px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#0f1420] px-6">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/5">
@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full rounded-2xl bg-accent px-6 py-3 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-2xl bg-accent px-6 py-3 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50"
           >
             {isPending ? "Entrando..." : "Entrar"}
           </button>

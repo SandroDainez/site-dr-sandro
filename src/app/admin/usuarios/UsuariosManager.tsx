@@ -67,7 +67,7 @@ export default function UsuariosManager({ initial }: { initial: UsuarioAdmin[] }
           <input className={input} type="text" placeholder="Nome" value={novo.nome} onChange={(e) => setNovo({ ...novo, nome: e.target.value })} />
           <input className={input} type="text" placeholder="Especialidade" value={novo.especialidade} onChange={(e) => setNovo({ ...novo, especialidade: e.target.value })} />
           <div className="sm:col-span-2 flex items-center gap-3">
-            <button type="submit" disabled={pending && busy === "novo"} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+            <button type="submit" disabled={pending && busy === "novo"} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
               {pending && busy === "novo" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserPlus className="h-3.5 w-3.5" />} Cadastrar (já liberado)
             </button>
             <span className="text-[11px] text-white/40">O usuário criado aqui já entra confirmado e liberado.</span>
@@ -104,7 +104,7 @@ export default function UsuariosManager({ initial }: { initial: UsuarioAdmin[] }
                   {busy === u.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Lock className="h-3.5 w-3.5" />} Bloquear
                 </button>
               ) : (
-                <button type="button" onClick={() => toggle(u)} disabled={busy === u.id} className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+                <button type="button" onClick={() => toggle(u)} disabled={busy === u.id} className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1.5 text-xs font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
                   {busy === u.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />} Liberar
                 </button>
               )}

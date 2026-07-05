@@ -287,7 +287,7 @@ export default function HeaderEditor({ initialHeader }: Props) {
         </div>
 
         {/* Prévia ao vivo */}
-        <div className="flex items-center justify-center rounded-xl border border-white/10 bg-[#07090f] p-6">
+        <div className="flex items-center justify-center rounded-xl border border-white/10 bg-[#0f1420] p-6">
           <SiteLogo header={header} variant="lg" />
         </div>
 
@@ -362,7 +362,7 @@ export default function HeaderEditor({ initialHeader }: Props) {
           type="button"
           onClick={handleSave}
           disabled={isPending || isUploading}
-          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Salvando..." : "Salvar cabeçalho"}

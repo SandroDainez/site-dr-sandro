@@ -56,7 +56,7 @@ export default function AssistenteChat() {
         {msgs.map((m, i) => (
           <div key={i} className={`flex gap-3 ${m.autor === "voce" ? "justify-end" : ""}`}>
             {m.autor === "ia" && <span className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent"><Stethoscope className="h-4 w-4" /></span>}
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${m.autor === "voce" ? "bg-accent text-[#07090f]" : "border border-white/10 bg-white/[0.04] text-white/85"}`}>
+            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${m.autor === "voce" ? "bg-accent text-[#0f1420]" : "border border-white/10 bg-white/[0.04] text-white/85"}`}>
               <p className="whitespace-pre-wrap">{m.texto}</p>
               {m.fontes && m.fontes.length > 0 && (
                 <div className="mt-3 border-t border-white/10 pt-2">
@@ -101,7 +101,7 @@ export default function AssistenteChat() {
           placeholder="Pergunte algo clínico…"
           className="w-full rounded-2xl border border-white/15 bg-black/40 py-3.5 pl-4 pr-14 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
         />
-        <button type="submit" disabled={carregando || !input.trim()} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl bg-accent text-[#07090f] transition hover:opacity-90 disabled:opacity-40">
+        <button type="submit" disabled={carregando || !input.trim()} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-xl bg-accent text-[#0f1420] transition hover:opacity-90 disabled:opacity-40">
           <Send className="h-4 w-4" />
         </button>
       </form>

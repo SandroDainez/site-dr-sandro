@@ -199,7 +199,7 @@ export default function AutoPanel({ config, status, labels, especialidades, even
             <p className="mt-1 text-[11px] text-white/40">Eventos próprios ou de parceiros aparecem destacados, em cor diferente e com selo explícito no calendário das 3 áreas.</p>
           </div>
         </div>
-        <button type="button" disabled={pending} onClick={salvarEvento} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+        <button type="button" disabled={pending} onClick={salvarEvento} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
           <Plus className="h-4 w-4" /> {pending ? "Salvando…" : "Adicionar evento"}
         </button>
       </div>

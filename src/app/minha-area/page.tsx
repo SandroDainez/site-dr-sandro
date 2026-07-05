@@ -49,7 +49,7 @@ export default async function MinhaAreaPage() {
   // GATE de aprovação: conta confirmada mas ainda não liberada pelo admin.
   if (!perfil.liberado) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#07090f] px-6 py-12 text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f1420] px-6 py-12 text-white">
         <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-400/15 text-amber-300 text-2xl">⏳</div>
           <h1 className="text-xl font-semibold">Conta em análise</h1>
@@ -72,7 +72,7 @@ export default async function MinhaAreaPage() {
   const primeiroNome = (perfil.nome || user.email || "").split(" ")[0] || "médico(a)";
 
   return (
-    <div className="min-h-screen bg-[#07090f] px-6 py-12 text-white">
+    <div className="min-h-screen bg-[#0f1420] px-6 py-12 text-white">
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -108,7 +108,7 @@ export default async function MinhaAreaPage() {
                   <p className="mt-0.5 truncate text-sm font-semibold text-white">{c.titulo}</p>
                   <p className="text-[11px] text-white/45">{c.feitas} de {c.total} aulas · {c.pct}%</p>
                 </div>
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-[#07090f]"><Play className="h-5 w-5" /></span>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-[#0f1420]"><Play className="h-5 w-5" /></span>
               </a>
             );
           })()}
@@ -119,7 +119,7 @@ export default async function MinhaAreaPage() {
                 <p className="mt-0.5 text-sm font-semibold text-white">{pendentes} {pendentes === 1 ? "questão pendente" : "questões pendentes"}</p>
                 <p className="text-[11px] text-white/45">Repetição espaçada — fixa o que você aprendeu</p>
               </div>
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[#07090f]"><Brain className="h-5 w-5" /></span>
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-400 text-[#0f1420]"><Brain className="h-5 w-5" /></span>
             </a>
           )}
           <div className="grid grid-cols-2 gap-3">

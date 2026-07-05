@@ -70,7 +70,7 @@ function AulaItem({ aula, index, done, onToggle }: { aula: CursoAula; index: num
       <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-3 p-4 text-left">
         <span
           onClick={(e) => { e.stopPropagation(); onToggle(); }}
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition ${done ? "border-accent bg-accent text-[#07090f]" : "border-white/20 text-white/60 hover:border-accent/50"}`}
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition ${done ? "border-accent bg-accent text-[#0f1420]" : "border-white/20 text-white/60 hover:border-accent/50"}`}
           title={done ? "Concluída" : "Marcar como concluída"}
         >
           {done ? <Check className="h-4 w-4" /> : index + 1}
@@ -137,7 +137,7 @@ export default function CursoView({ aulas, cursoId, logado, concluidasIniciais =
           <p className="mt-3 text-xs font-medium text-amber-300">Aulas concluídas ✓ — faça a <strong>avaliação</strong> abaixo para emitir o certificado.</p>
         )}
         {logado && completo && (
-          <a href={`/certificado/${cursoId}`} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#07090f] transition hover:opacity-90">
+          <a href={`/certificado/${cursoId}`} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#0f1420] transition hover:opacity-90">
             <Award className="h-4 w-4" /> Emitir certificado de conclusão
           </a>
         )}

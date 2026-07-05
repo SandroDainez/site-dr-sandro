@@ -25,7 +25,7 @@ export default function PerfilForm({ perfil }: { perfil: { nome?: string; especi
         <div><label className={labelCls}>CRM</label><input name="crm" defaultValue={perfil.crm ?? ""} className={inputCls} placeholder="CRM/UF 00000" /></div>
       </div>
       <div className="flex items-center gap-3">
-        <button disabled={pending} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">{pending ? "Salvando…" : "Salvar perfil"}</button>
+        <button disabled={pending} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">{pending ? "Salvando…" : "Salvar perfil"}</button>
         {st.ok && st.msg && <span className="text-sm text-accent">✓ {st.msg}</span>}
         {st.error && <span className="text-sm text-red-400">{st.error}</span>}
       </div>

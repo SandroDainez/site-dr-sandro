@@ -48,7 +48,7 @@ export default function QuizView({ quiz, cursoId, notaMinima, logado }: {
           <p className={`text-lg font-bold ${res.aprovado ? "text-accent" : "text-red-300"}`}>{res.aprovado ? "Aprovado!" : "Não atingiu a nota"} — {res.nota}%</p>
           <p className="text-sm text-white/60">{res.acertos} de {res.total} corretas.</p>
           {res.aprovado && logado && (
-            <a href={`/certificado/${cursoId}`} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#07090f] transition hover:opacity-90"><Award className="h-4 w-4" /> Emitir certificado</a>
+            <a href={`/certificado/${cursoId}`} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#0f1420] transition hover:opacity-90"><Award className="h-4 w-4" /> Emitir certificado</a>
           )}
           {!logado && <a href={`/entrar?next=/cursos/${cursoId}`} className="mt-2 inline-flex items-center gap-1.5 text-xs text-accent"><LogIn className="h-3.5 w-3.5" /> Entre para registrar a nota e emitir certificado</a>}
         </div>
@@ -90,7 +90,7 @@ export default function QuizView({ quiz, cursoId, notaMinima, logado }: {
 
       <div className="mt-5">
         {!enviado ? (
-          <button type="button" onClick={enviar} disabled={!todasRespondidas || enviando} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-40">
+          <button type="button" onClick={enviar} disabled={!todasRespondidas || enviando} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-40">
             {enviando ? "Enviando…" : todasRespondidas ? "Enviar respostas" : "Responda todas as questões"}
           </button>
         ) : (

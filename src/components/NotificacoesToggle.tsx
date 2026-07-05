@@ -64,7 +64,7 @@ export default function NotificacoesToggle() {
         </div>
       </div>
       <button type="button" onClick={ativado ? desativar : ativar} disabled={ocupado}
-        className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${ativado ? "border border-white/15 text-white/70 hover:text-white" : "bg-accent text-[#07090f] hover:opacity-90"}`}>
+        className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${ativado ? "border border-white/15 text-white/70 hover:text-white" : "bg-accent text-[#0f1420] hover:opacity-90"}`}>
         {ocupado ? "…" : ativado ? "Desativar" : "Ativar"}
       </button>
       {erro && <p className="w-full text-xs text-amber-300">{erro}</p>}

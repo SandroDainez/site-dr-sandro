@@ -12,7 +12,7 @@ export default async function EntrarPage() {
   if (user) redirect("/minha-area");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#07090f] px-6 py-16 text-white">
+    <div className="flex min-h-screen items-center justify-center bg-[#0f1420] px-6 py-16 text-white">
       <div className="w-full max-w-md">
         <a href="/" className="mb-8 flex items-center justify-center gap-1 text-sm text-white/50 transition hover:text-white">← Início</a>
         <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-8">

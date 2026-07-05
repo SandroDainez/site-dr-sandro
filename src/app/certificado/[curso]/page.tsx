@@ -31,7 +31,7 @@ export default async function CertificadoPage({ params }: { params: Promise<{ cu
 
   if (!completo) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#07090f] px-6 text-center text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#0f1420] px-6 text-center text-white">
         <div className="max-w-md">
           <p className="text-lg font-semibold">Conclua o curso para emitir o certificado.</p>
           <p className="mt-2 text-sm text-white/50">Marque todas as aulas como concluídas em <a href={`/cursos/${cursoId}`} className="text-accent">{curso.titulo}</a>.</p>
@@ -45,7 +45,7 @@ export default async function CertificadoPage({ params }: { params: Promise<{ cu
   const codigo = `${cursoId.slice(0, 6)}-${user.id.slice(0, 8)}`.toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#07090f] px-6 py-10 text-white print:bg-white">
+    <div className="min-h-screen bg-[#0f1420] px-6 py-10 text-white print:bg-white">
       <style>{`@media print { .no-print { display: none !important; } body { background: #fff; } }`}</style>
 
       <div className="mx-auto max-w-3xl">

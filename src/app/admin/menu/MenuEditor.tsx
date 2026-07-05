@@ -82,12 +82,12 @@ export default function MenuEditor({ initialStyle }: Props) {
         </button>
       </div>
 
-      <div className="sticky bottom-0 -mx-6 flex items-center gap-3 border-t border-white/10 bg-[#07090f]/90 px-6 py-4 backdrop-blur">
+      <div className="sticky bottom-0 -mx-6 flex items-center gap-3 border-t border-white/10 bg-[#0f1420]/90 px-6 py-4 backdrop-blur">
         <button
           type="button"
           onClick={handleSave}
           disabled={isPending}
-          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Salvando..." : "Salvar tamanho"}

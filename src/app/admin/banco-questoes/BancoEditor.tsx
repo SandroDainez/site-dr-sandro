@@ -52,7 +52,7 @@ export default function BancoEditor({ inicial }: { inicial: Q[] }) {
           <select value={areaIA} onChange={(e) => setAreaIA(e.target.value)} className={inputCls}><option value="anestesiologia">Anestesiologia</option><option value="terapia_intensiva">Terapia Intensiva</option><option value="emergencias">Emergência</option></select>
           <select value={qtd} onChange={(e) => setQtd(Number(e.target.value))} className={inputCls}>{[3, 5, 8, 10].map((n) => <option key={n} value={n}>{n} questões</option>)}</select>
         </div>
-        <button type="button" onClick={gerar} disabled={gerando || !tema.trim()} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+        <button type="button" onClick={gerar} disabled={gerando || !tema.trim()} className="mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
           <Sparkles className={`h-4 w-4 ${gerando ? "animate-pulse" : ""}`} /> {gerando ? "Gerando…" : "Gerar com IA"}
         </button>
         <p className="mt-2 text-[11px] text-white/45">Entram como rascunho (inativas). Revise a correção e ative — assim nada vai aos alunos sem sua conferência.</p>
@@ -83,7 +83,7 @@ export default function BancoEditor({ inicial }: { inicial: Q[] }) {
         </div>
         <div><label className={labelCls}>Explicação (após responder)</label><textarea value={form.explicacao} onChange={(e) => set("explicacao", e.target.value)} rows={2} className={inputCls} /></div>
         <div className="flex items-center gap-3">
-          <button type="button" onClick={salvar} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">{form.id ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />} {pending ? "Salvando…" : form.id ? "Salvar" : "Adicionar questão"}</button>
+          <button type="button" onClick={salvar} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">{form.id ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />} {pending ? "Salvando…" : form.id ? "Salvar" : "Adicionar questão"}</button>
           {msg && <span className="text-sm text-accent">{msg}</span>}
           {err && <span className="text-sm text-red-400">{err}</span>}
         </div>

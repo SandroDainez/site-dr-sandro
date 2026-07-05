@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #07090f;
+  --background: #0f1420;   /* grafite azulado (antes quase-preto) — menos fadiga visual */
   --foreground: #f4f8ff;
   --muted: #a3afc2;
   --line: rgba(255, 255, 255, 0.1);
-  --panel: #111722;
+  --panel: #151b26;        /* superfície de card, 1 camada acima do fundo */
   --panel-soft: rgba(255, 255, 255, 0.04);
   --accent: #2ce6b8;        /* teal-menta da MARCA (CTAs, Assistente) */
   --on-accent: #06231c;     /* texto escuro sobre o accent (contraste ~13:1) */

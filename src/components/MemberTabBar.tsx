@@ -18,7 +18,7 @@ export default function MemberTabBar() {
   return (
     <>
       <div className="h-[68px] lg:hidden" aria-hidden />
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#07090f]/95 backdrop-blur-xl lg:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-[#0f1420]/95 backdrop-blur-xl lg:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
         <div className="mx-auto flex max-w-md items-stretch justify-around">
           {TABS.map((t) => {
             const base = t.href.split("#")[0];

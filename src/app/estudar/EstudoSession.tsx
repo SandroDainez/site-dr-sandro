@@ -64,7 +64,7 @@ export default function EstudoSession() {
           <Award className="mx-auto h-9 w-9 text-accent" />
           <p className="mt-2 text-xl font-bold text-white">Sessão concluída!</p>
           <p className="mt-1 text-sm text-white/60">{acertos} de {qs.length} corretas · {Math.round((acertos / qs.length) * 100)}%</p>
-          <button onClick={() => carregar(area)} className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90"><RefreshCw className="h-4 w-4" /> Nova sessão</button>
+          <button onClick={() => carregar(area)} className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90"><RefreshCw className="h-4 w-4" /> Nova sessão</button>
           <p className="mt-3 text-xs text-white/40">As questões erradas voltam logo; as certas, mais pra frente (repetição espaçada).</p>
         </div>
       )}
@@ -104,7 +104,7 @@ export default function EstudoSession() {
             )}
           </div>
           {res && (
-            <button onClick={proxima} className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90">
+            <button onClick={proxima} className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90">
               {idx + 1 >= qs.length ? "Ver resultado" : "Próxima"} <ArrowRight className="h-4 w-4" />
             </button>
           )}

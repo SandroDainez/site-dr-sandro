@@ -96,7 +96,7 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 rounded-2xl border border-accent/20 bg-accent/[0.04] p-4">
         <p className="text-sm text-white/70">Depois de adicionar/editar referências, <strong className="text-white">reindexe</strong> para o assistente passar a usá-las.</p>
-        <button type="button" onClick={reindexar} disabled={reindexando} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+        <button type="button" onClick={reindexar} disabled={reindexando} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
           <RefreshCw className={`h-4 w-4 ${reindexando ? "animate-spin" : ""}`} /> {reindexando ? "Reindexando…" : "Reindexar assistente"}
         </button>
       </div>
@@ -147,7 +147,7 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button type="button" onClick={salvar} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+          <button type="button" onClick={salvar} disabled={pending} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
             {form.id ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />} {pending ? "Salvando…" : form.id ? "Salvar alterações" : "Adicionar referência"}
           </button>
           {msg && <span className="text-sm text-accent">{msg}</span>}

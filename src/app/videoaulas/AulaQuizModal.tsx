@@ -49,7 +49,7 @@ function QuizForm({
       </div>
       <button
         type="button" onClick={onSubmit} disabled={!completo}
-        className="mt-6 w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-40"
+        className="mt-6 w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-40"
       >
         {completo ? cta : "Responda todas as questões"}
       </button>
@@ -104,7 +104,7 @@ export default function AulaQuizModal({ item, onClose }: { item: VideoaulaData; 
               Faça um teste rápido <strong>antes</strong> da aula e <strong>o mesmo</strong> teste depois — assim você vê sua evolução. É <strong>opcional</strong>.
             </p>
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <button type="button" onClick={() => setFase("pre")} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90">
+              <button type="button" onClick={() => setFase("pre")} className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90">
                 Fazer o pré-teste ({total} {total === 1 ? "questão" : "questões"})
               </button>
               <button type="button" onClick={() => { setPulouPre(true); setFase("video"); }} className="rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-white/75 transition hover:text-white">
@@ -140,7 +140,7 @@ export default function AulaQuizModal({ item, onClose }: { item: VideoaulaData; 
                 <video src={item.videoUrl} controls autoPlay playsInline className="w-full" style={{ maxHeight: "60vh" }} />
               )}
             </div>
-            <button type="button" onClick={() => setFase("pos")} className="mt-5 w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-[#07090f] transition hover:opacity-90">
+            <button type="button" onClick={() => setFase("pos")} className="mt-5 w-full rounded-full bg-accent px-5 py-3 text-sm font-semibold text-[#0f1420] transition hover:opacity-90">
               Já assisti — fazer o pós-teste
             </button>
           </div>

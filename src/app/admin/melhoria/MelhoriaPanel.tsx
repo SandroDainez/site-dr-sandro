@@ -43,7 +43,7 @@ export default function MelhoriaPanel({ inicial }: { inicial: Relatorio }) {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button" onClick={gerar} disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50"
         >
           {isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Analisando…</> : <><Sparkles className="h-4 w-4" /> Gerar relatório agora</>}
         </button>

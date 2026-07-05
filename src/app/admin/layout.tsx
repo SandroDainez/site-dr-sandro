@@ -113,7 +113,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#07090f] text-foreground flex">
+    <div className="min-h-screen bg-[#0f1420] text-foreground flex">
       <aside className="hidden w-56 shrink-0 border-r border-white/10 bg-black/40 flex-col lg:flex">
         <div className="px-5 py-6 border-b border-white/10">
           <p className="text-xs uppercase tracking-[0.16em] text-accent">Admin</p>

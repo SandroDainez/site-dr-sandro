@@ -54,7 +54,7 @@ export default function EntrarForm() {
             key={t.v}
             type="button"
             onClick={() => setModo(t.v)}
-            className={`flex-1 rounded-full px-3 py-1.5 text-[13px] font-medium transition ${modo === t.v ? "bg-accent text-[#07090f]" : "text-white/60 hover:text-white"}`}
+            className={`flex-1 rounded-full px-3 py-1.5 text-[13px] font-medium transition ${modo === t.v ? "bg-accent text-[#0f1420]" : "text-white/60 hover:text-white"}`}
           >
             {t.label}
           </button>
@@ -66,7 +66,7 @@ export default function EntrarForm() {
           <div><label className={labelCls}>E-mail</label><input name="email" type="email" autoComplete="email" required className={inputCls} placeholder="voce@exemplo.com" /></div>
           <div><label className={labelCls}>Senha</label><SenhaInput autoComplete="current-password" placeholder="••••••••" /></div>
           {stEntrar.error && <p className="text-sm text-red-400">{stEntrar.error}</p>}
-          <button disabled={pEntrar} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">{pEntrar ? "Entrando…" : "Entrar"}</button>
+          <button disabled={pEntrar} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">{pEntrar ? "Entrando…" : "Entrar"}</button>
         </form>
       )}
 
@@ -90,7 +90,7 @@ export default function EntrarForm() {
           <div><label className={labelCls}>Senha</label><SenhaInput autoComplete="new-password" placeholder="mínimo 6 caracteres" /></div>
           {stCriar.error && <p className="text-sm text-red-400">{stCriar.error}</p>}
           {stCriar.msg && <p className="text-sm text-accent">{stCriar.msg}</p>}
-          <button disabled={pCriar} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">{pCriar ? "Criando…" : "Criar conta"}</button>
+          <button disabled={pCriar} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">{pCriar ? "Criando…" : "Criar conta"}</button>
         </form>
       )}
 
@@ -100,7 +100,7 @@ export default function EntrarForm() {
           <div><label className={labelCls}>E-mail</label><input name="email" type="email" autoComplete="email" required className={inputCls} placeholder="voce@exemplo.com" /></div>
           {stMagico.error && <p className="text-sm text-red-400">{stMagico.error}</p>}
           {stMagico.msg && <p className="text-sm text-accent">{stMagico.msg}</p>}
-          <button disabled={pMagico} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">{pMagico ? "Enviando…" : "Enviar link de acesso"}</button>
+          <button disabled={pMagico} className="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">{pMagico ? "Enviando…" : "Enviar link de acesso"}</button>
         </form>
       )}
     </div>

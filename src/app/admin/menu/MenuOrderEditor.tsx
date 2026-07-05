@@ -108,7 +108,7 @@ export default function MenuOrderEditor({ initial }: { initial: NavOverride }) {
       </div>
 
       <div className="flex items-center gap-3">
-        <button type="button" onClick={salvar} disabled={isPending} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+        <button type="button" onClick={salvar} disabled={isPending} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
           {isPending ? "Salvando…" : "Salvar menu"}
         </button>
         {msg && <span className="text-sm text-accent">{msg}</span>}

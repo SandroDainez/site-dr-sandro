@@ -61,7 +61,7 @@ export default function OrdemHomeEditor({ initial }: { initial: string[] }) {
       </ol>
 
       <div className="sticky bottom-4 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-[#0b0e14]/90 p-3 backdrop-blur">
-        <button type="button" onClick={salvar} disabled={pending} className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50">
+        <button type="button" onClick={salvar} disabled={pending} className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
           <Save className="h-4 w-4" /> {pending ? "Salvando…" : "Salvar ordem"}
         </button>
         <button type="button" onClick={() => { setOrdem([...DEFAULT_HOME_ORDER]); setSaved(false); }} className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2.5 text-sm text-white/70 transition hover:border-white/30 hover:text-white">

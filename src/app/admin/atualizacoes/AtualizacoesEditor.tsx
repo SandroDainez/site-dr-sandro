@@ -418,7 +418,7 @@ export default function AtualizacoesEditor({ initialAtualizacoes }: Props) {
           type="button"
           onClick={handleSave}
           disabled={isPending}
-          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#07090f] transition hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Salvando..." : "Salvar atualizações"}
