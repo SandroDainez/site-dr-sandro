@@ -17,6 +17,7 @@ import {
   Sparkles,
   ListOrdered,
   Columns3,
+  Megaphone,
   Stethoscope,
   ArrowRight,
   Type,
@@ -26,6 +27,14 @@ import {
 } from "lucide-react";
 
 const sections = [
+  {
+    href: "/admin/aviso",
+    icon: Megaphone,
+    label: "Aviso no topo do site",
+    desc: "Faixa temporária no topo (ex.: \"em construção\"). Ligar/desligar e editar o texto.",
+    color: "text-amber-400",
+    border: "hover:border-amber-400/40",
+  },
   {
     href: "/admin/usuarios",
     icon: Users,

@@ -856,6 +856,17 @@ export async function getNavStyle(): Promise<NavStyleData> {
 // (módulo puro, reusável no cliente). Padrão: clínico → mídia → comunidade → apps.
 export { HOME_SECTION_IDS, DEFAULT_HOME_ORDER, CARD_COL_SECTIONS, DEFAULT_CARD_COLS };
 
+// Aviso temporário no topo do site (ex.: "em construção") — editável no admin.
+export type AvisoData = { ativo: boolean; texto: string };
+const DEFAULT_AVISO: AvisoData = {
+  ativo: true,
+  texto: "🚧 Plataforma de ensino em construção — algumas coisas ainda podem falhar. Obrigado pela compreensão.",
+};
+export async function getAviso(): Promise<AvisoData> {
+  const a = await readBlob<AvisoData>("aviso", DEFAULT_AVISO);
+  return { ativo: !!a?.ativo, texto: typeof a?.texto === "string" ? a.texto : DEFAULT_AVISO.texto };
+}
+
 // Cards por linha (colunas no desktop) por seção — editável no admin.
 export async function getCardCols(): Promise<Record<string, number>> {
   const saved = await readBlob<Record<string, number>>("cardCols", {});

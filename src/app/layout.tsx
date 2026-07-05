@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Poppins, Lora } from "next/font/google";
-import { getHeader, getHero, headerSubtitleLines } from "@/lib/content";
+import { getHeader, getHero, headerSubtitleLines, getAviso } from "@/lib/content";
 import { getUsuario } from "@/lib/supabase/auth-server";
+import SiteAviso from "@/components/SiteAviso";
 import TrackVisit from "@/components/TrackVisit";
 import PWARegister from "@/components/PWARegister";
 import MemberTabBar from "@/components/MemberTabBar";
@@ -67,7 +68,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getUsuario();
+  const [user, aviso] = await Promise.all([getUsuario(), getAviso()]);
   return (
     <html
       lang="pt-BR"
@@ -75,6 +76,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${poppins.variable} ${lora.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background text-foreground font-sans">
+        {aviso.ativo && <SiteAviso texto={aviso.texto} />}
         {children}
         {user && <MemberTabBar />}
         <PWARegister />
