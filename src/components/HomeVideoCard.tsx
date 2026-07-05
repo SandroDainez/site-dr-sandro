@@ -94,7 +94,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
   // pointer-events-none no <video> manda o toque ao container. O #418 não vinha daqui
   // (era o dpl do logo, já corrigido), então é seguro mostrar o frame do vídeo.
   const thumb = (
-    <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-black group/thumb" onClick={abrir}>
+    <div className="relative cursor-pointer overflow-hidden bg-black group/thumb" style={{ height: item.imageSize ?? 176 }} onClick={abrir}>
       {thumbSrc ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
@@ -125,7 +125,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
       <article className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20">
         {/* Mídia */}
         {!hasVideo ? (
-          <div className="flex aspect-[4/5] w-full items-center justify-center bg-white/[0.03]">
+          <div className="flex w-full items-center justify-center bg-white/[0.03]" style={{ height: item.imageSize ?? 176 }}>
             <PlayCircle className="h-10 w-10 text-white/20" />
           </div>
         ) : !inlinePlaying ? (
@@ -141,7 +141,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
             />
           </div>
         ) : (
-          <div className="relative aspect-[4/5] overflow-hidden bg-black">
+          <div className="relative overflow-hidden bg-black" style={{ height: item.imageSize ?? 176 }}>
             {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video src={item.videoUrl} controls autoPlay playsInline style={objPos} className="absolute inset-0 h-full w-full object-cover" />
             <button

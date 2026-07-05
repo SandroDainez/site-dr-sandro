@@ -127,7 +127,8 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
     <article className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:border-white/20">
       {thumbSrc ? (
         <div
-          className={`relative aspect-[4/5] overflow-hidden ${hasVideo ? "cursor-pointer group" : ""}`}
+          className={`relative overflow-hidden ${hasVideo ? "cursor-pointer group" : ""}`}
+          style={{ height: item.imageSize ?? 176 }}
           onClick={() => { if (!hasVideo) return; if (hasQuiz) setQuizOpen(true); else if (!ytId) setPlayerOpen(true); }}
         >
           <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
@@ -141,7 +142,7 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
         </div>
       ) : isProxyVideo ? (
         inlinePlaying ? (
-          <div className="relative aspect-[4/5] overflow-hidden bg-black">
+          <div className="relative overflow-hidden bg-black" style={{ height: item.imageSize ?? 176 }}>
             {/* Vídeo tocando dentro do card (playsInline impede abrir em tela cheia nativa no iPhone) */}
             <video
               src={item.videoUrl}
@@ -162,7 +163,8 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
           </div>
         ) : (
           <div
-            className="relative aspect-[4/5] cursor-pointer group overflow-hidden bg-black"
+            className="relative cursor-pointer group overflow-hidden bg-black"
+            style={{ height: item.imageSize ?? 176 }}
             onClick={() => hasQuiz ? setQuizOpen(true) : setInlinePlaying(true)}
           >
             {/* Preview = primeiro frame do vídeo (imagem cheia do card). pointer-events-none
