@@ -19,6 +19,9 @@ export const CARD_COL_SECTIONS: { key: string; label: string; def: number }[] = 
   { key: "apps-uteis", label: "Apps do dia a dia", def: 3 },
   { key: "protocolos", label: "Protocolos", def: 3 },
   { key: "videoaulas", label: "Videoaulas", def: 3 },
+  { key: "cursos", label: "Cursos", def: 3 },
+  { key: "acervo", label: "Outros assuntos / Materiais", def: 3 },
+  { key: "procedimentos", label: "Procedimentos", def: 3 },
 ];
 export const DEFAULT_CARD_COLS: Record<string, number> = Object.fromEntries(
   CARD_COL_SECTIONS.map((s) => [s.key, s.def]),

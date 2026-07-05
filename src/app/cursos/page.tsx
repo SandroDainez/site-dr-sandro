@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 
-import { getCursos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { getCursos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getCardCols } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -18,9 +18,9 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import CursosCatalog from "./CursosCatalog";
 
 export default async function CursosPage() {
-  const [cursos, header, navItems, typo, navStyle, st] = await Promise.all([
+  const [cursos, header, navItems, typo, navStyle, st, cardCols] = await Promise.all([
     getCursos(), getHeader(), getNavItems(), getTypography(), getNavStyle(),
-    getSectionTexts(),
+    getSectionTexts(), getCardCols(),
   ]);
 
   return (
@@ -48,7 +48,7 @@ export default async function CursosPage() {
           <p className="mt-3 max-w-2xl text-base text-white/50">{secText(st, "page_cursos", "desc")}</p>
         </div>
 
-        <CursosCatalog cursos={cursos} />
+        <CursosCatalog cursos={cursos} cols={cardCols["cursos"]} />
       </main>
 
       <SiteFooter />

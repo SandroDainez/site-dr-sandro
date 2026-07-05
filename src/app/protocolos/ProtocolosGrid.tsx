@@ -3,9 +3,11 @@
 import { useState } from "react";
 import type { ProtocoloData } from "@/lib/content";
 import ProtocoloCard from "@/components/ProtocoloCard";
+import { colStyle } from "@/lib/card-grid";
 
 type Props = {
   protocolos: ProtocoloData[];
+  cols?: number;
 };
 
 type FilterArea = "todos" | ProtocoloData["area"];
@@ -17,7 +19,7 @@ const tabs: { value: FilterArea; label: string }[] = [
   { value: "anestesiologia", label: "Anestesiologia" },
 ];
 
-export default function ProtocolosGrid({ protocolos }: Props) {
+export default function ProtocolosGrid({ protocolos, cols }: Props) {
   const [active, setActive] = useState<FilterArea>("todos");
 
   const sorted = [...protocolos].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
@@ -45,7 +47,7 @@ export default function ProtocolosGrid({ protocolos }: Props) {
 
       {filtered.length === 0 && <p className="text-sm text-white/40">Nenhum protocolo nesta área ainda.</p>}
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="card-grid gap-5" style={colStyle(cols)}>
         {filtered.map((item) => (
           <ProtocoloCard key={item.id} item={item} />
         ))}

@@ -3,8 +3,9 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import {
   getProtocolos, getVideoaulas, getCursos, getAtualizacoes, getAcervo, getProcedimentos,
-  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getUiTexts,
+  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getUiTexts, getCardCols,
 } from "@/lib/content";
+import { colStyle } from "@/lib/card-grid";
 import { secText } from "@/lib/section-texts";
 import { uiText } from "@/lib/ui-texts";
 import AcervoList from "@/app/acervo/AcervoList";
@@ -62,9 +63,9 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const a = area as Area;
   const cfg = AREAS[a];
 
-  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st, ui] = await Promise.all([
+  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st, ui, cardCols] = await Promise.all([
     getProtocolos(), getVideoaulas(), getCursos(), getAtualizacoes(), getAcervo(), getProcedimentos(),
-    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(),
+    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(), getCardCols(),
   ]);
   const hubKey = `hub_${a}`;
 
@@ -123,7 +124,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           <>
             {proto.length > 0 && (
               <Section icon={ClipboardList} titulo="Protocolos" verHref="/protocolos" accent={cfg.accent}>
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="card-grid gap-5" style={colStyle(cardCols["protocolos"])}>
                   {proto.map((p) => (
                     <ProtocoloCard key={p.id} item={p} />
                   ))}
@@ -133,20 +134,20 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {procs.length > 0 && (
               <Section icon={Stethoscope} titulo="Procedimentos" verHref="/procedimentos" accent={cfg.accent}>
-                <AcervoList itens={procs} />
+                <AcervoList itens={procs} cols={cardCols["procedimentos"]} />
               </Section>
             )}
 
             {docs.length > 0 && (
               <Section icon={FileText} titulo="Documentos e materiais" verHref="/acervo" accent={cfg.accent}>
                 {/* mesma experiência da página "Outros assuntos": Ler / Tela cheia / Baixar */}
-                <AcervoList itens={docs} />
+                <AcervoList itens={docs} cols={cardCols["acervo"]} />
               </Section>
             )}
 
             {vids.length > 0 && (
               <Section icon={PlayCircle} titulo="Videoaulas" verHref="/videoaulas" accent={cfg.accent}>
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="card-grid gap-5" style={colStyle(cardCols["videoaulas"])}>
                   {vids.map((v) => <VideoCard key={v.id} item={v} />)}
                 </div>
               </Section>
@@ -154,7 +155,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {curs.length > 0 && (
               <Section icon={GraduationCap} titulo="Cursos" verHref="/cursos" accent={cfg.accent}>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="card-grid gap-3" style={colStyle(cardCols["cursos"])}>
                   {curs.map((c) => (
                     <a key={c.id} href={`/cursos/${c.id}`} className={card}>
                       <p className="text-sm font-semibold text-white">{c.titulo}</p>

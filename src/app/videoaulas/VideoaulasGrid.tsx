@@ -4,9 +4,11 @@ import { useState, useEffect, type CSSProperties } from "react";
 import type { VideoaulaData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 import AulaQuizModal from "./AulaQuizModal";
+import { colStyle } from "@/lib/card-grid";
 
 type Props = {
   videoaulas: VideoaulaData[];
+  cols?: number;
 };
 
 type FilterArea = "todas" | VideoaulaData["area"];
@@ -303,7 +305,7 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
   );
 }
 
-export default function VideoaulasGrid({ videoaulas }: Props) {
+export default function VideoaulasGrid({ videoaulas, cols }: Props) {
   const [active, setActive] = useState<FilterArea>("todas");
 
   const sorted = [...videoaulas].sort(
@@ -338,7 +340,7 @@ export default function VideoaulasGrid({ videoaulas }: Props) {
         </p>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="card-grid gap-5" style={colStyle(cols)}>
         {filtered.map((item) => (
           <VideoCard key={item.id} item={item} />
         ))}

@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 
-import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { getProtocolos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getCardCols } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -18,7 +18,7 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import ProtocolosGrid from "./ProtocolosGrid";
 
 export default async function ProtocolosPage() {
-  const [protocolos, header, navItems, typo, navStyle, st] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts()]);
+  const [protocolos, header, navItems, typo, navStyle, st, cardCols] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getCardCols()]);
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
@@ -52,7 +52,7 @@ export default async function ProtocolosPage() {
           <p className="mt-3 text-base text-white/50">{secText(st, "page_protocolos", "desc")}</p>
         </div>
 
-        <ProtocolosGrid protocolos={protocolos} />
+        <ProtocolosGrid protocolos={protocolos} cols={cardCols["protocolos"]} />
       </main>
 
       <SiteFooter />

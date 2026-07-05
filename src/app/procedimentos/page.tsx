@@ -4,7 +4,7 @@ export const metadata = {
   description: "Procedimentos e técnicas com vídeo, passo a passo e materiais para baixar, por especialidade.",
 };
 
-import { getProcedimentos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { getProcedimentos, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getCardCols } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -17,8 +17,8 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import AcervoList from "@/app/acervo/AcervoList";
 
 export default async function ProcedimentosPage() {
-  const [itens, header, navItems, typo, navStyle, st] = await Promise.all([
-    getProcedimentos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(),
+  const [itens, header, navItems, typo, navStyle, st, cardCols] = await Promise.all([
+    getProcedimentos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getCardCols(),
   ]);
 
   return (
@@ -46,7 +46,7 @@ export default async function ProcedimentosPage() {
           <p className="mt-3 max-w-2xl text-base text-white/50">{secText(st, "page_procedimentos", "desc")}</p>
         </div>
 
-        <AcervoList itens={itens} />
+        <AcervoList itens={itens} cols={cardCols["procedimentos"]} />
       </main>
 
       <SiteFooter />

@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 
-import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { getVideoaulas, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getCardCols } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -18,7 +18,7 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import VideoaulasGrid from "./VideoaulasGrid";
 
 export default async function VideoaulasPage() {
-  const [videoaulas, header, navItems, typo, navStyle, st] = await Promise.all([getVideoaulas(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts()]);
+  const [videoaulas, header, navItems, typo, navStyle, st, cardCols] = await Promise.all([getVideoaulas(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getCardCols()]);
 
   return (
     <div className="min-h-screen bg-[#07090f] text-white">
@@ -56,7 +56,7 @@ export default async function VideoaulasPage() {
           <p className="mt-3 text-base text-white/50">{secText(st, "page_videoaulas", "desc")}</p>
         </div>
 
-        <VideoaulasGrid videoaulas={videoaulas} />
+        <VideoaulasGrid videoaulas={videoaulas} cols={cardCols["videoaulas"]} />
       </main>
 
       <SiteFooter />

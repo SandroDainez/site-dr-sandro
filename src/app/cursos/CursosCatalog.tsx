@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Lock, PlayCircle, ArrowRight } from "lucide-react";
 import type { CursoData } from "@/lib/content";
+import { colStyle } from "@/lib/card-grid";
 
 type FilterArea = "todos" | CursoData["area"];
 
@@ -35,7 +36,7 @@ const nivelLabel: Record<string, string> = {
   avancado: "Avançado",
 };
 
-export default function CursosCatalog({ cursos }: { cursos: CursoData[] }) {
+export default function CursosCatalog({ cursos, cols }: { cursos: CursoData[]; cols?: number }) {
   const [active, setActive] = useState<FilterArea>("todos");
 
   const visiveis = cursos.filter((c) => c.titulo);
@@ -72,7 +73,7 @@ export default function CursosCatalog({ cursos }: { cursos: CursoData[] }) {
         <p className="text-sm text-white/40">Nenhum curso nesta área ainda.</p>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="card-grid gap-5" style={colStyle(cols)}>
         {filtrados.map((curso) => {
           const pago = curso.acesso === "pago";
           return (

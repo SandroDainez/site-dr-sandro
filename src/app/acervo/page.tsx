@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 
-import { getAcervo, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { getAcervo, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getCardCols } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -18,8 +18,8 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import AcervoList from "./AcervoList";
 
 export default async function AcervoPage() {
-  const [itens, header, navItems, typo, navStyle, st] = await Promise.all([
-    getAcervo(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(),
+  const [itens, header, navItems, typo, navStyle, st, cardCols] = await Promise.all([
+    getAcervo(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getCardCols(),
   ]);
 
   return (
@@ -47,7 +47,7 @@ export default async function AcervoPage() {
           <p className="mt-3 max-w-2xl text-base text-white/50">{secText(st, "page_acervo", "desc")}</p>
         </div>
 
-        <AcervoList itens={itens} />
+        <AcervoList itens={itens} cols={cardCols["acervo"]} />
       </main>
 
       <SiteFooter />
