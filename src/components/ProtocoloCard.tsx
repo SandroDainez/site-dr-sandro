@@ -63,11 +63,12 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
 
       {item.imageUrl && (
         <div className="mt-4">
-          <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+          {/* respeita o "Tamanho da imagem no site" (imageSize, px) — centralizada e limitada à largura do card */}
+          <div className="flex justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/20 p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img loading="lazy" decoding="async" src={item.imageUrl} alt={item.imageCaption || item.titulo} className="aspect-square w-full object-contain" />
+            <img loading="lazy" decoding="async" src={item.imageUrl} alt={item.imageCaption || item.titulo} style={{ width: `${item.imageSize ?? 176}px`, maxWidth: "100%" }} className="h-auto object-contain" />
           </div>
-          {item.imageCaption && <p className="mt-1.5 text-xs leading-relaxed text-white/40">{item.imageCaption}</p>}
+          {item.imageCaption && <p className="mt-1.5 text-center text-xs leading-relaxed text-white/40">{item.imageCaption}</p>}
         </div>
       )}
 
