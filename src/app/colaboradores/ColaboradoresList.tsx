@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PlayCircle, Stethoscope } from "lucide-react";
 import type { ColaboradorData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
+import { colStyle } from "@/lib/card-grid";
 
 function ytId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
@@ -98,7 +99,7 @@ function Card({ item }: { item: ColaboradorData }) {
   );
 }
 
-export default function ColaboradoresList({ items }: { items: ColaboradorData[] }) {
+export default function ColaboradoresList({ items, cols }: { items: ColaboradorData[]; cols?: number }) {
   const sorted = [...items].filter((x) => x.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
   if (sorted.length === 0) {
@@ -110,7 +111,7 @@ export default function ColaboradoresList({ items }: { items: ColaboradorData[] 
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="card-grid gap-5" style={colStyle(cols)}>
       {sorted.map((item) => <Card key={item.id} item={item} />)}
     </div>
   );

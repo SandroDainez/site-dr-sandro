@@ -585,7 +585,7 @@ export default async function Home() {
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
-            <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
+            <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} cols={cardCols["colaboradores"]} />
             <a href="/colaboradores" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
@@ -648,7 +648,7 @@ export default async function Home() {
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
-            <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} />
+            <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} cols={cardCols["podcast"]} />
             <a href="/podcast" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>

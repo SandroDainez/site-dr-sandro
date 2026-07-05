@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 
-import { getPodcasts, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { getPodcasts, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getCardCols } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -18,9 +18,9 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import PodcastList from "./PodcastList";
 
 export default async function PodcastPage() {
-  const [podcasts, header, navItems, typo, navStyle, st] = await Promise.all([
+  const [podcasts, header, navItems, typo, navStyle, st, cardCols] = await Promise.all([
     getPodcasts(), getHeader(), getNavItems(), getTypography(), getNavStyle(),
-    getSectionTexts(),
+    getSectionTexts(), getCardCols(),
   ]);
 
   return (
@@ -48,7 +48,7 @@ export default async function PodcastPage() {
           <p className="mt-3 text-base text-white/50">{secText(st, "page_podcast", "desc")}</p>
         </div>
 
-        <PodcastList podcasts={podcasts} />
+        <PodcastList podcasts={podcasts} cols={cardCols["podcast"]} />
       </main>
 
       <SiteFooter />

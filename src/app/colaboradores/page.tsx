@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 
-import { getColaboradores, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts } from "@/lib/content";
+import { getColaboradores, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getCardCols } from "@/lib/content";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
@@ -19,9 +19,9 @@ import { Heart } from "lucide-react";
 import ColaboradoresList from "./ColaboradoresList";
 
 export default async function ColaboradoresPage() {
-  const [items, header, navItems, typo, navStyle, st] = await Promise.all([
+  const [items, header, navItems, typo, navStyle, st, cardCols] = await Promise.all([
     getColaboradores(), getHeader(), getNavItems(), getTypography(), getNavStyle(),
-    getSectionTexts(),
+    getSectionTexts(), getCardCols(),
   ]);
 
   return (
@@ -53,7 +53,7 @@ export default async function ColaboradoresPage() {
           </div>
         </div>
 
-        <ColaboradoresList items={items} />
+        <ColaboradoresList items={items} cols={cardCols["colaboradores"]} />
       </main>
 
       <SiteFooter />

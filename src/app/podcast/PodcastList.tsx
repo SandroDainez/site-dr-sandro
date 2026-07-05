@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Mic, ExternalLink } from "lucide-react";
 import type { PodcastData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
+import { colStyle } from "@/lib/card-grid";
 
 function youtubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
@@ -126,7 +127,7 @@ function Card({ ep }: { ep: PodcastData }) {
   );
 }
 
-export default function PodcastList({ podcasts }: { podcasts: PodcastData[] }) {
+export default function PodcastList({ podcasts, cols }: { podcasts: PodcastData[]; cols?: number }) {
   const sorted = [...podcasts].filter((p) => p.titulo).sort(
     (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
   );
@@ -141,7 +142,7 @@ export default function PodcastList({ podcasts }: { podcasts: PodcastData[] }) {
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="card-grid gap-5" style={colStyle(cols)}>
       {sorted.map((ep) => <Card key={ep.id} ep={ep} />)}
     </div>
   );
