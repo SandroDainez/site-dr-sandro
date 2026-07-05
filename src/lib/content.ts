@@ -1,6 +1,7 @@
 import { list, put } from "@vercel/blob";
 import { cache } from "react";
 import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER } from "./home-sections";
+import { NAV_GROUPS, applyNavOverride, type NavGroup, type NavOverride } from "./nav-structure";
 import { unstable_noStore as noStore } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
@@ -834,8 +835,17 @@ export async function getTypography(): Promise<TypographyData> {
   return readBlob("typography", defaultTypography);
 }
 
-export async function getNavItems(): Promise<NavItemData[]> {
-  return readBlob("navItems", defaultNavItems);
+// Estrutura EFETIVA do menu = estrutura fixa (NAV_GROUPS) + edições do admin (ordem/
+// ocultar/renomear guardadas no blob "navOverride"). Os componentes de menu renderizam
+// a partir daqui. (Nome mantido por compat — as 12 páginas já chamam getNavItems.)
+export async function getNavItems(): Promise<NavGroup[]> {
+  const ov = (await readBlob("navOverride", {} as NavOverride)) as NavOverride;
+  return applyNavOverride(NAV_GROUPS, ov);
+}
+
+// Só a override crua (p/ o editor do admin carregar o estado atual).
+export async function getNavOverride(): Promise<NavOverride> {
+  return (await readBlob("navOverride", {} as NavOverride)) as NavOverride;
 }
 
 export async function getNavStyle(): Promise<NavStyleData> {

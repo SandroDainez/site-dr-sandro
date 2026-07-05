@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getNavStyle } from "@/lib/content";
+import { getNavStyle, getNavOverride } from "@/lib/content";
 import MenuEditor from "./MenuEditor";
+import MenuOrderEditor from "./MenuOrderEditor";
 
 export default async function AdminMenuPage() {
-  const navStyle = await getNavStyle();
+  const [navStyle, navOverride] = await Promise.all([getNavStyle(), getNavOverride()]);
 
   return (
     <div className="max-w-2xl pb-24">
@@ -12,18 +13,11 @@ export default async function AdminMenuPage() {
           ← Admin
         </Link>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Menu do topo</h1>
-        <p className="mt-1 text-sm text-white/50">Ajuste o tamanho da barra para caber na tela.</p>
+        <p className="mt-1 text-sm text-white/50">Reordene, oculte e renomeie os itens — e ajuste o tamanho da barra.</p>
       </div>
 
-      <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-sm leading-relaxed text-white/70">
-        <p className="mb-3 font-medium text-white">O menu tem uma estrutura fixa, organizada em grupos:</p>
-        <p className="mb-4 text-white/90">
-          Início · Especialidades ▾ · Cursos · Apps ▾ · Procedimentos · Podcast · Outros assuntos · Parceiros · Eventos · Contato
-        </p>
-        <p className="text-white/50">
-          A divisão dos grupos é mantida no código para ficar estável. Se quiser incluir, remover ou reordenar um item do
-          menu, me avise que ajusto. Aqui embaixo você controla o <strong className="text-white">tamanho</strong> da barra.
-        </p>
+      <div className="mb-4">
+        <MenuOrderEditor initial={navOverride} />
       </div>
 
       <MenuEditor initialStyle={navStyle} />

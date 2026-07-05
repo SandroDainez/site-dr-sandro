@@ -1,9 +1,9 @@
-import type { NavItemData, NavStyleData } from "@/lib/content";
-import { NAV_GROUPS, resolveHref, isGroupActive } from "@/lib/nav-structure";
+import type { NavStyleData } from "@/lib/content";
+import { NAV_GROUPS, resolveHref, isGroupActive, type NavGroup } from "@/lib/nav-structure";
 import { ChevronDown } from "lucide-react";
 
 type Props = {
-  items?: NavItemData[]; // mantido por compat; a estrutura vem de NAV_GROUPS
+  items?: NavGroup[]; // estrutura EFETIVA (NAV_GROUPS + edições do admin); fallback p/ NAV_GROUPS
   style?: NavStyleData; // aparência da barra (tamanho/espaçamento/fonte)
   internal?: boolean; // páginas internas: âncoras "#x" viram "/#x"
   currentPath?: string; // destaca o grupo da página atual
@@ -12,7 +12,8 @@ type Props = {
 // Menu principal (desktop, lg+): poucos botões agrupados. Os grupos abrem um
 // dropdown no hover OU quando um item recebe foco por teclado (group-focus-within),
 // então funciona sem JS e continua acessível.
-export default function SiteNav({ style, internal = false, currentPath }: Props) {
+export default function SiteNav({ items, style, internal = false, currentPath }: Props) {
+  const groups = items && items.length ? items : NAV_GROUPS;
   const s = style ?? {};
   const navStyle: React.CSSProperties = {
     paddingLeft: s.paddingX,
@@ -32,7 +33,7 @@ export default function SiteNav({ style, internal = false, currentPath }: Props)
       style={navStyle}
       className="hidden items-center gap-0 rounded-full border border-white/15 bg-black/80 px-1.5 py-1.5 text-[12.5px] font-medium text-white/85 backdrop-blur-md lg:flex"
     >
-      {NAV_GROUPS.map((group) => {
+      {groups.map((group) => {
         const active = isGroupActive(group, currentPath);
 
         // Item simples (sem filhos), ex.: Início

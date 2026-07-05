@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { NavOverride } from "@/lib/nav-structure";
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
 import OpenAI from "openai";
@@ -199,6 +200,19 @@ export async function saveNavStyle(style: NavStyleData): Promise<Result> {
     revalidatePath("/atualizacoes");
     revalidatePath("/protocolos");
     revalidatePath("/videoaulas");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+// Salva as edições do menu principal (ordem / ocultar / renomear). O menu aparece em
+// todas as páginas, então revalida o layout inteiro.
+export async function saveNavMenu(override: NavOverride): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("navOverride", override);
+    revalidatePath("/", "layout");
     return { ok: true };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };
