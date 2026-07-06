@@ -30,6 +30,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Mais",
     children: [
       { label: "Atualizações", href: "/atualizacoes" },
+      { label: "Artigos", href: "/artigos" },
       { label: "Videoaulas", href: "/videoaulas" },
       { label: "Protocolos", href: "/protocolos" },
       { label: "Procedimentos", href: "/procedimentos" },

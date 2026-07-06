@@ -1,8 +1,8 @@
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/ai/openai";
 
 // Embeddings p/ o RAG (assistente clínico). Modelo barato e bom: text-embedding-3-small (1536 dims).
 export async function embedTextos(textos: string[]): Promise<number[][]> {
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const openai = getOpenAI();
   const out: number[][] = [];
   // lotes de 96 p/ não estourar o limite
   for (let i = 0; i < textos.length; i += 96) {

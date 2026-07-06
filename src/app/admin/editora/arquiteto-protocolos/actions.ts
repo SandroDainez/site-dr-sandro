@@ -1,0 +1,324 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/admin-auth";
+import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
+import { slugify } from "@/lib/editora";
+import { getProvider } from "@/lib/ai/providers";
+import { aiProviders } from "@/lib/ai/config";
+import { buildArquitetoProtocolosPrompt } from "@/lib/ai/prompts/arquiteto-protocolos";
+import { validarSecoes, consolidarValidacao, type Validacao } from "@/lib/ai/citations";
+import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
+import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
+
+type Result<T = unknown> = { ok: true; data: T } | { ok: false; error: string };
+const msg = (e: unknown) => String(e instanceof Error ? e.message : e);
+
+type ProtocoloResumo = { id: string; title: string; slug: string; status: string; specialty: string };
+
+// Converte uma linha de protocol_sources para o shape Source do módulo de IA.
+type SourceRow = { id: string; title?: string | null; source_type?: string | null; content?: string | null; metadata?: { autor?: string | null; ano?: number | null } | null };
+function rowToSource(r: SourceRow): Source {
+  const meta = r.metadata ?? {};
+  return { id: r.id, titulo: r.title ?? "", tipo: r.source_type ?? "", autor: meta.autor ?? undefined, ano: meta.ano ?? null, texto: r.content ?? "" };
+}
+
+export async function listarProtocolos(): Promise<Result<ProtocoloResumo[]>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("protocols").select("id,title,slug,status,specialty").order("updated_at", { ascending: false });
+    if (error) throw error;
+    return { ok: true, data: (data ?? []) as ProtocoloResumo[] };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function criarProtocolo(input: { title: string; especialidadeModulo: string }): Promise<Result<ProtocoloResumo>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const title = (input.title || "").trim();
+    if (!title) return { ok: false, error: "Informe o título do protocolo." };
+    // slug único
+    let slug = slugify(title), n = 1;
+    for (;;) {
+      const { data } = await supabase.from("protocols").select("id").eq("slug", slug).maybeSingle();
+      if (!data) break;
+      n += 1; slug = `${slugify(title)}-${n}`;
+    }
+    const { data, error } = await supabase.from("protocols")
+      .insert({ title, slug, specialty: mapEspecialidadeDB(input.especialidadeModulo), status: "draft", stage: "arquiteto-protocolos" })
+      .select("id,title,slug,status,specialty").single();
+    if (error) throw error;
+    revalidatePath("/admin/editora/arquiteto-protocolos");
+    return { ok: true, data: data as ProtocoloResumo };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function listarSources(protocolId: string): Promise<Result<Source[]>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("protocol_sources").select("*").eq("protocol_id", protocolId).order("created_at", { ascending: true });
+    if (error) throw error;
+    return { ok: true, data: (data ?? []).map(rowToSource) };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function adicionarSource(input: {
+  protocolId: string; titulo: string; tipo: string; autor?: string; ano?: number | null; texto: string;
+}): Promise<Result<Source>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    if (!(input.texto || "").trim()) return { ok: false, error: "Cole o texto da fonte." };
+    const { data, error } = await supabase.from("protocol_sources").insert({
+      protocol_id: input.protocolId,
+      source_type: input.tipo || "artigo",
+      title: (input.titulo || "").trim() || "Fonte sem título",
+      content: input.texto,
+      metadata: { autor: input.autor ?? null, ano: input.ano ?? null },
+    }).select("*").single();
+    if (error) throw error;
+    return { ok: true, data: rowToSource(data) };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function removerSource(sourceId: string): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { error } = await supabase.from("protocol_sources").delete().eq("id", sourceId);
+    if (error) throw error;
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// Gera UM bloco (3-4 seções), recebendo os sources completos (do banco) + as seções
+// já geradas como contexto. Valida as citações DO BLOCO antes de devolver.
+export async function gerarBloco(input: {
+  protocolId: string; blocoIndex: number; especialidade: string; secoesAnteriores: SecaoGerada[];
+}): Promise<Result<{ secoes: SecaoGerada[]; validacaoBloco: Validacao; usage: { tokensIn: number; tokensOut: number }; provider: string; model: string }>> {
+  try {
+    await requireAdmin();
+    const bloco = PROTOCOLO_BLOCOS[input.blocoIndex];
+    if (!bloco) return { ok: false, error: "Bloco inválido." };
+
+    const sres = await listarSources(input.protocolId);
+    if (!sres.ok) return sres;
+    const sources = sres.data;
+    if (sources.length === 0) return { ok: false, error: "Adicione ao menos uma fonte antes de gerar." };
+
+    // Monta o prompt (usado pelos providers reais; o mock ignora) e chama o provider.
+    const prompt = buildArquitetoProtocolosPrompt({
+      especialidade: input.especialidade, sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores,
+    });
+    const provider = getProvider(aiProviders().generation); // mock | deepseek (AI_PROVIDER)
+    const res = await provider.generate({
+      modulo: "arquiteto-protocolos", especialidade: input.especialidade,
+      sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores, prompt,
+    });
+
+    // Valida citações DO BLOCO antes de prosseguir.
+    const validacaoBloco = validarSecoes(res.secoes, sources);
+    return { ok: true, data: { secoes: res.secoes, validacaoBloco, usage: res.usage, provider: res.provider, model: res.model } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// ESTÁGIO 2 — revisão do protocolo COMPLETO (GPT-4o). Aponta problemas + devolve versão
+// corrigida à parte (não reescreve em silêncio). O confidence segue calculado pelo CÓDIGO.
+export type RevisaoResultado = {
+  issues: Issue[]; corrigido: SecaoGerada[]; usage: { tokensIn: number; tokensOut: number };
+  provider: string; model: string; confidence: number; method: string;
+};
+export async function revisar(input: { protocolId: string; secoes: SecaoGerada[] }): Promise<Result<RevisaoResultado>> {
+  try {
+    await requireAdmin();
+    const sres = await listarSources(input.protocolId);
+    if (!sres.ok) return sres;
+    const sources = sres.data;
+    if (!input.secoes?.length) return { ok: false, error: "Gere o protocolo antes de revisar." };
+    const provider = getProvider(aiProviders().review); // mock | openai/gpt-4o
+    const rev = await provider.review({
+      modulo: "arquiteto-protocolos",
+      draft: { provider: "", model: "", secoes: input.secoes, usage: { tokensIn: 0, tokensOut: 0 } },
+      sources,
+    });
+    const val = consolidarValidacao(input.secoes, sources); // confidence pelo CÓDIGO (não pela IA)
+    return { ok: true, data: { issues: rev.issues, corrigido: rev.corrigido.secoes, usage: rev.usage, provider: rev.provider, model: rev.model, confidence: val.confidence, method: val.method } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// Salva o resultado (possivelmente editado) como NOVA protocol_version (append-only) +
+// registra a auditoria de IA POR ESTÁGIO: uma linha por bloco de geração + uma da revisão.
+// Confidence GLOBAL recalculado pelo código contra os sources.
+export async function salvarVersao(input: {
+  protocolId: string;
+  especialidade: string;
+  secoes: SecaoGerada[];
+  textoEditado?: Record<string, string>;
+  geracoes: { blocoIndex: number; provider: string; model: string; tokensIn: number; tokensOut: number; secoes: SecaoGerada[]; confidence: number; method: string }[];
+  revisao?: { provider: string; model: string; tokensIn: number; tokensOut: number; issues: Issue[]; corrigido: SecaoGerada[] };
+}): Promise<Result<{ versionId: string; versionNumber: number; validacao: Validacao }>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+
+    const sres = await listarSources(input.protocolId);
+    if (!sres.ok) return sres;
+    const sources = sres.data;
+
+    // Confidence GLOBAL pelo código.
+    const validacao = consolidarValidacao(input.secoes, sources);
+
+    // Próximo version_number (append-only).
+    const { data: ult } = await supabase.from("protocol_versions")
+      .select("version_number").eq("protocol_id", input.protocolId).order("version_number", { ascending: false }).limit(1).maybeSingle();
+    const versionNumber = (ult?.version_number ?? 0) + 1;
+
+    const content = {
+      especialidade: input.especialidade,
+      secoes: input.secoes,
+      textoEditado: input.textoEditado ?? {},
+      confidence: validacao.confidence,
+      confidence_method: validacao.method,
+    };
+
+    const { data: ver, error: verErr } = await supabase.from("protocol_versions")
+      .insert({ protocol_id: input.protocolId, version_number: versionNumber, content, is_published: false })
+      .select("id").single();
+    if (verErr) throw verErr;
+    const versionId = ver.id as string;
+
+    // current_version_id aponta para a nova versão.
+    await supabase.from("protocols").update({ current_version_id: versionId, stage: "arquiteto-protocolos" }).eq("id", input.protocolId);
+
+    // Auditoria: uma linha por bloco.
+    if (input.geracoes?.length) {
+      await supabase.from("ai_generations").insert(input.geracoes.map((g) => ({
+        protocol_version_id: versionId,
+        module_type: "arquiteto-protocolos",
+        provider: g.provider,
+        model: g.model,
+        tokens_in: g.tokensIn,
+        tokens_out: g.tokensOut,
+        output: { secoes: g.secoes },
+        citations: g.secoes.flatMap((s) => s.afirmacoes),
+        confidence_level: g.confidence,
+        confidence_method: g.method,
+      })));
+    }
+
+    // Auditoria do ESTÁGIO 2 (revisão): linha separada, com apontamentos (warnings) +
+    // versão corrigida (output). Não substitui o confidence do código — é camada adicional.
+    if (input.revisao) {
+      const r = input.revisao;
+      await supabase.from("ai_generations").insert({
+        protocol_version_id: versionId,
+        module_type: "arquiteto-protocolos:review",
+        provider: r.provider,
+        model: r.model,
+        tokens_in: r.tokensIn,
+        tokens_out: r.tokensOut,
+        output: { secoes: r.corrigido },
+        warnings: r.issues,
+        confidence_level: validacao.confidence,
+        confidence_method: validacao.method,
+      });
+    }
+
+    revalidatePath("/admin/editora/arquiteto-protocolos");
+    return { ok: true, data: { versionId, versionNumber, validacao } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// ── PUBLICAÇÃO / VERSIONAMENTO ────────────────────────────────────────────────
+type VersaoResumo = { id: string; version_number: number; is_published: boolean; created_at: string };
+
+export async function listarVersoes(protocolId: string): Promise<Result<VersaoResumo[]>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("protocol_versions")
+      .select("id,version_number,is_published,created_at").eq("protocol_id", protocolId).order("version_number", { ascending: false });
+    if (error) throw error;
+    return { ok: true, data: (data ?? []) as VersaoResumo[] };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// Revalida a listagem pública e a página do protocolo (padrão de cache do diagnóstico:
+// dinâmico + revalidatePath sob demanda). Sem isso o Next serve versão velha.
+function revalidarPublico(slug: string) {
+  revalidatePath("/protocolos");
+  revalidatePath(`/protocolos/${slug}`);
+  revalidatePath("/admin/editora/arquiteto-protocolos");
+}
+
+export async function publicarProtocolo(protocolId: string): Promise<Result<{ status: string; slug: string }>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: prot } = await supabase.from("protocols").select("slug").eq("id", protocolId).maybeSingle();
+    if (!prot) return { ok: false, error: "Protocolo não encontrado." };
+
+    // versão-alvo = a mais recente
+    const { data: alvo } = await supabase.from("protocol_versions")
+      .select("id,is_published").eq("protocol_id", protocolId).order("version_number", { ascending: false }).limit(1).maybeSingle();
+    if (!alvo) return { ok: false, error: "Gere e salve uma versão antes de publicar." };
+
+    if (!alvo.is_published) {
+      // despublica a versão publicada atual (imutável) via função controlada
+      const { data: pubAtual } = await supabase.from("protocol_versions")
+        .select("id").eq("protocol_id", protocolId).eq("is_published", true).maybeSingle();
+      if (pubAtual && pubAtual.id !== alvo.id) {
+        const { error: eUnp } = await supabase.rpc("unpublish_protocol_version", { p_version_id: pubAtual.id });
+        if (eUnp) throw eUnp;
+      }
+      const { error: ePub } = await supabase.from("protocol_versions").update({ is_published: true }).eq("id", alvo.id);
+      if (ePub) throw ePub;
+    }
+
+    const { error: eProt } = await supabase.from("protocols")
+      .update({ status: "published", current_version_id: alvo.id }).eq("id", protocolId);
+    if (eProt) throw eProt;
+
+    revalidarPublico(prot.slug);
+    return { ok: true, data: { status: "published", slug: prot.slug } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function despublicarProtocolo(protocolId: string): Promise<Result<{ status: string; slug: string }>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: prot } = await supabase.from("protocols").select("slug").eq("id", protocolId).maybeSingle();
+    if (!prot) return { ok: false, error: "Protocolo não encontrado." };
+
+    const { data: pub } = await supabase.from("protocol_versions").select("id").eq("protocol_id", protocolId).eq("is_published", true).maybeSingle();
+    if (pub) { const { error } = await supabase.rpc("unpublish_protocol_version", { p_version_id: pub.id }); if (error) throw error; }
+
+    const { error: e2 } = await supabase.from("protocols").update({ status: "ready_to_publish" }).eq("id", protocolId);
+    if (e2) throw e2;
+    revalidarPublico(prot.slug);
+    return { ok: true, data: { status: "ready_to_publish", slug: prot.slug } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function arquivarProtocolo(protocolId: string): Promise<Result<{ status: string; slug: string }>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: prot } = await supabase.from("protocols").select("slug").eq("id", protocolId).maybeSingle();
+    if (!prot) return { ok: false, error: "Protocolo não encontrado." };
+
+    const { data: pub } = await supabase.from("protocol_versions").select("id").eq("protocol_id", protocolId).eq("is_published", true).maybeSingle();
+    if (pub) { const { error } = await supabase.rpc("unpublish_protocol_version", { p_version_id: pub.id }); if (error) throw error; }
+
+    const { error: e2 } = await supabase.from("protocols").update({ status: "archived" }).eq("id", protocolId);
+    if (e2) throw e2;
+    revalidarPublico(prot.slug);
+    return { ok: true, data: { status: "archived", slug: prot.slug } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}

@@ -1,10 +1,25 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { tokenAdminValido } from "@/lib/admin-token";
 
-// Next 16: "middleware" virou "proxy". Aqui só renovamos a sessão Supabase do
-// usuário (cookies) a cada request, para Server Components verem quem está logado.
-// Não bloqueia rota nenhuma; a proteção é feita nas páginas (ex.: /minha-area).
+// Next 16: "middleware" virou "proxy". Faz duas coisas:
+//  (1) CAMADA (a) de segurança do admin: barra /admin no edge para quem não tem o
+//      cookie admin válido (redireciona para /admin-login). Defesa em profundidade —
+//      o layout do admin e cada action também checam (camada b). Ver docs/AUTH-ADMIN.md.
+//  (2) Renova a sessão Supabase (cookies) a cada request, para os Server Components.
 export async function proxy(request: NextRequest) {
+  // ── Camada (a): gate do admin no edge ──────────────────────────────────────
+  const { pathname } = request.nextUrl;
+  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin-login")) {
+    const token = request.cookies.get("admin_token")?.value;
+    if (!tokenAdminValido(token)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin-login";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
   let response = NextResponse.next({ request });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
