@@ -15,7 +15,10 @@ export const metadata = { title: "Minha área" };
 
 export default async function MinhaAreaPage() {
   const user = await getUsuario();
-  if (!user) redirect("/entrar?next=/minha-area");
+  // Sem login → vai pra HOME pública (não força login). Isto também conserta o PWA
+  // já instalado que abria em /minha-area (start_url antigo): agora cai no site normal.
+  // Login é feito pelo botão "Entrar"; a área de assinante segue protegida p/ quem entra.
+  if (!user) redirect("/");
 
   let perfil: { nome?: string; especialidade?: string; crm?: string; liberado?: boolean } = {};
   let meusCursos: { id: string; titulo: string; feitas: number; total: number; pct: number; completo: boolean }[] = [];
