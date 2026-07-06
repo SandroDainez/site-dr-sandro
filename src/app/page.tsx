@@ -744,14 +744,25 @@ export default async function Home() {
                 </div>
               ))}
             </div>
-            {contato.qrUrl && (
-              <div className="mt-6 flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-6 text-center">
-                {contato.qrLabel && <p className="text-sm font-semibold text-white">{contato.qrLabel}</p>}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={contato.qrUrl} alt={contato.qrLabel || "QR code"} className="h-44 w-44 rounded-xl bg-white object-contain p-2" />
-                {contato.qrLegenda && <p className="text-xs text-white/55">{contato.qrLegenda}</p>}
-              </div>
-            )}
+            {(() => {
+              // Lista de QRs (novo). Fallback p/ o QR único legado, se ainda não migrado.
+              const qrs = (contato.qrs && contato.qrs.length > 0)
+                ? contato.qrs.filter((q) => q.url)
+                : (contato.qrUrl ? [{ label: contato.qrLabel ?? "", url: contato.qrUrl, legenda: contato.qrLegenda }] : []);
+              if (qrs.length === 0) return null;
+              return (
+                <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {qrs.map((q, i) => (
+                    <div key={i} className="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-6 text-center">
+                      {q.label && <p className="text-sm font-semibold text-white">{q.label}</p>}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={q.url} alt={q.label || "QR code"} className="h-44 w-44 rounded-xl bg-white object-contain p-2" />
+                      {q.legenda && <p className="text-xs text-white/55">{q.legenda}</p>}
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </section>
 

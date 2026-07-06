@@ -89,7 +89,9 @@ export type ContatoData = {
   telefoneLink: string;
   instagram: string;
   instagramLink: string;
-  // QR code opcional (admin gera e sobe a imagem — ex.: WhatsApp, PIX, vCard).
+  // VÁRIOS QR codes (um por canal: WhatsApp, Instagram, PIX, vCard...).
+  qrs?: { label: string; url: string; legenda?: string }[];
+  // QR code legado (1 só) — mantido p/ compatibilidade; migrado para `qrs` no editor.
   qrUrl?: string;     // imagem do QR (servida via /api/img)
   qrLabel?: string;   // título acima do QR, ex.: "Fale no WhatsApp"
   qrLegenda?: string; // texto pequeno abaixo, ex.: "Aponte a câmera do celular"
