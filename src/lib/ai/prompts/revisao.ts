@@ -1,6 +1,7 @@
 import type { Source, SecaoGerada } from "../types";
 import { buildRevisaoProtocolosPrompt } from "./revisao-protocolos";
 import { buildRevisaoCientificoPrompt } from "./revisao-cientifico";
+import { buildRevisaoAulasPrompt } from "./revisao-aulas";
 
 // Dispatcher do prompt de REVISÃO (estágio 2) por módulo. O provider é agnóstico de módulo:
 // recebe ReviewInput.modulo e este dispatcher escolhe o prompt certo. Novo módulo = 1 case.
@@ -10,6 +11,8 @@ export function buildRevisaoPrompt(modulo: string, args: { secoes: SecaoGerada[]
     case "editor-cientifico":
     case "editor-premium": // refinamento produz o mesmo tipo de texto → mesmo revisor científico
       return buildRevisaoCientificoPrompt(args);
+    case "criador-aulas":
+      return buildRevisaoAulasPrompt(args);
     case "arquiteto-protocolos":
     default:
       return buildRevisaoProtocolosPrompt(args);
