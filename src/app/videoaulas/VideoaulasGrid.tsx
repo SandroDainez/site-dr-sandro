@@ -340,7 +340,7 @@ export default function VideoaulasGrid({ videoaulas, cols }: Props) {
         </p>
       )}
 
-      <div className="card-grid gap-5" style={colStyle(cols)}>
+      <div className="card-grid gap-5" style={colStyle(Math.min(cols ?? 3, filtered.length || 1))}>
         {filtered.map((item) => (
           <VideoCard key={item.id} item={item} />
         ))}

@@ -124,7 +124,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
           <>
             {proto.length > 0 && (
               <Section icon={ClipboardList} titulo="Protocolos" verHref="/protocolos" accent={cfg.accent}>
-                <div className="card-grid gap-5" style={colStyle(cardCols["protocolos"])}>
+                <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["protocolos"] ?? 3, proto.length || 1))}>
                   {proto.map((p) => (
                     <ProtocoloCard key={p.id} item={p} />
                   ))}
@@ -147,7 +147,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {vids.length > 0 && (
               <Section icon={PlayCircle} titulo="Videoaulas" verHref="/videoaulas" accent={cfg.accent}>
-                <div className="card-grid gap-5" style={colStyle(cardCols["videoaulas"])}>
+                <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["videoaulas"] ?? 3, vids.length || 1))}>
                   {vids.map((v) => <VideoCard key={v.id} item={v} />)}
                 </div>
               </Section>
@@ -155,7 +155,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
 
             {curs.length > 0 && (
               <Section icon={GraduationCap} titulo="Cursos" verHref="/cursos" accent={cfg.accent}>
-                <div className="card-grid gap-3" style={colStyle(cardCols["cursos"])}>
+                <div className="card-grid gap-3" style={colStyle(Math.min(cardCols["cursos"] ?? 3, curs.length || 1))}>
                   {curs.map((c) => (
                     <a key={c.id} href={`/cursos/${c.id}`} className={card}>
                       <p className="text-sm font-semibold text-white">{c.titulo}</p>

@@ -111,7 +111,7 @@ export default function ColaboradoresList({ items, cols }: { items: ColaboradorD
   }
 
   return (
-    <div className="card-grid gap-5" style={colStyle(cols)}>
+    <div className="card-grid gap-5" style={colStyle(Math.min(cols ?? 3, items.length || 1))}>
       {sorted.map((item) => <Card key={item.id} item={item} />)}
     </div>
   );

@@ -73,7 +73,7 @@ export default function CursosCatalog({ cursos, cols }: { cursos: CursoData[]; c
         <p className="text-sm text-white/40">Nenhum curso nesta área ainda.</p>
       )}
 
-      <div className="card-grid gap-5" style={colStyle(cols)}>
+      <div className="card-grid gap-5" style={colStyle(Math.min(cols ?? 3, filtrados.length || 1))}>
         {filtrados.map((curso) => {
           const pago = curso.acesso === "pago";
           return (

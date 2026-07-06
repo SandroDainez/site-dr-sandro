@@ -142,7 +142,7 @@ export default function PodcastList({ podcasts, cols }: { podcasts: PodcastData[
   }
 
   return (
-    <div className="card-grid gap-5" style={colStyle(cols)}>
+    <div className="card-grid gap-5" style={colStyle(Math.min(cols ?? 3, podcasts.length || 1))}>
       {sorted.map((ep) => <Card key={ep.id} ep={ep} />)}
     </div>
   );

@@ -168,7 +168,7 @@ export default function AcervoList({ itens, cols }: { itens: AcervoItemData[]; c
   }
 
   return (
-    <div className="card-grid gap-5" style={colStyle(cols)}>
+    <div className="card-grid gap-5" style={colStyle(Math.min(cols ?? 3, itens.length || 1))}>
       {sorted.map((item) => <Card key={item.id} item={item} />)}
     </div>
   );

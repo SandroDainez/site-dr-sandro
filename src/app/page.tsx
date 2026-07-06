@@ -208,7 +208,7 @@ export default async function Home() {
             <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "especialidades_band", "eyebrow")}</p>
             <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "especialidades_band", "title")}</h2>
           </div>
-          <div className="card-grid gap-4" style={colStyle(cardCols["especialidades"])}>
+          <div className="card-grid gap-4" style={colStyle(Math.min(cardCols["especialidades"] ?? 3, 3))}>
             {[
               { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-emerg/25 via-emerg/8", accent: "text-emerg", border: "hover:border-emerg/50" },
               { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-inten/25 via-inten/8", accent: "text-inten", border: "hover:border-inten/50" },
@@ -242,7 +242,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="card-grid gap-5" style={colStyle(cardCols["apps-assinatura"])}>
+          <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["apps-assinatura"] ?? 3, apps.length || 1))}>
             {apps.map((app, idx) => {
               const AppIcon = iconMap[app.icon] ?? Layers;
               return (
@@ -320,7 +320,7 @@ export default async function Home() {
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "freeApps", "title")}</h2>
           </div>
 
-          <div className="card-grid gap-5" style={colStyle(cardCols["apps-gratis"])}>
+          <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["apps-gratis"] ?? 3, freeApps.length || 1))}>
             {freeApps.map((item) => {
               const FreeIcon = iconMap[item.icon] ?? BookOpen;
               const inner = (
@@ -382,7 +382,7 @@ export default async function Home() {
             <p className="mt-3 max-w-2xl text-sm text-white/50">{secText(st, "utilApps", "desc")}</p>
           </div>
 
-          <div className="card-grid gap-5" style={colStyle(cardCols["apps-uteis"])}>
+          <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["apps-uteis"] ?? 3, utilApps.length || 1))}>
             {utilApps.map((item) => {
               const UtilIcon = iconMap[item.icon] ?? Wallet;
               const inner = (
@@ -486,7 +486,7 @@ export default async function Home() {
           const sorted = [...protocolos].sort(
             (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
           );
-          const recent = sorted.slice(0, 3);
+          const recent = sorted.slice(0, (cardCols["protocolos"] ?? 3) * 3);
           const hasContent = protocolos.length > 0;
           return (
             <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos" style={{ order: homeOrder["protocolos"] }}>
@@ -511,7 +511,7 @@ export default async function Home() {
                 <>
                   {/* Mesmo card da página /protocolos e das especialidades: expande NO LOCAL
                       (Ver protocolo ↓ / Ler / ⛶ Tela cheia / Baixar), sem abrir outra página. */}
-                  <div className="card-grid gap-4" style={colStyle(cardCols["protocolos"])}>
+                  <div className="card-grid gap-4" style={colStyle(Math.min(cardCols["protocolos"] ?? 3, recent.length || 1))}>
                     {recent.map((item) => (
                       <ProtocoloCard key={item.id} item={item} />
                     ))}
@@ -539,7 +539,7 @@ export default async function Home() {
           const sorted = [...videoaulas].sort(
             (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
           );
-          const recent = sorted.slice(0, 3);
+          const recent = sorted.slice(0, (cardCols["videoaulas"] ?? 3) * 3);
           return (
             <section id="videoaulas" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas" style={{ order: homeOrder["videoaulas"] }}>
               <div className="mb-8 flex items-end justify-between">
@@ -557,7 +557,7 @@ export default async function Home() {
                 </a>
               </div>
 
-              <div className="card-grid gap-4" style={colStyle(cardCols["videoaulas"])}>
+              <div className="card-grid gap-4" style={colStyle(Math.min(cardCols["videoaulas"] ?? 3, recent.length || 1))}>
                 {recent.map((item) => (
                   <HomeVideoCard key={item.id} item={item} />
                 ))}
@@ -585,7 +585,7 @@ export default async function Home() {
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
-            <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} cols={cardCols["colaboradores"]} />
+            <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["colaboradores"] ?? 3) * 3)} cols={cardCols["colaboradores"]} />
             <a href="/colaboradores" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
@@ -648,7 +648,7 @@ export default async function Home() {
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
-            <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} cols={cardCols["podcast"]} />
+            <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["podcast"] ?? 3) * 3)} cols={cardCols["podcast"]} />
             <a href="/podcast" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
@@ -667,7 +667,7 @@ export default async function Home() {
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
-            <AcervoList itens={[...acervo].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} cols={cardCols["acervo"]} />
+            <AcervoList itens={[...acervo].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["acervo"] ?? 3) * 3)} cols={cardCols["acervo"]} />
             <a href="/acervo" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
@@ -685,7 +685,7 @@ export default async function Home() {
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
-          <AcervoList itens={[...procedimentos].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, 3)} cols={cardCols["procedimentos"]} />
+          <AcervoList itens={[...procedimentos].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["procedimentos"] ?? 3) * 3)} cols={cardCols["procedimentos"]} />
           <a href="/procedimentos" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
             {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
           </a>
