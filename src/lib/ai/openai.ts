@@ -28,9 +28,13 @@ export async function chatJSON<T = unknown>(
   prompt: string,
   opts: { model?: string; temperature?: number; maxTokens?: number; system?: string } = {}
 ): Promise<T> {
-  const messages: { role: "system" | "user"; content: string }[] = [];
-  if (opts.system) messages.push({ role: "system", content: opts.system });
-  messages.push({ role: "user", content: prompt });
+  // A OpenAI exige a palavra "json" nas mensagens ao usar response_format json_object.
+  // Um system baseline garante isso mesmo que o prompt do chamador não mencione.
+  const sys = ["Responda estritamente em JSON válido.", opts.system].filter(Boolean).join("\n");
+  const messages: { role: "system" | "user"; content: string }[] = [
+    { role: "system", content: sys },
+    { role: "user", content: prompt },
+  ];
   const r = await getOpenAI().chat.completions.create({
     model: opts.model ?? AI_MODELS.chat,
     messages,
