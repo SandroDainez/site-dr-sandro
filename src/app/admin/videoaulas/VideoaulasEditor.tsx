@@ -553,7 +553,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         className="absolute inset-0 h-full w-full object-cover"
                       />
                     </div>
-                    <div className="flex-1 space-y-2.5">
+                    <div className={`flex-1 space-y-2.5 transition ${item.mostrarInteiro ? "pointer-events-none opacity-40" : ""}`}>
                       <div>
                         <input
                           type="range"
