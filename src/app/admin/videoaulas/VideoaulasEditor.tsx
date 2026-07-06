@@ -546,9 +546,9 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         playsInline
                         preload="metadata"
                         style={item.mostrarInteiro ? { objectFit: "contain" } : {
-                          objectPosition: `${item.enquadramento ?? 50}% 50%`,
+                          objectPosition: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%`,
                           transform: `scale(${(item.zoom ?? 100) / 100})`,
-                          transformOrigin: `50% ${item.enquadramentoY ?? 50}%`,
+                          transformOrigin: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%`,
                         }}
                         className="absolute inset-0 h-full w-full object-cover"
                       />
