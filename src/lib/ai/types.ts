@@ -3,12 +3,13 @@
 
 // Uma fonte fornecida (texto REAL contra o qual as citações são verificadas).
 export type Source = {
-  id: string;        // source_id estável (ex.: "S1")
+  id: string;        // source_id estável (ex.: "S1", "PMID123", "INT4")
   titulo: string;
-  tipo: string;      // guideline | artigo | livro | consenso
+  tipo: string;      // guideline | artigo | livro | consenso | biblioteca | pubmed
   autor?: string;
   ano?: number | null;
   texto: string;
+  url?: string;      // origem (kb_referencias.fonte_url ou link do PubMed), quando houver
 };
 
 // Cada afirmação da saída fica ligada a um source + âncora (§4 da arquitetura).
