@@ -25,7 +25,7 @@ export default function BoletimCard({ update, manual = false, logo }: { update: 
             <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-accent/20 bg-accent/[0.06]">
               {logo.logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logo.logoUrl} alt="" className="h-full w-full object-contain p-1" />
+                <img src={logo.logoUrl} alt="" className="h-full w-full object-contain" />
               ) : (
                 <span className="text-xl">{logo.emoji}</span>
               )}

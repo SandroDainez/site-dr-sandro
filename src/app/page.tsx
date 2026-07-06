@@ -227,7 +227,7 @@ export default async function Home() {
                   <div className="relative">
                     {s.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.logoUrl} alt={s.label} className="h-14 w-14 object-contain" />
+                      <img src={s.logoUrl} alt={s.label} className="h-14 w-14 rounded-2xl object-contain" />
                     ) : (
                       <p className="text-3xl">{s.emoji}</p>
                     )}

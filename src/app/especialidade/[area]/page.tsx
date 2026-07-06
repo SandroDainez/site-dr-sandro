@@ -121,7 +121,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
             <h1 className="mt-2 flex items-center gap-3 text-4xl font-semibold tracking-tight md:text-5xl">
               {hubLogo ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={hubLogo} alt="" className="h-12 w-12 shrink-0 object-contain md:h-14 md:w-14" />
+                <img src={hubLogo} alt="" className="h-12 w-12 shrink-0 rounded-2xl object-contain md:h-14 md:w-14" />
               ) : (
                 <span>{cfg.emoji}</span>
               )}
@@ -212,7 +212,7 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
                 <span className="relative flex items-center gap-3">
                   {logoByArea[k] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoByArea[k]} alt="" className="h-7 w-7 shrink-0 object-contain" />
+                    <img src={logoByArea[k]} alt="" className="h-7 w-7 shrink-0 rounded-lg object-contain" />
                   ) : (
                     <span className="text-2xl">{AREAS[k].emoji}</span>
                   )}

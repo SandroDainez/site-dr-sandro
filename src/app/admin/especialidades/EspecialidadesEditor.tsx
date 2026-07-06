@@ -91,7 +91,7 @@ export default function EspecialidadesEditor({ initial }: { initial: Especialida
               <div className={`flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${tema.grad} to-transparent`}>
                 {it.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={it.logoUrl} alt="" className="h-full w-full object-contain p-2" />
+                  <img src={it.logoUrl} alt="" className="h-full w-full rounded-2xl object-contain" />
                 ) : (
                   <span className="text-4xl">{it.emoji || "🩺"}</span>
                 )}
