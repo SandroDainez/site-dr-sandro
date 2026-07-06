@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { AtualizacaoData } from "@/lib/content";
 import BoletimCard from "./BoletimCard";
 import { UpdateCard } from "@/app/atualizacoes/AtualizacoesGrid";
+import { colStyle } from "@/lib/card-grid";
 
 // Feed ÚNICO de Atualizações clínicas: boletins automáticos da IA (medical_updates)
 // + atualizações manuais (AtualizacaoData), juntos e em ordem cronológica.
@@ -48,6 +49,7 @@ export default function AtualizacoesFeed({
   limit,
   initialArea = "todas",
   logos = {},
+  cols = 3,
 }: {
   ai?: any[];
   manuais?: AtualizacaoData[];
@@ -55,6 +57,7 @@ export default function AtualizacoesFeed({
   limit?: number;
   initialArea?: string;
   logos?: Record<string, { logoUrl?: string; emoji?: string }>;
+  cols?: number;
 }) {
   const valid = TABS.some((t) => t.value === initialArea) ? (initialArea as Area) : "todas";
   const [area, setArea] = useState<Area>(valid);
@@ -103,7 +106,7 @@ export default function AtualizacoesFeed({
           <p className="text-sm text-white/50">Nenhuma atualização ainda.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="card-grid gap-5" style={colStyle(cols)}>
           {shown.map((it) =>
             it.kind === "ai"
               ? <BoletimCard key={`ai-${it.raw.id}`} update={it.raw} logo={logos[it.area]} />
