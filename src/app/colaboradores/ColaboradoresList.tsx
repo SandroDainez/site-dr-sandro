@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { PlayCircle, Stethoscope } from "lucide-react";
+import { useState, useEffect } from "react";
+import { PlayCircle, Stethoscope, Maximize2 } from "lucide-react";
 import type { ColaboradorData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 import { colStyle } from "@/lib/card-grid";
@@ -13,30 +13,73 @@ function ytId(url: string): string | null {
 }
 const formatDate = dataCurta;
 
+// Modal de tela cheia (iframe do YouTube ou vídeo hospedado)
+function VideoModal({ item, onClose }: { item: ColaboradorData; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onClose]);
+  const yt = item.videoUrl ? ytId(item.videoUrl) : null;
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="relative w-full max-w-4xl" onClick={(e) => e.stopPropagation()}>
+        <button type="button" onClick={onClose} className="absolute -top-10 right-0 flex items-center gap-1 text-sm text-white/60 transition hover:text-white">✕ Fechar (Esc)</button>
+        {yt ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`}
+            title={item.titulo}
+            className="aspect-video w-full rounded-2xl bg-black shadow-2xl"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        ) : (
+          // eslint-disable-next-line jsx-a11y/media-has-caption
+          <video src={item.videoUrl} controls autoPlay playsInline className="w-full rounded-2xl bg-black shadow-2xl" style={{ maxHeight: "80vh" }} />
+        )}
+        <p className="mt-3 text-center text-sm font-medium text-white/70">{item.titulo}</p>
+      </div>
+    </div>
+  );
+}
+
 function Card({ item }: { item: ColaboradorData }) {
   const [playing, setPlaying] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const yt = item.videoUrl ? ytId(item.videoUrl) : null;
   const isProxy = item.videoUrl.startsWith("/api/img");
   const thumb = item.imageUrl || (yt ? `https://img.youtube.com/vi/${yt}/hqdefault.jpg` : "");
 
   return (
+    <>
+    {expanded && <VideoModal item={item} onClose={() => setExpanded(false)} />}
     <article className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-white/20">
       {/* Mídia 16:9 */}
       <div className="relative aspect-video w-full bg-black">
         {!item.videoUrl ? (
           <div className="flex h-full w-full items-center justify-center text-white/20"><PlayCircle className="h-10 w-10" /></div>
         ) : playing ? (
-          yt ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`}
-              title={item.titulo}
-              className="absolute inset-0 h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          ) : (
-            <video src={item.videoUrl} controls autoPlay playsInline className="absolute inset-0 h-full w-full bg-black object-contain" />
-          )
+          <>
+            {yt ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`}
+                title={item.titulo}
+                className="absolute inset-0 h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : (
+              <video src={item.videoUrl} controls autoPlay playsInline className="absolute inset-0 h-full w-full bg-black object-contain" />
+            )}
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/90"
+            >
+              <Maximize2 className="h-3 w-3" /> Tela cheia
+            </button>
+          </>
         ) : (
           <button type="button" onClick={() => setPlaying(true)} className="group absolute inset-0 h-full w-full cursor-pointer">
             {thumb ? (
@@ -73,6 +116,18 @@ function Card({ item }: { item: ColaboradorData }) {
           <div className="mt-2 text-sm leading-relaxed text-white/55 [&_a]:text-accent" dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.descricao) }} />
         )}
 
+        {item.videoUrl && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="inline-flex items-center gap-1.5 self-start rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/75 transition hover:border-accent/40 hover:text-white"
+            >
+              <Maximize2 className="h-3.5 w-3.5" /> Tela cheia
+            </button>
+          </div>
+        )}
+
         {(item.bio || (item.links && item.links.length > 0)) && (
           <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
             <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Sobre o profissional</p>
@@ -90,6 +145,7 @@ function Card({ item }: { item: ColaboradorData }) {
         )}
       </div>
     </article>
+    </>
   );
 }
 
