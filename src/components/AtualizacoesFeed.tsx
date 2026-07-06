@@ -59,8 +59,19 @@ export default function AtualizacoesFeed({
   const valid = TABS.some((t) => t.value === initialArea) ? (initialArea as Area) : "todas";
   const [area, setArea] = useState<Area>(valid);
 
+  // Só o boletim MAIS RECENTE por especialidade no feed — as semanas anteriores
+  // ficam no histórico (/atualizacoes-semanais). Evita "novo + velho" da mesma área.
+  const aiRecentes: any[] = [];
+  const vistos = new Set<string>();
+  for (const u of [...ai].sort((a, b) => String(b.data_publicacao ?? "").localeCompare(String(a.data_publicacao ?? "")))) {
+    const esp = String(u.especialidade ?? "");
+    if (vistos.has(esp)) continue;
+    vistos.add(esp);
+    aiRecentes.push(u);
+  }
+
   const items: Item[] = [
-    ...ai.map((u) => ({ kind: "ai" as const, date: (u.data_publicacao ?? "").slice(0, 10), area: espToSite(u.especialidade), raw: u })),
+    ...aiRecentes.map((u) => ({ kind: "ai" as const, date: (u.data_publicacao ?? "").slice(0, 10), area: espToSite(u.especialidade), raw: u })),
     ...manuais.filter((m) => m.titulo).map((m) => ({ kind: "manual" as const, date: m.data ?? "", area: m.area, areas: m.areas, raw: m })),
   ];
 
