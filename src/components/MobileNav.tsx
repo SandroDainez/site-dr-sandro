@@ -76,7 +76,12 @@ export default function MobileNav({ items, style, internal = false, currentPath 
                 style={{ fontSize }}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] transition ${isActive ? chipActive : "border-white/10 bg-white/[0.04] text-white/80"}`}
               >
-                {c.emoji && <span className="text-sm leading-none">{c.emoji}</span>}
+                {c.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={c.logoUrl} alt="" className="h-4 w-4 shrink-0 rounded object-contain" />
+                ) : c.emoji ? (
+                  <span className="text-sm leading-none">{c.emoji}</span>
+                ) : null}
                 {c.label}
               </a>
             );

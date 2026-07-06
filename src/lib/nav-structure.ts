@@ -2,7 +2,7 @@
 // relacionados. Definida em código (estável). Os conteúdos de cada seção seguem
 // editáveis no admin normalmente — o que é fixo aqui é só a montagem dos grupos.
 
-export type NavLink = { label: string; href: string; emoji?: string };
+export type NavLink = { label: string; href: string; emoji?: string; logoUrl?: string };
 export type NavGroup = { label: string; href?: string; children?: NavLink[] };
 
 export const NAV_GROUPS: NavGroup[] = [

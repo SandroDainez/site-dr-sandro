@@ -846,8 +846,27 @@ export async function getTypography(): Promise<TypographyData> {
 // ocultar/renomear guardadas no blob "navOverride"). Os componentes de menu renderizam
 // a partir daqui. (Nome mantido por compat — as 12 páginas já chamam getNavItems.)
 export async function getNavItems(): Promise<NavGroup[]> {
-  const ov = (await readBlob("navOverride", {} as NavOverride)) as NavOverride;
-  return applyNavOverride(NAV_GROUPS, ov);
+  const [ov, esps] = await Promise.all([
+    readBlob("navOverride", {} as NavOverride) as Promise<NavOverride>,
+    getEspecialidades(),
+  ]);
+  const groups = applyNavOverride(NAV_GROUPS, ov);
+  // Injeta o logo enviado no admin nos itens de especialidade do menu (casa a área
+  // pelo href /especialidade/<area>). Um lugar só → vale em todos os menus/páginas.
+  const logoByArea: Record<string, string | undefined> = {};
+  for (const e of esps) if (e.area) logoByArea[e.area] = e.logoUrl;
+  return groups.map((g) =>
+    g.children
+      ? {
+          ...g,
+          children: g.children.map((c) => {
+            const m = c.href.match(/^\/especialidade\/([a-z]+)/i);
+            const logo = m ? logoByArea[m[1].toLowerCase()] : undefined;
+            return logo ? { ...c, logoUrl: logo } : c;
+          }),
+        }
+      : g
+  );
 }
 
 // Só a override crua (p/ o editor do admin carregar o estado atual).

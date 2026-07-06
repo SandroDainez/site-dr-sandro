@@ -80,7 +80,12 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
                       href={href}
                       className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] transition ${isActive ? "bg-white/10 font-medium text-white" : "text-white/75 hover:bg-white/[0.07] hover:text-white"}`}
                     >
-                      {c.emoji && <span className="text-base leading-none">{c.emoji}</span>}
+                      {c.logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={c.logoUrl} alt="" className="h-5 w-5 shrink-0 rounded-md object-contain" />
+                      ) : c.emoji ? (
+                        <span className="text-base leading-none">{c.emoji}</span>
+                      ) : null}
                       {c.label}
                     </a>
                   );
