@@ -27,7 +27,7 @@ export const EDITORA_MODULOS: EditoraModulo[] = [
   { slug: "criador-flashcards",      nome: "Criador de Flashcards",   tipo: "geração",   icon: Layers,         descricao: "Gera flashcards (frente/verso) fundamentados nas fontes.", href: "/admin/editora/criador-flashcards", ativo: true },
   { slug: "criador-questoes",        nome: "Criador de Questões",     tipo: "geração",   icon: ListChecks,     descricao: "Cria questões de múltipla escolha com gabarito e justificativa.", href: "/admin/editora/criador-questoes", ativo: true },
   { slug: "atualizador-protocolos",  nome: "Atualizador de Protocolos", tipo: "híbrido", icon: RefreshCw,      descricao: "Busca novidades e propõe o delta sobre um protocolo existente.", href: "/admin/editora/atualizador-protocolos", ativo: true },
-  { slug: "comparador-guidelines",   nome: "Comparador de Guidelines", tipo: "retrieval", icon: GitCompare,    descricao: "Compara diretrizes de diferentes fontes (busca externa)." },
+  { slug: "comparador-guidelines",   nome: "Comparador de Guidelines", tipo: "retrieval", icon: GitCompare,    descricao: "Compara diretrizes de diferentes fontes (busca externa).", href: "/admin/editora/comparador-guidelines", ativo: true },
   { slug: "pesquisador-cientifico",  nome: "Pesquisador Científico",  tipo: "retrieval", icon: Search,         descricao: "Pesquisa e sintetiza evidências (PubMed, RAG interno)." },
 ];
 
