@@ -3,9 +3,19 @@
 import { useMemo, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X } from "lucide-react";
 import { PROTOCOLO_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/protocolo-estrutura";
+import { dataCurta } from "@/lib/format-date";
+
+const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+  draft: { label: "Rascunho", cls: "border-white/15 text-white/50" },
+  scientific_review: { label: "Em revisão", cls: "border-amber-400/30 bg-amber-400/10 text-amber-300" },
+  ready_to_publish: { label: "Pronto", cls: "border-inten/30 bg-inten/10 text-inten" },
+  published: { label: "Publicado", cls: "border-accent/40 bg-accent/10 text-accent" },
+  archived: { label: "Arquivado", cls: "border-white/10 text-white/40" },
+};
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada } from "@/lib/ai/types";
-import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, salvarVersao } from "./actions";
+import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, salvarVersao, listarVersoes, publicarProtocolo, despublicarProtocolo, arquivarProtocolo } from "./actions";
+import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 
 type Protocolo = { id: string; title: string; slug: string; status: string; specialty: string };
 type BlocoStatus = { status: "pendente" | "gerando" | "concluido" | "erro"; confidence?: number; err?: string };
@@ -43,16 +53,42 @@ export default function ArquitetoProtocolos({ protocolosIniciais }: { protocolos
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
 
+  // publicação
+  const [statusAtual, setStatusAtual] = useState<string>("");
+  const [versoes, setVersoes] = useState<{ id: string; version_number: number; is_published: boolean; created_at: string }[]>([]);
+
   const validacao = useMemo(() => (secoes.length ? validarSecoes(secoes, sources) : null), [secoes, sources]);
 
   async function carregarSources(pid: string) {
     const r = await listarSources(pid);
     if (r.ok) setSources(r.data);
   }
+  async function carregarVersoes(pid: string) {
+    const r = await listarVersoes(pid);
+    if (r.ok) setVersoes(r.data);
+  }
   function abrirProtocolo(p: Protocolo) {
     setProtocolo(p); setSecoes([]); setMetas([]); setSalvo(null); setError(null);
     setBlocos(PROTOCOLO_BLOCOS.map(() => ({ status: "pendente" }))); setTextoEditado({});
-    carregarSources(p.id);
+    setStatusAtual(p.status);
+    carregarSources(p.id); carregarVersoes(p.id);
+  }
+  function aplicarStatus(status: string) {
+    setStatusAtual(status);
+    setProtocolo((prev) => (prev ? { ...prev, status } : prev));
+    setProtocolos((prev) => prev.map((p) => (protocolo && p.id === protocolo.id ? { ...p, status } : p)));
+  }
+  function publicar() {
+    if (!protocolo) return; setError(null);
+    startTransition(async () => { const r = await publicarProtocolo(protocolo.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(protocolo.id); } else setError(r.error); });
+  }
+  function despublicar() {
+    if (!protocolo) return; setError(null);
+    startTransition(async () => { const r = await despublicarProtocolo(protocolo.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(protocolo.id); } else setError(r.error); });
+  }
+  function arquivar() {
+    if (!protocolo) return; setError(null);
+    startTransition(async () => { const r = await arquivarProtocolo(protocolo.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(protocolo.id); } else setError(r.error); });
   }
   function criarNovo() {
     setError(null);
@@ -111,7 +147,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais }: { protocolos
     setError(null);
     startTransition(async () => {
       const r = await salvarVersao({ protocolId: protocolo.id, especialidade, secoes, textoEditado, geracoes: metas });
-      if (r.ok) setSalvo({ versionNumber: r.data.versionNumber, confidence: r.data.validacao.confidence });
+      if (r.ok) { setSalvo({ versionNumber: r.data.versionNumber, confidence: r.data.validacao.confidence }); carregarVersoes(protocolo.id); }
       else setError(r.error);
     });
   }
@@ -265,6 +301,45 @@ export default function ArquitetoProtocolos({ protocolosIniciais }: { protocolos
               </div>
             </div>
           )}
+          {/* 6) PUBLICAÇÃO */}
+          <div className={card}>
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">6 · Publicação</p>
+              {(() => { const s = STATUS_LABEL[statusAtual] ?? STATUS_LABEL.draft; return <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${s.cls}`}>{s.label}</span>; })()}
+            </div>
+
+            {versoes.length === 0 ? (
+              <p className="text-sm text-white/40">Salve uma versão para poder publicar.</p>
+            ) : (
+              <div className="mb-4 space-y-1.5">
+                {versoes.map((v) => (
+                  <div key={v.id} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm">
+                    <span className="text-white/70">Versão {v.version_number}</span>
+                    {v.is_published
+                      ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> pública (congelada)</span>
+                      : <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/45">rascunho</span>}
+                    <span className="ml-auto text-[10px] text-white/30">{dataCurta(v.created_at)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" onClick={publicar} disabled={busy || versoes.length === 0} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
+                <Globe className="h-3.5 w-3.5" /> Publicar (versão mais recente)
+              </button>
+              {statusAtual === "published" && (
+                <>
+                  <a href={`/protocolos/${protocolo.slug}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/75 transition hover:text-white"><Globe className="h-3.5 w-3.5" /> Ver no site</a>
+                  <button type="button" onClick={despublicar} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 px-4 py-1.5 text-xs font-medium text-white/70 transition hover:text-white disabled:opacity-50"><EyeOff className="h-3.5 w-3.5" /> Despublicar</button>
+                </>
+              )}
+              {statusAtual !== "archived" && (
+                <button type="button" onClick={arquivar} disabled={busy} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/50 transition hover:text-white/80 disabled:opacity-50"><Archive className="h-3.5 w-3.5" /> Arquivar</button>
+              )}
+            </div>
+            <p className="mt-2 text-[11px] text-white/35">Publicar congela a versão mais recente (imutável) e a torna pública em /protocolos. Editar depois cria um novo rascunho; a versão pública só muda quando você republicar.</p>
+          </div>
         </>
       )}
 

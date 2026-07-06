@@ -189,3 +189,92 @@ export async function salvarVersao(input: {
     return { ok: true, data: { versionId, versionNumber, validacao } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
+
+// ── PUBLICAÇÃO / VERSIONAMENTO ────────────────────────────────────────────────
+type VersaoResumo = { id: string; version_number: number; is_published: boolean; created_at: string };
+
+export async function listarVersoes(protocolId: string): Promise<Result<VersaoResumo[]>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("protocol_versions")
+      .select("id,version_number,is_published,created_at").eq("protocol_id", protocolId).order("version_number", { ascending: false });
+    if (error) throw error;
+    return { ok: true, data: (data ?? []) as VersaoResumo[] };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// Revalida a listagem pública e a página do protocolo (padrão de cache do diagnóstico:
+// dinâmico + revalidatePath sob demanda). Sem isso o Next serve versão velha.
+function revalidarPublico(slug: string) {
+  revalidatePath("/protocolos");
+  revalidatePath(`/protocolos/${slug}`);
+  revalidatePath("/admin/editora/arquiteto-protocolos");
+}
+
+export async function publicarProtocolo(protocolId: string): Promise<Result<{ status: string; slug: string }>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: prot } = await supabase.from("protocols").select("slug").eq("id", protocolId).maybeSingle();
+    if (!prot) return { ok: false, error: "Protocolo não encontrado." };
+
+    // versão-alvo = a mais recente
+    const { data: alvo } = await supabase.from("protocol_versions")
+      .select("id,is_published").eq("protocol_id", protocolId).order("version_number", { ascending: false }).limit(1).maybeSingle();
+    if (!alvo) return { ok: false, error: "Gere e salve uma versão antes de publicar." };
+
+    if (!alvo.is_published) {
+      // despublica a versão publicada atual (imutável) via função controlada
+      const { data: pubAtual } = await supabase.from("protocol_versions")
+        .select("id").eq("protocol_id", protocolId).eq("is_published", true).maybeSingle();
+      if (pubAtual && pubAtual.id !== alvo.id) {
+        const { error: eUnp } = await supabase.rpc("unpublish_protocol_version", { p_version_id: pubAtual.id });
+        if (eUnp) throw eUnp;
+      }
+      const { error: ePub } = await supabase.from("protocol_versions").update({ is_published: true }).eq("id", alvo.id);
+      if (ePub) throw ePub;
+    }
+
+    const { error: eProt } = await supabase.from("protocols")
+      .update({ status: "published", current_version_id: alvo.id }).eq("id", protocolId);
+    if (eProt) throw eProt;
+
+    revalidarPublico(prot.slug);
+    return { ok: true, data: { status: "published", slug: prot.slug } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function despublicarProtocolo(protocolId: string): Promise<Result<{ status: string; slug: string }>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: prot } = await supabase.from("protocols").select("slug").eq("id", protocolId).maybeSingle();
+    if (!prot) return { ok: false, error: "Protocolo não encontrado." };
+
+    const { data: pub } = await supabase.from("protocol_versions").select("id").eq("protocol_id", protocolId).eq("is_published", true).maybeSingle();
+    if (pub) { const { error } = await supabase.rpc("unpublish_protocol_version", { p_version_id: pub.id }); if (error) throw error; }
+
+    const { error: e2 } = await supabase.from("protocols").update({ status: "ready_to_publish" }).eq("id", protocolId);
+    if (e2) throw e2;
+    revalidarPublico(prot.slug);
+    return { ok: true, data: { status: "ready_to_publish", slug: prot.slug } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+export async function arquivarProtocolo(protocolId: string): Promise<Result<{ status: string; slug: string }>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: prot } = await supabase.from("protocols").select("slug").eq("id", protocolId).maybeSingle();
+    if (!prot) return { ok: false, error: "Protocolo não encontrado." };
+
+    const { data: pub } = await supabase.from("protocol_versions").select("id").eq("protocol_id", protocolId).eq("is_published", true).maybeSingle();
+    if (pub) { const { error } = await supabase.rpc("unpublish_protocol_version", { p_version_id: pub.id }); if (error) throw error; }
+
+    const { error: e2 } = await supabase.from("protocols").update({ status: "archived" }).eq("id", protocolId);
+    if (e2) throw e2;
+    revalidarPublico(prot.slug);
+    return { ok: true, data: { status: "archived", slug: prot.slug } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
