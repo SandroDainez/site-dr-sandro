@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/ai/openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { embedUm, toVector } from "@/lib/agents/embeddings";
 
@@ -79,7 +79,7 @@ ${contexto}
 
 Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["texto 1","texto 2","texto 3","texto 4"],"correta":0,"explicacao":"..."}]}`;
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const openai = getOpenAI();
     const r = await openai.chat.completions.create({ model: "gpt-4o", messages: [{ role: "user", content: prompt }], temperature: 0.3, max_tokens: 2500, response_format: { type: "json_object" } });
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
     const qs: any[] = Array.isArray(parsed.questoes) ? parsed.questoes : [];

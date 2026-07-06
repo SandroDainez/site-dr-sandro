@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/ai/openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { verificarCronSecret, PRINCIPIOS_AGENTE } from "@/lib/agents/utils";
 
 export const maxDuration = 300;
-
-function getOpenAI() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
 
 function getJanelaEventos() {
   const hoje = new Date();

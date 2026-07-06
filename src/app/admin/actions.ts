@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { NavOverride } from "@/lib/nav-structure";
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/ai/openai";
 import {
   writeBlob,
   getTypography,
@@ -466,7 +466,7 @@ Retorne APENAS JSON:
 {"questoes":[{"enunciado":"...","opcoes":["...","...","...","..."],"correta":0,"justificativa":"..."}]}
 "correta" = ÍNDICE (0 a 3) da alternativa certa. NÃO use prefixos "A)"/"1." nas alternativas.`;
 
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const openai = getOpenAI();
     const r = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "user", content: prompt }],

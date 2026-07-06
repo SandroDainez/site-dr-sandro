@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/ai/openai";
 import { verificarCronSecret } from "@/lib/agents/utils";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { getContato } from "@/lib/content";
@@ -88,7 +88,7 @@ Retorne APENAS JSON:
   "acoes": ["...3 a 5 ações concretas e priorizadas..."]
 }`;
     try {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const openai = getOpenAI();
       const r = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [{ role: "user", content: prompt }],

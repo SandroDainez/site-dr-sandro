@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/ai/openai";
 import { getUsuario } from "@/lib/supabase/auth-server";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { handleMedicalQuery } from "@/lib/assistente/orchestrator";
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   const { data: perfil } = await supabase.from("profiles").select("liberado").eq("id", user.id).maybeSingle();
   if (!perfil?.liberado) return NextResponse.json({ error: "Sua conta está aguardando liberação do administrador." }, { status: 403 });
 
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const openai = getOpenAI();
 
   try {
     // Pipeline: biblioteca interna (RAG) → PubMed (se preciso) → gpt-4o → guardrails.

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getOpenAI } from "@/lib/ai/openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import {
   getSemanaAtual, pubmedUrl, verificarCronSecret, PRINCIPIOS_AGENTE,
@@ -14,10 +14,6 @@ import type { Especialidade } from "@/types/medical";
 export const maxDuration = 300; // agente longo: coleta multi-fonte + síntese
 
 const ESPECIALIDADES: Especialidade[] = ["anestesiologia", "terapia_intensiva", "emergencias"];
-
-function getOpenAI() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
 
 // ── CAMADA 1: PubMed ──────────────────────────────────────────────────────────
 async function buscarPubMed(especialidade: string): Promise<any[]> {
