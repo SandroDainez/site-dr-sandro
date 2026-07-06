@@ -306,6 +306,56 @@ Escreva um RESUMO de 2-3 frases que sintetize FIELMENTE o que está nesses tópi
   }
 }
 
+// Revisão de PORTUGUÊS (último passe): corrige SÓ ortografia/acentuação/crase/gramática
+// do texto PT-BR. NÃO toca em fatos, números, doses, unidades, nomes de fármacos/exames,
+// siglas, sentido, ordem nem estrutura. Os campos de FONTE (fonte_url, pmid, nível,
+// fonte_nome/tipo) são restaurados à força do original → o sistema de referências fica
+// intocado. Fail-safe: qualquer erro/contagem divergente devolve o conteúdo sem alteração.
+async function revisarPortugues(sintese: any, label: string): Promise<any> {
+  try {
+    const topicos = Array.isArray(sintese.topicos) ? sintese.topicos : [];
+    // envia APENAS os campos de texto humano (nada de URL/PMID/nível)
+    const payload = {
+      resumo: sintese.resumo ?? "",
+      topicos: topicos.map((t: any) => ({
+        titulo: t.titulo ?? "",
+        descricao: t.descricao ?? "",
+        relevancia_clinica: t.relevancia_clinica ?? "",
+      })),
+    };
+    const prompt = `Você é revisor de português do Brasil de um boletim clínico de ${label}.
+Corrija APENAS erros de português: ortografia, acentuação, crase, concordância e pontuação.
+NÃO altere fatos, números, doses, unidades, nomes de fármacos/exames, siglas, o sentido, a ordem nem a estrutura. NÃO traduza termos técnicos. O que já estiver correto, mantenha IDÊNTICO.
+Devolva EXATAMENTE o mesmo JSON, com a MESMA quantidade de tópicos e MESMA ordem, só com o texto corrigido:
+${JSON.stringify(payload, null, 2)}
+Retorne APENAS JSON: {"resumo":"...","topicos":[{"titulo":"...","descricao":"...","relevancia_clinica":"..."}]}`;
+    const r = await getOpenAI().chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 2500,
+      temperature: 0,
+      response_format: { type: "json_object" },
+    });
+    const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+    const revT = Array.isArray(parsed.topicos) ? parsed.topicos : [];
+    if (revT.length !== topicos.length) return sintese; // desalinhou → não arrisca
+    const txt = (novo: any, orig: string) =>
+      typeof novo === "string" && novo.trim() ? novo.trim() : orig;
+    return {
+      ...sintese,
+      resumo: txt(parsed.resumo, sintese.resumo ?? ""),
+      topicos: topicos.map((t: any, i: number) => ({
+        ...t, // preserva fonte_url, pmid, nivel_evidencia, fonte_nome, fonte_tipo etc.
+        titulo: txt(revT[i]?.titulo, t.titulo),
+        descricao: txt(revT[i]?.descricao, t.descricao),
+        relevancia_clinica: txt(revT[i]?.relevancia_clinica, t.relevancia_clinica),
+      })),
+    };
+  } catch {
+    return sintese; // fail-safe: sem revisão, mantém original
+  }
+}
+
 async function sintetizar(especialidade: string, todasFontes: any[]): Promise<any> {
   const label = ESPECIALIDADE_LABELS[especialidade];
   const semana = getSemanaAtual();
@@ -380,7 +430,8 @@ Retorne APENAS JSON válido:
       parsed.topicos = sanearTopicos(parsed.topicos ?? [], ordenadas);
       // resumo do topo SEMPRE reescrito a partir dos tópicos finais (senão fica desconectado)
       parsed.resumo = await resumirDosTopicos(parsed.topicos ?? [], label, semana, parsed.resumo ?? "");
-      return parsed;
+      // último passe: revisão de português (só o texto; referências preservadas à força)
+      return await revisarPortugues(parsed, label);
     } catch (err) {
       tentativas++;
       if (tentativas === 3) throw err;
