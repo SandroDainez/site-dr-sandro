@@ -34,6 +34,8 @@ export type GenerateInput = {
   secoesAnteriores: SecaoGerada[]; // seções já geradas (contexto)
   prompt?: string;                 // prompt montado (usado pelos providers reais; mock ignora)
   model?: string;
+  temperature?: number;            // default 0.2 (providers reais)
+  maxTokens?: number;              // default 3500 (providers reais)
 };
 
 export type GenerateResult = {

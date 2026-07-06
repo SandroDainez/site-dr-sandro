@@ -1,16 +1,16 @@
 import type { AIProvider } from "../types";
 import { MockProvider } from "./mock";
+import { OpenAIProvider } from "./openai";
+import { DeepSeekProvider } from "./deepseek";
 
-// Registro de providers. Piloto: só "mock". OpenAIProvider e DeepSeekProvider entram
-// no Comando 7.5 (OpenAI reutiliza src/lib/ai/openai.ts). AnthropicProvider: apenas
-// PREVISTO — plugável aqui no futuro sem refatorar os módulos. Ver ARQUITETURA-IA §1.
-
+// Registro de providers. mock (dev/piloto) + reais openai/deepseek. AnthropicProvider:
+// apenas PREVISTO — basta adicionar a factory aqui, sem refatorar os módulos.
 export type ProviderName = "mock" | "openai" | "deepseek" | "anthropic";
 
 const registro: Partial<Record<ProviderName, () => AIProvider>> = {
   mock: () => new MockProvider(),
-  // openai:    () => new OpenAIProvider(),    // Comando 7.5
-  // deepseek:  () => new DeepSeekProvider(),  // Comando 7.5
+  openai: () => new OpenAIProvider(),
+  deepseek: () => new DeepSeekProvider(),
   // anthropic: () => new AnthropicProvider(), // previsto, sem implementação
 };
 

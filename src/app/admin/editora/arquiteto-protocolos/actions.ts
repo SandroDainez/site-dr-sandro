@@ -5,9 +5,10 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { slugify } from "@/lib/editora";
 import { getProvider } from "@/lib/ai/providers";
+import { aiProviders } from "@/lib/ai/config";
 import { buildArquitetoProtocolosPrompt } from "@/lib/ai/prompts/arquiteto-protocolos";
 import { validarSecoes, consolidarValidacao, type Validacao } from "@/lib/ai/citations";
-import type { Source, SecaoGerada } from "@/lib/ai/types";
+import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
 
 type Result<T = unknown> = { ok: true; data: T } | { ok: false; error: string };
@@ -114,7 +115,7 @@ export async function gerarBloco(input: {
     const prompt = buildArquitetoProtocolosPrompt({
       especialidade: input.especialidade, sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores,
     });
-    const provider = getProvider("mock"); // piloto: só mock
+    const provider = getProvider(aiProviders().generation); // mock | deepseek (AI_PROVIDER)
     const res = await provider.generate({
       modulo: "arquiteto-protocolos", especialidade: input.especialidade,
       sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores, prompt,
@@ -126,15 +127,40 @@ export async function gerarBloco(input: {
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// ESTÁGIO 2 — revisão do protocolo COMPLETO (GPT-4o). Aponta problemas + devolve versão
+// corrigida à parte (não reescreve em silêncio). O confidence segue calculado pelo CÓDIGO.
+export type RevisaoResultado = {
+  issues: Issue[]; corrigido: SecaoGerada[]; usage: { tokensIn: number; tokensOut: number };
+  provider: string; model: string; confidence: number; method: string;
+};
+export async function revisar(input: { protocolId: string; secoes: SecaoGerada[] }): Promise<Result<RevisaoResultado>> {
+  try {
+    await requireAdmin();
+    const sres = await listarSources(input.protocolId);
+    if (!sres.ok) return sres;
+    const sources = sres.data;
+    if (!input.secoes?.length) return { ok: false, error: "Gere o protocolo antes de revisar." };
+    const provider = getProvider(aiProviders().review); // mock | openai/gpt-4o
+    const rev = await provider.review({
+      modulo: "arquiteto-protocolos",
+      draft: { provider: "", model: "", secoes: input.secoes, usage: { tokensIn: 0, tokensOut: 0 } },
+      sources,
+    });
+    const val = consolidarValidacao(input.secoes, sources); // confidence pelo CÓDIGO (não pela IA)
+    return { ok: true, data: { issues: rev.issues, corrigido: rev.corrigido.secoes, usage: rev.usage, provider: rev.provider, model: rev.model, confidence: val.confidence, method: val.method } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 // Salva o resultado (possivelmente editado) como NOVA protocol_version (append-only) +
-// registra a auditoria de IA (uma linha ai_generations por bloco), com confidence GLOBAL
-// recalculado pelo código contra os sources.
+// registra a auditoria de IA POR ESTÁGIO: uma linha por bloco de geração + uma da revisão.
+// Confidence GLOBAL recalculado pelo código contra os sources.
 export async function salvarVersao(input: {
   protocolId: string;
   especialidade: string;
   secoes: SecaoGerada[];
   textoEditado?: Record<string, string>;
   geracoes: { blocoIndex: number; provider: string; model: string; tokensIn: number; tokensOut: number; secoes: SecaoGerada[]; confidence: number; method: string }[];
+  revisao?: { provider: string; model: string; tokensIn: number; tokensOut: number; issues: Issue[]; corrigido: SecaoGerada[] };
 }): Promise<Result<{ versionId: string; versionNumber: number; validacao: Validacao }>> {
   try {
     await requireAdmin();
@@ -183,6 +209,24 @@ export async function salvarVersao(input: {
         confidence_level: g.confidence,
         confidence_method: g.method,
       })));
+    }
+
+    // Auditoria do ESTÁGIO 2 (revisão): linha separada, com apontamentos (warnings) +
+    // versão corrigida (output). Não substitui o confidence do código — é camada adicional.
+    if (input.revisao) {
+      const r = input.revisao;
+      await supabase.from("ai_generations").insert({
+        protocol_version_id: versionId,
+        module_type: "arquiteto-protocolos:review",
+        provider: r.provider,
+        model: r.model,
+        tokens_in: r.tokensIn,
+        tokens_out: r.tokensOut,
+        output: { secoes: r.corrigido },
+        warnings: r.issues,
+        confidence_level: validacao.confidence,
+        confidence_method: validacao.method,
+      });
     }
 
     revalidatePath("/admin/editora/arquiteto-protocolos");

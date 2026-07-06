@@ -13,6 +13,21 @@ export function getOpenAI(): OpenAI {
   return _client;
 }
 
+// DeepSeek — API COMPATÍVEL com OpenAI: mesmo SDK, só muda baseURL + key + modelo
+// (não duplica código de client). Server-only (key nunca vai ao client). O SDK já faz
+// retry com backoff (maxRetries) e respeita timeout.
+let _deepseek: OpenAI | null = null;
+export function getDeepSeek(): OpenAI {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error("DEEPSEEK_API_KEY não configurado no servidor.");
+  if (!_deepseek) _deepseek = new OpenAI({ apiKey, baseURL: "https://api.deepseek.com", timeout: 120_000, maxRetries: 2 });
+  return _deepseek;
+}
+
+// Modelos configuráveis por env var (trocar sem deploy de código).
+export function deepseekModel(): string { return process.env.DEEPSEEK_MODEL || "deepseek-chat"; }
+export function openaiReviewModel(): string { return process.env.OPENAI_REVIEW_MODEL || "gpt-4o"; }
+
 // Modelos usados no projeto, num lugar só (facilita trocar/auditar).
 export const AI_MODELS = {
   chat: "gpt-4o",
