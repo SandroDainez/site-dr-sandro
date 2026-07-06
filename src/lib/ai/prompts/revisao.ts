@@ -8,6 +8,7 @@ import { buildRevisaoCientificoPrompt } from "./revisao-cientifico";
 export function buildRevisaoPrompt(modulo: string, args: { secoes: SecaoGerada[]; sources: Source[] }): string {
   switch (modulo) {
     case "editor-cientifico":
+    case "editor-premium": // refinamento produz o mesmo tipo de texto → mesmo revisor científico
       return buildRevisaoCientificoPrompt(args);
     case "arquiteto-protocolos":
     default:
