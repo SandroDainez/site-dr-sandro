@@ -927,6 +927,30 @@ export async function getColaboradores(): Promise<ColaboradorData[]> {
   return readBlob("colaboradores", []);
 }
 
+// Cards da seção "Navegue por especialidade" (home). Editáveis no admin: cada card
+// tem um logo (imagem enviada, com emoji de reserva), texto, destino e cor. O campo
+// `area` (opcional) casa o card com a área das Atualizações p/ reaproveitar o logo.
+export type EspecialidadeCardData = {
+  id: string;
+  label: string;
+  desc: string;
+  emoji: string;              // usado quando não há logoUrl
+  logoUrl?: string;           // imagem enviada (/api/img?url=...)
+  href: string;               // destino do card
+  cor: string;                // token de cor: emerg | inten | anest | accent | blue | violet
+  area?: "emergencias" | "ti" | "anestesiologia" | "";
+};
+
+export const DEFAULT_ESPECIALIDADES: EspecialidadeCardData[] = [
+  { id: "emergencias", label: "Emergências", desc: "Urgência e emergência", emoji: "🚑", href: "/especialidade/emergencias", cor: "emerg", area: "emergencias" },
+  { id: "ti", label: "Terapia Intensiva", desc: "Cuidados intensivos", emoji: "🏥", href: "/especialidade/ti", cor: "inten", area: "ti" },
+  { id: "anestesiologia", label: "Anestesiologia", desc: "Anestesia e pré-operatório", emoji: "🩺", href: "/especialidade/anestesiologia", cor: "anest", area: "anestesiologia" },
+];
+
+export async function getEspecialidades(): Promise<EspecialidadeCardData[]> {
+  return readBlob("especialidades", DEFAULT_ESPECIALIDADES);
+}
+
 export async function getAcervo(): Promise<AcervoItemData[]> {
   return readBlob("acervo", []);
 }

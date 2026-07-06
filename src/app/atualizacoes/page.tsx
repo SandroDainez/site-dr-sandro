@@ -5,7 +5,7 @@ export const metadata = {
 };
 
 
-import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getUiTexts } from "@/lib/content";
+import { getAtualizacoes, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getUiTexts, getEspecialidades } from "@/lib/content";
 import { uiText } from "@/lib/ui-texts";
 import { secText } from "@/lib/section-texts";
 import SiteLogo from "@/components/SiteLogo";
@@ -24,7 +24,9 @@ export default async function AtualizacoesPage({
 }: {
   searchParams: Promise<{ area?: string }>;
 }) {
-  const [atualizacoes, header, params, navItems, typo, navStyle, st, ui, aiBoletins] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(), fetchMedicalUpdates()]);
+  const [atualizacoes, header, params, navItems, typo, navStyle, st, ui, aiBoletins, especialidades] = await Promise.all([getAtualizacoes(), getHeader(), searchParams, getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(), fetchMedicalUpdates(), getEspecialidades()]);
+  const espLogos: Record<string, { logoUrl?: string; emoji?: string }> = {};
+  for (const e of especialidades) { if (e.area) espLogos[e.area] = { logoUrl: e.logoUrl, emoji: e.emoji }; }
   const initialArea = params.area ?? "todas";
 
   return (
@@ -75,7 +77,7 @@ export default async function AtualizacoesPage({
           </div>
         </div>
 
-        <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} showTabs initialArea={initialArea} />
+        <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} showTabs initialArea={initialArea} logos={espLogos} />
       </main>
 
       <SiteFooter />

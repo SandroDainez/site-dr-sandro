@@ -51,6 +51,7 @@ import {
   getWhyUs,
   getSiteConfig,
   getAtualizacoes,
+  getEspecialidades,
   getProtocolos,
   getVideoaulas,
   getPodcasts,
@@ -67,6 +68,7 @@ import {
   headerSubtitleLines,
 } from "@/lib/content";
 import { colStyle } from "@/lib/card-grid";
+import { corTema } from "@/lib/especialidade-cor";
 
 const iconMap: Record<string, LucideIcon> = {
   Layers, CalendarClock, FileText, Zap, HeartPulse, BookOpen, AudioLines,
@@ -83,7 +85,7 @@ function computeHomeOrder(list: string[]): Record<string, number> {
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols, especialidades] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -108,8 +110,15 @@ export default async function Home() {
     getNavStyle(),
     getHomeOrder(),
     getCardCols(),
+    getEspecialidades(),
   ]);
   const homeOrder = computeHomeOrder(homeOrderList);
+  // Logo por área (p/ reaproveitar nos cards de Atualizações) — chave em forma "site"
+  // (emergencias | ti | anestesiologia), igual ao AtualizacoesFeed.
+  const espLogos: Record<string, { logoUrl?: string; emoji?: string }> = {};
+  for (const e of especialidades) {
+    if (e.area) espLogos[e.area] = { logoUrl: e.logoUrl, emoji: e.emoji };
+  }
   const aiBoletins = await fetchMedicalUpdates();
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
@@ -209,24 +218,28 @@ export default async function Home() {
             <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "especialidades_band", "title")}</h2>
           </div>
           <div className="card-grid gap-4" style={colStyle(cardCols["especialidades"] ?? 3)}>
-            {[
-              { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-emerg/25 via-emerg/8", accent: "text-emerg", border: "hover:border-emerg/50" },
-              { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-inten/25 via-inten/8", accent: "text-inten", border: "hover:border-inten/50" },
-              { area: "anestesiologia", label: "Anestesiologia", emoji: "🩺", desc: "Anestesia e pré-operatório", grad: "from-anest/25 via-anest/8", accent: "text-anest", border: "hover:border-anest/50" },
-            ].map((s) => (
-              <a key={s.area} href={`/especialidade/${s.area}`} className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition hover:-translate-y-1 ${s.border}`}>
-                <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${s.grad} to-transparent`} />
-                <div className="pointer-events-none absolute -right-6 -top-8 text-8xl opacity-10 transition group-hover:opacity-20">{s.emoji}</div>
-                <div className="relative">
-                  <p className="text-3xl">{s.emoji}</p>
-                  <h3 className="mt-4 text-xl font-semibold text-white">{s.label}</h3>
-                  <p className="mt-1 text-sm text-white/50">{s.desc}</p>
-                  <span className={`mt-5 inline-flex items-center gap-1.5 text-sm font-semibold ${s.accent}`}>
-                    Ver tudo <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </a>
-            ))}
+            {especialidades.map((s) => {
+              const tema = corTema(s.cor);
+              return (
+                <a key={s.id} href={s.href || "/"} className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition hover:-translate-y-1 ${tema.border}`}>
+                  <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${tema.grad} to-transparent`} />
+                  {!s.logoUrl && <div className="pointer-events-none absolute -right-6 -top-8 text-8xl opacity-10 transition group-hover:opacity-20">{s.emoji}</div>}
+                  <div className="relative">
+                    {s.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={s.logoUrl} alt={s.label} className="h-14 w-14 object-contain" />
+                    ) : (
+                      <p className="text-3xl">{s.emoji}</p>
+                    )}
+                    <h3 className="mt-4 text-xl font-semibold text-white">{s.label}</h3>
+                    <p className="mt-1 text-sm text-white/50">{s.desc}</p>
+                    <span className={`mt-5 inline-flex items-center gap-1.5 text-sm font-semibold ${tema.accent}`}>
+                      Ver tudo <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </section>
 
@@ -469,7 +482,7 @@ export default async function Home() {
                 </a>
               </div>
 
-              <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} limit={4} />
+              <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} limit={4} logos={espLogos} />
 
               <a
                 href="/atualizacoes"

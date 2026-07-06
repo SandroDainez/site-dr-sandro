@@ -32,6 +32,7 @@ import {
   type PodcastData,
   type ColaboradorData,
   type AcervoItemData,
+  type EspecialidadeCardData,
 } from "@/lib/content";
 
 async function requireAdmin() {
@@ -94,6 +95,17 @@ export async function saveApps(apps: AppData[]): Promise<Result> {
   try {
     await requireAdmin();
     await writeBlob("apps", apps);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+export async function saveEspecialidades(items: EspecialidadeCardData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("especialidades", items);
     revalidatePath("/");
     return { ok: true };
   } catch (e) {

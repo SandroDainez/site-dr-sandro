@@ -47,12 +47,14 @@ export default function AtualizacoesFeed({
   showTabs = false,
   limit,
   initialArea = "todas",
+  logos = {},
 }: {
   ai?: any[];
   manuais?: AtualizacaoData[];
   showTabs?: boolean;
   limit?: number;
   initialArea?: string;
+  logos?: Record<string, { logoUrl?: string; emoji?: string }>;
 }) {
   const valid = TABS.some((t) => t.value === initialArea) ? (initialArea as Area) : "todas";
   const [area, setArea] = useState<Area>(valid);
@@ -93,9 +95,9 @@ export default function AtualizacoesFeed({
         <div className="flex flex-col gap-4">
           {shown.map((it) =>
             it.kind === "ai"
-              ? <BoletimCard key={`ai-${it.raw.id}`} update={it.raw} />
+              ? <BoletimCard key={`ai-${it.raw.id}`} update={it.raw} logo={logos[it.area]} />
               : isBoletimManual(it.raw)
-                ? <BoletimCard key={`m-${it.raw.id}`} update={manualParaBoletim(it.raw)} manual />
+                ? <BoletimCard key={`m-${it.raw.id}`} update={manualParaBoletim(it.raw)} manual logo={logos[it.area]} />
                 : <UpdateCard key={`m-${it.raw.id}`} item={it.raw} />
           )}
         </div>

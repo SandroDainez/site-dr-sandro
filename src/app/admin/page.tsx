@@ -100,6 +100,14 @@ const sections = [
     border: "hover:border-amber-400/40",
   },
   {
+    href: "/admin/especialidades",
+    icon: Stethoscope,
+    label: "Navegue por especialidade",
+    desc: "Os cards de especialidade na home: logo próprio, texto, cor, ordem e adicionar novos. O logo também aparece nas Atualizações.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
+  },
+  {
     href: "/admin/ordem-home",
     icon: ListOrdered,
     label: "Ordem das seções (home)",
