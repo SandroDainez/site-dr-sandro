@@ -1,6 +1,7 @@
 import { getProcedimentos, getTypography } from "@/lib/content";
 import { saveProcedimentos } from "@/app/admin/actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AcervoEditor from "@/app/admin/acervo/AcervoEditor";
 import Link from "next/link";
@@ -21,6 +22,8 @@ export default async function AdminProcedimentosPage() {
       </div>
 
       <AdminHelp>Clique em “Adicionar item”. Informe título e especialidade (campo Área), escreva o passo a passo, envie o vídeo da técnica e/ou capa, e anexe PDFs/materiais para download. Salvar.</AdminHelp>
+
+      <ColsShortcut />
 
       <AcervoEditor initialItens={itens} onSave={saveProcedimentos} uploadPrefix="procedimentos" saveLabel="Salvar procedimentos" />
 

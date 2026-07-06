@@ -1,5 +1,6 @@
 import { getAcervo, getTypography } from "@/lib/content";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AcervoEditor from "./AcervoEditor";
 import Link from "next/link";
@@ -20,6 +21,8 @@ export default async function AdminAcervoPage() {
       </div>
 
       <AdminHelp>Clique em “Adicionar item”. Preencha título e categoria, escreva o texto, envie capa/vídeo (opcionais) e adicione arquivos para download (PDF, livro, imagem…). Salvar.</AdminHelp>
+
+      <ColsShortcut />
 
       <AcervoEditor initialItens={itens} saveLabel="Salvar" />
 

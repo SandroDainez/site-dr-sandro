@@ -1,5 +1,6 @@
 import { getColaboradores, getTypography } from "@/lib/content";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import ColaboradoresEditor from "./ColaboradoresEditor";
 import Link from "next/link";
@@ -30,6 +31,8 @@ export default async function AdminColaboradoresPage() {
       </div>
 
       <AdminHelp>Adicione o material de um profissional parceiro: cole o link do YouTube ou envie o vídeo, informe o nome e a especialidade, e — se ele quiser divulgação — preencha a mini-bio e os links (Instagram, site, WhatsApp...). Salvar.</AdminHelp>
+
+      <ColsShortcut />
 
       <ColaboradoresEditor initialItems={items} />
 

@@ -1,5 +1,6 @@
 import { getApps, getTypography } from "@/lib/content";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AppsEditor from "./AppsEditor";
 import Link from "next/link";
@@ -21,6 +22,8 @@ export default async function AdminAppsPage() {
       </div>
 
       <AdminHelp>Edite cada app por assinatura: logo/ícone, título, subtítulo, destaques e o link. Clique em Salvar para aplicar no site.</AdminHelp>
+
+      <ColsShortcut />
 
       <AppsEditor initialApps={apps} />
 

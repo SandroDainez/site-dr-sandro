@@ -1,5 +1,6 @@
 import { getCursos, getTypography } from "@/lib/content";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import CursosEditor from "./CursosEditor";
 import Link from "next/link";
@@ -24,6 +25,8 @@ export default async function AdminCursosPage() {
       </div>
 
       <AdminHelp>Crie um curso e, dentro dele, adicione aulas em sequência. Cada aula pode ter vídeo(s), slides, PDF e e-book. Marque grátis ou pago e Salvar.</AdminHelp>
+
+      <ColsShortcut />
 
       <CursosEditor initialCursos={cursos} />
 

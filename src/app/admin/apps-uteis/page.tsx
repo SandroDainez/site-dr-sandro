@@ -1,5 +1,6 @@
 import { getUtilApps, getTypography } from "@/lib/content";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AppsUteisEditor from "./AppsUteisEditor";
 import Link from "next/link";
@@ -23,6 +24,8 @@ export default async function AdminAppsUteisPage() {
       </div>
 
       <AdminHelp>Clique em “Adicionar app”. Defina a categoria (vira o selo), envie o logo, escreva título e descrição, cole o link e Salvar.</AdminHelp>
+
+      <ColsShortcut />
 
       <AppsUteisEditor initialApps={apps} />
 

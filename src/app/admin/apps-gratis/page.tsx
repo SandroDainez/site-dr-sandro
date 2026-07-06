@@ -1,5 +1,6 @@
 import { getFreeApps, getTypography } from "@/lib/content";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import AppsGratisEditor from "./AppsGratisEditor";
 import Link from "next/link";
@@ -21,6 +22,8 @@ export default async function AdminAppsGratisPage() {
       </div>
 
       <AdminHelp>Edite cada app gratuito: envie o logo (ou escolha um ícone), título, descrição e o link. Salvar para aplicar.</AdminHelp>
+
+      <ColsShortcut />
 
       <AppsGratisEditor initialApps={apps} />
 
