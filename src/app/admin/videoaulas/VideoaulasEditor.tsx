@@ -592,7 +592,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                         <input
                           type="range"
                           min={100}
-                          max={250}
+                          max={400}
                           value={item.zoom ?? 100}
                           onChange={(e) => {
                             const v = Number(e.target.value);
@@ -602,7 +602,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                           className="w-full accent-[var(--accent,#2ce6b8)]"
                         />
                         <div className="mt-1 flex justify-between text-[10px] text-white/30">
-                          <span>🔍 Zoom 100%</span><span>(libera o cima/baixo)</span><span>250%</span>
+                          <span>🔍 Zoom 100%</span><span>(libera o cima/baixo)</span><span>400%</span>
                         </div>
                       </div>
                     </div>
