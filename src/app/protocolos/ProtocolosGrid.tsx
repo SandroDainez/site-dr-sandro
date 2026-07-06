@@ -47,7 +47,7 @@ export default function ProtocolosGrid({ protocolos, cols }: Props) {
 
       {filtered.length === 0 && <p className="text-sm text-white/40">Nenhum protocolo nesta área ainda.</p>}
 
-      <div className="card-grid gap-5" style={colStyle(Math.min(cols ?? 3, filtered.length || 1))}>
+      <div className="card-grid gap-5" style={colStyle(cols ?? 3)}>
         {filtered.map((item) => (
           <ProtocoloCard key={item.id} item={item} />
         ))}

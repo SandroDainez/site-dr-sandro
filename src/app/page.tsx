@@ -208,7 +208,7 @@ export default async function Home() {
             <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "especialidades_band", "eyebrow")}</p>
             <h2 className="mt-1 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "especialidades_band", "title")}</h2>
           </div>
-          <div className="card-grid gap-4" style={colStyle(Math.min(cardCols["especialidades"] ?? 3, 3))}>
+          <div className="card-grid gap-4" style={colStyle(cardCols["especialidades"] ?? 3)}>
             {[
               { area: "emergencias", label: "Emergências", emoji: "🚑", desc: "Urgência e emergência", grad: "from-emerg/25 via-emerg/8", accent: "text-emerg", border: "hover:border-emerg/50" },
               { area: "ti", label: "Terapia Intensiva", emoji: "🏥", desc: "Cuidados intensivos", grad: "from-inten/25 via-inten/8", accent: "text-inten", border: "hover:border-inten/50" },
@@ -242,7 +242,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["apps-assinatura"] ?? 3, apps.length || 1))}>
+          <div className="card-grid gap-5" style={colStyle(cardCols["apps-assinatura"] ?? 3)}>
             {apps.map((app, idx) => {
               const AppIcon = iconMap[app.icon] ?? Layers;
               return (
@@ -320,7 +320,7 @@ export default async function Home() {
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "freeApps", "title")}</h2>
           </div>
 
-          <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["apps-gratis"] ?? 3, freeApps.length || 1))}>
+          <div className="card-grid gap-5" style={colStyle(cardCols["apps-gratis"] ?? 3)}>
             {freeApps.map((item) => {
               const FreeIcon = iconMap[item.icon] ?? BookOpen;
               const inner = (
@@ -382,7 +382,7 @@ export default async function Home() {
             <p className="mt-3 max-w-2xl text-sm text-white/50">{secText(st, "utilApps", "desc")}</p>
           </div>
 
-          <div className="card-grid gap-5" style={colStyle(Math.min(cardCols["apps-uteis"] ?? 3, utilApps.length || 1))}>
+          <div className="card-grid gap-5" style={colStyle(cardCols["apps-uteis"] ?? 3)}>
             {utilApps.map((item) => {
               const UtilIcon = iconMap[item.icon] ?? Wallet;
               const inner = (
@@ -511,7 +511,7 @@ export default async function Home() {
                 <>
                   {/* Mesmo card da página /protocolos e das especialidades: expande NO LOCAL
                       (Ver protocolo ↓ / Ler / ⛶ Tela cheia / Baixar), sem abrir outra página. */}
-                  <div className="card-grid gap-4" style={colStyle(Math.min(cardCols["protocolos"] ?? 3, recent.length || 1))}>
+                  <div className="card-grid gap-4" style={colStyle(cardCols["protocolos"] ?? 3)}>
                     {recent.map((item) => (
                       <ProtocoloCard key={item.id} item={item} />
                     ))}
@@ -557,7 +557,7 @@ export default async function Home() {
                 </a>
               </div>
 
-              <div className="card-grid gap-4" style={colStyle(Math.min(cardCols["videoaulas"] ?? 3, recent.length || 1))}>
+              <div className="card-grid gap-4" style={colStyle(cardCols["videoaulas"] ?? 3)}>
                 {recent.map((item) => (
                   <HomeVideoCard key={item.id} item={item} />
                 ))}
