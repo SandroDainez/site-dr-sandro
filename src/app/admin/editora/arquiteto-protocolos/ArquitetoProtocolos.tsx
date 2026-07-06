@@ -1,0 +1,274 @@
+"use client";
+
+import { useMemo, useState, useTransition } from "react";
+import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X } from "lucide-react";
+import { PROTOCOLO_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/protocolo-estrutura";
+import { validarSecoes } from "@/lib/ai/citations";
+import type { Source, SecaoGerada } from "@/lib/ai/types";
+import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, salvarVersao } from "./actions";
+
+type Protocolo = { id: string; title: string; slug: string; status: string; specialty: string };
+type BlocoStatus = { status: "pendente" | "gerando" | "concluido" | "erro"; confidence?: number; err?: string };
+type Meta = { blocoIndex: number; provider: string; model: string; tokensIn: number; tokensOut: number; secoes: SecaoGerada[]; confidence: number; method: string };
+
+const inputCls = "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-accent/50";
+const labelCls = "mb-1 block text-xs uppercase tracking-[0.1em] text-white/40";
+const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-5";
+
+function renderSecaoTexto(sec: SecaoGerada): string {
+  return sec.afirmacoes
+    .map((a) => (a.source_id ? `${a.texto} [${a.source_id}]` : `${a.texto}  ⚠ sem fonte`))
+    .join("\n");
+}
+
+export default function ArquitetoProtocolos({ protocolosIniciais }: { protocolosIniciais: Protocolo[] }) {
+  const [protocolos, setProtocolos] = useState<Protocolo[]>(protocolosIniciais);
+  const [protocolo, setProtocolo] = useState<Protocolo | null>(null);
+  const [novoTitulo, setNovoTitulo] = useState("");
+  const [especialidade, setEspecialidade] = useState<string>(ESPECIALIDADES_MODULO[0]);
+  const [sources, setSources] = useState<Source[]>([]);
+
+  // form de fonte
+  const [sTitulo, setSTitulo] = useState(""); const [sTipo, setSTipo] = useState<string>(TIPOS_FONTE[0]);
+  const [sAutor, setSAutor] = useState(""); const [sAno, setSAno] = useState(""); const [sTexto, setSTexto] = useState("");
+
+  // geração
+  const [blocos, setBlocos] = useState<BlocoStatus[]>(PROTOCOLO_BLOCOS.map(() => ({ status: "pendente" })));
+  const [secoes, setSecoes] = useState<SecaoGerada[]>([]);
+  const [metas, setMetas] = useState<Meta[]>([]);
+  const [gerando, setGerando] = useState(false);
+  const [textoEditado, setTextoEditado] = useState<Record<string, string>>({});
+
+  const [salvo, setSalvo] = useState<{ versionNumber: number; confidence: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, startTransition] = useTransition();
+
+  const validacao = useMemo(() => (secoes.length ? validarSecoes(secoes, sources) : null), [secoes, sources]);
+
+  async function carregarSources(pid: string) {
+    const r = await listarSources(pid);
+    if (r.ok) setSources(r.data);
+  }
+  function abrirProtocolo(p: Protocolo) {
+    setProtocolo(p); setSecoes([]); setMetas([]); setSalvo(null); setError(null);
+    setBlocos(PROTOCOLO_BLOCOS.map(() => ({ status: "pendente" }))); setTextoEditado({});
+    carregarSources(p.id);
+  }
+  function criarNovo() {
+    setError(null);
+    startTransition(async () => {
+      const r = await criarProtocolo({ title: novoTitulo, especialidadeModulo: especialidade });
+      if (r.ok) { setProtocolos((prev) => [r.data, ...prev]); setNovoTitulo(""); abrirProtocolo(r.data); }
+      else setError(r.error);
+    });
+  }
+  function addSource() {
+    if (!protocolo) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await adicionarSource({ protocolId: protocolo.id, titulo: sTitulo, tipo: sTipo, autor: sAutor || undefined, ano: sAno ? parseInt(sAno) : null, texto: sTexto });
+      if (r.ok) { setSources((prev) => [...prev, r.data]); setSTitulo(""); setSAutor(""); setSAno(""); setSTexto(""); }
+      else setError(r.error);
+    });
+  }
+  function delSource(id: string) {
+    startTransition(async () => {
+      const r = await removerSource(id);
+      if (r.ok) setSources((prev) => prev.filter((s) => s.id !== id));
+      else setError(r.error);
+    });
+  }
+
+  // Geração BLOCO A BLOCO (com progresso). Cada bloco recebe sources + seções anteriores.
+  async function gerarTudo() {
+    if (!protocolo) return;
+    if (sources.length === 0) { setError("Adicione ao menos uma fonte antes de gerar."); return; }
+    setError(null); setSalvo(null); setGerando(true);
+    setSecoes([]); setMetas([]); setTextoEditado({});
+    setBlocos(PROTOCOLO_BLOCOS.map(() => ({ status: "pendente" })));
+    let acumulado: SecaoGerada[] = [];
+    const metasLocal: Meta[] = [];
+    for (let i = 0; i < PROTOCOLO_BLOCOS.length; i++) {
+      setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "gerando" } : b)));
+      const r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado });
+      if (!r.ok) {
+        setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "erro", err: r.error } : b)));
+        setError(r.error); setGerando(false); return;
+      }
+      acumulado = [...acumulado, ...r.data.secoes];
+      metasLocal.push({ blocoIndex: i, provider: r.data.provider, model: r.data.model, tokensIn: r.data.usage.tokensIn, tokensOut: r.data.usage.tokensOut, secoes: r.data.secoes, confidence: r.data.validacaoBloco.confidence, method: r.data.validacaoBloco.method });
+      setSecoes([...acumulado]); setMetas([...metasLocal]);
+      setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "concluido", confidence: r.data.validacaoBloco.confidence } : b)));
+    }
+    const te: Record<string, string> = {};
+    for (const s of acumulado) te[s.secao] = renderSecaoTexto(s);
+    setTextoEditado(te);
+    setGerando(false);
+  }
+
+  function salvar() {
+    if (!protocolo || secoes.length === 0) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await salvarVersao({ protocolId: protocolo.id, especialidade, secoes, textoEditado, geracoes: metas });
+      if (r.ok) setSalvo({ versionNumber: r.data.versionNumber, confidence: r.data.validacao.confidence });
+      else setError(r.error);
+    });
+  }
+
+  const pct = validacao ? Math.round(validacao.confidence * 100) : 0;
+  const corConf = pct >= 90 ? "text-accent" : pct >= 70 ? "text-amber-300" : "text-rose-300";
+
+  return (
+    <div className="space-y-6">
+      {/* 1) PROTOCOLO */}
+      <div className={card}>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">1 · Protocolo</p>
+        {protocolo ? (
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 shrink-0 text-accent" />
+            <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-white">{protocolo.title}</p><p className="text-[11px] text-white/40">{protocolo.status} · {protocolo.specialty}</p></div>
+            <button type="button" onClick={() => setProtocolo(null)} className="text-xs text-white/50 hover:text-white">trocar</button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {protocolos.length > 0 && (
+              <div>
+                <label className={labelCls}>Abrir existente</label>
+                <select className={inputCls} value="" onChange={(e) => { const p = protocolos.find((x) => x.id === e.target.value); if (p) abrirProtocolo(p); }}>
+                  <option value="">Selecione…</option>
+                  {protocolos.map((p) => <option key={p.id} value={p.id}>{p.title} ({p.status})</option>)}
+                </select>
+              </div>
+            )}
+            <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+              <div>
+                <label className={labelCls}>Ou criar novo</label>
+                <input className={inputCls} value={novoTitulo} onChange={(e) => setNovoTitulo(e.target.value)} placeholder="Título do protocolo. Ex.: Sepse na emergência" />
+              </div>
+              <div className="flex items-end">
+                <button type="button" onClick={criarNovo} disabled={busy || novoTitulo.trim().length < 3} className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50"><Plus className="h-4 w-4" /> Criar</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {protocolo && (
+        <>
+          {/* 2) FONTES */}
+          <div className={card}>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">2 · Fontes ({sources.length})</p>
+            {sources.length > 0 && (
+              <div className="mb-4 space-y-2">
+                {sources.map((s) => (
+                  <div key={s.id} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2">
+                    <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] uppercase text-white/50">{s.tipo}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm text-white/80">{s.titulo}{s.autor ? ` — ${s.autor}` : ""}{s.ano ? ` (${s.ano})` : ""}</span>
+                    <span className="shrink-0 text-[10px] text-white/30">{s.texto.length} car.</span>
+                    <button type="button" onClick={() => delSource(s.id)} className="shrink-0 text-rose-400/70 hover:text-rose-400"><Trash2 className="h-3.5 w-3.5" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 space-y-2">
+              <p className="text-[11px] text-white/40">Adicionar fonte (texto colado). PDF fica para fase posterior.</p>
+              <div className="grid gap-2 sm:grid-cols-[1fr_150px_1fr_90px]">
+                <input className={inputCls} value={sTitulo} onChange={(e) => setSTitulo(e.target.value)} placeholder="Título da fonte" />
+                <select className={inputCls} value={sTipo} onChange={(e) => setSTipo(e.target.value)}>{TIPOS_FONTE.map((t) => <option key={t} value={t}>{t}</option>)}</select>
+                <input className={inputCls} value={sAutor} onChange={(e) => setSAutor(e.target.value)} placeholder="Sociedade / autor" />
+                <input className={inputCls} value={sAno} onChange={(e) => setSAno(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="Ano" inputMode="numeric" />
+              </div>
+              <textarea className={inputCls + " min-h-[90px] resize-y"} value={sTexto} onChange={(e) => setSTexto(e.target.value)} placeholder="Cole aqui o texto da diretriz/artigo (é contra este texto que as citações são verificadas)." />
+              <button type="button" onClick={addSource} disabled={busy || sTexto.trim().length < 10} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/80 transition hover:border-accent/40 disabled:opacity-50"><Plus className="h-3.5 w-3.5" /> Adicionar fonte</button>
+            </div>
+          </div>
+
+          {/* 3) ÁREA + 4) GERAÇÃO */}
+          <div className={card}>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">3 · Área · 4 · Geração</p>
+            <div className="mb-4 flex flex-wrap items-end gap-3">
+              <div>
+                <label className={labelCls}>Especialidade / tipo</label>
+                <select className={inputCls + " sm:w-56"} value={especialidade} onChange={(e) => setEspecialidade(e.target.value)}>{ESPECIALIDADES_MODULO.map((e) => <option key={e} value={e}>{e}</option>)}</select>
+              </div>
+              <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
+                {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Gerar protocolo (6 blocos)
+              </button>
+            </div>
+
+            {/* progresso bloco a bloco */}
+            <div className="space-y-1.5">
+              {PROTOCOLO_BLOCOS.map((secoesDoBloco, i) => {
+                const st = blocos[i];
+                return (
+                  <div key={i} className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm">
+                    {st.status === "concluido" ? <CheckCircle2 className="h-4 w-4 shrink-0 text-accent" />
+                      : st.status === "gerando" ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-amber-300" />
+                      : st.status === "erro" ? <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
+                      : <Circle className="h-4 w-4 shrink-0 text-white/25" />}
+                    <span className="text-white/40">Bloco {i + 1}</span>
+                    <span className="min-w-0 flex-1 truncate text-[12px] text-white/55">{secoesDoBloco.join(" · ")}</span>
+                    {st.status === "concluido" && st.confidence !== undefined && <span className="shrink-0 text-[11px] text-white/40">conf. bloco {Math.round(st.confidence * 100)}%</span>}
+                    {st.status === "gerando" && <span className="shrink-0 text-[11px] text-amber-300">gerando…</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 5) RESULTADO */}
+          {secoes.length > 0 && validacao && (
+            <div className={card}>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">5 · Resultado (editável)</p>
+                <div className="text-right">
+                  <p className={`text-2xl font-bold ${corConf}`}>{pct}% <span className="text-xs font-medium text-white/40">confiança</span></p>
+                  <p className="text-[11px] text-white/40">{validacao.validadas}/{validacao.totalClinicas} afirmações clínicas com citação validada · {validacao.semFonte} sem fonte · {validacao.invalidas} inválidas</p>
+                </div>
+              </div>
+              <details className="mb-4 rounded-lg border border-white/10 bg-white/[0.02] p-3 text-[11px] text-white/50">
+                <summary className="cursor-pointer text-white/60">Como a confiança é calculada (método)</summary>
+                <p className="mt-2 leading-relaxed">{validacao.method}</p>
+              </details>
+
+              <div className="space-y-3">
+                {secoes.map((sec) => {
+                  const itens = validacao.itens.filter((it) => it.secao === sec.secao);
+                  const problemas = itens.filter((it) => it.exigeFonte && it.status !== "valida");
+                  return (
+                    <div key={sec.secao} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <p className="text-sm font-semibold text-white">{sec.secao}</p>
+                        {problemas.length > 0 && <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-300"><AlertTriangle className="h-3 w-3" /> {problemas.length} sem citação válida</span>}
+                      </div>
+                      <textarea className={inputCls + " min-h-[70px] resize-y font-mono text-[12px]"} value={textoEditado[sec.secao] ?? renderSecaoTexto(sec)} onChange={(e) => setTextoEditado((prev) => ({ ...prev, [sec.secao]: e.target.value }))} />
+                      {problemas.length > 0 && (
+                        <ul className="mt-1.5 space-y-0.5">
+                          {problemas.map((p, idx) => (
+                            <li key={idx} className="flex items-center gap-1.5 text-[11px] text-amber-300/80">
+                              <X className="h-3 w-3 shrink-0" /> {p.status === "sem_fonte" ? "sem fonte" : p.status === "fonte_inexistente" ? "source_id inexistente" : "âncora não consta no source"}: “{p.texto.slice(0, 60)}”
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="sticky bottom-4 mt-5 flex items-center gap-3">
+                <button type="button" onClick={salvar} disabled={busy || gerando} className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-on-accent shadow-lg transition hover:brightness-110 disabled:opacity-60">
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Salvar como nova versão
+                </button>
+                {salvo && <span className="text-sm font-medium text-accent">✓ Versão {salvo.versionNumber} salva (confiança {Math.round(salvo.confidence * 100)}%)</span>}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {error && <p className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-2.5 text-sm text-rose-300">{error}</p>}
+    </div>
+  );
+}

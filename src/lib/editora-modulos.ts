@@ -15,11 +15,13 @@ export type EditoraModulo = {
   descricao: string;
   tipo: ModuloTipo;
   icon: LucideIcon;
+  href?: string;   // rota real quando o módulo já existe (senão, placeholder)
+  ativo?: boolean; // true = implementado (piloto), false/undefined = "em breve"
 };
 
 export const EDITORA_MODULOS: EditoraModulo[] = [
   { slug: "editor-cientifico",       nome: "Editor Científico",       tipo: "geração",   icon: FlaskConical,   descricao: "Redige texto científico a partir das referências fornecidas." },
-  { slug: "arquiteto-protocolos",    nome: "Arquiteto de Protocolos", tipo: "geração",   icon: ClipboardList,  descricao: "Estrutura um protocolo clínico a partir de diretrizes." },
+  { slug: "arquiteto-protocolos",    nome: "Arquiteto de Protocolos", tipo: "geração",   icon: ClipboardList,  descricao: "Estrutura um protocolo clínico a partir de diretrizes.", href: "/admin/editora/arquiteto-protocolos", ativo: true },
   { slug: "editor-premium",          nome: "Editor Premium",          tipo: "geração",   icon: Crown,          descricao: "Refina e densifica um rascunho com base nas fontes." },
   { slug: "criador-aulas",           nome: "Criador de Aulas",        tipo: "geração",   icon: GraduationCap,  descricao: "Monta aulas/seções a partir do material de origem." },
   { slug: "criador-flashcards",      nome: "Criador de Flashcards",   tipo: "geração",   icon: Layers,         descricao: "Gera flashcards (frente/verso) fundamentados nas fontes." },

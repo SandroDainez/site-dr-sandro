@@ -42,18 +42,18 @@ export default function AdminEditoraPage() {
           return (
             <Link
               key={m.slug}
-              href={`/admin/editora/modulos/${m.slug}`}
-              className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-white/20 hover:bg-white/[0.05]"
+              href={m.href ?? `/admin/editora/modulos/${m.slug}`}
+              className={`group flex flex-col gap-3 rounded-2xl border bg-white/[0.03] p-5 transition hover:bg-white/[0.05] ${m.ativo ? "border-accent/30 hover:border-accent/50" : "border-white/10 hover:border-white/20"}`}
             >
               <div className="flex items-center justify-between">
-                <Icon className="h-5 w-5 text-white/70" />
+                <Icon className={`h-5 w-5 ${m.ativo ? "text-accent" : "text-white/70"}`} />
                 <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${TIPO_BADGE[m.tipo]}`}>{m.tipo}</span>
               </div>
               <div>
                 <p className="font-medium text-white">{m.nome}</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted">{m.descricao}</p>
               </div>
-              <span className="mt-auto inline-flex w-fit items-center gap-1 rounded-full border border-white/10 px-2.5 py-0.5 text-[10px] font-medium text-white/40">em breve</span>
+              <span className={`mt-auto inline-flex w-fit items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${m.ativo ? "border-accent/30 bg-accent/10 text-accent" : "border-white/10 text-white/40"}`}>{m.ativo ? "piloto · disponível" : "em breve"}</span>
             </Link>
           );
         })}
