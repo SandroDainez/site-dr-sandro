@@ -59,6 +59,7 @@ const navGroups = [
       { href: "/admin/textos-botoes", label: "Textos e botões", icon: Pilcrow, hint: "Frases e botões soltos: 'Explorar plataforma', 'Ver todos', rodapé, curso pago." },
       { href: "/admin/tipografia", label: "Fontes e cores do texto", icon: Type, hint: "Tamanho, fonte, cor e peso das letras de cada seção." },
       { href: "/admin/hero", label: "Destaque da home", icon: Sparkles, hint: "Título e subtítulo do grande bloco no topo da página inicial." },
+      { href: "/admin/especialidades", label: "Navegue por especialidade", icon: Stethoscope, hint: "Cards de especialidade na home: logo, texto, cor, ordem e adicionar novos. O logo também aparece nas Atualizações clínicas." },
       { href: "/admin/ordem-home", label: "Ordem das seções (home)", icon: ListOrdered, hint: "Em que ordem as seções aparecem ao rolar a página inicial." },
       { href: "/admin/config", label: "Rodapé e faixa rolante", icon: Settings, hint: "Frases da faixa que rola e os textos do rodapé." },
       { href: "/admin/imagens", label: "Imagens", icon: ImageIcon, hint: "Enviar imagens e copiar o link para usar no site." },
