@@ -19,6 +19,7 @@ import {
   Columns3,
   Megaphone,
   Stethoscope,
+  Feather,
   ArrowRight,
   Type,
   UserCircle,
@@ -202,6 +203,14 @@ const sections = [
     desc: "Publique e gerencie atualizações médicas por área clínica.",
     color: "text-orange-400",
     border: "hover:border-orange-400/40",
+  },
+  {
+    href: "/admin/editora",
+    icon: Feather,
+    label: "Editora Médica",
+    desc: "Escreva e publique artigos/matérias médicas (do zero ou com rascunho gerado por IA). Aparecem em /artigos.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
   },
   {
     href: "/admin/protocolos",
