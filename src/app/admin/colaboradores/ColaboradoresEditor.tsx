@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 import type { ColaboradorData } from "@/lib/content";
 import { saveColaboradores } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import { BIO_CORES_LISTA } from "@/lib/bio-cor";
 
 type Props = { initialItems: ColaboradorData[] };
 
@@ -131,6 +132,20 @@ export default function ColaboradoresEditor({ initialItems }: Props) {
                   <button type="button" onClick={() => addLink(i)} className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs text-white/70 transition hover:border-accent/40 hover:text-white">
                     <Plus className="h-3.5 w-3.5" /> Adicionar link (Instagram, site, WhatsApp...)
                   </button>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelCls}>Cor de destaque da caixa</label>
+                  <select className={inputCls} value={item.bioCor ?? "neutro"} onChange={(e) => update(i, { bioCor: e.target.value })}>
+                    {BIO_CORES_LISTA.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>QR code — link a abrir ao escanear</label>
+                  <input className={inputCls} value={item.qrLink ?? ""} onChange={(e) => update(i, { qrLink: e.target.value })} placeholder="https://wa.me/5512991457764" />
+                  <p className="mt-1 text-[11px] text-white/35">Cole um link completo (WhatsApp, Instagram, site...). O QR é gerado automático e funcional. Deixe vazio p/ não mostrar.</p>
                 </div>
               </div>
             </div>

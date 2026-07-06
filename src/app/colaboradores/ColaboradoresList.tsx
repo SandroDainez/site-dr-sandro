@@ -6,6 +6,18 @@ import type { ColaboradorData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 import { colStyle } from "@/lib/card-grid";
 import { dataCurta } from "@/lib/format-date";
+import { bioCorTema } from "@/lib/bio-cor";
+import qrcode from "qrcode-generator";
+
+// QR determinístico (mesmo link → mesmo SVG, seguro p/ hidratação). Módulos pretos
+// sobre transparente → renderizado dentro de uma caixa branca fica escaneável.
+function qrDataUrl(text: string): string {
+  const qr = qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  const svg = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
 
 function ytId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
@@ -128,21 +140,33 @@ function Card({ item }: { item: ColaboradorData }) {
           </div>
         )}
 
-        {(item.bio || (item.links && item.links.length > 0)) && (
-          <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
-            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Sobre o profissional</p>
-            {item.bio && <p className="text-xs leading-relaxed text-white/55">{item.bio}</p>}
-            {item.links && item.links.filter((l) => l.url).length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {item.links.filter((l) => l.url).map((l) => (
-                  <a key={l.id} href={l.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-[11px] font-medium text-accent transition hover:bg-accent/20">
-                    {l.label || "Link"} ↗
-                  </a>
-                ))}
-              </div>
+        {(item.bio || item.qrLink || (item.links && item.links.length > 0)) && (() => {
+          const tema = bioCorTema(item.bioCor);
+          return (
+          <div className={`mt-3 flex gap-3 rounded-xl border p-3 ${tema.box}`}>
+            <div className="min-w-0 flex-1">
+              <p className={`mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${tema.head}`}>Sobre o profissional</p>
+              {item.bio && <p className="text-xs leading-relaxed text-white/55">{item.bio}</p>}
+              {item.links && item.links.filter((l) => l.url).length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {item.links.filter((l) => l.url).map((l) => (
+                    <a key={l.id} href={l.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-[11px] font-medium text-accent transition hover:bg-accent/20">
+                      {l.label || "Link"} ↗
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+            {item.qrLink && (
+              <a href={item.qrLink} target="_blank" rel="noreferrer" className="flex shrink-0 flex-col items-center gap-1 self-start rounded-lg bg-white p-1.5 transition hover:opacity-90" title="Escaneie ou toque para abrir o contato">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qrDataUrl(item.qrLink)} alt="QR de contato" className="h-[72px] w-[72px]" />
+                <span className="text-[8px] font-semibold uppercase tracking-wide text-black/55">Escaneie</span>
+              </a>
             )}
           </div>
-        )}
+          );
+        })()}
       </div>
     </article>
     </>
