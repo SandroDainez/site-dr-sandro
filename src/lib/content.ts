@@ -313,7 +313,8 @@ export type ColaboradorData = {
   bio?: string; // mini-bio do profissional (opcional, p/ marketing/contato)
   links?: ColaboradorLink[]; // contatos/redes/site do profissional (opcional)
   bioCor?: string; // cor de destaque da caixa "Sobre o profissional" (ver bio-cor.ts)
-  qrLink?: string; // URL codificada num QR funcional dentro da caixa (ex.: WhatsApp)
+  qrLink?: string; // número/URL do QR (o tipo abaixo decide como é montado)
+  qrTipo?: string; // "whatsapp" | "tel" | "url" (ver qr-link.ts) — default whatsapp
 };
 
 // Acervo: conteúdos gerais / curiosidades, com texto rico, capa, vídeo e

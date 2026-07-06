@@ -7,6 +7,7 @@ import type { ColaboradorData } from "@/lib/content";
 import { saveColaboradores } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import { BIO_CORES_LISTA } from "@/lib/bio-cor";
+import { QR_TIPOS } from "@/lib/qr-link";
 
 type Props = { initialItems: ColaboradorData[] };
 
@@ -135,18 +136,27 @@ export default function ColaboradoresEditor({ initialItems }: Props) {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className={labelCls}>Cor de destaque da caixa</label>
-                  <select className={inputCls} value={item.bioCor ?? "neutro"} onChange={(e) => update(i, { bioCor: e.target.value })}>
-                    {BIO_CORES_LISTA.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+              <div>
+                <label className={labelCls}>Cor de destaque da caixa</label>
+                <select className={inputCls + " sm:max-w-xs"} value={item.bioCor ?? "neutro"} onChange={(e) => update(i, { bioCor: e.target.value })}>
+                  {BIO_CORES_LISTA.map((c) => (<option key={c.value} value={c.value}>{c.label}</option>))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelCls}>QR code (opcional)</label>
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,220px)_1fr]">
+                  <select className={inputCls} value={item.qrTipo ?? "whatsapp"} onChange={(e) => update(i, { qrTipo: e.target.value })}>
+                    {QR_TIPOS.map((t) => (<option key={t.value} value={t.value}>{t.label}</option>))}
                   </select>
+                  <input className={inputCls} value={item.qrLink ?? ""} onChange={(e) => update(i, { qrLink: e.target.value })} placeholder={(item.qrTipo ?? "whatsapp") === "url" ? "https://instagram.com/..." : "12 99145-7764"} />
                 </div>
-                <div>
-                  <label className={labelCls}>QR code — link a abrir ao escanear</label>
-                  <input className={inputCls} value={item.qrLink ?? ""} onChange={(e) => update(i, { qrLink: e.target.value })} placeholder="https://wa.me/5512991457764" />
-                  <p className="mt-1 text-[11px] text-white/35">Cole um link completo (WhatsApp, Instagram, site...). O QR é gerado automático e funcional. Deixe vazio p/ não mostrar.</p>
-                </div>
+                <p className="mt-1 text-[11px] text-white/35">
+                  {(item.qrTipo ?? "whatsapp") === "whatsapp" && "WhatsApp: digite só o número com DDD (o 55 do Brasil é adicionado sozinho). Ao escanear, abre a conversa."}
+                  {item.qrTipo === "tel" && "Ligação: digite o número com DDD. Ao escanear, o celular oferece discar."}
+                  {item.qrTipo === "url" && "Site/link: cole o endereço completo (Instagram, site...). Ao escanear, abre a página."}
+                  {" "}Deixe vazio p/ não mostrar o QR.
+                </p>
               </div>
             </div>
 

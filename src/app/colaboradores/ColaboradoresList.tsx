@@ -7,6 +7,7 @@ import { sanitizeRichText } from "@/lib/rich-text";
 import { colStyle } from "@/lib/card-grid";
 import { dataCurta } from "@/lib/format-date";
 import { bioCorTema } from "@/lib/bio-cor";
+import { qrTarget, type QrTipo } from "@/lib/qr-link";
 import qrcode from "qrcode-generator";
 
 // QR determinístico (mesmo link → mesmo SVG, seguro p/ hidratação). Módulos pretos
@@ -157,13 +158,17 @@ function Card({ item }: { item: ColaboradorData }) {
                 </div>
               )}
             </div>
-            {item.qrLink && (
-              <a href={item.qrLink} target="_blank" rel="noreferrer" className="flex shrink-0 flex-col items-center gap-1 self-start rounded-lg bg-white p-1.5 transition hover:opacity-90" title="Escaneie ou toque para abrir o contato">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={qrDataUrl(item.qrLink)} alt="QR de contato" className="h-[72px] w-[72px]" />
-                <span className="text-[8px] font-semibold uppercase tracking-wide text-black/55">Escaneie</span>
-              </a>
-            )}
+            {(() => {
+              const alvo = qrTarget(item.qrLink, (item.qrTipo as QrTipo) || "whatsapp");
+              if (!alvo) return null;
+              return (
+                <a href={alvo} target="_blank" rel="noreferrer" className="flex shrink-0 flex-col items-center gap-1 self-start rounded-lg bg-white p-1.5 transition hover:opacity-90" title="Escaneie ou toque para abrir o contato">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrDataUrl(alvo)} alt="QR de contato" className="h-[72px] w-[72px]" />
+                  <span className="text-[8px] font-semibold uppercase tracking-wide text-black/55">Escaneie</span>
+                </a>
+              );
+            })()}
           </div>
           );
         })()}
