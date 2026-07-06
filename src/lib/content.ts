@@ -306,6 +306,7 @@ export type ColaboradorData = {
   descricao: string; // rich text
   medico: string; // nome do profissional que cedeu o material
   especialidade: string; // ex: "Cardiologia"
+  assunto?: string; // agrupa aulas do mesmo tema (ex.: "Raquianestesia") num card-playlist
   videoUrl: string; // YouTube ou /api/img de blob
   imageUrl: string; // thumbnail (opcional)
   duracao: string;

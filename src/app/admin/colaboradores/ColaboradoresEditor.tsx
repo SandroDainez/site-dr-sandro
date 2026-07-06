@@ -113,6 +113,12 @@ export default function ColaboradoresEditor({ initialItems }: Props) {
               </div>
             </div>
 
+            <div>
+              <label className={labelCls}>Assunto (agrupar aulas)</label>
+              <input className={inputCls} value={item.assunto ?? ""} onChange={(e) => update(i, { assunto: e.target.value })} placeholder="Ex.: Raquianestesia" />
+              <p className="mt-1 text-[11px] text-white/35">Aulas do <strong className="text-white/55">mesmo profissional</strong> com o <strong className="text-white/55">mesmo assunto</strong> viram um único card com a lista de aulas (playlist). Deixe vazio se for uma aula avulsa. A ordem dentro do assunto segue a <strong className="text-white/55">data</strong> (mais antiga primeiro).</p>
+            </div>
+
             {/* Sobre o profissional — opcional (bio + contatos/redes p/ divulgação) */}
             <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 space-y-3">
               <p className="text-xs uppercase tracking-[0.1em] text-white/40">Sobre o profissional <span className="normal-case text-white/30">(opcional — preencha se ele quiser divulgação)</span></p>
