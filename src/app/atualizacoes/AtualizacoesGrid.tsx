@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { AtualizacaoData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
+import { dataCurta } from "@/lib/format-date";
 
 type Props = {
   atualizacoes: AtualizacaoData[];
@@ -41,18 +42,7 @@ const areaConfig = {
 
 const ALL_AREAS: AtualizacaoData["area"][] = ["emergencias", "ti", "anestesiologia"];
 
-function formatDate(iso: string): string {
-  try {
-    const [year, month, day] = iso.split("-").map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
+const formatDate = dataCurta;
 
 export function UpdateCard({ item }: { item: AtualizacaoData }) {
   const [expanded, setExpanded] = useState(false);

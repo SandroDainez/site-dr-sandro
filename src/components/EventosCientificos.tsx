@@ -1,6 +1,7 @@
 import { createPublicClient, supabaseConfigured } from "@/lib/supabase/server";
 import type { Especialidade } from "@/types/medical";
 import { CalendarDays, MapPin, ArrowUpRight } from "lucide-react";
+import { dataCurta } from "@/lib/format-date";
 
 // Congressos/eventos científicos mundiais (descobertos pelos agentes, no Supabase).
 // Separado do "Calendário de aulas e imersões" do médico. Some se não houver dados.
@@ -11,14 +12,7 @@ const MODALIDADE_BADGE: Record<string, string> = {
   hibrido: "border-violet-400/30 bg-violet-400/10 text-violet-300",
 };
 
-function fmt(iso: string): string {
-  try {
-    const [y, m, d] = iso.split("-").map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
-}
+const fmt = dataCurta;
 
 export default async function EventosCientificos({
   especialidade,

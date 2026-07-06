@@ -5,17 +5,13 @@ import { FileText, BookOpen, ImageIcon, Video, File, Download, Library } from "l
 import type { AcervoItemData, AcervoArquivo } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 import { colStyle } from "@/lib/card-grid";
+import { dataCurta } from "@/lib/format-date";
 
 function ytId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
   return m ? m[1] : null;
 }
-function formatDate(iso: string): string {
-  try {
-    const [y, m, d] = iso.split("-").map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-  } catch { return iso; }
-}
+const formatDate = dataCurta;
 const arqIcon = { pdf: FileText, livro: BookOpen, imagem: ImageIcon, video: Video, arquivo: File };
 
 // Arquivos NÃO-PDF: botão simples de baixar/abrir.

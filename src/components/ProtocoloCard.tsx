@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { ProtocoloData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
+import { dataCurta } from "@/lib/format-date";
 
 // Card de protocolo reutilizável: mesma experiência no /protocolos (geral),
 // nos hubs por especialidade e no "Todo o conteúdo". Cada card cuida do próprio
@@ -19,14 +20,7 @@ const areaLabel: Record<ProtocoloData["area"], string> = {
   anestesiologia: "Anestesiologia",
 };
 
-function formatDate(iso: string): string {
-  try {
-    const [year, month, day] = iso.split("-").map(Number);
-    return new Date(year, month - 1, day).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
-}
+const formatDate = dataCurta;
 
 export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
   const [expanded, setExpanded] = useState(false);

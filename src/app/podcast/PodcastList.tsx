@@ -5,6 +5,7 @@ import { Mic, ExternalLink } from "lucide-react";
 import type { PodcastData } from "@/lib/content";
 import { sanitizeRichText } from "@/lib/rich-text";
 import { colStyle } from "@/lib/card-grid";
+import { dataCurta } from "@/lib/format-date";
 
 function youtubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
@@ -22,14 +23,7 @@ function embedFor(url: string): { type: "spotify" | "apple"; src: string } | nul
   return null;
 }
 
-function formatDate(iso: string): string {
-  try {
-    const [y, m, d] = iso.split("-").map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-  } catch {
-    return iso;
-  }
-}
+const formatDate = dataCurta;
 
 function Card({ ep }: { ep: PodcastData }) {
   const [playing, setPlaying] = useState(false);

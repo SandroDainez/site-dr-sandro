@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
 import UpdateContent from "./UpdateContent";
+import { dataCurta } from "@/lib/format-date";
 
 const ESP_LABEL: Record<string, string> = {
   anestesiologia: "Anestesiologia",
@@ -14,13 +15,7 @@ const ESP_LABEL: Record<string, string> = {
 // unificado de Atualizações.
 export default function BoletimCard({ update, manual = false }: { update: any; manual?: boolean }) {
   const [open, setOpen] = useState(false);
-  const data = (() => {
-    try {
-      return new Date(update.data_publicacao).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-    } catch {
-      return "";
-    }
-  })();
+  const data = dataCurta(update.data_publicacao);
 
   return (
     <div className={`overflow-hidden rounded-2xl border transition ${open ? "border-accent/40 bg-accent/[0.05]" : "border-accent/25 bg-accent/[0.03] hover:border-accent/40"}`}>

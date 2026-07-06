@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import UpdateContent from "@/components/UpdateContent";
+import { dataLonga } from "@/lib/format-date";
 
 type Area = "todas" | "anestesiologia" | "terapia_intensiva" | "emergencias";
 
@@ -24,13 +25,7 @@ const ESP_LABEL: Record<string, string> = {
   emergencias: "Emergências",
 };
 
-function fmt(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
-  } catch {
-    return iso;
-  }
-}
+const fmt = dataLonga;
 
 export default function AtualizacoesSemanaisBrowser({ updates, initialArea }: { updates: any[]; initialArea?: string }) {
   const valid = TABS.some((t) => t.value === initialArea) ? (initialArea as Area) : "todas";

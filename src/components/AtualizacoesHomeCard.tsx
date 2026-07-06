@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AtualizacaoData } from "@/lib/content";
+import { dataCurta } from "@/lib/format-date";
 
 const areaConfig: Record<AtualizacaoData["area"], { label: string; color: string; border: string }> = {
   emergencias: { label: "🚑 Emergências", color: "text-emerg", border: "border-emerg/30" },
@@ -9,12 +10,7 @@ const areaConfig: Record<AtualizacaoData["area"], { label: string; color: string
   anestesiologia: { label: "🩺 Anestesiologia", color: "text-anest", border: "border-anest/30" },
 };
 
-function formatDate(iso: string): string {
-  try {
-    const [y, m, d] = iso.split("-").map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
-  } catch { return iso; }
-}
+const formatDate = dataCurta;
 
 export function AtualizacoesHomeCard({ item }: { item: AtualizacaoData }) {
   const [expanded, setExpanded] = useState(false);

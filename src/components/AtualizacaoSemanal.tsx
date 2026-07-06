@@ -3,6 +3,7 @@ import { ESPECIALIDADE_LABELS } from "@/lib/agents/utils";
 import type { Especialidade } from "@/types/medical";
 import { Sparkles, ArrowRight } from "lucide-react";
 import UpdateContent from "./UpdateContent";
+import { dataLonga } from "@/lib/format-date";
 
 // Última atualização clínica da semana (agente de IA) para uma especialidade.
 // Some se Supabase não configurado ou sem dados. Histórico em /atualizacoes-semanais.
@@ -28,9 +29,7 @@ export default async function AtualizacaoSemanal({ especialidade }: { especialid
 
   if (!update) return null;
 
-  const dataFormatada = new Date(update.data_publicacao).toLocaleDateString("pt-BR", {
-    day: "2-digit", month: "long", year: "numeric",
-  });
+  const dataFormatada = dataLonga(update.data_publicacao);
 
   return (
     <section className="mb-10 overflow-hidden rounded-3xl border border-accent/25 bg-accent/[0.04] p-6 md:p-8">
