@@ -5,6 +5,7 @@ import { buildRevisaoAulasPrompt } from "./revisao-aulas";
 import { buildRevisaoFlashcardsPrompt } from "./revisao-flashcards";
 import { buildRevisaoAtualizacaoPrompt } from "./revisao-atualizacao";
 import { buildRevisaoComparadorPrompt } from "./revisao-comparador";
+import { buildRevisaoPesquisadorPrompt } from "./revisao-pesquisador";
 
 // Dispatcher do prompt de REVISÃO (estágio 2) por módulo. O provider é agnóstico de módulo:
 // recebe ReviewInput.modulo e este dispatcher escolhe o prompt certo. Novo módulo = 1 case.
@@ -22,6 +23,8 @@ export function buildRevisaoPrompt(modulo: string, args: { secoes: SecaoGerada[]
       return buildRevisaoAtualizacaoPrompt(args);
     case "comparador-guidelines":
       return buildRevisaoComparadorPrompt(args);
+    case "pesquisador-cientifico":
+      return buildRevisaoPesquisadorPrompt(args);
     case "arquiteto-protocolos":
     default:
       return buildRevisaoProtocolosPrompt(args);
