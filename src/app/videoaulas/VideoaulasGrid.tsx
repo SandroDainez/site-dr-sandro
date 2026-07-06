@@ -66,6 +66,8 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
     };
   }, [onClose]);
 
+  const ytModal = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
+
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
@@ -82,14 +84,24 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
         >
           ✕ Fechar (Esc)
         </button>
-        <video
-          src={item.videoUrl}
-          controls
-          autoPlay
-          playsInline
-          className="w-full rounded-2xl bg-black shadow-2xl"
-          style={{ maxHeight: "80vh" }}
-        />
+        {ytModal ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${ytModal}?autoplay=1&rel=0&playsinline=1`}
+            title={item.titulo}
+            className="aspect-video w-full rounded-2xl bg-black shadow-2xl"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        ) : (
+          <video
+            src={item.videoUrl}
+            controls
+            autoPlay
+            playsInline
+            className="w-full rounded-2xl bg-black shadow-2xl"
+            style={{ maxHeight: "80vh" }}
+          />
+        )}
         <p className="mt-3 text-center text-sm font-medium text-white/70">{item.titulo}</p>
       </div>
     </div>
@@ -122,26 +134,51 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
 
   return (
     <>
-      {playerOpen && isProxyVideo && (
+      {playerOpen && (isProxyVideo || ytId) && (
         <VideoModal item={item} onClose={() => setPlayerOpen(false)} />
       )}
       {quizOpen && <AulaQuizModal item={item} onClose={() => setQuizOpen(false)} />}
     <article className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:border-white/20">
       {thumbSrc ? (
+        ytId && inlinePlaying && !hasQuiz ? (
+          <div className="relative overflow-hidden bg-black" style={{ height: item.imageSize ?? 176 }}>
+            {/* Toca o YouTube DENTRO do card (sem sair do site) */}
+            <iframe
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&playsinline=1`}
+              title={item.titulo}
+              className="absolute inset-0 h-full w-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+            <button
+              type="button"
+              onClick={() => setPlayerOpen(true)}
+              className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm transition hover:bg-black/90"
+            >
+              ⛶ Expandir
+            </button>
+          </div>
+        ) : (
         <div
           className={`relative overflow-hidden ${hasVideo ? "cursor-pointer group" : ""}`}
           style={{ height: item.imageSize ?? 176 }}
-          onClick={() => { if (!hasVideo) return; if (hasQuiz) setQuizOpen(true); else if (!ytId) setPlayerOpen(true); }}
+          onClick={() => { if (!hasVideo) return; if (hasQuiz) setQuizOpen(true); else if (ytId) setInlinePlaying(true); else setPlayerOpen(true); }}
         >
           <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
-          {hasVideo && (!ytId || hasQuiz) && (
+          {hasVideo && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
                 <span className="text-white text-lg">▶</span>
               </div>
             </div>
           )}
+          {item.duracao && ytId && (
+            <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white/90">
+              {item.duracao}
+            </span>
+          )}
         </div>
+        )
       ) : isProxyVideo ? (
         inlinePlaying ? (
           <div className="relative overflow-hidden bg-black" style={{ height: item.imageSize ?? 176 }}>
@@ -271,14 +308,30 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
         {hasVideo && !hasQuiz && (
           <div className="mt-4 flex flex-wrap gap-2">
             {ytId ? (
-              <a
-                href={item.videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
-              >
-                ▶ Assistir no YouTube
-              </a>
+              <>
+                <button
+                  type="button"
+                  onClick={() => setInlinePlaying(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 border border-accent/30 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+                >
+                  ▶ Assistir aqui
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPlayerOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:bg-white/[0.1] hover:text-white"
+                >
+                  ⛶ Tela cheia
+                </button>
+                <a
+                  href={item.videoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/45 transition hover:text-white/70"
+                >
+                  YouTube ↗
+                </a>
+              </>
             ) : (
               <>
                 <button

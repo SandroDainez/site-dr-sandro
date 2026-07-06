@@ -36,6 +36,8 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
     };
   }, [onClose]);
 
+  const ytModal = item.videoUrl ? getYoutubeId(item.videoUrl) : null;
+
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
@@ -49,15 +51,25 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
         >
           ✕ Fechar (Esc)
         </button>
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-        <video
-          src={item.videoUrl}
-          controls
-          autoPlay
-          playsInline
-          className="w-full rounded-2xl bg-black shadow-2xl"
-          style={{ maxHeight: "80vh" }}
-        />
+        {ytModal ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${ytModal}?autoplay=1&rel=0&playsinline=1`}
+            title={item.titulo}
+            className="aspect-video w-full rounded-2xl bg-black shadow-2xl"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        ) : (
+          /* eslint-disable-next-line jsx-a11y/media-has-caption */
+          <video
+            src={item.videoUrl}
+            controls
+            autoPlay
+            playsInline
+            className="w-full rounded-2xl bg-black shadow-2xl"
+            style={{ maxHeight: "80vh" }}
+          />
+        )}
         <p className="mt-3 text-center text-sm font-medium text-white/70">{item.titulo}</p>
       </div>
     </div>
@@ -119,7 +131,7 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
 
   return (
     <>
-      {playerOpen && isProxy && <VideoModal item={item} onClose={() => setPlayerOpen(false)} />}
+      {playerOpen && (isProxy || ytId) && <VideoModal item={item} onClose={() => setPlayerOpen(false)} />}
       {quizOpen && <AulaQuizModal item={item} onClose={() => setQuizOpen(false)} />}
 
       <article className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden transition hover:-translate-y-0.5 hover:border-white/20">
