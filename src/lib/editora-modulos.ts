@@ -20,7 +20,7 @@ export type EditoraModulo = {
 };
 
 export const EDITORA_MODULOS: EditoraModulo[] = [
-  { slug: "editor-cientifico",       nome: "Editor Científico",       tipo: "geração",   icon: FlaskConical,   descricao: "Redige texto científico a partir das referências fornecidas." },
+  { slug: "editor-cientifico",       nome: "Editor Científico",       tipo: "geração",   icon: FlaskConical,   descricao: "Redige texto científico a partir das referências fornecidas.", href: "/admin/editora/editor-cientifico", ativo: true },
   { slug: "arquiteto-protocolos",    nome: "Arquiteto de Protocolos", tipo: "geração",   icon: ClipboardList,  descricao: "Estrutura um protocolo clínico a partir de diretrizes.", href: "/admin/editora/arquiteto-protocolos", ativo: true },
   { slug: "editor-premium",          nome: "Editor Premium",          tipo: "geração",   icon: Crown,          descricao: "Refina e densifica um rascunho com base nas fontes." },
   { slug: "criador-aulas",           nome: "Criador de Aulas",        tipo: "geração",   icon: GraduationCap,  descricao: "Monta aulas/seções a partir do material de origem." },

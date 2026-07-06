@@ -1,6 +1,6 @@
 import type OpenAI from "openai";
 import type { GenerateInput, GenerateResult, ReviewInput, ReviewResult, SecaoGerada, Issue } from "../types";
-import { buildRevisaoProtocolosPrompt } from "../prompts/revisao-protocolos";
+import { buildRevisaoPrompt } from "../prompts/revisao";
 
 // Lógica compartilhada por OpenAIProvider e DeepSeekProvider (a API do DeepSeek é
 // compatível com a da OpenAI, então o mesmo código serve para os dois clients).
@@ -31,7 +31,7 @@ export async function gerarSecoes(client: OpenAI, model: string, providerName: s
 // Estágio 2 — revisão do protocolo montado. NÃO reescreve em silêncio: devolve
 // APONTAMENTOS (issues) + versão corrigida à parte.
 export async function revisarProtocolo(client: OpenAI, model: string, providerName: string, input: ReviewInput): Promise<ReviewResult> {
-  const prompt = buildRevisaoProtocolosPrompt({ secoes: input.draft.secoes, sources: input.sources });
+  const prompt = buildRevisaoPrompt(input.modulo, { secoes: input.draft.secoes, sources: input.sources });
   try {
     const r = await client.chat.completions.create({
       model,
