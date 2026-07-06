@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import {
   getProtocolos, getVideoaulas, getCursos, getAtualizacoes, getAcervo, getProcedimentos,
-  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getUiTexts, getCardCols,
+  getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getSectionTexts, getUiTexts, getCardCols, getEspecialidades,
 } from "@/lib/content";
 import { colStyle } from "@/lib/card-grid";
 import { secText } from "@/lib/section-texts";
@@ -63,11 +63,15 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const a = area as Area;
   const cfg = AREAS[a];
 
-  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st, ui, cardCols] = await Promise.all([
+  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st, ui, cardCols, especialidades] = await Promise.all([
     getProtocolos(), getVideoaulas(), getCursos(), getAtualizacoes(), getAcervo(), getProcedimentos(),
-    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(), getCardCols(),
+    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(), getCardCols(), getEspecialidades(),
   ]);
   const hubKey = `hub_${a}`;
+  // Logo enviado no admin por área (casa pela "área") — usado no cabeçalho e nos atalhos.
+  const logoByArea: Record<string, string | undefined> = {};
+  for (const e of especialidades) if (e.area) logoByArea[e.area] = e.logoUrl;
+  const hubLogo = logoByArea[a];
 
   // Um item pertence ao hub se sua área principal é `a` OU se `a` está nas áreas
   // extras (multi-especialidade): um assunto pode aparecer em mais de um hub.
@@ -106,10 +110,23 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
       <main className="mx-auto w-full max-w-5xl px-6 py-14">
         <div className={`relative mb-10 overflow-hidden rounded-3xl border ${cfg.border} bg-white/[0.02] p-8 md:p-10`}>
           <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${cfg.grad}`} />
-          <div className="pointer-events-none absolute -right-10 -top-10 text-[9rem] opacity-10 blur-[1px] md:text-[12rem]">{cfg.emoji}</div>
+          {hubLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={hubLogo} alt="" className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 object-contain opacity-10 blur-[1px] md:h-56 md:w-56" />
+          ) : (
+            <div className="pointer-events-none absolute -right-10 -top-10 text-[9rem] opacity-10 blur-[1px] md:text-[12rem]">{cfg.emoji}</div>
+          )}
           <div className="relative">
             <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${cfg.accent}`}>{secText(st, hubKey, "eyebrow")}</p>
-            <h1 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">{cfg.emoji} {secText(st, hubKey, "title")}</h1>
+            <h1 className="mt-2 flex items-center gap-3 text-4xl font-semibold tracking-tight md:text-5xl">
+              {hubLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={hubLogo} alt="" className="h-12 w-12 shrink-0 object-contain md:h-14 md:w-14" />
+              ) : (
+                <span>{cfg.emoji}</span>
+              )}
+              <span>{secText(st, hubKey, "title")}</span>
+            </h1>
             <p className="mt-3 max-w-2xl text-base text-white/65">{secText(st, hubKey, "desc")}</p>
             {total > 0 && <p className="mt-5 text-xs text-white/45">{total} {total === 1 ? "item" : "itens"} nesta especialidade</p>}
           </div>
@@ -193,7 +210,12 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
               <a key={k} href={`/especialidade/${k}`} className={`group relative flex items-center justify-between overflow-hidden rounded-2xl border ${AREAS[k].border} bg-white/[0.02] px-5 py-4 transition hover:bg-white/[0.04]`}>
                 <span className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${AREAS[k].grad} opacity-60`} />
                 <span className="relative flex items-center gap-3">
-                  <span className="text-2xl">{AREAS[k].emoji}</span>
+                  {logoByArea[k] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logoByArea[k]} alt="" className="h-7 w-7 shrink-0 object-contain" />
+                  ) : (
+                    <span className="text-2xl">{AREAS[k].emoji}</span>
+                  )}
                   <span className={`font-semibold ${AREAS[k].accent}`}>{AREAS[k].label}</span>
                 </span>
                 <ArrowRight className="relative h-4 w-4 text-white/40 transition group-hover:translate-x-1 group-hover:text-white/70" />
