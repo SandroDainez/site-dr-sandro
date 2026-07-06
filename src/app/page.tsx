@@ -601,7 +601,7 @@ export default async function Home() {
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
-            <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["colaboradores"] ?? 3) * 3)} cols={cardCols["colaboradores"]} />
+            <ColaboradoresList items={colaboradores.filter((c) => c.titulo)} cols={cardCols["colaboradores"]} limit={(cardCols["colaboradores"] ?? 3) * 3} />
             <a href="/colaboradores" className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>

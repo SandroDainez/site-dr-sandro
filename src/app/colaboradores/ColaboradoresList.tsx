@@ -281,8 +281,11 @@ function agrupar(items: ColaboradorData[]): Grupo[] {
   return grupos;
 }
 
-export default function ColaboradoresList({ items, cols }: { items: ColaboradorData[]; cols?: number }) {
-  const grupos = agrupar(items);
+export default function ColaboradoresList({ items, cols, limit }: { items: ColaboradorData[]; cols?: number; limit?: number }) {
+  // Agrupa PRIMEIRO (por profissional+assunto) e só então limita por nº de CARDS —
+  // assim um assunto com muitas aulas conta como 1 card e não engole a lista.
+  const todos = agrupar(items);
+  const grupos = limit ? todos.slice(0, limit) : todos;
 
   if (grupos.length === 0) {
     return (
