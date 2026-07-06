@@ -580,6 +580,9 @@ export default async function Home() {
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "colaboradores", "eyebrow")}</p>
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "colaboradores", "title")}</h2>
+                {secText(st, "page_colaboradores", "desc") && (
+                  <p className="mt-3 max-w-3xl text-sm leading-relaxed text-white/60">{secText(st, "page_colaboradores", "desc")}</p>
+                )}
               </div>
               <a href="/colaboradores" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
