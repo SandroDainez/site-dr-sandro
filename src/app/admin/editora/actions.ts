@@ -1,18 +1,10 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { createHash } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { chatJSON } from "@/lib/ai/openai";
 import { slugify, type Artigo, type ArtigoEspecialidade } from "@/lib/editora";
-
-async function requireAdmin() {
-  const c = await cookies();
-  const token = c.get("admin_token")?.value;
-  const pw = process.env.ADMIN_PASSWORD;
-  if (!pw || token !== createHash("sha256").update(pw).digest("hex")) throw new Error("Não autorizado");
-}
+import { requireAdmin } from "@/lib/admin-auth"; // camada (b): checagem única server-side
 
 type Result<T = unknown> = { ok: true; data?: T } | { ok: false; error: string };
 
@@ -29,8 +21,7 @@ async function slugUnico(
   const raiz = slugify(base);
   let slug = raiz;
   let n = 1;
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+  for (;;) {
     const { data } = await supabase.from("editora_artigos").select("id").eq("slug", slug).maybeSingle();
     if (!data || data.id === id) return slug;
     n += 1;
