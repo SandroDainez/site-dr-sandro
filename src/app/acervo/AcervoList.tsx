@@ -75,7 +75,7 @@ function Card({ item }: { item: AcervoItemData }) {
   return (
     <article className="flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition hover:border-white/20">
       {(thumb || hasVideo) && (
-        <div className="relative aspect-video w-full bg-black">
+        <div className={`relative w-full bg-black ${hasVideo ? "aspect-video" : ""}`} style={hasVideo ? undefined : { height: item.capaAltura ?? 200 }}>
           {hasVideo && playing ? (
             yt ? (
               <iframe src={`https://www.youtube.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`} title={item.titulo} className="absolute inset-0 h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
@@ -87,7 +87,7 @@ function Card({ item }: { item: AcervoItemData }) {
             <button type="button" onClick={() => hasVideo && setPlaying(true)} className={`group absolute inset-0 h-full w-full ${hasVideo ? "cursor-pointer" : "cursor-default"}`}>
               {thumb ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img loading="lazy" decoding="async" src={thumb} alt={item.titulo} className="h-full w-full object-cover" />
+                <img loading="lazy" decoding="async" src={thumb} alt={item.titulo} className={`h-full w-full ${hasVideo ? "object-cover" : "object-contain"}`} />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-white/[0.03] text-white/20"><Library className="h-10 w-10" /></div>
               )}

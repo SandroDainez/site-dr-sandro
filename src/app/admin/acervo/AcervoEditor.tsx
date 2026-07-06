@@ -148,6 +148,19 @@ export default function AcervoEditor({ initialItens, onSave = saveAcervo, upload
                 {uploadingKey === `capa-${i}` ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando...</> : <><Upload className="h-3.5 w-3.5" /> Enviar capa</>}
               </button>
             </div>
+            {it.capaUrl && !it.videoUrl && (
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <label className="text-xs text-white/45">Altura da capa no site (imagem inteira, sem cortar)</label>
+                  <span className="text-xs font-semibold tabular-nums text-accent">{it.capaAltura ?? 200}px</span>
+                </div>
+                <input
+                  type="range" min={100} max={420} value={it.capaAltura ?? 200}
+                  onChange={(e) => update(i, { capaAltura: Number(e.target.value) })}
+                  className="w-full accent-[var(--accent,#2ce6b8)]"
+                />
+              </div>
+            )}
           </div>
 
           {/* Descrição */}

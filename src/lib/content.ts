@@ -329,6 +329,7 @@ export type AcervoItemData = {
   categoria: string; // badge livre (ex: Curiosidades, Saúde, Geral)
   descricao: string; // rich text (HTML)
   capaUrl: string; // imagem de capa
+  capaAltura?: number; // altura da capa no site em px (default 200) — imagem inteira, sem cortar
   videoUrl: string; // YouTube ou vídeo enviado (destaque, opcional)
   arquivos: AcervoArquivo[]; // downloads (PDF, livro, imagem, etc.)
   data: string; // YYYY-MM-DD
