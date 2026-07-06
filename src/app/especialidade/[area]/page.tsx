@@ -46,13 +46,13 @@ function Section({ icon: Icon, titulo, verHref, children, accent }: { icon: type
         <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
           <Icon className={`h-5 w-5 ${accent}`} /> {titulo}
         </h2>
-        {verHref && (
-          <a href={verHref} className="hidden items-center gap-1 text-xs font-medium text-accent/80 transition hover:text-accent sm:flex">
-            Ver todos <ArrowRight className="h-3 w-3" />
-          </a>
-        )}
       </div>
       {children}
+      {verHref && (
+        <a href={verHref} className="mt-6 mx-auto flex w-fit items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-5 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
+          Ver todos <ArrowRight className="h-3.5 w-3.5" />
+        </a>
+      )}
     </section>
   );
 }

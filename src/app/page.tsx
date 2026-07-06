@@ -463,7 +463,7 @@ export default async function Home() {
                 </div>
                 <a
                   href="/atualizacoes"
-                  className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
+                  className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
                 >
                   {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                 </a>
@@ -473,7 +473,7 @@ export default async function Home() {
 
               <a
                 href="/atualizacoes"
-                className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
+                className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
               >
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
@@ -500,7 +500,7 @@ export default async function Home() {
                 {hasContent && (
                   <a
                     href="/protocolos"
-                    className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
+                    className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
                   >
                     {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                   </a>
@@ -519,7 +519,7 @@ export default async function Home() {
 
                   <a
                     href="/protocolos"
-                    className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
+                    className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
                   >
                     {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                   </a>
@@ -551,7 +551,7 @@ export default async function Home() {
                 </div>
                 <a
                   href="/videoaulas"
-                  className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex"
+                  className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
                 >
                   {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
                 </a>
@@ -565,7 +565,7 @@ export default async function Home() {
 
               <a
                 href="/videoaulas"
-                className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden"
+                className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
               >
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
@@ -581,12 +581,12 @@ export default async function Home() {
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "colaboradores", "eyebrow")}</p>
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "colaboradores", "title")}</h2>
               </div>
-              <a href="/colaboradores" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
+              <a href="/colaboradores" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
             <ColaboradoresList items={[...colaboradores].filter((c) => c.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["colaboradores"] ?? 3) * 3)} cols={cardCols["colaboradores"]} />
-            <a href="/colaboradores" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
+            <a href="/colaboradores" className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
@@ -644,12 +644,12 @@ export default async function Home() {
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "podcast", "eyebrow")}</p>
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "podcast", "title")}</h2>
               </div>
-              <a href="/podcast" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
+              <a href="/podcast" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
             <PodcastList podcasts={[...podcasts].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["podcast"] ?? 3) * 3)} cols={cardCols["podcast"]} />
-            <a href="/podcast" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
+            <a href="/podcast" className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
@@ -663,12 +663,12 @@ export default async function Home() {
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "acervo", "eyebrow")}</p>
                 <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "acervo", "title")}</h2>
               </div>
-              <a href="/acervo" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
+              <a href="/acervo" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
                 {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
               </a>
             </div>
             <AcervoList itens={[...acervo].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["acervo"] ?? 3) * 3)} cols={cardCols["acervo"]} />
-            <a href="/acervo" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
+            <a href="/acervo" className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </section>
@@ -681,12 +681,12 @@ export default async function Home() {
               <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "procedimentos", "eyebrow")}</p>
               <h2 className="mt-2 text-2xl font-medium tracking-tight md:text-3xl">{secText(st, "procedimentos", "title")}</h2>
             </div>
-            <a href="/procedimentos" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:inline-flex">
+            <a href="/procedimentos" className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
               {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
             </a>
           </div>
           <AcervoList itens={[...procedimentos].filter((p) => p.titulo).sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()).slice(0, (cardCols["procedimentos"] ?? 3) * 3)} cols={cardCols["procedimentos"]} />
-          <a href="/procedimentos" className="mt-6 flex w-full items-center justify-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20 sm:hidden">
+          <a href="/procedimentos" className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20">
             {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
           </a>
         </section>
