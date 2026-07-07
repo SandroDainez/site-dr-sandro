@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ModuloResumo from "@/components/admin/ModuloResumo";
 import EditorPremium from "./EditorPremium";
 import { aiMode } from "@/lib/ai/config";
 
@@ -27,6 +28,9 @@ export default async function EditorPremiumPage() {
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para usar os modelos reais.</>}
         </p>
       </div>
+
+      <ModuloResumo slug="editor-premium" />
+
 
       <AdminHelp>
         1) Crie/abra um texto na biblioteca. 2) Cole as <strong className="text-white/85">referências</strong>. 3) Cole o

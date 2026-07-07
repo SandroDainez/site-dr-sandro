@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ModuloResumo from "@/components/admin/ModuloResumo";
 import CriadorQuestoes from "./CriadorQuestoes";
 import { aiMode } from "@/lib/ai/config";
 
@@ -27,6 +28,9 @@ export default async function CriadorQuestoesPage() {
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para os modelos reais.</>}
         </p>
       </div>
+
+      <ModuloResumo slug="criador-questoes" />
+
 
       <AdminHelp>
         1) Crie/abra um conjunto. 2) Cole as <strong className="text-white/85">referências</strong>. 3) Escolha área, nível e nº e

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ModuloResumo from "@/components/admin/ModuloResumo";
 import EditorCientifico from "./EditorCientifico";
 import { aiMode } from "@/lib/ai/config";
 
@@ -29,6 +30,9 @@ export default async function EditorCientificoPage() {
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para usar os modelos reais.</>}
         </p>
       </div>
+
+      <ModuloResumo slug="editor-cientifico" />
+
 
       <AdminHelp>
         1) Crie ou abra um texto na <strong className="text-white/85">biblioteca</strong>. 2) Cole as <strong className="text-white/85">referências</strong>

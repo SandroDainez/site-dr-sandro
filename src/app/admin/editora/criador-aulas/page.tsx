@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ModuloResumo from "@/components/admin/ModuloResumo";
 import CriadorAulas from "./CriadorAulas";
 import { aiMode } from "@/lib/ai/config";
 
@@ -26,6 +27,9 @@ export default async function CriadorAulasPage() {
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para usar os modelos reais.</>}
         </p>
       </div>
+
+      <ModuloResumo slug="criador-aulas" />
+
 
       <AdminHelp>
         1) Crie/abra uma aula. 2) Cole as <strong className="text-white/85">referências</strong>. 3) Escolha a área e o
