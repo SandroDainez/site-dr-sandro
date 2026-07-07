@@ -35,7 +35,7 @@ const SEV_CLS: Record<string, string> = {
 
 function renderVerso(sec: SecaoGerada): string {
   return sec.afirmacoes
-    .map((a) => (a.source_id ? `${a.texto} [${a.source_id}]` : `${a.texto}  ⚠ sem fonte`))
+    .map((a) => a.texto)
     .join("\n");
 }
 
