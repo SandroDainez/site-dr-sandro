@@ -145,7 +145,14 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     setBlocos((prev) => prev.map((b, idx) => (idx >= start ? { status: "pendente" } : b)));
     for (let i = start; i < PROTOCOLO_BLOCOS.length; i++) {
       setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "gerando" } : b)));
-      const r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado });
+      // Auto-retry: falha de bloco costuma ser transiente (timeout/limite momentâneo do
+      // DeepSeek). Tenta até 3x, com uma pausa entre elas, antes de mostrar erro.
+      let r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado });
+      for (let tent = 1; !r.ok && tent < 3; tent++) {
+        setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "gerando", err: `tentativa ${tent + 1}…` } : b)));
+        await new Promise((res) => setTimeout(res, 1500));
+        r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado });
+      }
       if (!r.ok) {
         setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "erro", err: r.error } : b)));
         setError(`Bloco ${i + 1}: ${r.error}`); setGerando(false); return;
