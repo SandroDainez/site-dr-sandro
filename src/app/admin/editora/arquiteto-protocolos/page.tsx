@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarProtocolos } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ModuloResumo from "@/components/admin/ModuloResumo";
 import ArquitetoProtocolos from "./ArquitetoProtocolos";
 import { aiMode } from "@/lib/ai/config";
 
@@ -29,6 +30,9 @@ export default async function ArquitetoProtocolosPage() {
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para usar os modelos reais.</>}
         </p>
       </div>
+
+      <ModuloResumo slug="arquiteto-protocolos" />
+
 
       <AdminHelp>
         1) Escolha ou crie um protocolo. 2) Cole as <strong className="text-white/85">fontes</strong> (guideline, artigo,

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarDocs, listarProtocolosPublicados } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ModuloResumo from "@/components/admin/ModuloResumo";
 import AtualizadorProtocolos from "./AtualizadorProtocolos";
 import { aiMode } from "@/lib/ai/config";
 
@@ -28,6 +29,9 @@ export default async function AtualizadorProtocolosPage() {
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para os modelos reais.</>}
         </p>
       </div>
+
+      <ModuloResumo slug="atualizador-protocolos" />
+
 
       <AdminHelp>
         1) Escolha um <strong className="text-white/85">protocolo publicado</strong> (do Arquiteto). 2) Clique em

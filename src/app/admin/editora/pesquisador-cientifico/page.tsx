@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
+import ModuloResumo from "@/components/admin/ModuloResumo";
 import PesquisadorCientifico from "./PesquisadorCientifico";
 import { aiMode } from "@/lib/ai/config";
 
@@ -27,6 +28,9 @@ export default async function PesquisadorCientificoPage() {
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para os modelos reais.</>}
         </p>
       </div>
+
+      <ModuloResumo slug="pesquisador-cientifico" />
+
 
       <AdminHelp>
         1) Informe a <strong className="text-white/85">pergunta</strong> e a área. 2) Clique em <strong className="text-white/85">Buscar e sintetizar</strong>

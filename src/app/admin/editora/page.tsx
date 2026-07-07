@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Newspaper, ArrowRight, Globe, PencilLine, Sparkles, ShieldCheck, Save, Send } from "lucide-react";
-import { EDITORA_MODULOS, GRUPOS, ENTRADA_LABEL } from "@/lib/editora-modulos";
+import { EDITORA_MODULOS, GRUPOS } from "@/lib/editora-modulos";
 
 export const dynamic = "force-dynamic";
 
@@ -88,9 +88,10 @@ export default function AdminEditoraPage() {
                       <p className="font-medium text-white">{m.nome}</p>
                       <p className="mt-1 text-[13px] leading-relaxed text-muted">{m.descricao}</p>
                     </div>
-                    <div className="mt-auto space-y-1.5 border-t border-white/8 pt-3">
-                      <p className="text-[11px] text-white/45"><span className="text-white/35">Entrada:</span> {ENTRADA_LABEL[m.entrada]}</p>
-                      <p className="inline-flex items-center gap-1 text-[11px] font-medium text-accent"><Globe className="h-3 w-3" /> Publica em <span className="font-mono">{m.publicaEm}</span></p>
+                    <div className="mt-auto space-y-1 border-t border-white/8 pt-3 text-[11px]">
+                      <p className="text-white/45"><span className="text-accent-blue/80">Você dá:</span> {m.recebe}</p>
+                      <p className="text-white/45"><span className="text-accent/80">Produz:</span> {m.produz}</p>
+                      <p className="inline-flex items-center gap-1 font-medium text-accent-violet"><Globe className="h-3 w-3" /> Publica em <span className="font-mono">{m.publicaEm}</span></p>
                     </div>
                   </Link>
                 );
