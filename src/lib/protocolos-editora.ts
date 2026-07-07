@@ -5,7 +5,7 @@ import type { SecaoGerada } from "@/lib/ai/types";
 // Usa o cliente ANÔNIMO de propósito → a RLS garante que só o publicado apareça
 // (protocols.status='published' + protocol_versions.is_published=true). Ver migration 003.
 
-export type ProtocoloPublicoResumo = { id: string; title: string; slug: string; specialty: string };
+export type ProtocoloPublicoResumo = { id: string; title: string; slug: string; specialty: string; areas: string[] };
 
 export type ProtocoloConteudo = {
   especialidade?: string;
@@ -28,8 +28,9 @@ export async function getProtocolosPublicados(): Promise<ProtocoloPublicoResumo[
   if (!serviceConfigured()) return [];
   try {
     const supabase = createPublicClient(); // anon → RLS só devolve status='published'
-    const { data } = await supabase.from("protocols").select("id,title,slug,specialty").eq("status", "published").order("updated_at", { ascending: false });
-    return (data as ProtocoloPublicoResumo[]) ?? [];
+    const { data } = await supabase.from("protocols").select("id,title,slug,specialty,areas").eq("status", "published").order("updated_at", { ascending: false });
+    return ((data as { id: string; title: string; slug: string; specialty: string; areas: string[] | null }[]) ?? [])
+      .map((p) => ({ id: p.id, title: p.title, slug: p.slug, specialty: p.specialty, areas: p.areas ?? [] }));
   } catch {
     return [];
   }
