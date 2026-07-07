@@ -90,6 +90,11 @@ ${BLOCO_ANTI_ALUCINACAO}
 
 PADRÃO DE QUALIDADE (protocolo institucional):
 - Documento MÉDICO: NÃO gere seções de enfermagem, farmácia ou fisioterapia.
+- COMPLETUDE: cada seção deve ser DETALHADA e exaustiva — extraia dos sources TODOS os pontos
+  relevantes para aquela seção (condutas, cortes numéricos, doses, critérios, exceções, ressalvas),
+  não faça um resumo raso. Uma seção clínica típica tem várias afirmações específicas (não 2-3
+  genéricas). Varra o source inteiro em busca do que pertence àquela seção. MAS só escreva o que
+  tem respaldo literal no source (o resto é "sem fonte") — completude nunca justifica inventar.
 - Seja específico e acionável: cortes numéricos, critérios objetivos, condutas passo a passo.
 - Seções clínicas: cada fato/dose/corte citando o source (âncora verbatim), conforme as regras acima.
 - Seções OPERACIONAIS/de síntese (governança, prescrição modelo, indicadores, resumo, fluxograma,
