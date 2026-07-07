@@ -16,6 +16,7 @@ import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarProtocolo, despublicarProtocolo, arquivarProtocolo } from "./actions";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
+import FontesInput from "@/components/admin/FontesInput";
 
 type Protocolo = { id: string; title: string; slug: string; status: string; specialty: string };
 type BlocoStatus = { status: "pendente" | "gerando" | "concluido" | "erro"; confidence?: number; err?: string };
@@ -46,9 +47,6 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   const [especialidade, setEspecialidade] = useState<string>(ESPECIALIDADES_MODULO[0]);
   const [sources, setSources] = useState<Source[]>([]);
 
-  // form de fonte
-  const [sTitulo, setSTitulo] = useState(""); const [sTipo, setSTipo] = useState<string>(TIPOS_FONTE[0]);
-  const [sAutor, setSAutor] = useState(""); const [sAno, setSAno] = useState(""); const [sTexto, setSTexto] = useState("");
 
   // geração
   const [blocos, setBlocos] = useState<BlocoStatus[]>(PROTOCOLO_BLOCOS.map(() => ({ status: "pendente" })));
@@ -107,15 +105,6 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     startTransition(async () => {
       const r = await criarProtocolo({ title: novoTitulo, especialidadeModulo: especialidade });
       if (r.ok) { setProtocolos((prev) => [r.data, ...prev]); setNovoTitulo(""); abrirProtocolo(r.data); }
-      else setError(r.error);
-    });
-  }
-  function addSource() {
-    if (!protocolo) return;
-    setError(null);
-    startTransition(async () => {
-      const r = await adicionarSource({ protocolId: protocolo.id, titulo: sTitulo, tipo: sTipo, autor: sAutor || undefined, ano: sAno ? parseInt(sAno) : null, texto: sTexto });
-      if (r.ok) { setSources((prev) => [...prev, r.data]); setSTitulo(""); setSAutor(""); setSAno(""); setSTexto(""); }
       else setError(r.error);
     });
   }
@@ -240,17 +229,12 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
                 ))}
               </div>
             )}
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 space-y-2">
-              <p className="text-[11px] text-white/40">Adicionar fonte (texto colado). PDF fica para fase posterior.</p>
-              <div className="grid gap-2 sm:grid-cols-[1fr_150px_1fr_90px]">
-                <input className={inputCls} value={sTitulo} onChange={(e) => setSTitulo(e.target.value)} placeholder="Título da fonte" />
-                <select className={inputCls} value={sTipo} onChange={(e) => setSTipo(e.target.value)}>{TIPOS_FONTE.map((t) => <option key={t} value={t}>{t}</option>)}</select>
-                <input className={inputCls} value={sAutor} onChange={(e) => setSAutor(e.target.value)} placeholder="Sociedade / autor" />
-                <input className={inputCls} value={sAno} onChange={(e) => setSAno(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="Ano" inputMode="numeric" />
-              </div>
-              <textarea className={inputCls + " min-h-[90px] resize-y"} value={sTexto} onChange={(e) => setSTexto(e.target.value)} placeholder="Cole aqui o texto da diretriz/artigo (é contra este texto que as citações são verificadas)." />
-              <button type="button" onClick={addSource} disabled={busy || sTexto.trim().length < 10} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/80 transition hover:border-accent/40 disabled:opacity-50"><Plus className="h-3.5 w-3.5" /> Adicionar fonte</button>
-            </div>
+            <FontesInput tipos={TIPOS_FONTE} busy={busy} onAdd={async (f) => {
+              if (!protocolo) return { ok: false, error: "Abra um protocolo." };
+              const r = await adicionarSource({ protocolId: protocolo.id, titulo: f.titulo, tipo: f.tipo, autor: f.autor, ano: f.ano, texto: f.texto });
+              if (r.ok) setSources((prev) => [...prev, r.data]);
+              return { ok: r.ok, error: r.ok ? undefined : r.error };
+            }} />
           </div>
 
           {/* 3) ÁREA + 4) GERAÇÃO */}

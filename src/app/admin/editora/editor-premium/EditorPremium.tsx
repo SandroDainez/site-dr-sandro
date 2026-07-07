@@ -7,6 +7,7 @@ import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc } from "./actions";
+import FontesInput from "@/components/admin/FontesInput";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -47,8 +48,6 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
   const [rascunho, setRascunho] = useState("");
 
   // form de referência
-  const [sTitulo, setSTitulo] = useState(""); const [sTipo, setSTipo] = useState<string>(TIPOS_FONTE[0]);
-  const [sAutor, setSAutor] = useState(""); const [sAno, setSAno] = useState(""); const [sTexto, setSTexto] = useState("");
 
   // refinamento
   const [blocos, setBlocos] = useState<BlocoStatus[]>(SCI_BLOCOS.map(() => ({ status: "pendente" })));
@@ -107,15 +106,6 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
     startTransition(async () => {
       const r = await criarDoc({ title: novoTitulo, especialidadeModulo: especialidade });
       if (r.ok) { setDocs((prev) => [r.data, ...prev]); setNovoTitulo(""); abrirDoc(r.data); }
-      else setError(r.error);
-    });
-  }
-  function addSource() {
-    if (!doc) return;
-    setError(null);
-    startTransition(async () => {
-      const r = await adicionarSource({ docId: doc.id, titulo: sTitulo, tipo: sTipo, autor: sAutor || undefined, ano: sAno ? parseInt(sAno) : null, texto: sTexto });
-      if (r.ok) { setSources((prev) => [...prev, r.data]); setSTitulo(""); setSAutor(""); setSAno(""); setSTexto(""); }
       else setError(r.error);
     });
   }
@@ -236,17 +226,12 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
                 ))}
               </div>
             )}
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 space-y-2">
-              <p className="text-[11px] text-white/40">Adicionar referência (texto colado). É contra este texto que as citações são verificadas.</p>
-              <div className="grid gap-2 sm:grid-cols-[1fr_150px_1fr_90px]">
-                <input className={inputCls} value={sTitulo} onChange={(e) => setSTitulo(e.target.value)} placeholder="Título da referência" />
-                <select className={inputCls} value={sTipo} onChange={(e) => setSTipo(e.target.value)}>{TIPOS_FONTE.map((t) => <option key={t} value={t}>{t}</option>)}</select>
-                <input className={inputCls} value={sAutor} onChange={(e) => setSAutor(e.target.value)} placeholder="Autor / sociedade" />
-                <input className={inputCls} value={sAno} onChange={(e) => setSAno(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="Ano" inputMode="numeric" />
-              </div>
-              <textarea className={inputCls + " min-h-[90px] resize-y"} value={sTexto} onChange={(e) => setSTexto(e.target.value)} placeholder="Cole aqui o texto do artigo/diretriz." />
-              <button type="button" onClick={addSource} disabled={busy || sTexto.trim().length < 10} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/80 transition hover:border-accent/40 disabled:opacity-50"><Plus className="h-3.5 w-3.5" /> Adicionar referência</button>
-            </div>
+            <FontesInput tipos={TIPOS_FONTE} busy={busy} onAdd={async (f) => {
+              if (!doc) return { ok: false, error: "Abra um item." };
+              const r = await adicionarSource({ docId: doc.id, titulo: f.titulo, tipo: f.tipo, autor: f.autor, ano: f.ano, texto: f.texto });
+              if (r.ok) setSources((prev) => [...prev, r.data]);
+              return { ok: r.ok, error: r.ok ? undefined : r.error };
+            }} />
           </div>
 
           {/* 3) RASCUNHO */}
