@@ -15,7 +15,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 };
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc, aplicarCorrecoes } from "./actions";
+import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, excluirVersao, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc, aplicarCorrecoes } from "./actions";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive, Wand2 } from "lucide-react";
 import FontesInput from "@/components/admin/FontesInput";
 
@@ -80,6 +80,16 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   async function carregarSources(pid: string) {
     const r = await listarSources(pid);
     if (r.ok) setSources(r.data);
+  }
+  function excluirVersaoClick(versionId: string, versionNumber: number) {
+    if (!protocolo) return;
+    if (!window.confirm(`Excluir a Versão ${versionNumber}? Esta ação não pode ser desfeita.`)) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await excluirVersao({ protocolId: protocolo.id, versionId });
+      if (r.ok) { carregarVersoes(protocolo.id); if (editandoVersao === versionNumber) setEditandoVersao(null); }
+      else setError(r.error);
+    });
   }
   async function carregarVersoes(pid: string, autoAbrirUltima = false) {
     const r = await listarVersoes(pid);
@@ -489,16 +499,24 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
               <>
               <div className="mb-2 space-y-1.5">
                 {versoes.map((v) => (
-                  <button key={v.id} type="button" onClick={() => abrirVersao(v.id, v.version_number, true)} disabled={gerando || busy}
-                    className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-left text-sm transition hover:border-accent/40 hover:bg-white/[0.04] disabled:opacity-50">
-                    <FileText className="h-3.5 w-3.5 shrink-0 text-white/40" />
-                    <span className="text-white/70">Versão {v.version_number}</span>
-                    {v.is_published
-                      ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> pública (congelada)</span>
-                      : <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/45">rascunho</span>}
-                    <span className="ml-auto text-[10px] text-white/30">{dataCurta(v.created_at)}</span>
-                    <span className="shrink-0 text-[10px] font-medium text-accent/80">abrir p/ editar →</span>
-                  </button>
+                  <div key={v.id} className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.02] transition hover:border-accent/40 hover:bg-white/[0.04]">
+                    <button type="button" onClick={() => abrirVersao(v.id, v.version_number, true)} disabled={gerando || busy}
+                      className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left text-sm disabled:opacity-50">
+                      <FileText className="h-3.5 w-3.5 shrink-0 text-white/40" />
+                      <span className="text-white/70">Versão {v.version_number}</span>
+                      {v.is_published
+                        ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> pública (congelada)</span>
+                        : <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/45">rascunho</span>}
+                      <span className="ml-auto text-[10px] text-white/30">{dataCurta(v.created_at)}</span>
+                      <span className="shrink-0 text-[10px] font-medium text-accent/80">abrir p/ editar →</span>
+                    </button>
+                    {!v.is_published && (
+                      <button type="button" title="Excluir esta versão" onClick={() => excluirVersaoClick(v.id, v.version_number)} disabled={gerando || busy}
+                        className="shrink-0 px-2.5 py-2 text-rose-400/60 transition hover:text-rose-400 disabled:opacity-50">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
               <p className="mb-4 text-[11px] text-white/35">Clique numa versão para reabrir o conteúdo no editor. Editar e salvar cria uma nova versão (as anteriores ficam no histórico).</p>

@@ -342,6 +342,35 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Exclui UMA versão (rascunho). A versão publicada não pode ser excluída (está no ar —
+// despublique antes). Se for a versão corrente, reaponta current_version_id para a última
+// restante. Remove antes as linhas de auditoria (ai_generations) daquela versão (FK).
+export async function excluirVersao(input: { protocolId: string; versionId: string }): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data: v } = await supabase.from("protocol_versions").select("id, is_published").eq("id", input.versionId).maybeSingle();
+    if (!v) return { ok: false, error: "Versão não encontrada." };
+    if (v.is_published) return { ok: false, error: "Esta versão está publicada (no ar). Despublique antes de excluí-la." };
+
+    // Se for a versão corrente, reaponta para a última versão restante (ou null).
+    const { data: prot } = await supabase.from("protocols").select("current_version_id").eq("id", input.protocolId).maybeSingle();
+    if (prot?.current_version_id === input.versionId) {
+      const { data: outras } = await supabase.from("protocol_versions")
+        .select("id").eq("protocol_id", input.protocolId).neq("id", input.versionId)
+        .order("version_number", { ascending: false }).limit(1);
+      await supabase.from("protocols").update({ current_version_id: outras?.[0]?.id ?? null }).eq("id", input.protocolId);
+    }
+
+    await supabase.from("ai_generations").delete().eq("protocol_version_id", input.versionId);
+    const { error } = await supabase.from("protocol_versions").delete().eq("id", input.versionId);
+    if (error) throw error;
+    revalidatePath("/admin/editora/arquiteto-protocolos");
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 // Carrega o CONTEÚDO de uma versão salva (secoes + textoEditado + especialidade) para
 // reabrir no editor e editar. Editar + salvar cria uma nova versão (append-only).
 export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; secoes: SecaoGerada[]; textoEditado: Record<string, string> }>> {
