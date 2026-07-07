@@ -15,8 +15,8 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 };
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc } from "./actions";
-import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
+import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc, aplicarCorrecoes } from "./actions";
+import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive, Wand2 } from "lucide-react";
 import FontesInput from "@/components/admin/FontesInput";
 
 type Protocolo = { id: string; title: string; slug: string; status: string; specialty: string };
@@ -60,6 +60,10 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   // revisão (estágio 2)
   const [revisao, setRevisao] = useState<RevisaoUI | null>(null);
   const [revisando, setRevisando] = useState(false);
+
+  // aplicar correções da IA (reancorar afirmações reprovadas)
+  const [corrigindo, setCorrigindo] = useState(false);
+  const [correcao, setCorrecao] = useState<{ corrigidas: number; total: number; antes: number; depois: number } | null>(null);
 
   const [salvo, setSalvo] = useState<{ versionNumber: number; confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -166,6 +170,22 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     if (r.ok) setRevisao({ issues: r.data.issues, corrigido: r.data.corrigido, usage: r.data.usage, provider: r.data.provider, model: r.data.model });
     else setError(r.error);
     setRevisando(false);
+  }
+
+  // Aplicar correções da IA: reancora as afirmações reprovadas e recalcula a confiança.
+  async function corrigirAgora() {
+    if (!protocolo || secoes.length === 0) return;
+    setError(null); setCorrigindo(true); setCorrecao(null); setSalvo(null);
+    const antes = validacao?.confidence ?? 0;
+    const r = await aplicarCorrecoes({ protocolId: protocolo.id, secoes });
+    if (r.ok) {
+      setSecoes(r.data.secoes);
+      const te: Record<string, string> = {};
+      for (const s of r.data.secoes) te[s.secao] = renderSecaoTexto(s);
+      setTextoEditado(te);
+      setCorrecao({ corrigidas: r.data.corrigidas, total: r.data.total, antes, depois: r.data.validacao.confidence });
+    } else setError(r.error);
+    setCorrigindo(false);
   }
 
   function salvar() {
@@ -377,6 +397,30 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
                   </div>
                 )}
               </div>
+
+              {/* Aplicar correções da IA — reancora as afirmações reprovadas e sobe a confiança */}
+              {(() => {
+                const reprovadas = validacao ? validacao.totalClinicas - validacao.validadas : 0;
+                return (
+                  <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-white"><Wand2 className="h-4 w-4 text-accent" /> Aplicar correções da IA</p>
+                        <p className="mt-0.5 text-[11px] text-white/45">A IA tenta reancorar as afirmações reprovadas num trecho verbatim da fonte (ou ajustar o texto pra bater, ou marcar honestamente como sem fonte). O código revalida e a confiança sobe conforme as fontes cobrem. Não salva — revise e salve depois.</p>
+                      </div>
+                      <button type="button" onClick={corrigirAgora} disabled={corrigindo || gerando || busy || reprovadas === 0} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {corrigindo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />} {reprovadas === 0 ? "Nada a corrigir" : `Corrigir ${reprovadas} afirmação(ões)`}
+                      </button>
+                    </div>
+                    {correcao && (
+                      <p className="mt-3 border-t border-white/10 pt-3 text-[12px] text-white/70">
+                        ✓ {correcao.corrigidas} de {correcao.total} reancorada(s). Confiança {Math.round(correcao.antes * 100)}% → <strong className="text-accent">{Math.round(correcao.depois * 100)}%</strong>.
+                        {correcao.total - correcao.corrigidas > 0 && <span className="text-white/50"> As {correcao.total - correcao.corrigidas} restantes não têm respaldo literal nas fontes — adicione fontes que as cubram, ou edite/remova.</span>}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               <div className="sticky bottom-4 mt-5 flex items-center gap-3">
                 <button type="button" onClick={salvar} disabled={busy || gerando} className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-on-accent shadow-lg transition hover:brightness-110 disabled:opacity-60">

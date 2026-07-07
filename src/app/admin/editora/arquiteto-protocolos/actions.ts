@@ -7,7 +7,9 @@ import { slugify } from "@/lib/editora";
 import { getProvider } from "@/lib/ai/providers";
 import { aiProviders } from "@/lib/ai/config";
 import { buildArquitetoProtocolosPrompt } from "@/lib/ai/prompts/arquiteto-protocolos";
-import { validarSecoes, consolidarValidacao, type Validacao } from "@/lib/ai/citations";
+import { validarSecoes, consolidarValidacao, normalizar, type Validacao } from "@/lib/ai/citations";
+import { corrigirCitacoes } from "@/lib/ai/correcao";
+import type { ItemCorrigir } from "@/lib/ai/prompts/correcao-protocolos";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
 
@@ -337,5 +339,58 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
     revalidatePath("/protocolos"); revalidatePath("/admin/editora/arquiteto-protocolos");
     if (doc?.slug) revalidatePath(`/protocolos/${doc.slug}`);
     return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// "Aplicar correções da IA": pega as afirmações cuja citação foi REPROVADA (clínicas/doses
+// sem âncora válida), pede à IA (DeepSeek) para reancorar/ajustar/marcar sem fonte, aplica e
+// REVALIDA por código (âncora inventada não conta). Não salva — devolve as seções corrigidas
+// pro editor; o usuário confere e salva. Sobe a confiança conforme as fontes realmente cobrem.
+export async function aplicarCorrecoes(input: { protocolId: string; secoes: SecaoGerada[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number }>> {
+  try {
+    await requireAdmin();
+    const sres = await listarSources(input.protocolId);
+    if (!sres.ok) return sres;
+    const sources = sres.data;
+    if (!input.secoes?.length) return { ok: false, error: "Gere o protocolo antes de corrigir." };
+
+    // Identifica as afirmações reprovadas (clinica|dose sem âncora válida), com id posicional.
+    const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
+    const reprovada = (a: SecaoGerada["afirmacoes"][number]) => {
+      if (a.tipo !== "clinica" && a.tipo !== "dose") return false;
+      const txt = a.source_id ? mapa.get(a.source_id) : undefined;
+      const anc = normalizar(a.ancora ?? "");
+      return !(a.source_id && txt !== undefined && anc && txt.includes(anc));
+    };
+    const itens: ItemCorrigir[] = [];
+    input.secoes.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => {
+      if (reprovada(a)) itens.push({ id: `${si}:${ai}`, secao: sec.secao, texto: a.texto, tipo: a.tipo });
+    }));
+
+    if (itens.length === 0) {
+      return { ok: true, data: { secoes: input.secoes, validacao: consolidarValidacao(input.secoes, sources), corrigidas: 0, total: 0 } };
+    }
+
+    const { correcoes } = await corrigirCitacoes({ itens, sources });
+
+    // Aplica as correções numa cópia; o código revalida depois.
+    const novo: SecaoGerada[] = input.secoes.map((sec) => ({ ...sec, afirmacoes: (sec.afirmacoes ?? []).map((a) => ({ ...a })) }));
+    for (const c of correcoes) {
+      const [si, ai] = c.id.split(":").map((n) => parseInt(n, 10));
+      const alvo = novo[si]?.afirmacoes?.[ai];
+      if (!alvo) continue;
+      alvo.texto = c.texto ?? alvo.texto;
+      alvo.source_id = c.source_id ?? null;
+      alvo.ancora = c.ancora ?? null;
+      alvo.tipo = c.tipo ?? alvo.tipo;
+    }
+
+    const validacao = consolidarValidacao(novo, sources); // REVALIDA por código (anti-trapaça)
+    // Quantas das reprovadas agora ficaram válidas?
+    const aindaReprovada = new Set<string>();
+    novo.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => { if (reprovada(a)) aindaReprovada.add(`${si}:${ai}`); }));
+    const corrigidas = itens.filter((i) => !aindaReprovada.has(i.id)).length;
+
+    return { ok: true, data: { secoes: novo, validacao, corrigidas, total: itens.length } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
