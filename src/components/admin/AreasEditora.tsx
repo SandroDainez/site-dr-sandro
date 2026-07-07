@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Check, Loader2, MapPin } from "lucide-react";
-import { AREAS_SITE, getAreasEditora, definirAreasEditora } from "@/app/admin/editora/areas-actions";
+import { AREAS_SITE } from "@/lib/editora/areas";
+import { getAreasEditora, definirAreasEditora } from "@/app/admin/editora/areas-actions";
 
 // Seleção múltipla PLANA de especialidades onde o conteúdo publicado aparece nos hubs
 // (/especialidade/[area]). Todas as áreas têm o mesmo peso — marque quantas quiser.
