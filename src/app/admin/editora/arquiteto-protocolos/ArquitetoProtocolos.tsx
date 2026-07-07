@@ -81,6 +81,13 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     const r = await listarSources(pid);
     if (r.ok) setSources(r.data);
   }
+  // Validação MANUAL: o médico marca uma afirmação como "conferi na fonte" (resolve o aviso
+  // sem citação verbatim). Fica gravado na versão ao salvar; contado à parte da confiança.
+  function aceitarAfirmacao(si: number, ai: number, valor: boolean) {
+    setSecoes((prev) => prev.map((s, i) => (i !== si ? s : {
+      ...s, afirmacoes: s.afirmacoes.map((a, j) => (j !== ai ? a : { ...a, conferido: valor })),
+    })));
+  }
   function excluirVersaoClick(versionId: string, versionNumber: number) {
     if (!protocolo) return;
     if (!window.confirm(`Excluir a Versão ${versionNumber}? Esta ação não pode ser desfeita.`)) return;
@@ -378,8 +385,12 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">5 · Resultado (editável)</p>
                 <div className="text-right">
-                  <p className={`text-2xl font-bold ${corConf}`}>{pct}% <span className="text-xs font-medium text-white/40">confiança</span></p>
-                  <p className="text-[11px] text-white/40">{validacao.validadas}/{validacao.totalClinicas} afirmações clínicas com citação validada · {validacao.semFonte} sem fonte · {validacao.invalidas} inválidas</p>
+                  <p className={`text-2xl font-bold ${corConf}`}>{pct}% <span className="text-xs font-medium text-white/40">citação automática</span></p>
+                  <p className="text-[11px] text-white/40">
+                    {validacao.validadas}/{validacao.totalClinicas} citadas pelo código
+                    {validacao.conferidas > 0 && <span className="text-accent"> · +{validacao.conferidas} conferidas por você = {Math.round(((validacao.validadas + validacao.conferidas) / Math.max(1, validacao.totalClinicas)) * 100)}% resolvidas</span>}
+                    {" · "}{validacao.semFonte + validacao.invalidas} pendentes
+                  </p>
                 </div>
               </div>
               <details className="mb-4 rounded-lg border border-white/10 bg-white/[0.02] p-3 text-[11px] text-white/50">
@@ -390,19 +401,32 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
               <div className="space-y-3">
                 {secoes.map((sec) => {
                   const itens = validacao.itens.filter((it) => it.secao === sec.secao);
-                  const problemas = itens.filter((it) => it.exigeFonte && it.status !== "valida");
+                  const problemas = itens.filter((it) => it.exigeFonte && it.status !== "valida" && !it.conferido);
+                  const conferidasSec = itens.filter((it) => it.exigeFonte && it.status !== "valida" && it.conferido);
                   return (
                     <div key={sec.secao} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-                      <div className="mb-1.5 flex items-center gap-2">
+                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-white">{sec.secao}</p>
                         {problemas.length > 0 && <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-300"><AlertTriangle className="h-3 w-3" /> {problemas.length} sem citação válida</span>}
+                        {conferidasSec.length > 0 && <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent"><CheckCircle2 className="h-3 w-3" /> {conferidasSec.length} conferida{conferidasSec.length > 1 ? "s" : ""} por você</span>}
                       </div>
                       <textarea className={inputCls + " min-h-[70px] resize-y font-mono text-[12px]"} value={textoEditado[sec.secao] ?? renderSecaoTexto(sec)} onChange={(e) => setTextoEditado((prev) => ({ ...prev, [sec.secao]: e.target.value }))} />
                       {problemas.length > 0 && (
-                        <ul className="mt-1.5 space-y-0.5">
-                          {problemas.map((p, idx) => (
-                            <li key={idx} className="flex items-center gap-1.5 text-[11px] text-amber-300/80">
-                              <X className="h-3 w-3 shrink-0" /> {p.status === "sem_fonte" ? "sem fonte" : p.status === "fonte_inexistente" ? "source_id inexistente" : "âncora não consta no source"}: “{p.texto.slice(0, 60)}”
+                        <ul className="mt-1.5 space-y-1">
+                          {problemas.map((p) => (
+                            <li key={`${p.secaoIndex}:${p.afIndex}`} className="flex items-start gap-2 text-[11px] text-amber-300/80">
+                              <span className="min-w-0 flex-1"><X className="mr-1 inline h-3 w-3" />{p.status === "sem_fonte" ? "sem fonte" : p.status === "fonte_inexistente" ? "source_id inexistente" : "âncora não consta no source"}: “{p.texto.slice(0, 60)}”</span>
+                              <button type="button" onClick={() => aceitarAfirmacao(p.secaoIndex, p.afIndex, true)} title="Já conferi na fonte — resolver este aviso" className="shrink-0 inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent transition hover:bg-accent/20"><CheckCircle2 className="h-3 w-3" /> Aceitar (conferido)</button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {conferidasSec.length > 0 && (
+                        <ul className="mt-1.5 space-y-1">
+                          {conferidasSec.map((p) => (
+                            <li key={`${p.secaoIndex}:${p.afIndex}`} className="flex items-start gap-2 text-[11px] text-accent/75">
+                              <span className="min-w-0 flex-1"><CheckCircle2 className="mr-1 inline h-3 w-3" />conferido por você: “{p.texto.slice(0, 60)}”</span>
+                              <button type="button" onClick={() => aceitarAfirmacao(p.secaoIndex, p.afIndex, false)} className="shrink-0 rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/50 transition hover:text-white/80">desfazer</button>
                             </li>
                           ))}
                         </ul>
@@ -455,7 +479,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
 
               {/* Aplicar correções da IA — reancora as afirmações reprovadas e sobe a confiança */}
               {(() => {
-                const reprovadas = validacao ? validacao.totalClinicas - validacao.validadas : 0;
+                const reprovadas = validacao ? validacao.totalClinicas - validacao.validadas - validacao.conferidas : 0;
                 return (
                   <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">

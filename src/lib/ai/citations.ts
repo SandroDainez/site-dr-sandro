@@ -16,20 +16,24 @@ export type StatusCitacao = "valida" | "sem_fonte" | "fonte_inexistente" | "anco
 
 export type ItemValidado = {
   secao: string;
+  secaoIndex: number;
+  afIndex: number;
   texto: string;
   tipo: Afirmacao["tipo"];
   source_id: string | null;
   status: StatusCitacao;
   exigeFonte: boolean;
+  conferido: boolean;      // validado manualmente pelo médico
 };
 
 export type Validacao = {
   itens: ItemValidado[];
   totalClinicas: number;   // afirmações que EXIGEM fonte (clinica|dose)
-  validadas: number;       // dessas, com citação válida
-  semFonte: number;        // clínicas sem source_id
-  invalidas: number;       // clínicas com fonte inexistente ou âncora fabricada
-  confidence: number;      // 0..1
+  validadas: number;       // dessas, com citação válida (verbatim, pelo código)
+  conferidas: number;      // dessas, sem citação válida MAS conferidas manualmente pelo médico
+  semFonte: number;        // clínicas sem source_id (e não conferidas)
+  invalidas: number;       // clínicas com fonte inexistente/âncora fabricada (e não conferidas)
+  confidence: number;      // 0..1 — citação automática (validadas/total), PURA (não conta conferidas)
   method: string;
 };
 
@@ -49,21 +53,23 @@ function statusDe(a: Afirmacao, mapaSources: Map<string, string>): StatusCitacao
 export function validarSecoes(secoes: SecaoGerada[], sources: Source[]): Validacao {
   const mapaSources = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
   const itens: ItemValidado[] = [];
-  let totalClinicas = 0, validadas = 0, semFonte = 0, invalidas = 0;
+  let totalClinicas = 0, validadas = 0, conferidas = 0, semFonte = 0, invalidas = 0;
 
-  for (const sec of secoes) {
-    for (const a of sec.afirmacoes ?? []) {
+  secoes.forEach((sec, si) => {
+    (sec.afirmacoes ?? []).forEach((a, ai) => {
       const status = statusDe(a, mapaSources);
       const ef = exigeFonte(a);
-      itens.push({ secao: sec.secao, texto: a.texto, tipo: a.tipo, source_id: a.source_id, status, exigeFonte: ef });
+      const conferido = !!a.conferido;
+      itens.push({ secao: sec.secao, secaoIndex: si, afIndex: ai, texto: a.texto, tipo: a.tipo, source_id: a.source_id, status, exigeFonte: ef, conferido });
       if (ef) {
         totalClinicas += 1;
         if (status === "valida") validadas += 1;
+        else if (conferido) conferidas += 1;         // resolvido manualmente pelo médico
         else if (status === "sem_fonte") semFonte += 1;
         else invalidas += 1; // fonte_inexistente | ancora_invalida
       }
-    }
-  }
+    });
+  });
 
   const confidence = totalClinicas === 0 ? 1 : validadas / totalClinicas;
   const method =
@@ -75,6 +81,7 @@ export function validarSecoes(secoes: SecaoGerada[], sources: Source[]): Validac
     itens,
     totalClinicas,
     validadas,
+    conferidas,
     semFonte,
     invalidas,
     confidence: Math.round(confidence * 1000) / 1000,
