@@ -68,6 +68,7 @@ import {
   getCardCols,
   headerSubtitleLines,
 } from "@/lib/content";
+import { getProtocolosPublicados } from "@/lib/protocolos-editora";
 import { colStyle } from "@/lib/card-grid";
 import { corTema } from "@/lib/especialidade-cor";
 
@@ -86,7 +87,7 @@ function computeHomeOrder(list: string[]): Record<string, number> {
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols, especialidades] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolos, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols, especialidades, protocolosEditora] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -112,6 +113,7 @@ export default async function Home() {
     getHomeOrder(),
     getCardCols(),
     getEspecialidades(),
+    getProtocolosPublicados(),
   ]);
   const homeOrder = computeHomeOrder(homeOrderList);
   // Logo por área (p/ reaproveitar nos cards de Atualizações) — chave em forma "site"
@@ -501,7 +503,8 @@ export default async function Home() {
             (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
           );
           const recent = sorted.slice(0, (cardCols["protocolos"] ?? 3) * 3);
-          const hasContent = protocolos.length > 0;
+          const editoraTop = protocolosEditora.slice(0, 3);
+          const hasContent = protocolos.length > 0 || protocolosEditora.length > 0;
           return (
             <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos" style={{ order: homeOrder["protocolos"] }}>
               <div className="mb-8 flex items-end justify-between">
@@ -523,13 +526,26 @@ export default async function Home() {
 
               {hasContent ? (
                 <>
-                  {/* Mesmo card da página /protocolos e das especialidades: expande NO LOCAL
-                      (Ver protocolo ↓ / Ler / ⛶ Tela cheia / Baixar), sem abrir outra página. */}
+                  {/* Protocolos institucionais (Editora) — linkam para a página do protocolo. */}
+                  {editoraTop.length > 0 && (
+                    <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {editoraTop.map((p) => (
+                        <a key={p.id} href={`/protocolos/${p.slug}`} className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-accent/40 hover:bg-white/[0.05]">
+                          <span className="w-fit rounded-full border border-white/15 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/50">institucional</span>
+                          <h3 className="text-[15px] font-semibold leading-snug text-white group-hover:text-accent">{p.title}</h3>
+                          <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-accent">Ver protocolo <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" /></span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {/* Cards "de blob" (legado): expandem NO LOCAL (Ler / Tela cheia / Baixar). */}
+                  {recent.length > 0 && (
                   <div className="card-grid gap-4" style={colStyle(cardCols["protocolos"] ?? 3)}>
                     {recent.map((item) => (
                       <ProtocoloCard key={item.id} item={item} />
                     ))}
                   </div>
+                  )}
 
                   <Link
                     href="/protocolos"

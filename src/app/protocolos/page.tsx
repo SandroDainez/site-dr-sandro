@@ -16,11 +16,9 @@ import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import ProtocolosGrid from "./ProtocolosGrid";
+import ProtocolosEditoraGrid from "./ProtocolosEditoraGrid";
 import { getProtocolosPublicados } from "@/lib/protocolos-editora";
-import { ArrowRight, ClipboardList } from "lucide-react";
 import Link from "next/link";
-
-const ESP_LABEL_PROT: Record<string, string> = { emergencias: "Emergências", ti: "Terapia Intensiva", anestesiologia: "Anestesiologia", geral: "Geral" };
 
 export default async function ProtocolosPage() {
   const [protocolos, header, navItems, typo, navStyle, st, cardCols, protocolosEditora] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getCardCols(), getProtocolosPublicados()]);
@@ -57,25 +55,21 @@ export default async function ProtocolosPage() {
           <p className="mt-3 text-base text-white/50">{secText(st, "page_protocolos", "desc")}</p>
         </div>
 
-        {protocolosEditora.length > 0 && (
-          <section className="mb-14">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.14em] text-accent">Protocolos institucionais</p>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {protocolosEditora.map((p) => (
-                <a key={p.id} href={`/protocolos/${p.slug}`} className="group flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-accent/40 hover:bg-white/[0.05]">
-                  <div className="flex items-center justify-between">
-                    <ClipboardList className="h-5 w-5 text-accent" />
-                    <span className="rounded-full border border-white/15 bg-white/[0.04] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/50">{ESP_LABEL_PROT[p.specialty] ?? p.specialty}</span>
-                  </div>
-                  <h3 className="text-[15px] font-semibold leading-snug text-white group-hover:text-accent">{p.title}</h3>
-                  <span className="mt-auto inline-flex items-center gap-1 text-xs font-semibold text-accent">Ver protocolo <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-1" /></span>
-                </a>
-              ))}
-            </div>
-          </section>
+        {/* Protocolos da Editora (documentos institucionais) — lista filtrável por área. */}
+        {protocolosEditora.length > 0 && <ProtocolosEditoraGrid protocolos={protocolosEditora} />}
+
+        {/* Protocolos "de blob" (legado) — só aparecem se existirem, pra não confundir. */}
+        {protocolos.length > 0 && (
+          <div className="mt-14">
+            <ProtocolosGrid protocolos={protocolos} cols={cardCols["protocolos"]} />
+          </div>
         )}
 
-        <ProtocolosGrid protocolos={protocolos} cols={cardCols["protocolos"]} />
+        {protocolosEditora.length === 0 && protocolos.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center">
+            <p className="text-sm text-white/50">Protocolos em breve.</p>
+          </div>
+        )}
       </main>
 
       <SiteFooter />
