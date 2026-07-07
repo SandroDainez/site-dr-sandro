@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu } from "lucide-react";
+import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu, PencilLine } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
 import { PROTOCOLO_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/protocolo-estrutura";
 import { dataCurta } from "@/lib/format-date";
@@ -69,6 +69,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
   const resultadoRef = useRef<HTMLDivElement>(null); // rolar até o editor ao abrir uma versão
+  const [editandoVersao, setEditandoVersao] = useState<number | null>(null); // modo edição focado
 
   // publicação
   const [statusAtual, setStatusAtual] = useState<string>("");
@@ -84,15 +85,17 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     const r = await listarVersoes(pid);
     if (r.ok) {
       setVersoes(r.data);
-      // Ao abrir um protocolo, recarrega a versão mais recente no editor (senão vinha vazio).
-      if (autoAbrirUltima && r.data.length > 0) abrirVersao(r.data[0].id);
+      // Ao abrir um protocolo, recarrega a versão mais recente (SEM entrar no modo edição focado).
+      if (autoAbrirUltima && r.data.length > 0) abrirVersao(r.data[0].id, r.data[0].version_number, false);
     }
   }
   // Reabre o conteúdo de uma versão salva no editor (editar + salvar cria nova versão).
-  async function abrirVersao(versionId: string) {
+  // foco=true → entra no MODO EDIÇÃO focado (esconde fontes/geração, mostra banner).
+  async function abrirVersao(versionId: string, versionNumber?: number, foco = false) {
     setError(null);
     const r = await carregarVersao(versionId);
     if (!r.ok) { setError(r.error); return; }
+    setEditandoVersao(foco ? (versionNumber ?? null) : null);
     setSecoes(r.data.secoes);
     const te = r.data.textoEditado && Object.keys(r.data.textoEditado).length
       ? r.data.textoEditado
@@ -105,7 +108,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     setTimeout(() => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
   }
   function abrirProtocolo(p: Protocolo) {
-    setProtocolo(p); setSecoes([]); setMetas([]); setSalvo(null); setError(null); setRevisao(null);
+    setProtocolo(p); setSecoes([]); setMetas([]); setSalvo(null); setError(null); setRevisao(null); setEditandoVersao(null);
     setBlocos(PROTOCOLO_BLOCOS.map(() => ({ status: "pendente" }))); setTextoEditado({});
     setStatusAtual(p.status);
     carregarSources(p.id); carregarVersoes(p.id, true);
@@ -158,7 +161,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   async function gerarDoBloco(start: number) {
     if (!protocolo) return;
     if (sources.length === 0) { setError("Adicione ao menos uma fonte antes de gerar."); return; }
-    setError(null); setSalvo(null); setRevisao(null); setGerando(true);
+    setError(null); setSalvo(null); setRevisao(null); setGerando(true); setEditandoVersao(null);
     // Base: metas/seções dos blocos anteriores (no start=0 zera tudo).
     const metasLocal: Meta[] = start === 0 ? [] : metas.filter((m) => m.blocoIndex < start);
     let acumulado: SecaoGerada[] = metasLocal.flatMap((m) => m.secoes);
@@ -239,6 +242,18 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
 
   return (
     <div className="space-y-6">
+      {/* Banner do MODO EDIÇÃO focado */}
+      {editandoVersao != null && (
+        <div className="sticky top-2 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-accent/15 px-4 py-2.5 shadow-lg backdrop-blur">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-accent">
+            <PencilLine className="h-4 w-4" /> Editando a Versão {editandoVersao} — altere as seções abaixo e salve como nova versão.
+          </p>
+          <button type="button" onClick={() => setEditandoVersao(null)} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-3 py-1 text-xs font-medium text-white/80 transition hover:text-white">
+            <X className="h-3.5 w-3.5" /> Sair da edição
+          </button>
+        </div>
+      )}
+
       {/* 1) PROTOCOLO */}
       <div className={card}>
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">1 · Protocolo</p>
@@ -274,7 +289,8 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
 
       {protocolo && (
         <>
-          {/* 2) FONTES */}
+          {/* 2) FONTES + 3/4) GERAÇÃO — escondidos no modo edição focado */}
+          {!editandoVersao && (<>
           <div className={card}>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">2 · Fontes ({sources.length})</p>
             {sources.length > 0 && (
@@ -344,6 +360,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
               </div>
             )}
           </div>
+          </>)}
 
           {/* 5) RESULTADO */}
           {secoes.length > 0 && validacao && (
@@ -472,7 +489,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
               <>
               <div className="mb-2 space-y-1.5">
                 {versoes.map((v) => (
-                  <button key={v.id} type="button" onClick={() => abrirVersao(v.id)} disabled={gerando || busy}
+                  <button key={v.id} type="button" onClick={() => abrirVersao(v.id, v.version_number, true)} disabled={gerando || busy}
                     className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-left text-sm transition hover:border-accent/40 hover:bg-white/[0.04] disabled:opacity-50">
                     <FileText className="h-3.5 w-3.5 shrink-0 text-white/40" />
                     <span className="text-white/70">Versão {v.version_number}</span>
