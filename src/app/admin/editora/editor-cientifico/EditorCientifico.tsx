@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu } from "lucide-react";
+import AreasEditora from "@/components/admin/AreasEditora";
 import { SCI_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/cientifico-estrutura";
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
@@ -406,6 +407,8 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
                 ))}
               </div>
             )}
+
+            <AreasEditora tabela="sci_docs" docId={doc.id} />
 
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={publicar} disabled={busy || versoes.length === 0} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">

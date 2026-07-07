@@ -18,7 +18,8 @@ import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
-import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Stethoscope } from "lucide-react";
+import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Stethoscope, BookOpen } from "lucide-react";
+import { getEditoraPorArea, EDITORA_GRUPOS_ORDEM } from "@/lib/editora-hub";
 import ProtocoloCard from "@/components/ProtocoloCard";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
@@ -86,7 +87,14 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const procs = procedimentos.filter((x) => inArea(x) && x.titulo);
   const aiBoletins = await fetchMedicalUpdates(siteAreaToEspecialidade(a));
 
-  const total = proto.length + vids.length + curs.length + atu.length + docs.length + procs.length + aiBoletins.length;
+  // Conteúdo publicado na Editora Médica marcado para esta área (protocolos, aulas, textos,
+  // estudo). Agrupado por finalidade numa seção própria.
+  const editoraItens = await getEditoraPorArea(a);
+  const editoraGrupos = EDITORA_GRUPOS_ORDEM
+    .map((g) => ({ grupo: g, itens: editoraItens.filter((i) => i.grupo === g) }))
+    .filter((g) => g.itens.length > 0);
+
+  const total = proto.length + vids.length + curs.length + atu.length + docs.length + procs.length + aiBoletins.length + editoraItens.length;
 
   const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:border-white/20";
 
@@ -187,6 +195,29 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
             {(atu.length > 0 || aiBoletins.length > 0) && (
               <Section icon={Newspaper} titulo="Atualizações" verHref="/atualizacoes" accent={cfg.accent}>
                 <AtualizacoesFeed ai={aiBoletins} manuais={atu} />
+              </Section>
+            )}
+
+            {editoraGrupos.length > 0 && (
+              <Section icon={BookOpen} titulo="Da Editora Médica" accent={cfg.accent}>
+                <div className="space-y-6">
+                  {editoraGrupos.map(({ grupo, itens }) => (
+                    <div key={grupo}>
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-white/40">{grupo}</p>
+                      <div className="card-grid gap-4" style={colStyle(3)}>
+                        {itens.map((item) => (
+                          <a key={item.id} href={item.href} className={`${card} group flex flex-col`}>
+                            <span className={`text-[10px] font-bold uppercase tracking-wide ${cfg.accent}`}>{item.tipoLabel}</span>
+                            <span className="mt-1.5 flex-1 text-sm font-semibold text-white group-hover:text-white">{item.titulo}</span>
+                            <span className="mt-3 inline-flex items-center gap-1 text-xs text-white/40 transition group-hover:text-white/70">
+                              Abrir <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </Section>
             )}
           </>

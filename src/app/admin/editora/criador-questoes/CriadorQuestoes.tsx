@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, ListChecks, Save, AlertTriangle, FileText, X, ShieldCheck, Cpu, CheckCircle2, Circle } from "lucide-react";
+import AreasEditora from "@/components/admin/AreasEditora";
 import { ESPECIALIDADES_MODULO, TIPOS_FONTE, NIVEIS_QUESTAO, QUANTIDADES_QUESTAO, justificativaTexto, type QuestaoGerada } from "@/lib/editora/questao-estrutura";
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
@@ -348,6 +349,8 @@ export default function CriadorQuestoes({ docsIniciais, modo }: { docsIniciais: 
                 ))}
               </div>
             )}
+
+            <AreasEditora tabela="questao_docs" docId={doc.id} />
 
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={publicar} disabled={busy || versoes.length === 0} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
