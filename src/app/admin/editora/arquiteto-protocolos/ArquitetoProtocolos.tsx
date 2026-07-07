@@ -14,7 +14,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 };
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarProtocolo, despublicarProtocolo, arquivarProtocolo } from "./actions";
+import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc } from "./actions";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 import FontesInput from "@/components/admin/FontesInput";
 
@@ -99,6 +99,16 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   function arquivar() {
     if (!protocolo) return; setError(null);
     startTransition(async () => { const r = await arquivarProtocolo(protocolo.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(protocolo.id); } else setError(r.error); });
+  }
+  function excluir() {
+    if (!protocolo) return;
+    if (!window.confirm("Excluir este protocolo? Esta ação não pode ser desfeita.")) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await excluirDoc(protocolo.id);
+      if (r.ok) { setProtocolos((prev) => prev.filter((p) => p.id !== protocolo.id)); setProtocolo(null); }
+      else setError(r.error);
+    });
   }
   function criarNovo() {
     setError(null);
@@ -245,7 +255,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
                 <label className={labelCls}>Especialidade / tipo</label>
                 <select className={inputCls + " sm:w-56"} value={especialidade} onChange={(e) => setEspecialidade(e.target.value)}>{ESPECIALIDADES_MODULO.map((e) => <option key={e} value={e}>{e}</option>)}</select>
               </div>
-              <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
+              <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:brightness-75">
                 {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Gerar protocolo (6 blocos)
               </button>
             </div>
@@ -411,6 +421,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
               {statusAtual !== "archived" && (
                 <button type="button" onClick={arquivar} disabled={busy} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/50 transition hover:text-white/80 disabled:opacity-50"><Archive className="h-3.5 w-3.5" /> Arquivar</button>
               )}
+              <button type="button" onClick={excluir} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/25 px-4 py-1.5 text-xs font-medium text-rose-300/80 transition hover:border-rose-400/50 hover:text-rose-300 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
             </div>
             <p className="mt-2 text-[11px] text-white/35">Publicar congela a versão mais recente (imutável) e a torna pública em /protocolos. Editar depois cria um novo rascunho; a versão pública só muda quando você republicar.</p>
           </div>

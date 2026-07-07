@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { upload } from "@vercel/blob/client";
-import { Plus, Loader2, FileText, Library, ClipboardPaste, Search, Check } from "lucide-react";
+import { Plus, Loader2, FileText, Library, ClipboardPaste, Search, Check, Sparkles, BookOpen } from "lucide-react";
 import { extrairTextoPdf } from "@/app/admin/referencias/actions";
-import { buscarNaBiblioteca, type BibliotecaHit } from "@/app/admin/editora/fontes-actions";
+import { buscarNaBiblioteca, buscarPorIA, type BibliotecaHit, type IaHit } from "@/app/admin/editora/fontes-actions";
 
 // Ingestão de FONTES em 3 modos: colar texto · enviar PDF (extrai o texto) · buscar na
 // biblioteca interna (kb_chunks). Em todos, o resultado é uma fonte {titulo,tipo,autor,ano,texto}
@@ -14,11 +14,12 @@ export type FonteInput = { titulo: string; tipo: string; autor?: string; ano?: n
 
 const inputCls = "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-accent/50";
 
-type Modo = "texto" | "pdf" | "biblioteca";
+type Modo = "texto" | "pdf" | "biblioteca" | "ia";
 const MODOS: { id: Modo; label: string; icon: typeof FileText }[] = [
   { id: "texto", label: "Colar texto", icon: ClipboardPaste },
   { id: "pdf", label: "Enviar PDF", icon: FileText },
   { id: "biblioteca", label: "Buscar na biblioteca", icon: Library },
+  { id: "ia", label: "Buscar por IA (PubMed)", icon: Sparkles },
 ];
 
 export default function FontesInput({
@@ -50,6 +51,14 @@ export default function FontesInput({
   const [hits, setHits] = useState<BibliotecaHit[]>([]);
   const [addedIdx, setAddedIdx] = useState<Set<number>>(new Set());
   const [addingIdx, setAddingIdx] = useState<number | null>(null);
+
+  // busca por IA (biblioteca interna + PubMed)
+  const [qi, setQi] = useState("");
+  const [iaBusy, setIaBusy] = useState(false);
+  const [iaHits, setIaHits] = useState<IaHit[]>([]);
+  const [iaMeta, setIaMeta] = useState<{ internos: number; pubmed: number } | null>(null);
+  const [iaAdded, setIaAdded] = useState<Set<number>>(new Set());
+  const [iaAdding, setIaAdding] = useState<number | null>(null);
 
   function limparMeta() { setTitulo(""); setAutor(""); setAno(""); setTexto(""); setPdfNome(""); }
 
@@ -97,6 +106,25 @@ export default function FontesInput({
       if (r.ok) setAddedIdx((prev) => new Set(prev).add(idx));
       else setErro(r.error ?? "Erro ao adicionar.");
       setAddingIdx(null);
+    });
+  }
+
+  function buscarIa() {
+    setErro(null); setIaBusy(true); setIaHits([]); setIaAdded(new Set()); setIaMeta(null);
+    startTransition(async () => {
+      const r = await buscarPorIA(qi);
+      if (r.ok) { setIaHits(r.data); setIaMeta({ internos: r.internos, pubmed: r.pubmed }); }
+      else setErro(r.error);
+      setIaBusy(false);
+    });
+  }
+  function addIaHit(h: IaHit, idx: number) {
+    setErro(null); setIaAdding(idx);
+    startTransition(async () => {
+      const r = await onAdd({ titulo: h.titulo, tipo: h.tipo === "pubmed" ? "artigo" : (h.tipo || "biblioteca"), autor: h.autor, ano: h.ano, texto: h.conteudo });
+      if (r.ok) setIaAdded((prev) => new Set(prev).add(idx));
+      else setErro(r.error ?? "Erro ao adicionar.");
+      setIaAdding(null);
     });
   }
 
@@ -184,6 +212,42 @@ export default function FontesInput({
             </ul>
           )}
           {!libBusy && hits.length === 0 && q && <p className="text-[11px] text-white/35">Sem resultados — tente outros termos.</p>}
+        </div>
+      )}
+
+      {modo === "ia" && (
+        <div className="space-y-2">
+          <p className="text-[11px] text-white/40">A IA busca na <strong className="text-white/60">biblioteca interna</strong> + <strong className="text-white/60">PubMed</strong> (artigos reais, com PMID). Escolha os que quer usar como fonte.</p>
+          <div className="flex gap-2">
+            <input className={inputCls} value={qi} onChange={(e) => setQi(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") buscarIa(); }} placeholder="Ex.: corticoide na SDRA moderada a grave" />
+            <button type="button" onClick={buscarIa} disabled={iaBusy || qi.trim().length < 4} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed">
+              {iaBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />} Buscar
+            </button>
+          </div>
+          {iaBusy && <p className="text-[11px] text-white/40">Buscando na biblioteca interna e no PubMed… (pode levar alguns segundos)</p>}
+          {iaMeta && <p className="text-[11px] text-white/40">{iaMeta.internos} da biblioteca · {iaMeta.pubmed} do PubMed</p>}
+          {iaHits.length > 0 && (
+            <ul className="space-y-1.5">
+              {iaHits.map((h, i) => {
+                const added = iaAdded.has(i);
+                const isPub = h.tipo === "pubmed";
+                return (
+                  <li key={i} className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-2.5">
+                    <span className={`mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[9px] font-bold uppercase ${isPub ? "border-sky-400/30 bg-sky-400/10 text-sky-300" : "border-teal-400/30 bg-teal-400/10 text-teal-300"}`}>{isPub ? <BookOpen className="h-2.5 w-2.5" /> : <Library className="h-2.5 w-2.5" />}{isPub ? "PubMed" : "Biblioteca"}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[12px] font-medium text-white/80">{h.titulo}{h.ano ? ` (${h.ano})` : ""}</p>
+                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-white/50">{h.conteudo}</p>
+                    </div>
+                    <button type="button" onClick={() => addIaHit(h, i)} disabled={added || iaAdding === i || busy}
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${added ? "border-accent/40 bg-accent/10 text-accent" : "border-white/15 text-white/70 hover:border-accent/40 hover:text-white"} disabled:opacity-60`}>
+                      {iaAdding === i ? <Loader2 className="h-3 w-3 animate-spin" /> : added ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />} {added ? "Adicionada" : "Adicionar"}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {!iaBusy && iaHits.length === 0 && iaMeta && <p className="text-[11px] text-white/35">Sem resultados.</p>}
         </div>
       )}
 

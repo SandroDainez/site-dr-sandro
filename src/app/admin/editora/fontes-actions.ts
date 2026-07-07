@@ -3,6 +3,7 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { searchInternalLibrary } from "@/lib/assistente/search-library";
+import { buscarEvidencias } from "@/lib/ai/retrieval";
 
 // Ações compartilhadas da ingestão de FONTES dos módulos de geração (Arquiteto, Editor
 // Científico/Premium, Aulas, Flashcards, Questões). A extração de PDF reusa extrairTextoPdf
@@ -31,6 +32,25 @@ export async function buscarNaBiblioteca(query: string): Promise<Result> {
         score: h.score,
       }));
     return { ok: true, data };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+// Busca por IA: biblioteca interna + PubMed (via a camada de retrieval, com cache). Cada
+// resultado (trecho interno ou abstract de artigo REAL, com PMID) pode virar fonte.
+export type IaHit = { conteudo: string; titulo: string; tipo: string; url: string | null; autor?: string; ano?: number | null };
+type IaResult = { ok: true; data: IaHit[]; internos: number; pubmed: number } | { ok: false; error: string };
+export async function buscarPorIA(tema: string): Promise<IaResult> {
+  try {
+    await requireAdmin();
+    const q = (tema || "").trim();
+    if (q.length < 4) return { ok: false, error: "Descreva o tema (mín. 4 caracteres)." };
+    const evid = await buscarEvidencias({ tema: q, incluirPubmed: true });
+    const data: IaHit[] = evid.sources.map((s) => ({
+      conteudo: s.texto, titulo: s.titulo, tipo: s.tipo, url: s.url ?? null, autor: s.autor, ano: s.ano ?? null,
+    }));
+    return { ok: true, data, internos: evid.internos, pubmed: evid.pubmed };
   } catch (e) {
     return { ok: false, error: String(e instanceof Error ? e.message : e) };
   }

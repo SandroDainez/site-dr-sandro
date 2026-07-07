@@ -7,7 +7,7 @@ import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import { questoesToSecoes } from "@/lib/editora/questao-estrutura";
 import type { Source, Issue } from "@/lib/ai/types";
-import { criarDoc, listarSources, adicionarSource, removerSource, gerar, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc } from "./actions";
+import { criarDoc, listarSources, adicionarSource, removerSource, gerar, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc } from "./actions";
 import FontesInput from "@/components/admin/FontesInput";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 
@@ -74,6 +74,16 @@ export default function CriadorQuestoes({ docsIniciais, modo }: { docsIniciais: 
   function publicar() { if (!doc) return; setError(null); startTransition(async () => { const r = await publicarDoc(doc.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(doc.id); } else setError(r.error); }); }
   function despublicar() { if (!doc) return; setError(null); startTransition(async () => { const r = await despublicarDoc(doc.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(doc.id); } else setError(r.error); }); }
   function arquivar() { if (!doc) return; setError(null); startTransition(async () => { const r = await arquivarDoc(doc.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(doc.id); } else setError(r.error); }); }
+  function excluir() {
+    if (!doc) return;
+    if (!window.confirm("Excluir este item? Esta ação não pode ser desfeita.")) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await excluirDoc(doc.id);
+      if (r.ok) { setDocs((prev) => prev.filter((d) => d.id !== doc.id)); setDoc(null); }
+      else setError(r.error);
+    });
+  }
   function criarNovo() {
     setError(null);
     startTransition(async () => {
@@ -200,7 +210,7 @@ export default function CriadorQuestoes({ docsIniciais, modo }: { docsIniciais: 
                 <label className={labelCls}>Nº</label>
                 <select className={inputCls + " sm:w-24"} value={quantidade} onChange={(e) => setQuantidade(parseInt(e.target.value))}>{QUANTIDADES_QUESTAO.map((q) => <option key={q} value={q}>{q}</option>)}</select>
               </div>
-              <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
+              <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:brightness-75">
                 {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <ListChecks className="h-4 w-4" />} Gerar {quantidade} questões
               </button>
             </div>
@@ -352,6 +362,7 @@ export default function CriadorQuestoes({ docsIniciais, modo }: { docsIniciais: 
               {statusAtual !== "archived" && (
                 <button type="button" onClick={arquivar} disabled={busy} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/50 transition hover:text-white/80 disabled:opacity-50"><Archive className="h-3.5 w-3.5" /> Arquivar</button>
               )}
+              <button type="button" onClick={excluir} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/25 px-4 py-1.5 text-xs font-medium text-rose-300/80 transition hover:border-rose-400/50 hover:text-rose-300 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
             </div>
             <p className="mt-2 text-[11px] text-white/35">Publicar congela a versão (imutável), mostra em /questoes e <strong className="text-white/50">alimenta o quiz</strong> (as questões entram no banco do /estudar). Despublicar/arquivar desativa essas questões no quiz.</p>
           </div>
