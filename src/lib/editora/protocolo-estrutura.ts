@@ -1,42 +1,87 @@
-// Estrutura fixa institucional do protocolo (24 seções) e o AGRUPAMENTO EM BLOCOS
-// para geração por partes (3-4 seções por chamada — evita truncamento nas seções
-// finais, justamente Doses e Referências). Ver docs/ARQUITETURA-IA.md.
+// Estrutura institucional do protocolo (médico) e o AGRUPAMENTO EM BLOCOS para geração
+// por partes (2-4 seções por chamada — evita truncamento nas seções finais, sobretudo
+// Doses e Referências). Ver docs/ARQUITETURA-IA.md.
+//
+// v2 (jul/2026): estrutura elevada ao padrão de protocolo institucional completo, após
+// benchmark com um protocolo-referência (Hipoglicemia MCP-EC-001). Só entrou o que agrega
+// para um documento MÉDICO — sem seções multiprofissionais (enfermagem/farmácia/fisio),
+// sem anexos, sem epidemiologia. Novidades: governança documental, fundamentos dedicados
+// (fisiopatologia/etiologia/fatores de risco/manifestações), prescrição médica modelo,
+// critérios de internação, segurança do paciente (alertas), erros frequentes, indicadores
+// de qualidade, resumo executivo e fundamentação científica.
 
 export const PROTOCOLO_SECOES: string[] = [
+  // Identidade e governança
   "Título",
+  "Controle do documento",
   "Objetivo",
-  "Quando utilizar",
+  "Abrangência",
+  // Fundamentos
   "Definições",
+  "Fisiopatologia",
+  "Etiologia",
+  "Fatores de risco",
+  // Reconhecimento e diagnóstico
+  "Manifestações clínicas",
   "Critérios diagnósticos",
-  "Avaliação inicial",
-  "Estabilização imediata",
-  "Estratificação de gravidade",
+  "Classificação e estratificação de gravidade",
   "Diagnóstico diferencial",
-  "Exames",
+  // Abordagem inicial
+  "Avaliação inicial (ABCDE)",
+  "Exames complementares",
+  "Estabilização imediata",
+  // Tratamento
   "Tratamento",
   "Doses e medicamentos",
-  "Monitorização",
-  "Reavaliação",
+  "Prescrição médica modelo",
+  // Seguimento e decisão de fluxo
+  "Monitorização e reavaliação",
+  "Critérios de internação",
   "Critérios de UTI",
   "Critérios de alta",
-  "Situações especiais",
-  "Populações especiais",
+  // Populações e desfechos
+  "Situações e populações especiais",
   "Complicações",
-  "Armadilhas clínicas",
-  "Pontos-chave",
+  // Segurança e qualidade
+  "Segurança do paciente",
+  "Erros frequentes",
+  "Armadilhas e pérolas clínicas",
+  "Indicadores de qualidade",
+  // Síntese e apoio à beira-leito
+  "Resumo executivo",
   "Fluxograma",
   "Checklist",
+  // Base científica
+  "Fundamentação científica",
   "Referências",
 ];
 
-// 6 blocos de 4 seções (3-4 por chamada, conforme exigido).
+// 10 blocos (2-4 seções). Doses ficam junto do Tratamento/Prescrição modelo; Referências
+// isoladas no último bloco (evita truncamento). A geração itera por índice de bloco.
 export const PROTOCOLO_BLOCOS: string[][] = [
-  ["Título", "Objetivo", "Quando utilizar", "Definições"],
-  ["Critérios diagnósticos", "Avaliação inicial", "Estabilização imediata", "Estratificação de gravidade"],
-  ["Diagnóstico diferencial", "Exames", "Tratamento", "Doses e medicamentos"],
-  ["Monitorização", "Reavaliação", "Critérios de UTI", "Critérios de alta"],
-  ["Situações especiais", "Populações especiais", "Complicações", "Armadilhas clínicas"],
-  ["Pontos-chave", "Fluxograma", "Checklist", "Referências"],
+  ["Título", "Controle do documento", "Objetivo", "Abrangência"],
+  ["Definições", "Fisiopatologia", "Etiologia", "Fatores de risco"],
+  ["Manifestações clínicas", "Critérios diagnósticos", "Classificação e estratificação de gravidade", "Diagnóstico diferencial"],
+  ["Avaliação inicial (ABCDE)", "Exames complementares", "Estabilização imediata"],
+  ["Tratamento", "Doses e medicamentos", "Prescrição médica modelo"],
+  ["Monitorização e reavaliação", "Critérios de internação", "Critérios de UTI", "Critérios de alta"],
+  ["Situações e populações especiais", "Complicações"],
+  ["Segurança do paciente", "Erros frequentes", "Armadilhas e pérolas clínicas", "Indicadores de qualidade"],
+  ["Resumo executivo", "Fluxograma", "Checklist"],
+  ["Fundamentação científica", "Referências"],
+];
+
+// Seções OPERACIONAIS/de síntese: não são afirmações clínicas primárias baseadas em fonte.
+// A IA as preenche com tipo "geral" (governança), sintetizando o que JÁ foi gerado e citado
+// nas seções clínicas — nunca fabricando fato, dose ou meta. Indicadores de qualidade são
+// metas SUGERIDAS/EDITÁVEIS (institucionais), não números de guideline.
+export const PROTOCOLO_SECOES_OPERACIONAIS: string[] = [
+  "Controle do documento",
+  "Prescrição médica modelo",
+  "Indicadores de qualidade",
+  "Resumo executivo",
+  "Fluxograma",
+  "Checklist",
 ];
 
 // Escolha de especialidade/tipo do módulo (mais granular que a coluna do banco).
@@ -57,6 +102,6 @@ export function mapEspecialidadeDB(e: string): "emergencias" | "ti" | "anestesio
   }
 }
 
-// Tipos de fonte aceitos na ingestão (piloto: só texto colado).
+// Tipos de fonte aceitos na ingestão.
 export const TIPOS_FONTE = ["guideline", "artigo", "livro", "consenso"] as const;
 export type TipoFonte = (typeof TIPOS_FONTE)[number];
