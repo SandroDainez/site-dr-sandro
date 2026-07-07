@@ -371,6 +371,29 @@ export async function excluirVersao(input: { protocolId: string; versionId: stri
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Imagem/infográfico do protocolo (coluna protocols.image_url) — aparece no card padrão.
+export async function getImagemProtocolo(protocolId: string): Promise<Result<string | null>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("protocols").select("image_url").eq("id", protocolId).maybeSingle();
+    if (error) throw error;
+    return { ok: true, data: (data?.image_url as string | null) ?? null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+export async function definirImagemProtocolo(protocolId: string, url: string | null): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { error } = await supabase.from("protocols").update({ image_url: url }).eq("id", protocolId);
+    if (error) throw error;
+    revalidatePath("/protocolos");
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 // Carrega o CONTEÚDO de uma versão salva (secoes + textoEditado + especialidade) para
 // reabrir no editor e editar. Editar + salvar cria uma nova versão (append-only).
 export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; secoes: SecaoGerada[]; textoEditado: Record<string, string> }>> {

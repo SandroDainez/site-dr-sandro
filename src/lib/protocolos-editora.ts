@@ -68,8 +68,8 @@ export async function getProtocolosPublicadosData(): Promise<ProtocoloData[]> {
   try {
     const supabase = createPublicClient(); // anon → RLS só devolve status='published'
     const { data: prots } = await supabase
-      .from("protocols").select("id,title,slug,specialty,areas,updated_at").eq("status", "published").order("updated_at", { ascending: false });
-    const lista = (prots as { id: string; title: string; slug: string; specialty: string; areas: string[] | null; updated_at: string }[]) ?? [];
+      .from("protocols").select("id,title,slug,specialty,areas,updated_at,image_url").eq("status", "published").order("updated_at", { ascending: false });
+    const lista = (prots as { id: string; title: string; slug: string; specialty: string; areas: string[] | null; updated_at: string; image_url: string | null }[]) ?? [];
     if (lista.length === 0) return [];
 
     // Versões publicadas dos protocolos, numa query só.
@@ -92,7 +92,7 @@ export async function getProtocolosPublicadosData(): Promise<ProtocoloData[]> {
         descricao: objetivo,
         conteudo: conteudoParaHtml(conteudo),
         area,
-        imageUrl: "",
+        imageUrl: p.image_url ?? "",
         imageCaption: "",
         arquivoUrl: "",
         arquivoLabel: "",
