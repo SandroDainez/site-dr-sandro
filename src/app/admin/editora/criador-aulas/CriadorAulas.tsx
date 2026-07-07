@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, GraduationCap, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu } from "lucide-react";
+import AreasEditora from "@/components/admin/AreasEditora";
 import { AULA_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE, PUBLICOS_ALVO } from "@/lib/editora/aula-estrutura";
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
@@ -402,6 +403,8 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
                 ))}
               </div>
             )}
+
+            <AreasEditora tabela="aula_docs" docId={doc.id} />
 
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={publicar} disabled={busy || versoes.length === 0} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
