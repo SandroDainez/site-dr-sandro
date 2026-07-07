@@ -53,7 +53,7 @@ export async function gerarQuestoesIA(args: {
   const prompt = buildCriadorQuestoesPrompt(args);
   try {
     const r = await client.chat.completions.create({
-      model, messages: [{ role: "user", content: prompt }], temperature: 0.3, max_tokens: 4000, response_format: { type: "json_object" },
+      model, messages: [{ role: "user", content: prompt }], temperature: 0.3, max_tokens: 8000, response_format: { type: "json_object" },
     });
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
     return { questoes: normQuestoes(parsed), usage: usageDe(r.usage), provider: gen, model };
@@ -74,7 +74,7 @@ export async function revisarQuestoesIA(args: {
   const prompt = buildRevisaoQuestoesPrompt(args);
   try {
     const r = await client.chat.completions.create({
-      model, messages: [{ role: "user", content: prompt }], temperature: 0, max_tokens: 4000, response_format: { type: "json_object" },
+      model, messages: [{ role: "user", content: prompt }], temperature: 0, max_tokens: 8000, response_format: { type: "json_object" },
     });
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
     const issues: Issue[] = Array.isArray(parsed.issues) ? parsed.issues : [];

@@ -111,7 +111,8 @@ Retorne APENAS JSON: {"titulo":"...","resumo":"2-3 frases de resumo","corpo":"<h
 
     const r = await chatJSON<{ titulo?: string; resumo?: string; corpo?: string }>(prompt, {
       temperature: 0.4,
-      maxTokens: 2600,
+      // Corpo de 4-8 parágrafos em HTML: 2600 truncava artigos maiores → JSON incompleto.
+      maxTokens: 6000,
     });
     return { ok: true, data: { titulo: r.titulo ?? "", resumo: r.resumo ?? "", corpo: r.corpo ?? "" } };
   } catch (e) {

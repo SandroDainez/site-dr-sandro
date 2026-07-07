@@ -17,7 +17,10 @@ export async function gerarSecoes(client: OpenAI, model: string, providerName: s
       model,
       messages: [{ role: "user", content: prompt }],
       temperature: input.temperature ?? 0.2,
-      max_tokens: input.maxTokens ?? 3500,
+      // Cap elevado: no protocolo institucional de 33 seções, blocos densos (Tratamento +
+      // Doses + Prescrição modelo) estouravam 3500 tokens → JSON truncado → parse quebra.
+      // DeepSeek/GPT-4o aceitam bem acima disto; o modelo só usa o que precisa.
+      max_tokens: input.maxTokens ?? 8000,
       response_format: { type: "json_object" },
     });
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
@@ -37,7 +40,8 @@ export async function revisarProtocolo(client: OpenAI, model: string, providerNa
       model,
       messages: [{ role: "user", content: prompt }],
       temperature: 0,
-      max_tokens: 4000,
+      // Protocolo de 33 seções: a revisão recebe e devolve o documento completo.
+      max_tokens: 8000,
       response_format: { type: "json_object" },
     });
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
