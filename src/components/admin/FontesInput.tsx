@@ -14,6 +14,19 @@ export type FonteInput = { titulo: string; tipo: string; autor?: string; ano?: n
 
 const inputCls = "w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white outline-none focus:border-accent/50";
 
+// Agrupa os trechos por FONTE (livro/diretriz), preservando o índice original de cada
+// trecho — a busca costuma retornar vários trechos do mesmo livro, e mostrar o título uma
+// vez (com os trechos embaixo) evita a impressão de "repetição".
+function agruparPorFonte<T extends { titulo: string }>(hits: T[]): [string, { h: T; idx: number }[]][] {
+  const grupos = new Map<string, { h: T; idx: number }[]>();
+  hits.forEach((h, i) => {
+    const k = h.titulo || "Biblioteca";
+    if (!grupos.has(k)) grupos.set(k, []);
+    grupos.get(k)!.push({ h, idx: i });
+  });
+  return [...grupos.entries()];
+}
+
 type Modo = "texto" | "pdf" | "biblioteca" | "ia";
 const MODOS: { id: Modo; label: string; icon: typeof FileText }[] = [
   { id: "texto", label: "Colar texto", icon: ClipboardPaste },
@@ -193,23 +206,33 @@ export default function FontesInput({
             </button>
           </div>
           {hits.length > 0 && (
-            <ul className="space-y-1.5">
-              {hits.map((h, i) => {
-                const added = addedIdx.has(i);
-                return (
-                  <li key={i} className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-2.5">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[12px] font-medium text-white/80">{h.titulo} <span className="text-white/30">· {Math.round(h.score * 100)}%</span></p>
-                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-white/50">{h.conteudo}</p>
-                    </div>
-                    <button type="button" onClick={() => addHit(h, i)} disabled={added || addingIdx === i || busy}
-                      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${added ? "border-accent/40 bg-accent/10 text-accent" : "border-white/15 text-white/70 hover:border-accent/40 hover:text-white"} disabled:opacity-60`}>
-                      {addingIdx === i ? <Loader2 className="h-3 w-3 animate-spin" /> : added ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />} {added ? "Adicionada" : "Adicionar"}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="space-y-3">
+              {agruparPorFonte(hits).map(([fonte, itens]) => (
+                <div key={fonte}>
+                  <p className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-white/70">
+                    <BookOpen className="h-3 w-3 shrink-0 text-white/40" /> <span className="truncate">{fonte}</span>
+                    <span className="shrink-0 text-white/30">· {itens.length} trecho{itens.length > 1 ? "s" : ""}</span>
+                  </p>
+                  <ul className="space-y-1.5">
+                    {itens.map(({ h, idx }) => {
+                      const added = addedIdx.has(idx);
+                      return (
+                        <li key={idx} className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-2.5">
+                          <div className="min-w-0 flex-1">
+                            <p className="line-clamp-2 text-[11px] leading-snug text-white/60">{h.conteudo}</p>
+                            <p className="mt-0.5 text-[10px] text-white/30">relevância {Math.round(h.score * 100)}%</p>
+                          </div>
+                          <button type="button" onClick={() => addHit(h, idx)} disabled={added || addingIdx === idx || busy}
+                            className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${added ? "border-accent/40 bg-accent/10 text-accent" : "border-white/15 text-white/70 hover:border-accent/40 hover:text-white"} disabled:opacity-60`}>
+                            {addingIdx === idx ? <Loader2 className="h-3 w-3 animate-spin" /> : added ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />} {added ? "Adicionada" : "Adicionar"}
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
           )}
           {!libBusy && hits.length === 0 && q && <p className="text-[11px] text-white/35">Sem resultados — tente outros termos.</p>}
         </div>
