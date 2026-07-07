@@ -31,7 +31,9 @@ function textoSecao(secao: string, conteudo: ProtocoloConteudo): string {
   if (conteudo.textoEditado && conteudo.textoEditado[secao]) return conteudo.textoEditado[secao];
   const sec = conteudo.secoes?.find((s) => s.secao === secao);
   if (!sec) return "";
-  return sec.afirmacoes.map((a) => (a.source_id ? `${a.texto} [${a.source_id}]` : `${a.texto}  ⚠ sem fonte`)).join("\n");
+  // Documento publicado: texto LIMPO, sem os marcadores de citação crus. As fontes aparecem
+  // na seção "Referências"; a rastreabilidade por afirmação fica nos dados (não no texto).
+  return sec.afirmacoes.map((a) => a.texto).join("\n");
 }
 
 export default async function ProtocoloPublicoPage({ params }: { params: Promise<{ slug: string }> }) {

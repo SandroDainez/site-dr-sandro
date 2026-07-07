@@ -33,7 +33,7 @@ const SEV_CLS: Record<string, string> = {
 };
 
 function renderSecaoTexto(sec: SecaoGerada): string {
-  return sec.afirmacoes.map((a) => (a.source_id ? `${a.texto} [${a.source_id}]` : `${a.texto}  ⚠ sem fonte`)).join("\n");
+  return sec.afirmacoes.map((a) => a.texto).join("\n");
 }
 
 export default function PesquisadorCientifico({ docsIniciais, modo }: { docsIniciais: Doc[]; modo: "mock" | "real" }) {

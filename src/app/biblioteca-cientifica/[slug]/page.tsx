@@ -30,7 +30,7 @@ function textoSecao(secao: string, conteudo: CientificoConteudo): string {
   if (conteudo.textoEditado && conteudo.textoEditado[secao]) return conteudo.textoEditado[secao];
   const sec = conteudo.secoes?.find((s) => s.secao === secao);
   if (!sec) return "";
-  return sec.afirmacoes.map((a) => (a.source_id ? `${a.texto} [${a.source_id}]` : `${a.texto}  ⚠ sem fonte`)).join("\n");
+  return sec.afirmacoes.map((a) => a.texto).join("\n");
 }
 
 export default async function CientificoPublicoPage({ params }: { params: Promise<{ slug: string }> }) {

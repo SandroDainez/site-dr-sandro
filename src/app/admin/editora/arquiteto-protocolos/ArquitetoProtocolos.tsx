@@ -28,9 +28,10 @@ const labelCls = "mb-1 block text-xs uppercase tracking-[0.1em] text-white/40";
 const card = "rounded-2xl border border-white/10 bg-white/[0.03] p-5";
 
 function renderSecaoTexto(sec: SecaoGerada): string {
-  return sec.afirmacoes
-    .map((a) => (a.source_id ? `${a.texto} [${a.source_id}]` : `${a.texto}  ⚠ sem fonte`))
-    .join("\n");
+  // Texto LIMPO (sem o [source_id] cru nem "⚠ sem fonte") — é o que vai pro editor e, ao
+  // salvar, pro documento publicado. A rastreabilidade da citação continua nos dados
+  // (afirmacoes[].source_id) e a validação/avisos aparecem à parte, fora do texto.
+  return sec.afirmacoes.map((a) => a.texto).join("\n");
 }
 
 type RevisaoUI = { issues: Issue[]; corrigido: SecaoGerada[]; usage: { tokensIn: number; tokensOut: number }; provider: string; model: string };

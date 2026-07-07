@@ -34,6 +34,6 @@ export function questoesToSecoes(qs: QuestaoGerada[]): SecaoGerada[] {
 // Renderiza a justificativa como texto (com marcadores de citação / sem fonte).
 export function justificativaTexto(q: QuestaoGerada): string {
   return (q.justificativa ?? [])
-    .map((a) => (a.source_id ? `${a.texto} [${a.source_id}]` : `${a.texto}  ⚠ sem fonte`))
+    .map((a) => a.texto)
     .join(" ");
 }

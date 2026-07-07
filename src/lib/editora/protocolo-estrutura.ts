@@ -56,17 +56,23 @@ export const PROTOCOLO_SECOES: string[] = [
   "Referências",
 ];
 
-// 10 blocos (2-4 seções). Doses ficam junto do Tratamento/Prescrição modelo; Referências
-// isoladas no último bloco (evita truncamento). A geração itera por índice de bloco.
+// 14 blocos pequenos (1-4 seções). Com a diretriz de COMPLETUDE (seções exaustivas), o
+// DeepSeek satura ~8192 tokens de saída; blocos densos (Tratamento, Doses, Fisiopatologia)
+// ficam sozinhos ou pareados com uma seção leve pra caber. Seções curtas/operacionais podem
+// ir 3-4 juntas. A geração itera por índice de bloco.
 export const PROTOCOLO_BLOCOS: string[][] = [
   ["Título", "Controle do documento", "Objetivo", "Abrangência"],
-  ["Definições", "Fisiopatologia", "Etiologia", "Fatores de risco"],
-  ["Manifestações clínicas", "Critérios diagnósticos", "Classificação e estratificação de gravidade", "Diagnóstico diferencial"],
+  ["Definições", "Fisiopatologia"],
+  ["Etiologia", "Fatores de risco"],
+  ["Manifestações clínicas", "Critérios diagnósticos"],
+  ["Classificação e estratificação de gravidade", "Diagnóstico diferencial"],
   ["Avaliação inicial (ABCDE)", "Exames complementares", "Estabilização imediata"],
-  ["Tratamento", "Doses e medicamentos", "Prescrição médica modelo"],
+  ["Tratamento"],
+  ["Doses e medicamentos", "Prescrição médica modelo"],
   ["Monitorização e reavaliação", "Critérios de internação", "Critérios de UTI", "Critérios de alta"],
   ["Situações e populações especiais", "Complicações"],
-  ["Segurança do paciente", "Erros frequentes", "Armadilhas e pérolas clínicas", "Indicadores de qualidade"],
+  ["Segurança do paciente", "Erros frequentes"],
+  ["Armadilhas e pérolas clínicas", "Indicadores de qualidade"],
   ["Resumo executivo", "Fluxograma", "Checklist"],
   ["Fundamentação científica", "Referências"],
 ];
