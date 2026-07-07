@@ -16,12 +16,13 @@ import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import ProtocolosGrid from "./ProtocolosGrid";
-import ProtocolosEditoraGrid from "./ProtocolosEditoraGrid";
-import { getProtocolosPublicados } from "@/lib/protocolos-editora";
+import { getProtocolosPublicadosData } from "@/lib/protocolos-editora";
 import Link from "next/link";
 
 export default async function ProtocolosPage() {
-  const [protocolos, header, navItems, typo, navStyle, st, cardCols, protocolosEditora] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getCardCols(), getProtocolosPublicados()]);
+  const [protocolosBlob, header, navItems, typo, navStyle, st, cardCols, protocolosEditora] = await Promise.all([getProtocolos(), getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getCardCols(), getProtocolosPublicadosData()]);
+  // Lista ÚNICA: protocolos da Editora + "de blob", todos com o mesmo card padrão.
+  const protocolos = [...protocolosEditora, ...protocolosBlob];
 
   return (
     <div className="min-h-screen bg-[#0f1420] text-white">
@@ -55,17 +56,9 @@ export default async function ProtocolosPage() {
           <p className="mt-3 text-base text-white/50">{secText(st, "page_protocolos", "desc")}</p>
         </div>
 
-        {/* Protocolos da Editora (documentos institucionais) — lista filtrável por área. */}
-        {protocolosEditora.length > 0 && <ProtocolosEditoraGrid protocolos={protocolosEditora} />}
-
-        {/* Protocolos "de blob" (legado) — só aparecem se existirem, pra não confundir. */}
-        {protocolos.length > 0 && (
-          <div className="mt-14">
-            <ProtocolosGrid protocolos={protocolos} cols={cardCols["protocolos"]} />
-          </div>
-        )}
-
-        {protocolosEditora.length === 0 && protocolos.length === 0 && (
+        {protocolos.length > 0 ? (
+          <ProtocolosGrid protocolos={protocolos} cols={cardCols["protocolos"]} />
+        ) : (
           <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-16 text-center">
             <p className="text-sm text-white/50">Protocolos em breve.</p>
           </div>

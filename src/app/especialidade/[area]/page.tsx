@@ -20,6 +20,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { ArrowRight, ClipboardList, FileText, PlayCircle, GraduationCap, Newspaper, Stethoscope, BookOpen } from "lucide-react";
 import { getEditoraPorArea, EDITORA_GRUPOS_ORDEM } from "@/lib/editora-hub";
+import { getProtocolosPublicadosData } from "@/lib/protocolos-editora";
 import ProtocoloCard from "@/components/ProtocoloCard";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
@@ -65,10 +66,12 @@ export default async function EspecialidadePage({ params }: { params: Promise<{ 
   const a = area as Area;
   const cfg = AREAS[a];
 
-  const [protocolos, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st, ui, cardCols, especialidades] = await Promise.all([
+  const [protocolosBlob, videoaulas, cursos, atualizacoes, acervo, procedimentos, header, navItems, typo, navStyle, st, ui, cardCols, especialidades, protocolosEditoraData] = await Promise.all([
     getProtocolos(), getVideoaulas(), getCursos(), getAtualizacoes(), getAcervo(), getProcedimentos(),
-    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(), getCardCols(), getEspecialidades(),
+    getHeader(), getNavItems(), getTypography(), getNavStyle(), getSectionTexts(), getUiTexts(), getCardCols(), getEspecialidades(), getProtocolosPublicadosData(),
   ]);
+  // Protocolos da Editora entram na MESMA seção Protocolos do hub (card padrão).
+  const protocolos = [...protocolosEditoraData, ...protocolosBlob];
   const hubKey = `hub_${a}`;
   // Logo enviado no admin por área (casa pela "área") — usado no cabeçalho e nos atalhos.
   const logoByArea: Record<string, string | undefined> = {};

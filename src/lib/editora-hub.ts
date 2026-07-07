@@ -27,7 +27,8 @@ type Fonte = {
 };
 
 const FONTES: Fonte[] = [
-  { tabela: "protocols",            grupo: "Protocolos",          tipoLabel: "Protocolo",             base: "/protocolos" },
+  // NOTA: `protocols` NÃO entra aqui — os protocolos publicados aparecem na seção "Protocolos"
+  // principal do hub (card padrão, via getProtocolosPublicadosData). Evita duplicação.
   { tabela: "protocol_update_docs", grupo: "Protocolos",          tipoLabel: "Atualização de protocolo", base: "/atualizacoes-protocolos" },
   { tabela: "aula_docs",            grupo: "Aulas",               tipoLabel: "Aula",                  base: "/aulas" },
   { tabela: "sci_docs",             grupo: "Textos científicos",  tipoLabel: "Texto científico",      base: "/biblioteca-cientifica" },
