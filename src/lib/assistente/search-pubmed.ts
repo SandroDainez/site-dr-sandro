@@ -16,6 +16,14 @@ export type PubmedHit = {
 
 const apiKeyParam = () => (process.env.PUBMED_API_KEY ? `&api_key=${process.env.PUBMED_API_KEY}` : "");
 
+// Shape parcial de um registro de esummary do PubMed (só os campos que lemos).
+type PubmedSummary = {
+  title?: string;
+  source?: string;
+  pubdate?: string;
+  authors?: { name?: string }[];
+};
+
 // Pergunta em PT → termo de busca enxuto em inglês (o recall do PubMed cai muito
 // em português). Falha → usa a própria pergunta. gpt-4o-mini para custo baixo.
 export async function buildPubmedQuery(openai: OpenAI, perguntaPT: string): Promise<string> {
@@ -49,7 +57,7 @@ async function esearch(term: string, comFiltro: boolean): Promise<string[]> {
   return (d.esearchresult?.idlist ?? []) as string[];
 }
 
-async function esummary(ids: string[]): Promise<Record<string, any>> {
+async function esummary(ids: string[]): Promise<Record<string, PubmedSummary>> {
   const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&id=${ids.join(",")}&retmode=json${apiKeyParam()}`;
   const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
   if (!r.ok) return {};
@@ -78,8 +86,8 @@ async function efetchAbstracts(ids: string[]): Promise<Record<string, string>> {
   }
 }
 
-function autoresDe(a: any): string {
-  const nomes: string[] = Array.isArray(a?.authors) ? a.authors.map((x: any) => x?.name).filter(Boolean) : [];
+function autoresDe(a: PubmedSummary | undefined): string {
+  const nomes: string[] = Array.isArray(a?.authors) ? a.authors.map((x) => x?.name).filter((n): n is string => Boolean(n)) : [];
   if (nomes.length === 0) return "";
   return nomes.length <= 3 ? nomes.join(", ") : `${nomes.slice(0, 3).join(", ")} et al.`;
 }

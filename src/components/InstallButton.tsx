@@ -5,13 +5,19 @@ import { Download } from "lucide-react";
 
 // Botão "Instalar app" — aparece só quando o navegador permite instalar (Android/Chrome/Edge).
 // No iPhone (Safari) a instalação é via Compartilhar → "Adicionar à Tela de Início".
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => void;
+  userChoice: Promise<{ outcome: string; platform: string }>;
+}
+
 export default function InstallButton() {
-  const [evt, setEvt] = useState<any>(null);
+  const [evt, setEvt] = useState<BeforeInstallPromptEvent | null>(null);
   const [oculto, setOculto] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (window.matchMedia?.("(display-mode: standalone)").matches) { setOculto(true); return; }
-    const onPrompt = (e: any) => { e.preventDefault(); setEvt(e); };
+    const onPrompt = (e: Event) => { e.preventDefault(); setEvt(e as BeforeInstallPromptEvent); };
     const onInstalled = () => setOculto(true);
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);

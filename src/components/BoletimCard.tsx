@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
-import UpdateContent from "./UpdateContent";
+import UpdateContent, { type UpdateContentData } from "./UpdateContent";
 import { dataCurta } from "@/lib/format-date";
+
+export interface BoletimUpdate extends UpdateContentData {
+  id?: string | number;
+  especialidade?: string;
+  titulo?: string;
+  semana_referencia?: string;
+  data_publicacao?: string;
+}
 
 const ESP_LABEL: Record<string, string> = {
   anestesiologia: "Anestesiologia",
@@ -13,7 +21,7 @@ const ESP_LABEL: Record<string, string> = {
 
 // Card (vertical, na grade — mesmo padrão dos demais cards do site) de um boletim
 // clínico da IA (medical_updates). Expande no local para mostrar o conteúdo completo.
-export default function BoletimCard({ update, manual = false, logo }: { update: any; manual?: boolean; logo?: { logoUrl?: string; emoji?: string } }) {
+export default function BoletimCard({ update, manual = false, logo }: { update: BoletimUpdate; manual?: boolean; logo?: { logoUrl?: string; emoji?: string } }) {
   const [open, setOpen] = useState(false);
   const data = dataCurta(update.data_publicacao);
 
@@ -38,7 +46,7 @@ export default function BoletimCard({ update, manual = false, logo }: { update: 
 
       {/* Metadados */}
       <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[11px] text-white/45">
-        <span>{ESP_LABEL[update.especialidade] ?? update.especialidade}</span>
+        <span>{ESP_LABEL[update.especialidade ?? ""] ?? update.especialidade}</span>
         {update.semana_referencia && <span>· {update.semana_referencia}</span>}
         {data && <span>· {data}</span>}
       </div>

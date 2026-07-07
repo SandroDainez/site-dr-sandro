@@ -52,6 +52,7 @@ export function UpdateCard({ item }: { item: AtualizacaoData }) {
   useEffect(() => {
     const id = decodeURIComponent(window.location.hash.replace("#", ""));
     if (id && id === item.id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpanded(true);
       setTimeout(() => {
         document.getElementById(`atualizacao-${item.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -136,10 +137,8 @@ export function UpdateCard({ item }: { item: AtualizacaoData }) {
 
 function SectionHeader({
   area,
-  count,
 }: {
   area: AtualizacaoData["area"];
-  count: number;
 }) {
   const cfg = areaConfig[area];
   const labels: Record<typeof area, string> = {
@@ -218,7 +217,7 @@ export default function AtualizacoesGrid({ atualizacoes, initialArea }: Props) {
         {areasToShow.map((area) => (
           <section key={area}>
             <div className="mb-3">
-              <SectionHeader area={area} count={grouped[area].length} />
+              <SectionHeader area={area} />
             </div>
             <div className="flex flex-col gap-4">
               {grouped[area].map((item) => (

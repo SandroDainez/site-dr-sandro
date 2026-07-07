@@ -14,7 +14,8 @@ const AREAS = [
   { value: "emergencias", label: "🚑 Emergências" },
 ];
 
-function fmt(iso: string): string {
+function fmt(iso: string | null | undefined): string {
+  if (!iso) return "";
   try {
     const d = new Date(iso);
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
@@ -23,12 +24,24 @@ function fmt(iso: string): string {
   }
 }
 
+export type StatusEntry = { semana: string | null; data: string | null; topicos: number; fontes: number } | null;
+export type Evento = {
+  id: string;
+  titulo?: string;
+  url_oficial?: string;
+  data_inicio?: string;
+  cidade?: string;
+  local_nome?: string;
+  pais?: string;
+  organizador?: string;
+  ativo?: boolean;
+};
 type Props = {
   config: { supabase: boolean; openai: boolean; service: boolean };
-  status: Record<string, any>;
+  status: Record<string, StatusEntry>;
   labels: Record<string, string>;
   especialidades: string[];
-  eventos: any[];
+  eventos: Evento[];
 };
 
 export default function AutoPanel({ config, status, labels, especialidades, eventos }: Props) {

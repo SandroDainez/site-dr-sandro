@@ -34,7 +34,7 @@ export function createPublicClient() {
 
 // Busca os boletins clínicos da IA (medical_updates). Opcionalmente por especialidade
 // (valor do agente: anestesiologia | terapia_intensiva | emergencias). Vazio se sem config.
-export async function fetchMedicalUpdates(especialidade?: string): Promise<any[]> {
+export async function fetchMedicalUpdates(especialidade?: string): Promise<Record<string, unknown>[]> {
   if (!supabaseConfigured()) return [];
   try {
     const supabase = createPublicClient();

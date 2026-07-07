@@ -475,17 +475,17 @@ Retorne APENAS JSON:
       response_format: { type: "json_object" },
     });
     const data = JSON.parse(r.choices[0].message.content ?? "{}");
-    const arr = Array.isArray(data.questoes) ? data.questoes : [];
-    const questoes = arr.map((q: any) => ({
+    const arr: Record<string, unknown>[] = Array.isArray(data.questoes) ? data.questoes : [];
+    const questoes = arr.map((q) => ({
       enunciado: String(q.enunciado ?? "").trim(),
       opcoes: (Array.isArray(q.opcoes) ? q.opcoes : [])
         // remove SÓ rótulos de enumeração reais ("A)", "1.", "(A)") — exige terminador )/. + espaço.
         // NÃO mexe em valores que começam com número (ex.: "0,3 mg/kg", "2 mg/kg").
-        .map((o: any) => String(o).replace(/^\s*\(?[A-Da-d0-9]{1,2}\)?[).\-]\s+/, "").trim())
+        .map((o: unknown) => String(o).replace(/^\s*\(?[A-Da-d0-9]{1,2}\)?[).\-]\s+/, "").trim())
         .filter(Boolean),
-      correta: Number.isInteger(q.correta) ? q.correta : 0,
+      correta: Number.isInteger(q.correta) ? (q.correta as number) : 0,
       justificativa: q.justificativa ? String(q.justificativa).trim() : "",
-    })).filter((q: any) => q.enunciado && q.opcoes.length >= 2 && q.correta >= 0 && q.correta < q.opcoes.length);
+    })).filter((q) => q.enunciado && q.opcoes.length >= 2 && q.correta >= 0 && q.correta < q.opcoes.length);
     if (questoes.length === 0) return { ok: false, error: "A IA não retornou questões válidas. Tente novamente." };
     return { ok: true, questoes };
   } catch (e) {

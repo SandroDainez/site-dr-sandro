@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createPublicClient, supabaseConfigured, serviceConfigured } from "@/lib/supabase/server";
 import { ESPECIALIDADE_LABELS } from "@/lib/agents/utils";
 import type { Especialidade } from "@/types/medical";
-import AutoPanel from "./AutoPanel";
+import AutoPanel, { type StatusEntry, type Evento } from "./AutoPanel";
 
 const ESPECIALIDADES: Especialidade[] = ["anestesiologia", "terapia_intensiva", "emergencias"];
 
@@ -14,8 +14,8 @@ export default async function ConteudoAutomaticoPage() {
   const openaiOk = !!process.env.OPENAI_API_KEY;
   const serviceOk = serviceConfigured();
 
-  const status: Record<string, any> = {};
-  let eventos: any[] = [];
+  const status: Record<string, StatusEntry> = {};
+  let eventos: Evento[] = [];
 
   if (configured) {
     try {

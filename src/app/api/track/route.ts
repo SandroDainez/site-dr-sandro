@@ -62,7 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Agregados detalhados: página, origem e dispositivo
     try {
-      let body: any = {};
+      let body: { path?: unknown; ref?: unknown } = {};
       try { body = await req.json(); } catch {}
       const detalhe = await getAnalyticsDetail();
       incr(detalhe.paths, rotuloPath(String(body.path || "/")));

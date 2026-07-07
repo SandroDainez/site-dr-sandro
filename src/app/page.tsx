@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import {
   ArrowRight,
   AudioLines,
@@ -511,12 +512,12 @@ export default async function Home() {
                   </h2>
                 </div>
                 {hasContent && (
-                  <a
+                  <Link
                     href="/protocolos"
                     className="group hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
                   >
                     {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
+                  </Link>
                 )}
               </div>
 
@@ -530,12 +531,12 @@ export default async function Home() {
                     ))}
                   </div>
 
-                  <a
+                  <Link
                     href="/protocolos"
                     className="mt-8 mx-auto flex w-fit items-center justify-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
                   >
                     {uiText(ui, "verMais")} <ArrowRight className="h-3.5 w-3.5" />
-                  </a>
+                  </Link>
                 </>
               ) : (
                 <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-12 text-center">

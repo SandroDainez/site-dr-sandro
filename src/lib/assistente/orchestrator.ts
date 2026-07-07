@@ -12,7 +12,7 @@ export type AssistResult = {
   semFonte: boolean;
 };
 
-type SupabaseLike = { rpc: (fn: string, args: Record<string, unknown>) => any };
+type SupabaseLike = { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown[] | null }> };
 
 export const RECUSA_FORA_ESCOPO =
   "Sou um assistente especializado em Anestesiologia, Medicina Intensiva e Medicina de Emergência. Posso ajudar com dúvidas clínicas, farmacologia, ventilação, protocolos e o conteúdo da plataforma — mas não respondo assuntos fora da área médica.";
@@ -58,7 +58,7 @@ async function planejarBusca(openai: OpenAI, pergunta: string): Promise<string[]
       }],
     });
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
-    const consultas: string[] = Array.isArray(parsed.consultas) ? parsed.consultas.filter((q: any) => typeof q === "string" && q.trim()).slice(0, 6) : [];
+    const consultas: string[] = Array.isArray(parsed.consultas) ? parsed.consultas.filter((q: unknown): q is string => typeof q === "string" && q.trim().length > 0).slice(0, 6) : [];
     // sempre inclui a pergunta original como uma das consultas
     return [pergunta, ...consultas.filter((q) => q.toLowerCase() !== pergunta.toLowerCase())];
   } catch {

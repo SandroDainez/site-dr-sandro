@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save, Plus, Trash2, Sparkles, Pencil, X, Eye, EyeOff } from "lucide-react";
 import { salvarQuestao, excluirQuestao, alternarAtivo, gerarQuestoesIA } from "./actions";
 
-type Q = { id?: string; enunciado: string; opcoes: string[]; correta: number; explicacao?: string; area?: string; tema?: string; nivel?: string; ativo?: boolean };
+export type Q = { id?: string; enunciado: string; opcoes: string[]; correta: number; explicacao?: string; area?: string; tema?: string; nivel?: string; ativo?: boolean };
 const vazia: Q = { enunciado: "", opcoes: ["", "", "", ""], correta: 0, explicacao: "", area: "", tema: "", nivel: "", ativo: true };
 const inputCls = "w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50";
 const labelCls = "mb-1 block text-xs uppercase tracking-[0.1em] text-white/45";
@@ -20,7 +20,7 @@ export default function BancoEditor({ inicial }: { inicial: Q[] }) {
   // gerador IA
   const [tema, setTema] = useState(""); const [areaIA, setAreaIA] = useState("anestesiologia"); const [qtd, setQtd] = useState(5);
   const [gerando, setGerando] = useState(false);
-  const set = (k: keyof Q, v: any) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: keyof Q, v: Q[keyof Q]) => setForm((f) => ({ ...f, [k]: v }));
 
   function salvar() {
     setErr(null); setMsg(null);
@@ -35,7 +35,7 @@ export default function BancoEditor({ inicial }: { inicial: Q[] }) {
     setErr(null); setMsg(null); setGerando(true);
     gerarQuestoesIA(tema, areaIA, qtd).then((r) => {
       setGerando(false);
-      if (r.ok) { setMsg(`${r.data?.criadas ?? 0} questões geradas como RASCUNHO — revise e ative abaixo.`); setTema(""); router.refresh(); }
+      if (r.ok) { setMsg(`${(r.data as { criadas?: number } | undefined)?.criadas ?? 0} questões geradas como RASCUNHO — revise e ative abaixo.`); setTema(""); router.refresh(); }
       else setErr(r.error ?? "Falha ao gerar.");
     });
   }

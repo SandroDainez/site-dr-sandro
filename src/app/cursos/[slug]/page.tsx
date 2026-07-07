@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getCurso, getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle, getUiTexts,
@@ -63,7 +64,7 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
         supabase.from("course_progress").select("aula_id").eq("user_id", user.id).eq("curso_id", curso.id),
         supabase.from("quiz_attempts").select("id").eq("user_id", user.id).eq("curso_id", curso.id).eq("aprovado", true).limit(1),
       ]);
-      concluidas = (prog ?? []).map((r: any) => r.aula_id);
+      concluidas = (prog ?? []).map((r: { aula_id: string }) => r.aula_id);
       quizAprovado = (ap ?? []).length > 0;
     } catch { concluidas = []; }
   }
@@ -76,21 +77,21 @@ export default async function CursoDetailPage({ params }: { params: Promise<{ sl
       <style dangerouslySetInnerHTML={{ __html: buildTypographyCss(typo) }} />
       <header data-typo="header" className="sticky top-0 z-50 border-b border-white/10 bg-[#0f1420]/80 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <SiteLogo header={header} variant="sm" />
             <div>
               {header.name && <p className="text-2xl font-bold tracking-tight text-white">{header.name}</p>}
               {headerSubtitleLines(header)[0] && <p className="text-xs font-semibold text-accent leading-tight">{headerSubtitleLines(header)[0]}</p>}
             </div>
-          </a>
+          </Link>
           <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/cursos" /><AssistenteButton /><SearchButton /><AuthButton /></div>
           <MobileNav items={navItems} style={navStyle} internal currentPath="/cursos" />
-          <a href="/cursos" className="flex items-center gap-1 text-sm text-white/50 transition hover:text-white lg:hidden">← Cursos</a>
+          <Link href="/cursos" className="flex items-center gap-1 text-sm text-white/50 transition hover:text-white lg:hidden">← Cursos</Link>
         </div>
       </header>
 
       <main className="mx-auto w-full max-w-5xl px-6 py-12">
-        <a href="/cursos" className="mb-6 inline-flex items-center gap-1 text-sm text-white/50 transition hover:text-white">← Todos os cursos</a>
+        <Link href="/cursos" className="mb-6 inline-flex items-center gap-1 text-sm text-white/50 transition hover:text-white">← Todos os cursos</Link>
 
         {/* Hero do curso */}
         <div className="grid gap-6 md:grid-cols-[1.4fr_1fr] md:items-start">

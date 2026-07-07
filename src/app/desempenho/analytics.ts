@@ -17,6 +17,9 @@ export type Desempenho = {
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
+type CardRow = { total_respostas?: number | null; total_acertos?: number | null; questoes?: { area?: string | null } | null };
+type VqaRow = { videoaula_id?: string | null; titulo?: string | null; total?: number | null; score_pre?: number | null; score_pos?: number | null };
+
 export async function getDesempenho(): Promise<Desempenho | null> {
   const user = await getUsuario();
   if (!user) return null;
@@ -49,11 +52,11 @@ export async function getDesempenho(): Promise<Desempenho | null> {
 
   // desempenho por área
   const mapa = new Map<string, { respostas: number; acertos: number }>();
-  for (const c of cards ?? []) {
-    const area = ((c as any).questoes?.area) || "geral";
+  for (const c of (cards ?? []) as CardRow[]) {
+    const area = c.questoes?.area || "geral";
     const m = mapa.get(area) ?? { respostas: 0, acertos: 0 };
-    m.respostas += (c as any).total_respostas || 0;
-    m.acertos += (c as any).total_acertos || 0;
+    m.respostas += c.total_respostas || 0;
+    m.acertos += c.total_acertos || 0;
     mapa.set(area, m);
   }
   const porArea = [...mapa.entries()].map(([area, m]) => ({ area, label: AREA_LABEL[area] ?? area, respostas: m.respostas, acertos: m.acertos, pct: m.respostas ? Math.round((m.acertos / m.respostas) * 100) : 0 })).sort((a, b) => b.respostas - a.respostas);
@@ -76,17 +79,17 @@ export async function getDesempenho(): Promise<Desempenho | null> {
   // Videoaulas: última tentativa por aula (vqa já vem do mais recente p/ o mais antigo)
   const vistos = new Set<string>();
   const videoaulas: Desempenho["videoaulas"] = [];
-  for (const a of vqa ?? []) {
-    const id = (a as any).videoaula_id;
+  for (const a of (vqa ?? []) as VqaRow[]) {
+    const id = a.videoaula_id;
     if (!id || vistos.has(id)) continue;
     vistos.add(id);
-    const total = (a as any).total || 0;
-    const pre = (a as any).score_pre;
-    const pos = (a as any).score_pos ?? 0;
+    const total = a.total || 0;
+    const pre = a.score_pre;
+    const pos = a.score_pos ?? 0;
     const pctPre = total && typeof pre === "number" ? Math.round((pre / total) * 100) : null;
     const pctPos = total ? Math.round((pos / total) * 100) : 0;
     videoaulas.push({
-      id, titulo: (a as any).titulo || "Videoaula", total,
+      id, titulo: a.titulo || "Videoaula", total,
       pctPre, pctPos, ganho: pctPre === null ? null : pctPos - pctPre,
     });
   }

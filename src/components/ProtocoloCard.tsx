@@ -31,6 +31,7 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
   useEffect(() => {
     const id = decodeURIComponent(window.location.hash.replace("#", ""));
     if (id && id === item.id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpanded(true);
       setTimeout(() => document.getElementById(`protocolo-${item.id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     }

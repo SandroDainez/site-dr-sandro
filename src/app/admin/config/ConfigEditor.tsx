@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, Trash2, Save, X } from "lucide-react";
+import { Plus, Save, X } from "lucide-react";
 import type { SiteConfig } from "@/lib/content";
 import { saveSiteConfig } from "@/app/admin/actions";
 

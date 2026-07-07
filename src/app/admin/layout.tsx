@@ -105,7 +105,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isLoginPage = false; // handled by not protecting /admin/login
+  // /admin/login não é protegido aqui
 
   const cookieStore = await cookies();
   const token = cookieStore.get("admin_token")?.value;

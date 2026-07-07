@@ -32,10 +32,11 @@ export async function listarUsuarios(): Promise<UsuarioAdmin[]> {
   const { data: list } = await sb.auth.admin.listUsers({ page: 1, perPage: 1000 });
   const users = list?.users ?? [];
   const { data: profs } = await sb.from("profiles").select("id,nome,especialidade,crm,liberado");
-  const pmap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+  type Profile = { id: string; nome?: string; especialidade?: string; crm?: string; liberado?: boolean };
+  const pmap = new Map<string, Profile>((profs ?? []).map((p: Profile) => [p.id, p]));
   return users
-    .map((u: any) => {
-      const p: any = pmap.get(u.id) ?? {};
+    .map((u) => {
+      const p: Profile = pmap.get(u.id) ?? ({} as Profile);
       return {
         id: u.id,
         email: u.email ?? "",

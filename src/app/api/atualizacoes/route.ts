@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
   if (!body.conteudo || typeof body.conteudo !== "string") {
     return NextResponse.json({ error: "Campo 'conteudo' é obrigatório." }, { status: 400 });
   }
-  if (!body.area || !AREAS.includes(body.area as any)) {
+  if (!body.area || !AREAS.includes(body.area as (typeof AREAS)[number])) {
     return NextResponse.json(
       { error: "Campo 'area' deve ser: emergencias, ti ou anestesiologia." },
       { status: 400 }

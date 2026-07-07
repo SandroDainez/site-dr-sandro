@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
 import { getCursos } from "@/lib/content";
@@ -21,7 +22,7 @@ export default async function MinhaAreaPage() {
   if (!user) redirect("/");
 
   let perfil: { nome?: string; especialidade?: string; crm?: string; liberado?: boolean } = {};
-  let meusCursos: { id: string; titulo: string; feitas: number; total: number; pct: number; completo: boolean }[] = [];
+  const meusCursos: { id: string; titulo: string; feitas: number; total: number; pct: number; completo: boolean }[] = [];
   try {
     const supabase = await createAuthClient();
     const [{ data: prof }, { data: prog }, cursos] = await Promise.all([
@@ -79,7 +80,7 @@ export default async function MinhaAreaPage() {
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <a href="/" className="text-xs text-white/45 transition hover:text-white">← Início</a>
+            <Link href="/" className="text-xs text-white/45 transition hover:text-white">← Início</Link>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">Olá, {primeiroNome}</h1>
             <p className="mt-1 text-sm text-white/50">{user.email}</p>
           </div>
@@ -137,7 +138,7 @@ export default async function MinhaAreaPage() {
         <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
           <div className="mb-3 flex items-center gap-2 text-accent"><GraduationCap className="h-5 w-5" /><h2 className="text-sm font-semibold text-white">Meus cursos</h2></div>
           {meusCursos.length === 0 ? (
-            <p className="text-sm text-white/45">Você ainda não começou nenhum curso. <a href="/cursos" className="text-accent">Ver cursos →</a></p>
+            <p className="text-sm text-white/45">Você ainda não começou nenhum curso. <Link href="/cursos" className="text-accent">Ver cursos →</Link></p>
           ) : (
             <div className="space-y-3">
               {meusCursos.map((c) => (

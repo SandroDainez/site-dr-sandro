@@ -126,8 +126,19 @@ export const SITES_SOCIEDADES: Record<string, { sigla: string; site: string }[]>
 
 // ── CAMADA 4: APIs de bases secundárias ───────────────────────────────────────
 
+// Item normalizado retornado pelas buscas nas bases secundárias.
+export type FonteItem = {
+  origem: string;
+  titulo: string;
+  journal: string;
+  url: string;
+  ano: string;
+  doi?: string | null;
+  tipo?: string;
+};
+
 // LILACS / BVS — literatura latino-americana (API gratuita)
-export async function buscarLILACS(especialidade: string): Promise<any[]> {
+export async function buscarLILACS(especialidade: string): Promise<FonteItem[]> {
   const termos: Record<string, string> = {
     anestesiologia: "anestesia OR anestesiologia OR analgesia",
     terapia_intensiva: "terapia intensiva OR UTI OR cuidados intensivos OR sepse",
@@ -140,20 +151,20 @@ export async function buscarLILACS(especialidade: string): Promise<any[]> {
     if (!r.ok) return [];
     const data = await r.json();
     const docs = data.docs ?? data.results ?? [];
-    return docs.slice(0, 6).map((d: any) => ({
+    return docs.slice(0, 6).map((d: Record<string, unknown>): FonteItem => ({
       origem: "lilacs",
-      titulo: d.ti_es || d.ti_pt || d.ti || d.title || "",
-      journal: d.ta || d.journal || "LILACS/BVS",
+      titulo: String(d.ti_es || d.ti_pt || d.ti || d.title || ""),
+      journal: String(d.ta || d.journal || "LILACS/BVS"),
       url: d.ur ? `https://pesquisa.bvsalud.org/portal/resource/pt/${d.ur}` : "https://pesquisa.bvsalud.org",
-      ano: d.dp?.substring(0, 4) || "",
-    })).filter((d: any) => d.titulo);
+      ano: (d.dp as string | undefined)?.substring(0, 4) || "",
+    })).filter((d: FonteItem) => d.titulo);
   } catch {
     return [];
   }
 }
 
 // SciELO Brasil (API gratuita)
-export async function buscarSciELO(especialidade: string): Promise<any[]> {
+export async function buscarSciELO(especialidade: string): Promise<FonteItem[]> {
   const termos: Record<string, string> = {
     anestesiologia: "anestesia anestesiologia",
     terapia_intensiva: "terapia intensiva UTI cuidados intensivos",
@@ -166,8 +177,13 @@ export async function buscarSciELO(especialidade: string): Promise<any[]> {
     if (!r.ok) return [];
     const data = await r.json();
     const hits = data.hits?.hits ?? [];
-    return hits.slice(0, 5).map((h: any) => {
-      const src = h._source ?? {};
+    return hits.slice(0, 5).map((h: Record<string, unknown>): FonteItem => {
+      const src = (h._source ?? {}) as {
+        title?: (string & Record<string, string>) | undefined;
+        journal_title?: string;
+        url?: string;
+        publication_year?: string | number;
+      };
       return {
         origem: "scielo",
         titulo: src.title?.["pt"] || src.title?.["en"] || src.title || "",
@@ -175,14 +191,14 @@ export async function buscarSciELO(especialidade: string): Promise<any[]> {
         url: src.url || `https://search.scielo.org/?q=${q}`,
         ano: src.publication_year?.toString() || "",
       };
-    }).filter((d: any) => d.titulo);
+    }).filter((d: FonteItem) => d.titulo);
   } catch {
     return [];
   }
 }
 
 // OpenAlex — base aberta com 250M+ artigos (API gratuita, sem key)
-export async function buscarOpenAlex(especialidade: string): Promise<any[]> {
+export async function buscarOpenAlex(especialidade: string): Promise<FonteItem[]> {
   const conceitos: Record<string, string> = {
     anestesiologia: "C121332964", // Anesthesiology
     terapia_intensiva: "C189719430", // Intensive care medicine
@@ -195,21 +211,27 @@ export async function buscarOpenAlex(especialidade: string): Promise<any[]> {
     const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!r.ok) return [];
     const data = await r.json();
-    return (data.results ?? []).slice(0, 6).map((w: any) => ({
+    return (data.results ?? []).slice(0, 6).map((w: {
+      title?: string;
+      primary_location?: { source?: { display_name?: string }; landing_page_url?: string };
+      doi?: string;
+      id?: string;
+      publication_year?: string | number;
+    }): FonteItem => ({
       origem: "openalex",
       titulo: w.title || "",
       journal: w.primary_location?.source?.display_name || "OpenAlex",
       url: w.primary_location?.landing_page_url || w.doi || `https://openalex.org/${w.id}`,
       doi: w.doi?.replace("https://doi.org/", "") || null,
       ano: w.publication_year?.toString() || "",
-    })).filter((d: any) => d.titulo);
+    })).filter((d: FonteItem) => d.titulo);
   } catch {
     return [];
   }
 }
 
 // ClinicalTrials.gov — trials concluídos recentemente relevantes
-export async function buscarClinicalTrials(especialidade: string): Promise<any[]> {
+export async function buscarClinicalTrials(especialidade: string): Promise<FonteItem[]> {
   const termos: Record<string, string> = {
     anestesiologia: "anesthesia OR analgesia OR regional anesthesia",
     terapia_intensiva: "critical care OR sepsis OR mechanical ventilation OR ICU",
@@ -221,7 +243,12 @@ export async function buscarClinicalTrials(especialidade: string): Promise<any[]
     const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!r.ok) return [];
     const data = await r.json();
-    return (data.studies ?? []).slice(0, 4).map((s: any) => {
+    return (data.studies ?? []).slice(0, 4).map((s: {
+      protocolSection?: {
+        identificationModule?: { nctId?: string; briefTitle?: string };
+        sponsorCollaboratorsModule?: { leadSponsor?: { name?: string } };
+      };
+    }): FonteItem => {
       const p = s.protocolSection;
       const id = p?.identificationModule?.nctId;
       return {
@@ -231,34 +258,34 @@ export async function buscarClinicalTrials(especialidade: string): Promise<any[]
         url: id ? `https://clinicaltrials.gov/study/${id}` : "https://clinicaltrials.gov",
         ano: new Date().getFullYear().toString(),
       };
-    }).filter((d: any) => d.titulo);
+    }).filter((d: FonteItem) => d.titulo);
   } catch {
     return [];
   }
 }
 
 // FDA — alertas de segurança (crítico para anestesia/UTI)
-export async function buscarFDA(): Promise<any[]> {
+export async function buscarFDA(): Promise<FonteItem[]> {
   try {
     const url2 = `https://api.fda.gov/drug/enforcement.json?search=product_description:(anesthesia+OR+sedation+OR+vasopressor+OR+analgesic)&limit=3`;
     const r2 = await fetch(url2, { signal: AbortSignal.timeout(10000) });
     if (!r2.ok) return [];
     const data2 = await r2.json();
-    return (data2.results ?? []).slice(0, 3).map((item: any) => ({
+    return (data2.results ?? []).slice(0, 3).map((item: { product_description?: string }): FonteItem => ({
       origem: "fda",
       titulo: `FDA Alert: ${item.product_description?.substring(0, 100) || "Drug Safety Alert"}`,
       journal: "FDA MedWatch",
       url: "https://www.fda.gov/safety/medwatch-fda-safety-information-and-adverse-event-reporting-program",
       ano: new Date().getFullYear().toString(),
       tipo: "alerta_seguranca",
-    })).filter((d: any) => d.titulo);
+    })).filter((d: FonteItem) => d.titulo);
   } catch {
     return [];
   }
 }
 
 // NICE Guidelines — guidelines britânicos
-export async function buscarNICE(especialidade: string): Promise<any[]> {
+export async function buscarNICE(especialidade: string): Promise<FonteItem[]> {
   const termos: Record<string, string> = {
     anestesiologia: "anaesthesia analgesia pain",
     terapia_intensiva: "critical care intensive sepsis",
@@ -271,21 +298,27 @@ export async function buscarNICE(especialidade: string): Promise<any[]> {
     if (!r.ok) return [];
     const data = await r.json();
     const items = data?.embedded?.guidance ?? data?.results ?? [];
-    return items.slice(0, 4).map((g: any) => ({
+    return items.slice(0, 4).map((g: {
+      title?: string;
+      name?: string;
+      type?: string;
+      url?: string;
+      lastUpdated?: string;
+    }): FonteItem => ({
       origem: "nice",
       titulo: g.title || g.name || "",
       journal: `NICE ${g.type || "Guideline"}`,
       url: g.url ? `https://www.nice.org.uk${g.url}` : "https://www.nice.org.uk/guidance",
       ano: g.lastUpdated?.substring(0, 4) || new Date().getFullYear().toString(),
       tipo: "guideline",
-    })).filter((d: any) => d.titulo);
+    })).filter((d: FonteItem) => d.titulo);
   } catch {
     return [];
   }
 }
 
 // WHO Guidelines — documentos normativos globais
-export async function buscarWHO(especialidade: string): Promise<any[]> {
+export async function buscarWHO(especialidade: string): Promise<FonteItem[]> {
   const termos: Record<string, string> = {
     anestesiologia: "anaesthesia surgical care pain",
     terapia_intensiva: "critical care sepsis intensive care",
@@ -298,14 +331,19 @@ export async function buscarWHO(especialidade: string): Promise<any[]> {
     if (!r.ok) return [];
     const data = await r.json();
     const items = data?.value ?? data?.items ?? [];
-    return items.slice(0, 3).map((item: any) => ({
+    return items.slice(0, 3).map((item: {
+      Title?: string;
+      title?: string;
+      Url?: string;
+      PublicationDate?: string;
+    }): FonteItem => ({
       origem: "who",
       titulo: item.Title || item.title || "",
       journal: "WHO / Organização Mundial da Saúde",
       url: item.Url ? `https://www.who.int${item.Url}` : "https://www.who.int/publications",
       ano: item.PublicationDate?.substring(0, 4) || new Date().getFullYear().toString(),
       tipo: "guideline",
-    })).filter((d: any) => d.titulo);
+    })).filter((d: FonteItem) => d.titulo);
   } catch {
     return [];
   }

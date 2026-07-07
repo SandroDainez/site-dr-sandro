@@ -48,7 +48,6 @@ function VideoModal({ item, onClose }: { item: ColaboradorData; onClose: () => v
             allowFullScreen
           />
         ) : (
-          // eslint-disable-next-line jsx-a11y/media-has-caption
           <video src={item.videoUrl} controls autoPlay playsInline className="w-full rounded-2xl bg-black shadow-2xl" style={{ maxHeight: "80vh" }} />
         )}
         <p className="mt-3 text-center text-sm font-medium text-white/70">{item.titulo}</p>
