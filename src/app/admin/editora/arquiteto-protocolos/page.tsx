@@ -23,7 +23,7 @@ export default async function ArquitetoProtocolosPage() {
           : <span className="align-middle text-[10px] font-semibold uppercase tracking-wide text-amber-400">piloto · mock</span>}</h1>
         <p className="mt-1 text-sm text-white/50">
           Gera um protocolo institucional a partir das <strong className="text-white/70">fontes que você cola</strong>,
-          seção por seção (em 6 blocos), com <strong className="text-white/70">validação de citações</strong> e um índice
+          seção por seção (em blocos), com <strong className="text-white/70">validação de citações</strong> e um índice
           de confiança calculado pelo código. {modo === "real"
             ? <>Geração com <strong className="text-white/70">DeepSeek</strong> e revisão com <strong className="text-white/70">GPT-4o</strong>.</>
             : <>Nesta fase a IA é <strong className="text-white/70">simulada (mock)</strong> — defina <code className="text-white/70">AI_PROVIDER=real</code> para usar os modelos reais.</>}
@@ -33,7 +33,7 @@ export default async function ArquitetoProtocolosPage() {
       <AdminHelp>
         1) Escolha ou crie um protocolo. 2) Cole as <strong className="text-white/85">fontes</strong> (guideline, artigo,
         livro, consenso) com seus metadados. 3) Escolha a área. 4) Clique em <strong className="text-white/85">Gerar</strong> —
-        acompanhe os 6 blocos. 5) Revise/edite e <strong className="text-white/85">salve como versão</strong>. A confiança e o
+        acompanhe os blocos. 5) Revise/edite e <strong className="text-white/85">salve como versão</strong>. A confiança e o
         método aparecem no fim (afirmações clínicas com citação validada ÷ total).
       </AdminHelp>
 
