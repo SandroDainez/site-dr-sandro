@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
 import { PROTOCOLO_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/protocolo-estrutura";
@@ -68,6 +68,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   const [salvo, setSalvo] = useState<{ versionNumber: number; confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
+  const resultadoRef = useRef<HTMLDivElement>(null); // rolar até o editor ao abrir uma versão
 
   // publicação
   const [statusAtual, setStatusAtual] = useState<string>("");
@@ -100,6 +101,8 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     if (r.data.especialidade) setEspecialidade(r.data.especialidade);
     setBlocos(PROTOCOLO_BLOCOS.map(() => ({ status: "concluido" })));
     setMetas([]); setSalvo(null); setRevisao(null); setCorrecao(null);
+    // Rola até o editor (o conteúdo carrega na seção "Resultado", bem acima da lista de versões).
+    setTimeout(() => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
   }
   function abrirProtocolo(p: Protocolo) {
     setProtocolo(p); setSecoes([]); setMetas([]); setSalvo(null); setError(null); setRevisao(null);
@@ -344,7 +347,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
 
           {/* 5) RESULTADO */}
           {secoes.length > 0 && validacao && (
-            <div className={card}>
+            <div ref={resultadoRef} className={card}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">5 · Resultado (editável)</p>
                 <div className="text-right">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, ListChecks, Save, AlertTriangle, FileText, X, ShieldCheck, Cpu, CheckCircle2, Circle } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
 import { ESPECIALIDADES_MODULO, TIPOS_FONTE, NIVEIS_QUESTAO, QUANTIDADES_QUESTAO, justificativaTexto, type QuestaoGerada } from "@/lib/editora/questao-estrutura";
@@ -70,11 +70,12 @@ export default function CriadorQuestoes({ docsIniciais, modo }: { docsIniciais: 
     }
   }
   // Reabre o conteúdo de uma versão salva no editor (editar + salvar cria nova versão).
+  const resultadoRef = useRef<HTMLDivElement>(null);
   async function abrirVersao(versionId: string) {
     setError(null);
     const r = await carregarVersao(versionId);
     if (!r.ok) { setError(r.error); return; }
-    setQuestoes(r.data.questoes);
+    setQuestoes(r.data.questoes); setTimeout(() => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
     if (r.data.especialidade) setEspecialidade(r.data.especialidade);
     if (r.data.nivel) setNivel(r.data.nivel);
     setMeta(null); setSalvo(null); setRevisao(null);
@@ -244,7 +245,7 @@ export default function CriadorQuestoes({ docsIniciais, modo }: { docsIniciais: 
 
           {/* 4) RESULTADO */}
           {questoes.length > 0 && validacao && (
-            <div className={card}>
+            <div ref={resultadoRef} className={card}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">4 · Questões</p>
                 <div className="text-right">

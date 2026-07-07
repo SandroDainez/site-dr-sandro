@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Trash2, Loader2, GitCompare, Save, AlertTriangle, FileText, X, ShieldCheck, Cpu, CheckCircle2, Library, BookOpen, Plus } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
 import { ESPECIALIDADES_MODULO } from "@/lib/editora/protocolo-estrutura";
@@ -71,11 +71,12 @@ export default function ComparadorGuidelines({ docsIniciais, modo }: { docsInici
     }
   }
   // Reabre o conteúdo de uma versão salva no editor (editar + salvar cria nova versão).
+  const resultadoRef = useRef<HTMLDivElement>(null);
   async function abrirVersao(versionId: string) {
     setError(null);
     const r = await carregarVersao(versionId);
     if (!r.ok) { setError(r.error); return; }
-    setSecoes(r.data.secoes);
+    setSecoes(r.data.secoes); setTimeout(() => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
     setEvidencias(r.data.evidencias);
     const te = r.data.textoEditado && Object.keys(r.data.textoEditado).length
       ? r.data.textoEditado
@@ -220,7 +221,7 @@ export default function ComparadorGuidelines({ docsIniciais, modo }: { docsInici
 
           {/* 3) RESULTADO */}
           {secoes.length > 0 && validacao && (
-            <div className={card}>
+            <div ref={resultadoRef} className={card}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">3 · Comparação por aspecto (editável)</p>
                 <div className="text-right">
