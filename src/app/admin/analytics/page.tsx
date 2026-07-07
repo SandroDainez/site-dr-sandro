@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { getAnalytics, getAnalyticsDetail } from "@/lib/content";
+import ZerarButton from "./ZerarButton";
 
 function brTodayParts(): { y: number; m: number; d: number } {
   const d = new Date(Date.now() - 3 * 3600 * 1000);
@@ -71,6 +72,7 @@ export default async function AdminAnalyticsPage() {
           Visitas ao site (páginas públicas). <strong className="text-white/70">Visualizações</strong> = aberturas de página;{" "}
           <strong className="text-white/70">Visitantes</strong> = pessoas distintas no dia. Robôs são ignorados.
         </p>
+        <ZerarButton />
       </div>
 
       {/* Cards de resumo */}

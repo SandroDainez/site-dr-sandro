@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Loader2, RefreshCw, Save, AlertTriangle, FileText, X, ShieldCheck, Cpu, CheckCircle2, Library, BookOpen, Plus } from "lucide-react";
+import { Trash2, Loader2, RefreshCw, Save, AlertTriangle, FileText, X, ShieldCheck, Cpu, CheckCircle2, Library, BookOpen, Plus } from "lucide-react";
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarDoc, gerar, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc } from "./actions";
+import { criarDoc, gerar, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc } from "./actions";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -74,6 +74,16 @@ export default function AtualizadorProtocolos({ docsIniciais, protocolos, modo }
   function despublicar() { if (!doc) return; setError(null); startTransition(async () => { const r = await despublicarDoc(doc.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(doc.id); } else setError(r.error); }); }
   function arquivar() { if (!doc) return; setError(null); startTransition(async () => { const r = await arquivarDoc(doc.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(doc.id); } else setError(r.error); }); }
 
+  function excluir() {
+    if (!doc) return;
+    if (!window.confirm("Excluir este item? Esta ação não pode ser desfeita.")) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await excluirDoc(doc.id);
+      if (r.ok) { setDocs((prev) => prev.filter((d) => d.id !== doc.id)); setDoc(null); }
+      else setError(r.error);
+    });
+  }
   function criarNovo() {
     if (!protocoloSel) { setError("Escolha um protocolo publicado."); return; }
     setError(null);
@@ -170,7 +180,7 @@ export default function AtualizadorProtocolos({ docsIniciais, protocolos, modo }
               <label className="inline-flex items-center gap-2 text-sm text-white/70">
                 <input type="checkbox" checked={incluirPubmed} onChange={(e) => setIncluirPubmed(e.target.checked)} className="h-4 w-4 accent-[color:var(--accent)]" /> Incluir PubMed
               </label>
-              <button type="button" onClick={gerarTudo} disabled={gerando || busy} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
+              <button type="button" onClick={gerarTudo} disabled={gerando || busy} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:brightness-75">
                 {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Buscar e gerar atualização
               </button>
             </div>
@@ -319,6 +329,7 @@ export default function AtualizadorProtocolos({ docsIniciais, protocolos, modo }
               {statusAtual !== "archived" && (
                 <button type="button" onClick={arquivar} disabled={busy} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/50 transition hover:text-white/80 disabled:opacity-50"><Archive className="h-3.5 w-3.5" /> Arquivar</button>
               )}
+              <button type="button" onClick={excluir} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/25 px-4 py-1.5 text-xs font-medium text-rose-300/80 transition hover:border-rose-400/50 hover:text-rose-300 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
             </div>
             <p className="mt-2 text-[11px] text-white/35">Publicar congela a versão (imutável) e mostra o relatório em /atualizacoes-protocolos. Editar depois cria um novo rascunho.</p>
           </div>

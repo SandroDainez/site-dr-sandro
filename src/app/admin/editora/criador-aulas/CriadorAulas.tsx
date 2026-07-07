@@ -6,7 +6,8 @@ import { AULA_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE, PUBLICOS_ALVO } from "
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc } from "./actions";
+import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc } from "./actions";
+import FontesInput from "@/components/admin/FontesInput";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -46,8 +47,6 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
   const [publicoAlvo, setPublicoAlvo] = useState<string>(PUBLICOS_ALVO[0]);
   const [sources, setSources] = useState<Source[]>([]);
 
-  const [sTitulo, setSTitulo] = useState(""); const [sTipo, setSTipo] = useState<string>(TIPOS_FONTE[0]);
-  const [sAutor, setSAutor] = useState(""); const [sAno, setSAno] = useState(""); const [sTexto, setSTexto] = useState("");
 
   const [blocos, setBlocos] = useState<BlocoStatus[]>(AULA_BLOCOS.map(() => ({ status: "pendente" })));
   const [secoes, setSecoes] = useState<SecaoGerada[]>([]);
@@ -98,20 +97,21 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
     if (!doc) return; setError(null);
     startTransition(async () => { const r = await arquivarDoc(doc.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(doc.id); } else setError(r.error); });
   }
+  function excluir() {
+    if (!doc) return;
+    if (!window.confirm("Excluir este item? Esta ação não pode ser desfeita.")) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await excluirDoc(doc.id);
+      if (r.ok) { setDocs((prev) => prev.filter((d) => d.id !== doc.id)); setDoc(null); }
+      else setError(r.error);
+    });
+  }
   function criarNovo() {
     setError(null);
     startTransition(async () => {
       const r = await criarDoc({ title: novoTitulo, especialidadeModulo: especialidade });
       if (r.ok) { setDocs((prev) => [r.data, ...prev]); setNovoTitulo(""); abrirDoc(r.data); }
-      else setError(r.error);
-    });
-  }
-  function addSource() {
-    if (!doc) return;
-    setError(null);
-    startTransition(async () => {
-      const r = await adicionarSource({ docId: doc.id, titulo: sTitulo, tipo: sTipo, autor: sAutor || undefined, ano: sAno ? parseInt(sAno) : null, texto: sTexto });
-      if (r.ok) { setSources((prev) => [...prev, r.data]); setSTitulo(""); setSAutor(""); setSAno(""); setSTexto(""); }
       else setError(r.error);
     });
   }
@@ -231,17 +231,12 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
                 ))}
               </div>
             )}
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 space-y-2">
-              <p className="text-[11px] text-white/40">Adicionar referência (texto colado). É contra este texto que as citações são verificadas.</p>
-              <div className="grid gap-2 sm:grid-cols-[1fr_150px_1fr_90px]">
-                <input className={inputCls} value={sTitulo} onChange={(e) => setSTitulo(e.target.value)} placeholder="Título da referência" />
-                <select className={inputCls} value={sTipo} onChange={(e) => setSTipo(e.target.value)}>{TIPOS_FONTE.map((t) => <option key={t} value={t}>{t}</option>)}</select>
-                <input className={inputCls} value={sAutor} onChange={(e) => setSAutor(e.target.value)} placeholder="Autor / sociedade" />
-                <input className={inputCls} value={sAno} onChange={(e) => setSAno(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="Ano" inputMode="numeric" />
-              </div>
-              <textarea className={inputCls + " min-h-[90px] resize-y"} value={sTexto} onChange={(e) => setSTexto(e.target.value)} placeholder="Cole aqui o texto do artigo/diretriz." />
-              <button type="button" onClick={addSource} disabled={busy || sTexto.trim().length < 10} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/80 transition hover:border-accent/40 disabled:opacity-50"><Plus className="h-3.5 w-3.5" /> Adicionar referência</button>
-            </div>
+            <FontesInput tipos={TIPOS_FONTE} busy={busy} onAdd={async (f) => {
+              if (!doc) return { ok: false, error: "Abra um item." };
+              const r = await adicionarSource({ docId: doc.id, titulo: f.titulo, tipo: f.tipo, autor: f.autor, ano: f.ano, texto: f.texto });
+              if (r.ok) setSources((prev) => [...prev, r.data]);
+              return { ok: r.ok, error: r.ok ? undefined : r.error };
+            }} />
           </div>
 
           {/* 3) ÁREA + PÚBLICO + GERAÇÃO */}
@@ -256,7 +251,7 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
                 <label className={labelCls}>Público-alvo</label>
                 <select className={inputCls + " sm:w-52"} value={publicoAlvo} onChange={(e) => setPublicoAlvo(e.target.value)}>{PUBLICOS_ALVO.map((p) => <option key={p} value={p}>{p}</option>)}</select>
               </div>
-              <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
+              <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:brightness-75">
                 {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <GraduationCap className="h-4 w-4" />} Gerar aula ({AULA_BLOCOS.length} blocos)
               </button>
             </div>
@@ -421,6 +416,7 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
               {statusAtual !== "archived" && (
                 <button type="button" onClick={arquivar} disabled={busy} className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 px-4 py-1.5 text-xs font-medium text-white/50 transition hover:text-white/80 disabled:opacity-50"><Archive className="h-3.5 w-3.5" /> Arquivar</button>
               )}
+              <button type="button" onClick={excluir} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/25 px-4 py-1.5 text-xs font-medium text-rose-300/80 transition hover:border-rose-400/50 hover:text-rose-300 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
             </div>
             <p className="mt-2 text-[11px] text-white/35">Publicar congela a versão mais recente (imutável) e a torna pública em /aulas. Editar depois cria um novo rascunho; a versão pública só muda quando você republicar.</p>
           </div>

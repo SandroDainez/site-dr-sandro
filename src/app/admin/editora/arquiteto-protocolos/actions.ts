@@ -322,3 +322,20 @@ export async function arquivarProtocolo(protocolId: string): Promise<Result<{ st
     return { ok: true, data: { status: "archived", slug: prot.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
+
+// Exclui um documento (rascunho ou publicado). Despublica versões publicadas (imutáveis)
+// antes de apagar, senão a trigger bloqueia o DELETE em cascata.
+export async function excluirDoc(id: string): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: doc } = await supabase.from("protocols").select("slug").eq("id", id).maybeSingle();
+    const { data: pubs } = await supabase.from("protocol_versions").select("id").eq("protocol_id", id).eq("is_published", true);
+    for (const p of pubs ?? []) { const { error } = await supabase.rpc("unpublish_protocol_version", { p_version_id: p.id }); if (error) throw error; }
+    const { error } = await supabase.from("protocols").delete().eq("id", id);
+    if (error) throw error;
+    revalidatePath("/protocolos"); revalidatePath("/admin/editora/arquiteto-protocolos");
+    if (doc?.slug) revalidatePath(`/protocolos/${doc.slug}`);
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}

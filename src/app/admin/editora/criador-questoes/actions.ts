@@ -341,3 +341,21 @@ export async function arquivarDoc(docId: string): Promise<Result<{ status: strin
     return { ok: true, data: { status: "archived", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
+
+// Exclui um documento (rascunho ou publicado). Despublica versões publicadas (imutáveis)
+// antes de apagar, senão a trigger bloqueia o DELETE em cascata.
+export async function excluirDoc(id: string): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    const supabase = createServiceClient();
+    const { data: doc } = await supabase.from("questao_docs").select("slug").eq("id", id).maybeSingle();
+    const { data: pubs } = await supabase.from("questao_versions").select("id").eq("doc_id", id).eq("is_published", true);
+    for (const p of pubs ?? []) { const { error } = await supabase.rpc("unpublish_questao_version", { p_version_id: p.id }); if (error) throw error; }
+    await supabase.from("questoes").update({ ativo: false }).eq("editora_doc_id", id); // remove do quiz (soft)
+    const { error } = await supabase.from("questao_docs").delete().eq("id", id);
+    if (error) throw error;
+    revalidatePath("/questoes"); revalidatePath("/admin/editora/criador-questoes");
+    if (doc?.slug) revalidatePath(`/questoes/${doc.slug}`);
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
