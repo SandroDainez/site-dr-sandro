@@ -206,6 +206,30 @@ export async function salvarVersao(input: {
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Carrega o CONTEÚDO de uma versão salva (secoes + textoEditado + tema + especialidade +
+// evidências reconstruídas do snapshot de referências) para reabrir no editor e editar.
+// Editar + salvar cria uma nova versão (append-only). Espelha o `content` do salvarVersao:
+// o content guarda `referencias` (snapshot slim), não os Source[] completos — reconstruímos
+// um Source[] mínimo por id p/ a lista de evidências e a validação por citação continuarem.
+export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; tema: string; secoes: SecaoGerada[]; textoEditado: Record<string, string>; evidencias: Source[] }>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("protocol_update_versions").select("content").eq("id", versionId).maybeSingle();
+    if (error) throw error;
+    if (!data) return { ok: false, error: "Versão não encontrada." };
+    const c = (data.content ?? {}) as {
+      especialidade?: string; tema?: string; secoes?: SecaoGerada[]; textoEditado?: Record<string, string>;
+      referencias?: { id: string; titulo?: string; tipo?: string; autor?: string | null; ano?: number | null; url?: string | null }[];
+    };
+    const evidencias: Source[] = (Array.isArray(c.referencias) ? c.referencias : []).map((r) => ({
+      id: r.id, titulo: r.titulo ?? "", tipo: r.tipo ?? "", autor: r.autor ?? undefined, ano: r.ano ?? null, texto: "", url: r.url ?? undefined,
+    }));
+    return { ok: true, data: { especialidade: c.especialidade ?? "", tema: c.tema ?? "", secoes: Array.isArray(c.secoes) ? c.secoes : [], textoEditado: c.textoEditado ?? {}, evidencias } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 // ── PUBLICAÇÃO / VERSIONAMENTO ────────────────────────────────────────────────
 type VersaoResumo = { id: string; version_number: number; is_published: boolean; created_at: string };
 

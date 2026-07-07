@@ -131,6 +131,7 @@ export async function salvarVersao(input: {
       especialidade: input.especialidade,
       tema: input.tema,
       secoes: input.secoes,
+      evidencias: input.evidencias,
       textoEditado: input.textoEditado ?? {},
       referencias: snapshotReferencias(input.secoes, input.evidencias),
       confidence: validacao.confidence,
@@ -178,6 +179,28 @@ export async function listarVersoes(docId: string): Promise<Result<VersaoResumo[
       .select("id,version_number,is_published,created_at").eq("doc_id", docId).order("version_number", { ascending: false });
     if (error) throw error;
     return { ok: true, data: (data ?? []) as VersaoResumo[] };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// Carrega o CONTEÚDO de uma versão salva (tema + especialidade + secoes + evidencias +
+// textoEditado) para reabrir no editor. Editar + salvar cria uma nova versão (append-only).
+// Espelha salvarVersao — inclui tema e evidencias (necessárias p/ revalidar as citações).
+export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; tema: string; secoes: SecaoGerada[]; evidencias: Source[]; textoEditado: Record<string, string> }>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("research_versions").select("content").eq("id", versionId).maybeSingle();
+    if (error) throw error;
+    if (!data) return { ok: false, error: "Versão não encontrada." };
+    const c = (data.content ?? {}) as { especialidade?: string; tema?: string; secoes?: SecaoGerada[]; evidencias?: Source[]; textoEditado?: Record<string, string> };
+    return { ok: true, data: {
+      especialidade: c.especialidade ?? "",
+      tema: c.tema ?? "",
+      secoes: Array.isArray(c.secoes) ? c.secoes : [],
+      evidencias: Array.isArray(c.evidencias) ? c.evidencias : [],
+      textoEditado: c.textoEditado ?? {},
+    } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 

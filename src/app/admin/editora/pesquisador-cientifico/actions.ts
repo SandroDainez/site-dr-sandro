@@ -169,6 +169,34 @@ export async function salvarVersao(input: {
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Carrega o CONTEÚDO de uma versão salva (tema + secoes + evidencias + textoEditado +
+// especialidade) para reabrir no editor e editar. Editar + salvar cria nova versão (append-only).
+// Espelha salvarVersao: as evidencias vêm do snapshot de referencias gravado no content.
+export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; tema: string; secoes: SecaoGerada[]; evidencias: Source[]; textoEditado: Record<string, string> }>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("research_versions").select("content").eq("id", versionId).maybeSingle();
+    if (error) throw error;
+    if (!data) return { ok: false, error: "Versão não encontrada." };
+    const c = (data.content ?? {}) as {
+      especialidade?: string; tema?: string; secoes?: SecaoGerada[];
+      referencias?: Source[]; textoEditado?: Record<string, string>;
+    };
+    return {
+      ok: true,
+      data: {
+        especialidade: c.especialidade ?? "",
+        tema: c.tema ?? "",
+        secoes: Array.isArray(c.secoes) ? c.secoes : [],
+        evidencias: Array.isArray(c.referencias) ? c.referencias : [],
+        textoEditado: c.textoEditado ?? {},
+      },
+    };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 type VersaoResumo = { id: string; version_number: number; is_published: boolean; created_at: string };
 export async function listarVersoes(docId: string): Promise<Result<VersaoResumo[]>> {
   try {

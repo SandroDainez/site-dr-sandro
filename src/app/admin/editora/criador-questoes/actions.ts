@@ -342,6 +342,21 @@ export async function arquivarDoc(docId: string): Promise<Result<{ status: strin
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Carrega o CONTEÚDO de uma versão salva (questoes + especialidade + nivel) para reabrir
+// no editor de questões e editar. Editar + salvar cria uma nova versão (append-only).
+export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; nivel: string; questoes: QuestaoGerada[] }>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("questao_versions").select("content").eq("id", versionId).maybeSingle();
+    if (error) throw error;
+    if (!data) return { ok: false, error: "Versão não encontrada." };
+    const c = (data.content ?? {}) as { especialidade?: string; nivel?: string; questoes?: QuestaoGerada[] };
+    return { ok: true, data: { especialidade: c.especialidade ?? "", nivel: c.nivel ?? "", questoes: Array.isArray(c.questoes) ? c.questoes : [] } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 // Exclui um documento (rascunho ou publicado). Despublica versões publicadas (imutáveis)
 // antes de apagar, senão a trigger bloqueia o DELETE em cascata.
 export async function excluirDoc(id: string): Promise<Result<null>> {
