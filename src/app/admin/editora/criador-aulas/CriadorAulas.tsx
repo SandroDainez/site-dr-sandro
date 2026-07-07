@@ -7,7 +7,7 @@ import { AULA_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE, PUBLICOS_ALVO } from "
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc } from "./actions";
+import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc } from "./actions";
 import FontesInput from "@/components/admin/FontesInput";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 
@@ -71,15 +71,34 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
     const r = await listarSources(id);
     if (r.ok) setSources(r.data);
   }
-  async function carregarVersoes(id: string) {
+  async function carregarVersoes(id: string, autoAbrirUltima = false) {
     const r = await listarVersoes(id);
-    if (r.ok) setVersoes(r.data);
+    if (r.ok) {
+      setVersoes(r.data);
+      // Ao abrir uma aula, recarrega a versão mais recente no editor (senão vinha vazio).
+      if (autoAbrirUltima && r.data.length > 0) abrirVersao(r.data[0].id);
+    }
+  }
+  // Reabre o conteúdo de uma versão salva no editor (editar + salvar cria nova versão).
+  async function abrirVersao(versionId: string) {
+    setError(null);
+    const r = await carregarVersao(versionId);
+    if (!r.ok) { setError(r.error); return; }
+    setSecoes(r.data.secoes);
+    const te = r.data.textoEditado && Object.keys(r.data.textoEditado).length
+      ? r.data.textoEditado
+      : Object.fromEntries(r.data.secoes.map((s) => [s.secao, renderSecaoTexto(s)]));
+    setTextoEditado(te);
+    if (r.data.especialidade) setEspecialidade(r.data.especialidade);
+    if (r.data.publicoAlvo) setPublicoAlvo(r.data.publicoAlvo);
+    setBlocos(AULA_BLOCOS.map(() => ({ status: "concluido" })));
+    setMetas([]); setSalvo(null); setRevisao(null);
   }
   function abrirDoc(d: Doc) {
     setDoc(d); setSecoes([]); setMetas([]); setSalvo(null); setError(null); setRevisao(null);
     setBlocos(AULA_BLOCOS.map(() => ({ status: "pendente" }))); setTextoEditado({});
     setStatusAtual(d.status);
-    carregarSources(d.id); carregarVersoes(d.id);
+    carregarSources(d.id); carregarVersoes(d.id, true);
   }
   function aplicarStatus(status: string) {
     setStatusAtual(status);
@@ -391,17 +410,23 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
             {versoes.length === 0 ? (
               <p className="text-sm text-white/40">Salve uma versão para poder publicar.</p>
             ) : (
-              <div className="mb-4 space-y-1.5">
+              <>
+              <div className="mb-2 space-y-1.5">
                 {versoes.map((v) => (
-                  <div key={v.id} className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-sm">
+                  <button key={v.id} type="button" onClick={() => abrirVersao(v.id)} disabled={gerando || busy}
+                    className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-left text-sm transition hover:border-accent/40 hover:bg-white/[0.04] disabled:opacity-50">
+                    <FileText className="h-3.5 w-3.5 shrink-0 text-white/40" />
                     <span className="text-white/70">Versão {v.version_number}</span>
                     {v.is_published
                       ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> pública (congelada)</span>
                       : <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/45">rascunho</span>}
                     <span className="ml-auto text-[10px] text-white/30">{dataCurta(v.created_at)}</span>
-                  </div>
+                    <span className="shrink-0 text-[10px] font-medium text-accent/80">abrir p/ editar →</span>
+                  </button>
                 ))}
               </div>
+              <p className="mb-4 text-[11px] text-white/35">Clique numa versão para reabrir o conteúdo no editor. Editar e salvar cria uma nova versão (as anteriores ficam no histórico).</p>
+              </>
             )}
 
             <AreasEditora tabela="aula_docs" docId={doc.id} />

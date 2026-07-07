@@ -252,6 +252,21 @@ export async function listarVersoes(docId: string): Promise<Result<VersaoResumo[
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Carrega o CONTEÚDO de uma versão salva (secoes + textoEditado + especialidade) para
+// reabrir no editor e editar. Editar + salvar cria uma nova versão (append-only).
+export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; secoes: SecaoGerada[]; textoEditado: Record<string, string> }>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("sci_versions").select("content").eq("id", versionId).maybeSingle();
+    if (error) throw error;
+    if (!data) return { ok: false, error: "Versão não encontrada." };
+    const c = (data.content ?? {}) as { especialidade?: string; secoes?: SecaoGerada[]; textoEditado?: Record<string, string> };
+    return { ok: true, data: { especialidade: c.especialidade ?? "", secoes: Array.isArray(c.secoes) ? c.secoes : [], textoEditado: c.textoEditado ?? {} } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 function revalidarPublico(slug: string) {
   revalidatePath("/biblioteca-cientifica");
   revalidatePath(`/biblioteca-cientifica/${slug}`);
