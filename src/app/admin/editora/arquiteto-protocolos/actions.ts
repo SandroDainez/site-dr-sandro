@@ -402,6 +402,7 @@ export async function aplicarCorrecoes(input: { protocolId: string; secoes: Seca
     const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
     const reprovada = (a: SecaoGerada["afirmacoes"][number]) => {
       if (a.tipo !== "clinica" && a.tipo !== "dose") return false;
+      if (a.conferido) return false; // já validada manualmente pelo médico — não reancorar
       const txt = a.source_id ? mapa.get(a.source_id) : undefined;
       const anc = normalizar(a.ancora ?? "");
       return !(a.source_id && txt !== undefined && anc && txt.includes(anc));

@@ -18,6 +18,8 @@ export type Afirmacao = {
   source_id: string | null;   // null = "sem fonte"
   ancora: string | null;      // trecho verbatim do source que sustenta (null se sem fonte)
   tipo: "clinica" | "dose" | "geral"; // clinica/dose EXIGEM fonte
+  conferido?: boolean;        // validação MANUAL do médico ("conferi na fonte") — resolve o
+                              // aviso sem citação verbatim; contado à parte da confiança automática
 };
 
 export type SecaoGerada = {
