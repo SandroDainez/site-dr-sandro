@@ -15,8 +15,54 @@ export const maxDuration = 300; // agente longo: coleta multi-fonte + síntese
 
 const ESPECIALIDADES: Especialidade[] = ["anestesiologia", "terapia_intensiva", "emergencias"];
 
+// Item de fonte coletada (PubMed/RSS/sociedades/bases/regulatórios). Campos variam
+// por origem, por isso quase tudo é opcional.
+type Fonte = {
+  origem: string;
+  titulo?: string;
+  journal?: string;
+  pmid?: string;
+  ano?: string;
+  tipo?: string;
+  tipoPub?: string;
+  resumo?: string;
+  url?: string;
+  descricao?: string;
+};
+
+// Tópico do boletim gerado/revisado pela IA (JSON solto, campos opcionais).
+type Topico = {
+  titulo?: string;
+  descricao?: string;
+  relevancia_clinica?: string;
+  pmid?: string | null;
+  fonte_nome?: string;
+  fonte_tipo?: string;
+  nivel_evidencia?: string;
+  fonte_url?: string | null;
+};
+
+// Síntese completa produzida pela IA.
+type Sintese = {
+  titulo?: string;
+  resumo?: string;
+  topicos?: Topico[];
+};
+
+// Item cru retornado pela web search (sociedades/regulatórios) antes de normalizar.
+type ItemBusca = {
+  titulo?: string;
+  organizacao?: string;
+  url?: string;
+  tipo?: string;
+  descricao?: string;
+};
+
+// Forma mínima da resposta de chat.completions que usamos.
+type ChatCompletionResposta = { choices: { message: { content: string | null } }[] };
+
 // ── CAMADA 1: PubMed ──────────────────────────────────────────────────────────
-async function buscarPubMed(especialidade: string): Promise<any[]> {
+async function buscarPubMed(especialidade: string): Promise<Fonte[]> {
   const query = encodeURIComponent(MESH_QUERIES[especialidade]);
   const key = process.env.PUBMED_API_KEY ? `&api_key=${process.env.PUBMED_API_KEY}` : "";
   try {
@@ -37,7 +83,7 @@ async function buscarPubMed(especialidade: string): Promise<any[]> {
     // Puxa os ABSTRACTS (efetch) para fundamentar a síntese no que o estudo realmente
     // diz — base da qualidade: a IA escreve do resumo real, não "adivinha" pelo título.
     const abstracts = await buscarAbstractsPubMed(ids, key);
-    return ids.map((id) => {
+    return ids.map((id): Fonte | null => {
       const a = d2.result?.[id];
       if (!a) return null;
       return {
@@ -50,7 +96,7 @@ async function buscarPubMed(especialidade: string): Promise<any[]> {
         resumo: abstracts[id] ?? "",
         url: pubmedUrl(id),
       };
-    }).filter(Boolean);
+    }).filter((f): f is Fonte => f !== null);
   } catch {
     return [];
   }
@@ -81,7 +127,7 @@ async function buscarAbstractsPubMed(ids: string[], key: string): Promise<Record
 }
 
 // ── CAMADA 2: RSS feeds ───────────────────────────────────────────────────────
-async function parsearRSS(url: string, nomeJournal: string): Promise<any[]> {
+async function parsearRSS(url: string, nomeJournal: string): Promise<Fonte[]> {
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; MedUpdateBot/2.0)" },
@@ -89,7 +135,7 @@ async function parsearRSS(url: string, nomeJournal: string): Promise<any[]> {
     });
     if (!res.ok) return [];
     const xml = await res.text();
-    const itens: any[] = [];
+    const itens: Fonte[] = [];
     const regex = /<item>([\s\S]*?)<\/item>|<entry>([\s\S]*?)<\/entry>/g;
     let match;
     while ((match = regex.exec(xml)) !== null) {
@@ -120,22 +166,24 @@ async function parsearRSS(url: string, nomeJournal: string): Promise<any[]> {
   }
 }
 
-async function buscarRSS(especialidade: string): Promise<any[]> {
+async function buscarRSS(especialidade: string): Promise<Fonte[]> {
   const feeds = [...(RSS_FEEDS[especialidade] ?? []), ...RSS_TRANSVERSAIS];
   const resultados = await Promise.allSettled(feeds.map((f) => parsearRSS(f.url, f.nome)));
   return resultados
     .filter((r) => r.status === "fulfilled")
-    .flatMap((r) => (r as PromiseFulfilledResult<any[]>).value)
+    .flatMap((r) => (r as PromiseFulfilledResult<Fonte[]>).value)
     .slice(0, 18);
 }
 
 // ── CAMADA 3: Sites das sociedades — web search ───────────────────────────────
-async function buscarSociedades(especialidade: string): Promise<any[]> {
+async function buscarSociedades(especialidade: string): Promise<Fonte[]> {
   const label = ESPECIALIDADE_LABELS[especialidade];
   const sociedades = SITES_SOCIEDADES[especialidade] ?? [];
   const lista = sociedades.map((s) => `${s.sigla} (${s.site})`).join(", ");
   try {
-    const response = await (getOpenAI().chat.completions.create as any)({
+    const response = await (getOpenAI().chat.completions.create as unknown as (
+      args: Record<string, unknown>
+    ) => Promise<ChatCompletionResposta>)({
       model: "gpt-4o-search-preview",
       max_tokens: 1500,
       messages: [{
@@ -152,8 +200,8 @@ Retorne APENAS o array JSON, sem markdown.`,
     });
     const texto = response.choices[0].message.content ?? "[]";
     const clean = texto.replace(/```json|```/g, "").trim();
-    const dados = JSON.parse(clean.startsWith("[") ? clean : `[${clean}]`);
-    return dados.filter((d: any) => d.url && d.titulo).map((d: any) => ({
+    const dados: ItemBusca[] = JSON.parse(clean.startsWith("[") ? clean : `[${clean}]`);
+    return dados.filter((d: ItemBusca) => d.url && d.titulo).map((d: ItemBusca) => ({
       origem: "sociedade",
       titulo: d.titulo,
       journal: d.organizacao ?? "",
@@ -167,7 +215,7 @@ Retorne APENAS o array JSON, sem markdown.`,
 }
 
 // ── CAMADA 4: Bases secundárias (todas em paralelo) ──────────────────────────
-async function buscarBasesSecundarias(especialidade: string): Promise<any[]> {
+async function buscarBasesSecundarias(especialidade: string): Promise<Fonte[]> {
   const [lilacs, scielo, openalex, trials, fda, nice, who] = await Promise.allSettled([
     buscarLILACS(especialidade),
     buscarSciELO(especialidade),
@@ -177,16 +225,18 @@ async function buscarBasesSecundarias(especialidade: string): Promise<any[]> {
     buscarNICE(especialidade),
     buscarWHO(especialidade),
   ]).then((rs) => rs.map((r) => (r.status === "fulfilled" ? r.value : [])));
-  return [...lilacs, ...scielo, ...openalex, ...trials, ...fda, ...nice, ...who];
+  return [...lilacs, ...scielo, ...openalex, ...trials, ...fda, ...nice, ...who] as Fonte[];
 }
 
 // ── CAMADA 5: Regulatórios brasileiros + segurança do paciente ────────────────
-async function buscarRegulatoriosBR(especialidade: string): Promise<any[]> {
+async function buscarRegulatoriosBR(especialidade: string): Promise<Fonte[]> {
   const label = ESPECIALIDADE_LABELS[especialidade];
   const listaBR = SITES_REGULATORIOS_BR.map((s) => `${s.sigla} (${s.site}): ${s.foco}`).join("\n");
   const listaSeg = SITES_SEGURANCA_PACIENTE.map((s) => `${s.sigla} (${s.site}): ${s.foco}`).join("\n");
   try {
-    const response = await (getOpenAI().chat.completions.create as any)({
+    const response = await (getOpenAI().chat.completions.create as unknown as (
+      args: Record<string, unknown>
+    ) => Promise<ChatCompletionResposta>)({
       model: "gpt-4o-search-preview",
       max_tokens: 1200,
       messages: [{
@@ -207,8 +257,8 @@ Inclua APENAS itens com URL verificável. Retorne APENAS o array JSON.`,
     });
     const texto = response.choices[0].message.content ?? "[]";
     const clean = texto.replace(/```json|```/g, "").trim();
-    const dados = JSON.parse(clean.startsWith("[") ? clean : `[${clean}]`);
-    return dados.filter((d: any) => d.url && d.titulo).map((d: any) => ({
+    const dados: ItemBusca[] = JSON.parse(clean.startsWith("[") ? clean : `[${clean}]`);
+    return dados.filter((d: ItemBusca) => d.url && d.titulo).map((d: ItemBusca) => ({
       origem: "regulatorio",
       titulo: d.titulo,
       journal: d.organizacao ?? "",
@@ -225,7 +275,7 @@ Inclua APENAS itens com URL verificável. Retorne APENAS o array JSON.`,
 // Guarda ANTI-INVENÇÃO (no código, não confia só no prompt): garante que todo link
 // e PMID de um tópico realmente exista nas fontes coletadas. Se o modelo inventou
 // uma URL/PMID, ela é descartada — preferimos sem link a com link fabricado.
-function sanearTopicos(topicos: any[], fontes: any[]): any[] {
+function sanearTopicos(topicos: Topico[], fontes: Fonte[]): Topico[] {
   const urlsReais = new Set(fontes.map((f) => String(f.url || "").trim().toLowerCase()).filter(Boolean));
   const pmidsReais = new Set(fontes.map((f) => String(f.pmid || "").trim()).filter(Boolean));
   return (Array.isArray(topicos) ? topicos : []).map((t) => {
@@ -243,7 +293,7 @@ function sanearTopicos(topicos: any[], fontes: any[]): any[] {
 // confronta cada tópico com as fontes e DERRUBA o que estiver exagerado, não sustentado
 // pela fonte, mal atribuído ou pouco relevante p/ especialista. Corrige imprecisões.
 // Fail-safe: em erro/vazio devolve os tópicos originais (nunca zera a semana).
-async function revisarTopicos(topicos: any[], fontesTexto: string, label: string): Promise<any[]> {
+async function revisarTopicos(topicos: Topico[], fontesTexto: string, label: string): Promise<Topico[]> {
   if (!Array.isArray(topicos) || topicos.length === 0) return topicos ?? [];
   const prompt = `Você é um revisor SÊNIOR e CÉTICO de ${label} (nível editor de revista médica e parecerista de banca).
 
@@ -279,7 +329,7 @@ Retorne APENAS JSON: {"topicos": [ ...os aprovados e corrigidos, mesmos campos d
 // Reescreve o RESUMO do topo a partir dos tópicos JÁ FINALIZADOS (pós-revisão e
 // saneamento). Sem isso, o resumo descrevia o rascunho antigo e ficava desconectado
 // do que aparece embaixo. Fail-safe: em erro mantém o resumo original.
-async function resumirDosTopicos(topicos: any[], label: string, semana: string, original: string): Promise<string> {
+async function resumirDosTopicos(topicos: Topico[], label: string, semana: string, original: string): Promise<string> {
   if (!Array.isArray(topicos) || topicos.length === 0) return original;
   const lista = topicos.map((t, i) => `${i + 1}. ${t.titulo}${t.descricao ? ` — ${t.descricao}` : ""}`).join("\n");
   const prompt = `Estes são os tópicos FINAIS do boletim de ${label} desta semana (${semana}):
@@ -307,13 +357,13 @@ Escreva um RESUMO de 2-3 frases que sintetize FIELMENTE o que está nesses tópi
 // siglas, sentido, ordem nem estrutura. Os campos de FONTE (fonte_url, pmid, nível,
 // fonte_nome/tipo) são restaurados à força do original → o sistema de referências fica
 // intocado. Fail-safe: qualquer erro/contagem divergente devolve o conteúdo sem alteração.
-async function revisarPortugues(sintese: any, label: string): Promise<any> {
+async function revisarPortugues(sintese: Sintese, label: string): Promise<Sintese> {
   try {
-    const topicos = Array.isArray(sintese.topicos) ? sintese.topicos : [];
+    const topicos: Topico[] = Array.isArray(sintese.topicos) ? sintese.topicos : [];
     // envia APENAS os campos de texto humano (nada de URL/PMID/nível)
     const payload = {
       resumo: sintese.resumo ?? "",
-      topicos: topicos.map((t: any) => ({
+      topicos: topicos.map((t: Topico) => ({
         titulo: t.titulo ?? "",
         descricao: t.descricao ?? "",
         relevancia_clinica: t.relevancia_clinica ?? "",
@@ -335,12 +385,12 @@ Retorne APENAS JSON: {"resumo":"...","topicos":[{"titulo":"...","descricao":"...
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
     const revT = Array.isArray(parsed.topicos) ? parsed.topicos : [];
     if (revT.length !== topicos.length) return sintese; // desalinhou → não arrisca
-    const txt = (novo: any, orig: string) =>
+    const txt = (novo: unknown, orig: string | undefined) =>
       typeof novo === "string" && novo.trim() ? novo.trim() : orig;
     return {
       ...sintese,
       resumo: txt(parsed.resumo, sintese.resumo ?? ""),
-      topicos: topicos.map((t: any, i: number) => ({
+      topicos: topicos.map((t: Topico, i: number) => ({
         ...t, // preserva fonte_url, pmid, nivel_evidencia, fonte_nome, fonte_tipo etc.
         titulo: txt(revT[i]?.titulo, t.titulo),
         descricao: txt(revT[i]?.descricao, t.descricao),
@@ -352,7 +402,7 @@ Retorne APENAS JSON: {"resumo":"...","topicos":[{"titulo":"...","descricao":"...
   }
 }
 
-async function sintetizar(especialidade: string, todasFontes: any[]): Promise<any> {
+async function sintetizar(especialidade: string, todasFontes: Fonte[]): Promise<Sintese> {
   const label = ESPECIALIDADE_LABELS[especialidade];
   const semana = getSemanaAtual();
   const ordenadas = [
@@ -434,6 +484,7 @@ Retorne APENAS JSON válido:
       await new Promise((res) => setTimeout(res, 2000 * tentativas));
     }
   }
+  throw new Error("sintetizar: falha após 3 tentativas"); // inalcançável (loop sempre retorna/lança)
 }
 
 // ── ROUTE HANDLER ─────────────────────────────────────────────────────────────
@@ -447,7 +498,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServiceClient();
   const semana = getSemanaAtual();
-  const resultados: Record<string, any> = {};
+  const resultados: Record<string, unknown> = {};
 
   for (const especialidade of ESPECIALIDADES) {
     try {
@@ -517,9 +568,9 @@ export async function POST(request: NextRequest) {
         },
         topicos: sintese.topicos?.length ?? 0,
       };
-    } catch (err: any) {
+    } catch (err) {
       console.error(`[UPDATES][${especialidade}] Erro:`, err);
-      resultados[especialidade] = { status: "erro", mensagem: err.message };
+      resultados[especialidade] = { status: "erro", mensagem: (err as { message?: string })?.message };
     }
   }
 

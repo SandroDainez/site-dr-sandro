@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { AtualizacaoData } from "@/lib/content";
-import BoletimCard from "./BoletimCard";
+import BoletimCard, { type BoletimUpdate } from "./BoletimCard";
 import { UpdateCard } from "@/app/atualizacoes/AtualizacoesGrid";
 import { colStyle } from "@/lib/card-grid";
 
@@ -39,7 +39,7 @@ function manualParaBoletim(m: AtualizacaoData) {
 }
 
 type Item =
-  | { kind: "ai"; date: string; area: string; raw: any }
+  | { kind: "ai"; date: string; area: string; raw: BoletimUpdate }
   | { kind: "manual"; date: string; area: string; areas?: string[]; raw: AtualizacaoData };
 
 export default function AtualizacoesFeed({
@@ -51,7 +51,7 @@ export default function AtualizacoesFeed({
   logos = {},
   cols = 3,
 }: {
-  ai?: any[];
+  ai?: BoletimUpdate[];
   manuais?: AtualizacaoData[];
   showTabs?: boolean;
   limit?: number;
@@ -64,7 +64,7 @@ export default function AtualizacoesFeed({
 
   // Só o boletim MAIS RECENTE por especialidade no feed — as semanas anteriores
   // ficam no histórico (/atualizacoes-semanais). Evita "novo + velho" da mesma área.
-  const aiRecentes: any[] = [];
+  const aiRecentes: BoletimUpdate[] = [];
   const vistos = new Set<string>();
   for (const u of [...ai].sort((a, b) => String(b.data_publicacao ?? "").localeCompare(String(a.data_publicacao ?? "")))) {
     const esp = String(u.especialidade ?? "");
@@ -74,7 +74,7 @@ export default function AtualizacoesFeed({
   }
 
   const items: Item[] = [
-    ...aiRecentes.map((u) => ({ kind: "ai" as const, date: (u.data_publicacao ?? "").slice(0, 10), area: espToSite(u.especialidade), raw: u })),
+    ...aiRecentes.map((u) => ({ kind: "ai" as const, date: (u.data_publicacao ?? "").slice(0, 10), area: espToSite(u.especialidade ?? ""), raw: u })),
     ...manuais.filter((m) => m.titulo).map((m) => ({ kind: "manual" as const, date: m.data ?? "", area: m.area, areas: m.areas, raw: m })),
   ];
 

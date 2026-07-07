@@ -9,6 +9,14 @@ export const maxDuration = 300;
 
 type Meta = { fonte_tipo: string; fonte_titulo: string; fonte_url: string; area?: string | null };
 type Fonte = { fonteId: string; texto: string; meta: Meta };
+type BoletimTopico = {
+  titulo?: string;
+  descricao?: string;
+  relevancia_clinica?: string;
+  nivel_evidencia?: string;
+  fonte_nome?: string;
+  fonte_url?: string;
+};
 
 const strip = (s?: string) => (s || "").replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/gi, " ").replace(/\s+/g, " ").trim();
 // Para texto que NÃO é HTML (PDF/livros/boletins): só normaliza espaços.
@@ -40,11 +48,11 @@ export async function POST(request: NextRequest) {
   const [protos, procs, acervo, cursos, atus] = await Promise.all([
     getProtocolos(), getProcedimentos(), getAcervo(), getCursos(), getAtualizacoes(),
   ]);
-  for (const p of protos) if (p.titulo) add(`proto:${p.id}`, `${p.descricao} ${(p as any).conteudo || ""}`, { fonte_tipo: "Protocolo", fonte_titulo: p.titulo, fonte_url: "/protocolos", area: p.area });
+  for (const p of protos) if (p.titulo) add(`proto:${p.id}`, `${p.descricao} ${(p as { conteudo?: string }).conteudo || ""}`, { fonte_tipo: "Protocolo", fonte_titulo: p.titulo, fonte_url: "/protocolos", area: p.area });
   for (const p of procs) if (p.titulo) add(`proc:${p.id}`, p.descricao, { fonte_tipo: "Procedimento", fonte_titulo: p.titulo, fonte_url: "/procedimentos", area: p.area });
   for (const a of acervo) if (a.titulo) add(`acervo:${a.id}`, a.descricao, { fonte_tipo: "Material", fonte_titulo: a.titulo, fonte_url: "/acervo", area: a.area });
   for (const c of cursos) if (c.titulo) add(`curso:${c.id}`, `${c.resumo} ${c.descricao}`, { fonte_tipo: "Curso", fonte_titulo: c.titulo, fonte_url: `/cursos/${c.id}`, area: c.area });
-  for (const a of atus) if (a.titulo) add(`atu:${a.id}`, (a as any).conteudo || (a as any).resumo, { fonte_tipo: "Atualização", fonte_titulo: a.titulo, fonte_url: "/atualizacoes", area: a.area });
+  for (const a of atus) if (a.titulo) { const au = a as { conteudo?: string; resumo?: string }; add(`atu:${a.id}`, au.conteudo || au.resumo || "", { fonte_tipo: "Atualização", fonte_titulo: a.titulo, fonte_url: "/atualizacoes", area: a.area }); }
 
   // 1b) Biblioteca de referência (livros, artigos, PDFs, diretrizes)
   try {
@@ -59,8 +67,8 @@ export async function POST(request: NextRequest) {
   try {
     const { data: ups } = await supabase.from("medical_updates").select("id,especialidade,topicos").eq("publicado", true).limit(200);
     for (const u of ups ?? []) {
-      const tps = Array.isArray(u.topicos) ? u.topicos : [];
-      tps.forEach((t: any, i: number) => {
+      const tps: BoletimTopico[] = Array.isArray(u.topicos) ? u.topicos : [];
+      tps.forEach((t: BoletimTopico, i: number) => {
         const texto = `${t.descricao || ""} ${t.relevancia_clinica || ""}${t.nivel_evidencia ? ` [Nível: ${t.nivel_evidencia}]` : ""}`;
         if (t.titulo && stripTexto(texto)) add(`bol:${u.id}:${i}`, `${t.titulo}\n${texto}`, { fonte_tipo: "Boletim clínico", fonte_titulo: t.fonte_nome || t.titulo, fonte_url: t.fonte_url || "/atualizacoes-semanais", area: u.especialidade }, false);
       });

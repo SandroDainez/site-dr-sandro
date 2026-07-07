@@ -76,7 +76,6 @@ function Card({ item }: { item: AcervoItemData }) {
             yt ? (
               <iframe src={`https://www.youtube.com/embed/${yt}?autoplay=1&rel=0&playsinline=1`} title={item.titulo} className="absolute inset-0 h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen />
             ) : (
-              // eslint-disable-next-line jsx-a11y/media-has-caption
               <video src={item.videoUrl} controls autoPlay playsInline className="absolute inset-0 h-full w-full bg-black object-contain" />
             )
           ) : (

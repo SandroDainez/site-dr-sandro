@@ -12,7 +12,7 @@ async function requireAdmin() {
   const pw = process.env.ADMIN_PASSWORD;
   if (!pw || token !== createHash("sha256").update(pw).digest("hex")) throw new Error("Não autorizado");
 }
-type Result = { ok: boolean; data?: any; error?: string };
+type Result = { ok: boolean; data?: unknown; error?: string };
 
 export async function listarQuestoes(): Promise<Result> {
   try {
@@ -62,7 +62,7 @@ export async function gerarQuestoesIA(tema: string, area: string, quantidade: nu
     try {
       const vec = await embedUm(`${tema} ${area}`);
       const { data: trechos } = await sb.rpc("match_kb", { query_embedding: toVector(vec), match_count: 8 });
-      contexto = (trechos ?? []).map((t: any, i: number) => `[${i + 1}] ${t.conteudo}`).join("\n\n");
+      contexto = (trechos ?? []).map((t: { conteudo: string }, i: number) => `[${i + 1}] ${t.conteudo}`).join("\n\n");
     } catch { contexto = ""; }
     if (!contexto) return { ok: false, error: "Sem conteúdo no portal sobre esse tema ainda. Adicione referências/boletins e reindexe o assistente antes de gerar questões." };
 
@@ -82,14 +82,15 @@ Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["texto 1","texto 
     const openai = getOpenAI();
     const r = await openai.chat.completions.create({ model: "gpt-4o", messages: [{ role: "user", content: prompt }], temperature: 0.3, max_tokens: 2500, response_format: { type: "json_object" } });
     const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
-    const qs: any[] = Array.isArray(parsed.questoes) ? parsed.questoes : [];
+    type QRaw = { enunciado?: unknown; opcoes?: unknown; correta?: unknown; explicacao?: unknown };
+    const qs: QRaw[] = Array.isArray(parsed.questoes) ? parsed.questoes : [];
     if (qs.length === 0) return { ok: false, error: "A IA não gerou questões. Tente outro tema." };
 
     // remove SÓ rótulo de enumeração ("A) ", "1. ", "(B) ") — exige terminador )/./: + ESPAÇO.
     // NÃO remove número que faz parte do valor (ex.: "0,3 mg/kg", "2 mg/kg", "0.2 mg/kg").
-    const limpaOp = (o: any) => String(o).replace(/^\s*\(?[A-Ea-e0-9]{1,2}\)?\s*[).:-]\s+/, "").trim();
+    const limpaOp = (o: unknown) => String(o).replace(/^\s*\(?[A-Ea-e0-9]{1,2}\)?\s*[).:-]\s+/, "").trim();
     // resolve a correta seja índice, letra ("B") ou o texto da alternativa
-    const resolveCorreta = (c: any, ops: string[]): number => {
+    const resolveCorreta = (c: unknown, ops: string[]): number => {
       if (typeof c === "number" && c >= 0 && c < ops.length) return c;
       const s = String(c ?? "").trim();
       if (/^\d+$/.test(s)) return Math.min(Number(s), ops.length - 1);
@@ -100,7 +101,7 @@ Retorne APENAS JSON: {"questoes":[{"enunciado":"...","opcoes":["texto 1","texto 
       return i >= 0 ? i : 0;
     };
     const linhas = qs.filter((q) => q.enunciado && Array.isArray(q.opcoes) && q.opcoes.length >= 2).map((q) => {
-      const opcoes = q.opcoes.map(limpaOp);
+      const opcoes = (q.opcoes as unknown[]).map(limpaOp);
       return { enunciado: String(q.enunciado), opcoes, correta: resolveCorreta(q.correta, opcoes), explicacao: q.explicacao ? String(q.explicacao) : null, area: area || null, tema: tema.trim(), nivel: null, fonte_url: null, ativo: false };
     });
     const { error } = await sb.from("questoes").insert(linhas);

@@ -100,6 +100,7 @@ export default function CursoView({ aulas, cursoId, logado, concluidasIniciais =
     if (logado) return;
     const s = new Set<string>();
     for (const a of aulas) { try { if (localStorage.getItem(lsKey(cursoId, a.id)) === "1") s.add(a.id); } catch {} }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDone(s);
   }, [logado, cursoId, aulas]);
 

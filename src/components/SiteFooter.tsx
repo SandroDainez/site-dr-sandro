@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSiteConfig, getUiTexts } from "@/lib/content";
 import { uiText } from "@/lib/ui-texts";
 import { NAV_GROUPS, resolveHref } from "@/lib/nav-structure";
@@ -34,12 +35,12 @@ export default async function SiteFooter() {
       <div className="mx-auto w-full max-w-7xl px-6">
         {/* Atalho claro para o início */}
         <div className="flex justify-center">
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-accent transition hover:border-accent/70 hover:bg-accent/20"
           >
             <Home className="h-4 w-4" /> {uiText(ui, "footerVoltar")}
-          </a>
+          </Link>
         </div>
 
         {/* Mapa do site */}

@@ -28,6 +28,7 @@ export default function EstudoSession() {
     setQs(s.questoes); setPendentes(s.pendentes); setCarregando(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { carregar(area); }, [area, carregar]);
 
   const q = qs[idx];

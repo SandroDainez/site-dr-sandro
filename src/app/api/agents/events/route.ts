@@ -5,6 +5,41 @@ import { verificarCronSecret, PRINCIPIOS_AGENTE } from "@/lib/agents/utils";
 
 export const maxDuration = 300;
 
+// Evento cru vindo da busca (JSON solto da IA) — campos variam, quase tudo opcional.
+type Evento = {
+  titulo?: string;
+  descricao?: string;
+  especialidades?: string[];
+  data_inicio?: string;
+  data_fim?: string | null;
+  local_nome?: string | null;
+  cidade?: string | null;
+  pais?: string | null;
+  modalidade?: string | null;
+  url_oficial?: string;
+  organizador?: string | null;
+  slug_marco?: string;
+};
+
+// Linha de medical_events lida do Supabase (subset selecionado). `id` é opcional
+// porque o mesmo índice também guarda um registro recém-inserido montado à mão
+// (dedup dentro da própria rodada), que ainda não carrega o id do banco.
+type EventoRow = {
+  id?: string;
+  titulo: string;
+  data_inicio: string;
+  data_fim?: string | null;
+  data_confirmada?: boolean | null;
+  url_oficial?: string | null;
+  slug_marco?: string | null;
+};
+
+// Item de classificação retornado pela IA.
+type ItemClassificacao = { i?: number; manter?: boolean; especialidades?: string[] };
+
+// Forma mínima da resposta de chat.completions que usamos.
+type ChatCompletionResposta = { choices: { message: { content: string | null } }[] };
+
 function getJanelaEventos() {
   const hoje = new Date();
   const anoAtual = hoje.getFullYear();
@@ -44,7 +79,7 @@ function normTitulo(t: string): string {
   return (t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/20\d\d/g, "").replace(/[^a-z]+/g, " ").trim();
 }
-function diffDias(a: string, b: string): number {
+function diffDias(a: string | undefined, b: string | undefined): number {
   return Math.abs((new Date(a + "T12:00:00").getTime() - new Date(b + "T12:00:00").getTime()) / 86400000);
 }
 
@@ -92,11 +127,13 @@ function getFocos(hoje: string, fimJanela: string): { id: string; instrucao: str
 }
 
 // Uma busca focada: web search com retry + parsing robusto + fallback sem busca.
-async function buscarFoco(instrucao: string): Promise<any[]> {
+async function buscarFoco(instrucao: string): Promise<Evento[]> {
   const prompt = `Você é especialista em eventos científicos médicos.\n\n${PRINCIPIOS_AGENTE}\n\n${instrucao}`;
   for (let t = 0; t < 2; t++) {
     try {
-      const response = await (getOpenAI().chat.completions.create as any)({
+      const response = await (getOpenAI().chat.completions.create as unknown as (
+        args: Record<string, unknown>
+      ) => Promise<ChatCompletionResposta>)({
         model: "gpt-4o-search-preview",
         max_tokens: 4000,
         messages: [{ role: "user", content: prompt }],
@@ -128,7 +165,7 @@ async function buscarFoco(instrucao: string): Promise<any[]> {
 }
 
 // Roda todas as buscas focadas em paralelo e junta os resultados, deduplicando.
-async function pesquisarEventos(): Promise<any[]> {
+async function pesquisarEventos(): Promise<Evento[]> {
   const { hoje, fimJanela } = getJanelaEventos();
   const focos = getFocos(hoje, fimJanela);
   const resultados = await Promise.all(focos.map((f) => buscarFoco(f.instrucao)));
@@ -136,7 +173,7 @@ async function pesquisarEventos(): Promise<any[]> {
 
   // Dedup: por slug_marco, senão por url_oficial, senão por título+data.
   const vistos = new Set<string>();
-  const unicos: any[] = [];
+  const unicos: Evento[] = [];
   for (const e of todos) {
     const chave = (e.slug_marco?.trim() || e.url_oficial?.trim() || `${e.titulo}|${e.data_inicio}`).toLowerCase();
     if (vistos.has(chave)) continue;
@@ -156,7 +193,7 @@ const TERMOS_FORA_ESCOPO = [
   "ginecolog", "obstetr", "ortoped", "dermatolog", "oftalmolog", "urolog", "psiquiatr",
   "radiolog", "oncolog", "endocrinolog", "reumatolog", "geriatr", "estética",
 ];
-function foraDoEscopo(ev: any): boolean {
+function foraDoEscopo(ev: Evento): boolean {
   const txt = `${ev.titulo || ""} ${ev.organizador || ""} ${ev.descricao || ""}`.toLowerCase();
   return TERMOS_FORA_ESCOPO.some((t) => txt.includes(t));
 }
@@ -165,7 +202,7 @@ function foraDoEscopo(ev: any): boolean {
 // Se o TÍTULO nomeia claramente UMA única das 3 áreas, força essa área. Quando o
 // título aponta zero ou múltiplas áreas (ex.: ISICEM = intensiva+emergência), mantém
 // a escolha do LLM. Conserta casos como "Congreso de Anestesiología" rotulado errado.
-function corrigirEspecialidadePorTitulo(ev: any, espLLM: string[]): string[] {
+function corrigirEspecialidadePorTitulo(ev: Evento, espLLM: string[]): string[] {
   const t = `${ev.titulo || ""}`.toLowerCase();
   const hits: string[] = [];
   if (/anest|anaest/.test(t)) hits.push("anestesiologia");
@@ -177,7 +214,7 @@ function corrigirEspecialidadePorTitulo(ev: any, espLLM: string[]): string[] {
 // CLASSIFICADOR (passe dedicado, estrito): decide MANTER e atribui a especialidade
 // CORRETA — não confia na escolha do buscador. Só anestesiologia / terapia intensiva /
 // medicina de emergência PARA MÉDICOS; conservador (especialidade primária do evento).
-async function classificarEventos(eventos: any[]): Promise<any[]> {
+async function classificarEventos(eventos: Evento[]): Promise<Evento[]> {
   if (eventos.length === 0) return [];
   const lista = eventos.map((e, i) => `[${i}] "${e.titulo}" | organizador: ${e.organizador || "?"} | ${e.descricao || ""}`).join("\n");
   const prompt = `Você classifica eventos científicos para um site de médicos das especialidades ANESTESIOLOGIA, TERAPIA INTENSIVA (medicina intensiva) e MEDICINA DE EMERGÊNCIA.
@@ -199,10 +236,10 @@ Retorne APENAS JSON: {"itens":[{"i":0,"manter":true,"especialidades":["anestesio
       response_format: { type: "json_object" },
     });
     const data = JSON.parse(r.choices[0].message.content ?? "{}");
-    const itens: any[] = Array.isArray(data.itens) ? data.itens : [];
-    const porIdx = new Map<number, any>(itens.map((x) => [Number(x.i), x]));
+    const itens: ItemClassificacao[] = Array.isArray(data.itens) ? data.itens : [];
+    const porIdx = new Map<number, ItemClassificacao>(itens.map((x) => [Number(x.i), x]));
     const validas = new Set(["anestesiologia", "terapia_intensiva", "emergencias"]);
-    const out: any[] = [];
+    const out: Evento[] = [];
     eventos.forEach((ev, i) => {
       const c = porIdx.get(i);
       if (c && c.manter === false) return; // fora de escopo → descarta
@@ -325,10 +362,10 @@ export async function POST(request: NextRequest) {
     .select("id,titulo,data_inicio,data_fim,data_confirmada,url_oficial,slug_marco")
     .eq("ativo", true)
     .gte("data_inicio", hoje);
-  const porSlug = new Map<string, any>();
-  const porUrl = new Map<string, any>();
-  const porNorm = new Map<string, any[]>();
-  const indexar = (r: any) => {
+  const porSlug = new Map<string, EventoRow>();
+  const porUrl = new Map<string, EventoRow>();
+  const porNorm = new Map<string, EventoRow[]>();
+  const indexar = (r: EventoRow) => {
     if (r.slug_marco) porSlug.set(r.slug_marco, r);
     if (r.url_oficial) porUrl.set(String(r.url_oficial).trim().toLowerCase(), r);
     const k = normTitulo(r.titulo);
@@ -348,7 +385,7 @@ export async function POST(request: NextRequest) {
     const marco = MARCOS.find((m) => m.chk.test(ev.titulo || ""));
     if (marco) { slug = marco.slug; ev.especialidades = marco.esp; }
     // Casa em memória: slug-marco → URL exata → título normalizado + data próxima (±75d).
-    let existente: any = null;
+    let existente: EventoRow | null = null;
     if (slug) existente = porSlug.get(slug) ?? null;
     if (!existente) existente = porUrl.get(String(ev.url_oficial).trim().toLowerCase()) ?? null;
     if (!existente) {
@@ -375,11 +412,11 @@ export async function POST(request: NextRequest) {
       if (marcoPendente) {
         // Verifica SEMPRE no site oficial canônico salvo (não na URL volátil que o
         // agente trouxe — que pode ser um agregador com data chutada).
-        const verificada = await verificarDataNaFonte(existente.url_oficial, ev.data_inicio);
+        const verificada = await verificarDataNaFonte(existente.url_oficial ?? "", ev.data_inicio ?? "");
         if (!verificada) {
           // não confirma: mantém a data provisória e o status "a confirmar"
-          novaData = existente.data_inicio;
-          novaDataFim = existente.data_fim;
+          novaData = existente.data_inicio ?? null;
+          novaDataFim = existente.data_fim ?? null;
           confirmar = false;
         }
       }

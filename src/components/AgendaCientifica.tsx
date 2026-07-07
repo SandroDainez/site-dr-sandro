@@ -6,6 +6,21 @@ import CalendarioCientifico, { type EventoUnificado } from "./CalendarioCientifi
 
 const espToSite = (e?: Especialidade): string | null => (!e ? null : e === "terapia_intensiva" ? "ti" : e);
 
+interface MedicalEventRow {
+  id: string | number;
+  titulo: string;
+  data_inicio: string;
+  data_fim?: string | null;
+  cidade?: string | null;
+  local_nome?: string | null;
+  pais?: string | null;
+  modalidade?: string | null;
+  organizador?: string | null;
+  url_oficial: string;
+  data_confirmada?: boolean | null;
+  selo?: string | null;
+}
+
 // Agenda ÚNICA: junta os cursos/imersões do médico (EventoData, Blob) com os
 // congressos científicos (medical_events, Supabase) num só calendário + lista.
 // Com `especialidade`, mostra só os congressos daquela área (calendário do hub).
@@ -58,7 +73,7 @@ export default async function AgendaCientifica({
         .limit(200);
       if (especialidade) query = query.contains("especialidades", [especialidade]);
       const { data } = await query;
-      dosCongressos = (data ?? []).map((e: any) => ({
+      dosCongressos = ((data ?? []) as MedicalEventRow[]).map((e) => ({
         id: `cong-${e.id}`,
         titulo: e.titulo,
         data_inicio: e.data_inicio,
@@ -85,7 +100,7 @@ export default async function AgendaCientifica({
     const siteArea = espToSite(especialidade);
     dasFormacoes = cursosPagina
       .filter((c) => c.titulo && c.data && c.data >= hojeISO)
-      .filter((c) => !siteArea || c.area === siteArea || c.area === "geral" || (c.areas?.includes(siteArea as any) ?? false))
+      .filter((c) => !siteArea || c.area === siteArea || c.area === "geral" || (c.areas?.includes(siteArea as "emergencias" | "ti" | "anestesiologia") ?? false))
       .map((c) => ({
         id: `cursopg-${c.id}`,
         titulo: c.titulo,

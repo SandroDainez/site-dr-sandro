@@ -29,7 +29,7 @@ export async function getSessao(area?: string, tamanho = 15): Promise<{ questoes
   for (const c of cards ?? []) vistas.set(c.questao_id, c.proxima_revisao);
   const pendentes = (cards ?? []).filter((c) => c.proxima_revisao <= hoje).length;
 
-  const todas = (qResp.data ?? []) as any[];
+  const todas = (qResp.data ?? []) as QuestaoSessao[];
   const vencidas = todas.filter((q) => vistas.has(q.id) && (vistas.get(q.id) as string) <= hoje);
   const novas = todas.filter((q) => !vistas.has(q.id));
 

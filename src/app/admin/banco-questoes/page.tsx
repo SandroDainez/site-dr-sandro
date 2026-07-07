@@ -1,5 +1,5 @@
 import AdminHelp from "@/components/admin/AdminHelp";
-import BancoEditor from "./BancoEditor";
+import BancoEditor, { type Q } from "./BancoEditor";
 import { listarQuestoes } from "./actions";
 
 export default async function AdminBancoQuestoesPage() {
@@ -13,7 +13,7 @@ export default async function AdminBancoQuestoesPage() {
       <AdminHelp>
         Crie questões manualmente ou <strong>gere por IA</strong> a partir do seu conteúdo (boletins, referências). As geradas por IA entram como <strong>rascunho</strong> — revise a correção e <strong>ative</strong> antes de liberar aos alunos. O aluno responde uma de cada vez; o sistema agenda a revisão pelo desempenho (acertou → volta mais tarde; errou → volta logo).
       </AdminHelp>
-      {r.ok ? <BancoEditor inicial={r.data ?? []} /> : <p className="text-sm text-red-400">{r.error}</p>}
+      {r.ok ? <BancoEditor inicial={(r.data as Q[] | undefined) ?? []} /> : <p className="text-sm text-red-400">{r.error}</p>}
     </div>
   );
 }

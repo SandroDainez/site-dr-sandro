@@ -18,11 +18,37 @@ const ORIGEM_BADGE: Record<string, { label: string; css: string }> = {
 
 const TIPO_DESTAQUE = ["guideline", "posicionamento", "alerta", "resolucao", "regulatorio"];
 
-export default function UpdateContent({ update }: { update: any }) {
-  const fontesPorOrigem = (update.fontes ?? []).reduce((acc: Record<string, number>, f: any) => {
-    acc[f.origem] = (acc[f.origem] ?? 0) + 1;
+interface UpdateFonte {
+  origem?: string;
+  titulo?: string;
+  journal?: string;
+  ano?: number | string;
+  url?: string;
+}
+
+interface UpdateTopico {
+  titulo?: string;
+  descricao?: string;
+  relevancia_clinica?: string;
+  fonte_tipo?: string;
+  fonte_nome?: string;
+  fonte_url?: string;
+  pmid?: string;
+  nivel_evidencia?: string;
+}
+
+export interface UpdateContentData {
+  resumo?: string;
+  topicos?: UpdateTopico[];
+  fontes?: UpdateFonte[];
+}
+
+export default function UpdateContent({ update }: { update: UpdateContentData }) {
+  const fontesPorOrigem = (update.fontes ?? []).reduce((acc: Record<string, number>, f: UpdateFonte) => {
+    const k = f.origem ?? "";
+    acc[k] = (acc[k] ?? 0) + 1;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
   return (
     <div>
@@ -40,15 +66,15 @@ export default function UpdateContent({ update }: { update: any }) {
         })}
       </div>
 
-      {update.topicos?.length > 0 && (
+      {update.topicos && update.topicos.length > 0 && (
         <div className="mt-6 space-y-3">
-          {update.topicos.map((topico: any, i: number) => {
-            const isDestaque = TIPO_DESTAQUE.includes(topico.fonte_tipo);
+          {update.topicos.map((topico: UpdateTopico, i: number) => {
+            const isDestaque = TIPO_DESTAQUE.includes(topico.fonte_tipo ?? "");
             // Link da fonte: URL direta do tópico, ou PubMed (PMID), ou casa o nome
             // da fonte com a lista de referências (que tem as URLs).
             const fontes = update.fontes ?? [];
             const matchFonte = topico.fonte_nome
-              ? fontes.find((f: any) => f.journal && (f.journal === topico.fonte_nome || f.journal.includes(topico.fonte_nome) || topico.fonte_nome.includes(f.journal)))
+              ? fontes.find((f: UpdateFonte) => f.journal && (f.journal === topico.fonte_nome || f.journal.includes(topico.fonte_nome!) || topico.fonte_nome!.includes(f.journal)))
               : null;
             const fonteUrl: string | null =
               topico.fonte_url ||
@@ -89,14 +115,14 @@ export default function UpdateContent({ update }: { update: any }) {
         </div>
       )}
 
-      {update.fontes?.length > 0 && (
+      {update.fontes && update.fontes.length > 0 && (
         <details className="group mt-5">
           <summary className="cursor-pointer list-none text-xs font-medium uppercase tracking-wide text-white/45 transition hover:text-white/70">
             Referências consultadas ({update.fontes.length}) <span className="ml-1 inline-block transition group-open:rotate-180">▾</span>
           </summary>
           <ul className="mt-3 space-y-2">
-            {update.fontes.map((fonte: any, i: number) => {
-              const badge = ORIGEM_BADGE[fonte.origem];
+            {update.fontes.map((fonte: UpdateFonte, i: number) => {
+              const badge = ORIGEM_BADGE[fonte.origem ?? ""];
               return (
                 <li key={i} className="flex items-start gap-2 text-sm">
                   <span className="mt-0.5 shrink-0 text-white/30">{i + 1}.</span>

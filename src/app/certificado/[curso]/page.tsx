@@ -24,7 +24,7 @@ export default async function CertificadoPage({ params }: { params: Promise<{ cu
     supabase.from("profiles").select("nome").eq("id", user.id).maybeSingle(),
     supabase.from("quiz_attempts").select("id").eq("user_id", user.id).eq("curso_id", cursoId).eq("aprovado", true).limit(1),
   ]);
-  const feitas = new Set((prog ?? []).map((r: any) => r.aula_id));
+  const feitas = new Set((prog ?? []).map((r: { aula_id: string }) => r.aula_id));
   const total = curso.aulas.length;
   const quizAprovado = !temQuiz || (ap ?? []).length > 0;
   const completo = total > 0 && curso.aulas.every((a) => feitas.has(a.id)) && quizAprovado;

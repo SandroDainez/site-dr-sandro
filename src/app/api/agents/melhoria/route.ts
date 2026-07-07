@@ -4,17 +4,26 @@ import { verificarCronSecret } from "@/lib/agents/utils";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { getContato } from "@/lib/content";
 
+type Lacuna = { tema?: string; evidencia?: string; sugestao?: string; tipo?: string; prioridade?: string };
+type RelatorioConteudo = {
+  resumo?: string;
+  lacunas?: Lacuna[];
+  perguntas_sem_resposta?: string[];
+  acoes?: string[];
+  dados?: Record<string, number>;
+};
+
 // Envia o relatório por e-mail via Resend (só se RESEND_API_KEY estiver configurado).
 // Destinatário: RELATORIO_EMAIL ou, na falta, o e-mail de contato do site.
-async function enviarPorEmail(resumo: string, conteudo: any, gerado_em: string): Promise<{ ok: boolean; reason: string }> {
+async function enviarPorEmail(resumo: string, conteudo: RelatorioConteudo, gerado_em: string): Promise<{ ok: boolean; reason: string }> {
   const key = process.env.RESEND_API_KEY;
   if (!key) return { ok: false, reason: "sem_RESEND_API_KEY_no_ambiente" };
   let dest = process.env.RELATORIO_EMAIL || "";
   if (!dest) { try { dest = (await getContato()).email || ""; } catch {} }
   if (!dest) return { ok: false, reason: "sem_destinatario (defina RELATORIO_EMAIL ou e-mail de contato)" };
-  const esc = (s: string) => String(s ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const lac = (conteudo.lacunas ?? []).map((l: any) => `<li><b>${esc(l.tema)}</b> <i>(${esc(l.prioridade)})</i> — ${esc(l.sugestao)}</li>`).join("");
-  const acoes = (conteudo.acoes ?? []).map((a: any) => `<li>${esc(a)}</li>`).join("");
+  const esc = (s: unknown) => String(s ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const lac = (conteudo.lacunas ?? []).map((l: Lacuna) => `<li><b>${esc(l.tema)}</b> <i>(${esc(l.prioridade)})</i> — ${esc(l.sugestao)}</li>`).join("");
+  const acoes = (conteudo.acoes ?? []).map((a: string) => `<li>${esc(a)}</li>`).join("");
   const html = `<div style="font-family:system-ui,Arial,sans-serif;max-width:600px">
     <h2 style="margin:0 0 8px">📊 Sugestões de melhoria — MedCampus</h2>
     <p style="color:#555">${esc(gerado_em)}</p>
@@ -51,18 +60,18 @@ export async function POST(request: NextRequest) {
 
   // 1) Buscas SEM resultado (lacunas de conteúdo mais diretas)
   const { data: buscas } = await sb.from("search_queries").select("termo").eq("resultados", 0).gte("created_at", desde);
-  const buscasTop = contar((buscas ?? []).map((b: any) => String(b.termo || "").toLowerCase().trim())).slice(0, 20);
+  const buscasTop = contar((buscas ?? []).map((b: { termo?: string | null }) => String(b.termo || "").toLowerCase().trim())).slice(0, 20);
 
   // 2) Perguntas que o assistente NÃO respondeu (sem fonte no portal)
   const { data: perg } = await sb.from("assistant_queries").select("pergunta").eq("sem_fonte", true).gte("created_at", desde);
-  const pergTop = contar((perg ?? []).map((p: any) => String(p.pergunta || "").trim())).slice(0, 20);
+  const pergTop = contar((perg ?? []).map((p: { pergunta?: string | null }) => String(p.pergunta || "").trim())).slice(0, 20);
 
   // 3) Volume geral (pra contexto)
   const { count: totalBuscas } = await sb.from("search_queries").select("*", { count: "exact", head: true }).gte("created_at", desde);
   const { count: totalPerg } = await sb.from("assistant_queries").select("*", { count: "exact", head: true }).gte("created_at", desde);
 
   const semDados = buscasTop.length === 0 && pergTop.length === 0;
-  let conteudo: any;
+  let conteudo: RelatorioConteudo;
   let resumo: string;
 
   if (semDados) {

@@ -17,7 +17,16 @@ export type LibraryHit = {
   score: number;
 };
 
-type SupabaseLike = { rpc: (fn: string, args: Record<string, unknown>) => any };
+type SupabaseLike = { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown[] | null }> };
+
+// Linha crua vinda das RPCs de busca (hybrid_search / match_kb).
+type KbRow = {
+  conteudo?: unknown;
+  fonte_tipo?: unknown;
+  fonte_titulo?: string | null;
+  fonte_url?: string | null;
+  similaridade?: unknown;
+};
 
 export async function searchInternalLibrary(
   supabase: SupabaseLike,
@@ -28,16 +37,16 @@ export async function searchInternalLibrary(
   // BUSCA HÍBRIDA (vetorial + lexical, fundidos por RRF) — robusta a termo exato (sigla,
   // nome de droga, dose). `similaridade` é o cosine (p/ thresholds); a ordem já vem por RRF.
   // Fallback p/ match_kb (vetorial puro) se a RPC híbrida não existir/falhar.
-  let data: any[] | null = null;
+  let data: KbRow[] | null = null;
   try {
     const r = await supabase.rpc("hybrid_search", { query_text: query, query_embedding: toVector(vec), match_count: limit });
-    data = r.data ?? null;
+    data = (r.data as KbRow[] | null) ?? null;
   } catch { data = null; }
   if (!data) {
     const r = await supabase.rpc("match_kb", { query_embedding: toVector(vec), match_count: limit });
-    data = (r.data ?? []).filter((t: any) => Number(t.similaridade ?? 0) >= LIB_FLOOR);
+    data = ((r.data as KbRow[] | null) ?? []).filter((t: KbRow) => Number(t.similaridade ?? 0) >= LIB_FLOOR);
   }
-  return (data ?? []).map((t: any) => ({
+  return (data ?? []).map((t: KbRow) => ({
     conteudo: String(t.conteudo ?? ""),
     fonte_tipo: String(t.fonte_tipo ?? ""),
     fonte_titulo: t.fonte_titulo ?? null,

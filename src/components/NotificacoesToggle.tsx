@@ -21,6 +21,7 @@ export default function NotificacoesToggle() {
 
   useEffect(() => {
     const ok = typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSuportado(ok);
     if (!ok) return;
     navigator.serviceWorker.ready.then((reg) => reg.pushManager.getSubscription()).then((s) => setAtivado(!!s)).catch(() => {});
@@ -35,8 +36,8 @@ export default function NotificacoesToggle() {
       if (perm !== "granted") { setErro("Permissão negada. Ative as notificações nas configurações do navegador."); setOcupado(false); return; }
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
-      const j: any = sub.toJSON();
-      const r = await salvarInscricao({ endpoint: j.endpoint, keys: { p256dh: j.keys.p256dh, auth: j.keys.auth } });
+      const j: PushSubscriptionJSON = sub.toJSON();
+      const r = await salvarInscricao({ endpoint: j.endpoint ?? "", keys: { p256dh: j.keys?.p256dh ?? "", auth: j.keys?.auth ?? "" } });
       if (r.ok) setAtivado(true); else setErro("Não consegui salvar. Tente de novo.");
     } catch { setErro("Não foi possível ativar (no iPhone, instale o app na tela inicial primeiro)."); }
     finally { setOcupado(false); }

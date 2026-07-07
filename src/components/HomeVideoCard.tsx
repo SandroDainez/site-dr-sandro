@@ -60,7 +60,6 @@ function VideoModal({ item, onClose }: { item: VideoaulaData; onClose: () => voi
             allowFullScreen
           />
         ) : (
-          /* eslint-disable-next-line jsx-a11y/media-has-caption */
           <video
             src={item.videoUrl}
             controls
@@ -111,7 +110,6 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
       ) : isProxy ? (
-        // eslint-disable-next-line jsx-a11y/media-has-caption
         <video src={`${item.videoUrl}#t=0.5`} muted playsInline preload="metadata" style={objPos} className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-white/[0.03]"><PlayCircle className="h-10 w-10 text-white/25" /></div>
@@ -154,7 +152,6 @@ export default function HomeVideoCard({ item }: { item: VideoaulaData }) {
           </div>
         ) : (
           <div className="relative overflow-hidden bg-black" style={{ height: item.imageSize ?? 176 }}>
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video src={item.videoUrl} controls autoPlay playsInline style={objPos} className="absolute inset-0 h-full w-full object-cover" />
             <button
               type="button"

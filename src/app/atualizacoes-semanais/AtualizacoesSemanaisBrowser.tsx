@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import UpdateContent from "@/components/UpdateContent";
 import { dataLonga } from "@/lib/format-date";
+import type { MedicalUpdate } from "@/types/medical";
 
 type Area = "todas" | "anestesiologia" | "terapia_intensiva" | "emergencias";
 
@@ -27,7 +28,7 @@ const ESP_LABEL: Record<string, string> = {
 
 const fmt = dataLonga;
 
-export default function AtualizacoesSemanaisBrowser({ updates, initialArea }: { updates: any[]; initialArea?: string }) {
+export default function AtualizacoesSemanaisBrowser({ updates, initialArea }: { updates: MedicalUpdate[]; initialArea?: string }) {
   const valid = TABS.some((t) => t.value === initialArea) ? (initialArea as Area) : "todas";
   const [area, setArea] = useState<Area>(valid);
   const [open, setOpen] = useState<Set<string>>(new Set());
@@ -37,7 +38,7 @@ export default function AtualizacoesSemanaisBrowser({ updates, initialArea }: { 
   function toggle(id: string) {
     setOpen((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   }

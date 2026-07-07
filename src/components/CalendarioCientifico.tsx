@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
+
+// Wrapper declarado fora do render (evita recriar o componente a cada render).
+// `embedded` controla se a seção tem largura/padding próprios ou não.
+function Wrapper({ embedded, children }: { embedded?: boolean; children: ReactNode }) {
+  return embedded ? (
+    <section id="eventos" className="scroll-mt-32">{children}</section>
+  ) : (
+    <section id="eventos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">{children}</section>
+  );
+}
 
 // Calendário ÚNICO de eventos: cursos/imersões do médico (link interno de inscrição)
 // + congressos científicos (link externo oficial, pesquisados pela IA ou manuais).
@@ -83,6 +94,7 @@ export default function CalendarioCientifico({
     return new Date(h.getFullYear(), h.getMonth(), 1);
   });
   const [hojeKey, setHojeKey] = useState("");
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setHojeKey(key(new Date())), []);
 
   const porDia = useMemo(() => {
@@ -114,15 +126,8 @@ export default function CalendarioCientifico({
     return { dias: grid, tituloMes: mesAtual.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) };
   }, [mesAtual]);
 
-  const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    embedded ? (
-      <section id="eventos" className="scroll-mt-32">{children}</section>
-    ) : (
-      <section id="eventos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24">{children}</section>
-    );
-
   return (
-    <Wrapper>
+    <Wrapper embedded={embedded}>
       <div className={embedded ? "rounded-3xl border border-white/10 bg-white/[0.02] p-6 md:p-8" : "finex-glass rounded-[2rem] p-8 md:p-10"}>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>

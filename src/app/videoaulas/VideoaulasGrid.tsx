@@ -164,6 +164,7 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
           style={{ height: item.imageSize ?? 176 }}
           onClick={() => { if (!hasVideo) return; if (hasQuiz) setQuizOpen(true); else if (ytId) setInlinePlaying(true); else setPlayerOpen(true); }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img loading="lazy" decoding="async" src={thumbSrc} alt={item.titulo} style={objPos} className="absolute inset-0 h-full w-full object-cover" />
           {hasVideo && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
@@ -209,7 +210,6 @@ export function VideoCard({ item }: { item: VideoaulaData }) {
             {/* Preview = primeiro frame do vídeo (imagem cheia do card). pointer-events-none
                 manda o toque ao container (abre quiz/toca inline). O #418 NÃO vinha daqui
                 (era o dpl do logo, já corrigido), então é seguro mostrar o frame. */}
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video
               src={`${item.videoUrl}#t=0.5`}
               muted

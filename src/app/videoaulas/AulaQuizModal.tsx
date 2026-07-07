@@ -136,7 +136,6 @@ export default function AulaQuizModal({ item, onClose }: { item: VideoaulaData; 
                   className="aspect-video w-full"
                 />
               ) : (
-                // eslint-disable-next-line jsx-a11y/media-has-caption
                 <video src={item.videoUrl} controls autoPlay playsInline className="w-full" style={{ maxHeight: "60vh" }} />
               )}
             </div>

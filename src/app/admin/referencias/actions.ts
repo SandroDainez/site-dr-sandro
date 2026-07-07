@@ -12,13 +12,16 @@ async function requireAdmin() {
   if (!pw || token !== createHash("sha256").update(pw).digest("hex")) throw new Error("Não autorizado");
 }
 
-type Result = { ok: boolean; data?: any; error?: string };
+type Result<T = unknown> = { ok: boolean; data?: T; error?: string };
 
 // Erros do Supabase/PostgREST são OBJETOS (não Error) — String(obj) vira "[object Object]".
 // Esta função extrai a mensagem de verdade, em qualquer formato.
-function msgErro(e: any): string {
+function msgErro(e: unknown): string {
   if (e instanceof Error) return e.message;
-  if (e && typeof e === "object") return e.message || e.details || e.hint || e.error_description || e.error || JSON.stringify(e);
+  if (e && typeof e === "object") {
+    const o = e as Record<string, unknown>;
+    return String(o.message || o.details || o.hint || o.error_description || o.error || JSON.stringify(e));
+  }
   return String(e);
 }
 
@@ -52,10 +55,10 @@ export async function listarReferencias(): Promise<Result> {
     const trechos = new Map<string, number>();
     try {
       const { data: statusRaw } = await supabase.rpc("kb_referencias_status");
-      const rows: any[] = Array.isArray(statusRaw) ? statusRaw : [];
+      const rows: { id: string; chars?: unknown; trechos?: unknown }[] = Array.isArray(statusRaw) ? statusRaw : [];
       for (const r of rows) { chars.set(r.id, Number(r.chars) || 0); trechos.set(r.id, Number(r.trechos) || 0); }
     } catch { /* status é opcional */ }
-    const comStatus = (data ?? []).map((r: any) => ({ ...r, _chars: chars.get(r.id) ?? 0, _trechos: trechos.get(r.id) ?? 0 }));
+    const comStatus = (data ?? []).map((r: { id: string }) => ({ ...r, _chars: chars.get(r.id) ?? 0, _trechos: trechos.get(r.id) ?? 0 }));
     return { ok: true, data: comStatus };
   } catch (e) { return { ok: false, error: msgErro(e) }; }
 }
@@ -71,7 +74,7 @@ export async function salvarReferencia(ref: {
     // metadados → preserva o texto existente (não apaga o livro já salvo).
     if (!ref.id && !ref.conteudo?.trim()) return { ok: false, error: "Cole o texto da referência (ou envie um PDF)." };
     const supabase = createServiceClient();
-    const linha: Record<string, any> = {
+    const linha: Record<string, unknown> = {
       titulo: ref.titulo.trim(),
       tipo: ref.tipo || "Artigo",
       autor: ref.autor || null,
@@ -117,7 +120,7 @@ export async function excluirReferencia(id: string): Promise<Result> {
 }
 
 // Extrai o texto de um PDF (blob privado) para preencher o conteúdo.
-export async function extrairTextoPdf(url: string): Promise<Result> {
+export async function extrairTextoPdf(url: string): Promise<Result<string>> {
   try {
     await requireAdmin();
     const token = process.env.BLOB_READ_WRITE_TOKEN;

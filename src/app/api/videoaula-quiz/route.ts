@@ -9,7 +9,13 @@ export async function POST(req: NextRequest) {
   const user = await getUsuario();
   if (!user || !serviceConfigured()) return NextResponse.json({ ok: true, saved: false });
 
-  let body: any = {};
+  let body: {
+    videoaulaId?: unknown;
+    titulo?: unknown;
+    total?: unknown;
+    scorePre?: unknown;
+    scorePos?: unknown;
+  } = {};
   try { body = await req.json(); } catch {}
   const { videoaulaId, titulo, total, scorePre, scorePos } = body ?? {};
   if (!videoaulaId || typeof scorePos !== "number") {

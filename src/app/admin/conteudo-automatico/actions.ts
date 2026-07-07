@@ -14,7 +14,7 @@ async function requireAdmin() {
   }
 }
 
-type Result = { ok: boolean; data?: any; error?: string };
+type Result = { ok: boolean; data?: unknown; error?: string };
 
 // Dispara um agente em processo (sem brecha pública): injeta o CRON_SECRET aqui,
 // no servidor, depois de checar que quem chamou é o admin logado.

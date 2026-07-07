@@ -1,5 +1,5 @@
 import AdminHelp from "@/components/admin/AdminHelp";
-import ReferenciasEditor from "./ReferenciasEditor";
+import ReferenciasEditor, { type Ref } from "./ReferenciasEditor";
 import { listarReferencias } from "./actions";
 
 export default async function AdminReferenciasPage() {
@@ -18,7 +18,7 @@ export default async function AdminReferenciasPage() {
         Adicione uma referência: dê um título, escolha o tipo, e <strong>cole o texto</strong> (resumo/trechos relevantes) ou <strong>envie um PDF</strong> (o texto é extraído automaticamente). Depois clique em <strong>“Reindexar assistente”</strong> para ele passar a usar o material. O assistente nunca inventa — só responde com base no que está aqui e nos boletins.
       </AdminHelp>
 
-      {r.ok ? <ReferenciasEditor inicial={r.data ?? []} /> : <p className="text-sm text-red-400">{r.error}</p>}
+      {r.ok ? <ReferenciasEditor inicial={(r.data as Ref[] | undefined) ?? []} /> : <p className="text-sm text-red-400">{r.error}</p>}
     </div>
   );
 }

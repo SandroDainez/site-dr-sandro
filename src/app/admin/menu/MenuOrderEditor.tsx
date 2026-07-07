@@ -38,7 +38,7 @@ export default function MenuOrderEditor({ initial }: { initial: NavOverride }) {
   const [isPending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
 
-  const toggleHide = (label: string) => setHidden((h) => { const n = new Set(h); n.has(label) ? n.delete(label) : n.add(label); return n; });
+  const toggleHide = (label: string) => setHidden((h) => { const n = new Set(h); if (n.has(label)) n.delete(label); else n.add(label); return n; });
   const rename = (label: string, v: string) => setLabels((l) => ({ ...l, [label]: v }));
 
   function salvar() {

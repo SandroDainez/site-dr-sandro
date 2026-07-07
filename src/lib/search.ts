@@ -27,20 +27,20 @@ export async function buscarTudo(q: string): Promise<ResultadoBusca[]> {
   ]);
 
   const out: ResultadoBusca[] = [];
-  for (const p of protos) if (casa(p.titulo, p.descricao, (p as any).conteudo)) out.push({ tipo: "Protocolo", titulo: p.titulo, descricao: resumo(p.descricao), href: "/protocolos", area: p.area });
+  for (const p of protos) if (casa(p.titulo, p.descricao, (p as { conteudo?: string }).conteudo)) out.push({ tipo: "Protocolo", titulo: p.titulo, descricao: resumo(p.descricao), href: "/protocolos", area: p.area });
   for (const p of procs) if (p.titulo && casa(p.titulo, p.descricao)) out.push({ tipo: "Procedimento", titulo: p.titulo, descricao: resumo(p.descricao), href: "/procedimentos", area: p.area });
   for (const c of cursos) if (c.titulo && casa(c.titulo, c.resumo, c.descricao)) out.push({ tipo: "Curso", titulo: c.titulo, descricao: resumo(c.resumo || c.descricao), href: `/cursos/${c.id}`, area: c.area });
   for (const v of vids) if (casa(v.titulo, v.descricao)) out.push({ tipo: "Videoaula", titulo: v.titulo, descricao: resumo(v.descricao), href: "/videoaulas", area: v.area });
   for (const a of acervo) if (a.titulo && casa(a.titulo, a.descricao)) out.push({ tipo: "Outros assuntos", titulo: a.titulo, descricao: resumo(a.descricao), href: "/acervo", area: a.area });
   for (const p of pods) if (casa(p.titulo, p.descricao)) out.push({ tipo: "Podcast", titulo: p.titulo, descricao: resumo(p.descricao), href: "/podcast" });
-  for (const a of atus) if (a.titulo && casa(a.titulo, (a as any).conteudo, (a as any).resumo)) out.push({ tipo: "Atualização", titulo: a.titulo, descricao: resumo((a as any).conteudo || (a as any).resumo), href: "/atualizacoes", area: a.area });
+  for (const a of atus) { const ax = a as { conteudo?: string; resumo?: string }; if (a.titulo && casa(a.titulo, ax.conteudo, ax.resumo)) out.push({ tipo: "Atualização", titulo: a.titulo, descricao: resumo(ax.conteudo || ax.resumo), href: "/atualizacoes", area: a.area }); }
 
   if (supabaseConfigured()) {
     try {
       const sb = createPublicClient();
       const { data: ups } = await sb.from("medical_updates").select("titulo,resumo,especialidade,topicos").eq("publicado", true).limit(100);
       for (const u of ups ?? []) {
-        const topicosTxt = Array.isArray(u.topicos) ? u.topicos.map((t: any) => `${t.titulo} ${t.descricao}`).join(" ") : "";
+        const topicosTxt = Array.isArray(u.topicos) ? u.topicos.map((t: { titulo?: string; descricao?: string }) => `${t.titulo} ${t.descricao}`).join(" ") : "";
         if (casa(u.titulo, u.resumo, topicosTxt)) out.push({ tipo: "Boletim clínico", titulo: u.titulo, descricao: resumo(u.resumo), href: "/atualizacoes-semanais", area: u.especialidade });
       }
       const { data: evs } = await sb.from("medical_events").select("titulo,descricao,url_oficial,especialidades").eq("ativo", true).limit(300);

@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUsuario } from "@/lib/supabase/auth-server";
 import { getHeader } from "@/lib/content";
@@ -14,7 +15,7 @@ export default async function EntrarPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0f1420] px-6 py-16 text-white">
       <div className="w-full max-w-md">
-        <a href="/" className="mb-8 flex items-center justify-center gap-1 text-sm text-white/50 transition hover:text-white">← Início</a>
+        <Link href="/" className="mb-8 flex items-center justify-center gap-1 text-sm text-white/50 transition hover:text-white">← Início</Link>
         <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-8">
           <div className="mb-6 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">{header.name || "Portal Médico"}</p>

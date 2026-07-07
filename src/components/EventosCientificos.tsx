@@ -14,6 +14,19 @@ const MODALIDADE_BADGE: Record<string, string> = {
 
 const fmt = dataCurta;
 
+interface EventoRow {
+  id: string | number;
+  url_oficial: string;
+  titulo: string;
+  descricao?: string | null;
+  modalidade?: string | null;
+  pais?: string | null;
+  data_inicio: string;
+  data_fim?: string | null;
+  cidade?: string | null;
+  local_nome?: string | null;
+}
+
 export default async function EventosCientificos({
   especialidade,
   limit = 6,
@@ -27,7 +40,7 @@ export default async function EventosCientificos({
 }) {
   if (!supabaseConfigured()) return null;
 
-  let eventos: any[] = [];
+  let eventos: EventoRow[] = [];
   try {
     const supabase = createPublicClient();
     const hoje = new Date().toISOString().split("T")[0];
@@ -40,7 +53,7 @@ export default async function EventosCientificos({
       .limit(limit);
     if (especialidade) query = query.contains("especialidades", [especialidade]);
     const { data } = await query;
-    eventos = data ?? [];
+    eventos = (data ?? []) as EventoRow[];
   } catch {
     return null;
   }

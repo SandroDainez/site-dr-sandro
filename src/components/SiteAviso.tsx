@@ -14,6 +14,7 @@ export default function SiteAviso({ texto }: { texto: string }) {
 
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShow(localStorage.getItem(key) !== "1");
     } catch {
       setShow(true);

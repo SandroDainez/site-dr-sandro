@@ -3,6 +3,7 @@ import { ESPECIALIDADE_LABELS } from "@/lib/agents/utils";
 import type { Especialidade } from "@/types/medical";
 import { Sparkles, ArrowRight } from "lucide-react";
 import UpdateContent from "./UpdateContent";
+import type { BoletimUpdate } from "./BoletimCard";
 import { dataLonga } from "@/lib/format-date";
 
 // Última atualização clínica da semana (agente de IA) para uma especialidade.
@@ -11,7 +12,7 @@ import { dataLonga } from "@/lib/format-date";
 export default async function AtualizacaoSemanal({ especialidade }: { especialidade: Especialidade }) {
   if (!supabaseConfigured()) return null;
 
-  let update: any = null;
+  let update: BoletimUpdate | null = null;
   try {
     const supabase = createPublicClient();
     const { data } = await supabase
@@ -22,7 +23,7 @@ export default async function AtualizacaoSemanal({ especialidade }: { especialid
       .order("data_publicacao", { ascending: false })
       .limit(1)
       .maybeSingle();
-    update = data;
+    update = data as BoletimUpdate | null;
   } catch {
     return null;
   }

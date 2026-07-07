@@ -6,7 +6,7 @@ import { upload } from "@vercel/blob/client";
 import { Save, Trash2, Upload, Plus, RefreshCw, FileText, Pencil, X } from "lucide-react";
 import { salvarReferencia, salvarReferenciaPdf, excluirReferencia, reindexarAssistente } from "./actions";
 
-type Ref = { id?: string; titulo: string; tipo?: string; autor?: string; fonte_url?: string; arquivo_url?: string; conteudo?: string; area?: string; ativo?: boolean; _trechos?: number; _chars?: number };
+export type Ref = { id?: string; titulo: string; tipo?: string; autor?: string; fonte_url?: string; arquivo_url?: string; conteudo?: string; area?: string; ativo?: boolean; _trechos?: number; _chars?: number };
 
 const vazio: Ref = { titulo: "", tipo: "Artigo", autor: "", fonte_url: "", arquivo_url: "", conteudo: "", area: "" };
 const inputCls = "w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50";
@@ -21,7 +21,7 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
   const [enviando, setEnviando] = useState(false);
   const [reindexando, setReindexando] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const set = (k: keyof Ref, v: any) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: keyof Ref, v: Ref[keyof Ref]) => setForm((f) => ({ ...f, [k]: v }));
 
   async function onPdf(file: File) {
     setErr(null); setMsg(null); setEnviando(true);
@@ -32,7 +32,7 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
       set("arquivo_url", blob.url);
       if (!form.titulo) set("titulo", file.name.replace(/\.pdf$/i, ""));
       setMsg("PDF anexado ✓ — clique em “Adicionar referência” para extrair e salvar (feito no servidor).");
-    } catch (e) { setErr("Falha no upload do PDF."); }
+    } catch { setErr("Falha no upload do PDF."); }
     finally { setEnviando(false); }
   }
 
@@ -44,7 +44,7 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
       const r = usaPdf ? await salvarReferenciaPdf(form, form.arquivo_url!) : await salvarReferencia(form);
       if (r.ok) {
         setMsg(usaPdf
-          ? `Referência salva (${Number(r.data?.chars ?? 0).toLocaleString("pt-BR")} caracteres extraídos). Agora clique em “Reindexar assistente”.`
+          ? `Referência salva (${Number((r.data as { chars?: number } | undefined)?.chars ?? 0).toLocaleString("pt-BR")} caracteres extraídos). Agora clique em “Reindexar assistente”.`
           : "Referência salva. Lembre de reindexar o assistente.");
         setForm(vazio); router.refresh();
       } else setErr(r.error ?? "Erro ao salvar.");
@@ -69,7 +69,7 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
       for (let volta = 0; volta < 300; volta++) {
         const r = await reindexarAssistente();
         if (!r.ok) { setErr(r.error ?? "Falha ao reindexar."); houveErro = true; break; }
-        const d = r.data || {};
+        const d = (r.data as { falhas?: number; total?: number; pendentes?: number } | undefined) || {};
         totalFalhas += d.falhas ?? 0;
         ultimoTotal = Number(d.total ?? ultimoTotal);
         if (d.pendentes && d.pendentes > 0) {

@@ -12,7 +12,7 @@ async function requireAdmin() {
   if (!pw || token !== createHash("sha256").update(pw).digest("hex")) throw new Error("Não autorizado");
 }
 
-type Result = { ok: boolean; data?: any; error?: string };
+type Result = { ok: boolean; data?: unknown; error?: string };
 
 // Roda o agente de melhoria sob demanda (injeta o CRON_SECRET no servidor após
 // confirmar o admin logado — mesma técnica do "executar agora" dos outros agentes).

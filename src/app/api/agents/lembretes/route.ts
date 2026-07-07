@@ -28,8 +28,9 @@ export async function POST(request: NextRequest) {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload);
       enviados++;
-    } catch (e: any) {
-      if (e?.statusCode === 404 || e?.statusCode === 410) { await sb.from("push_subscriptions").delete().eq("endpoint", s.endpoint); removidos++; }
+    } catch (e) {
+      const statusCode = (e as { statusCode?: number })?.statusCode;
+      if (statusCode === 404 || statusCode === 410) { await sb.from("push_subscriptions").delete().eq("endpoint", s.endpoint); removidos++; }
     }
   }
   return NextResponse.json({ status: "ok", enviados, removidos, usuariosComPendencia: pendentesPorUser.size });
