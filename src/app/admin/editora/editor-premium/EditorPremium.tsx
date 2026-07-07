@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, Wand2, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
 import { SCI_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/cientifico-estrutura";
@@ -84,11 +84,12 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
     }
   }
   // Reabre o conteúdo de uma versão salva no editor (editar + salvar cria nova versão).
+  const resultadoRef = useRef<HTMLDivElement>(null);
   async function abrirVersao(versionId: string) {
     setError(null);
     const r = await carregarVersao(versionId);
     if (!r.ok) { setError(r.error); return; }
-    setSecoes(r.data.secoes);
+    setSecoes(r.data.secoes); setTimeout(() => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
     const te = r.data.textoEditado && Object.keys(r.data.textoEditado).length
       ? r.data.textoEditado
       : Object.fromEntries(r.data.secoes.map((s) => [s.secao, renderSecaoTexto(s)]));
@@ -319,7 +320,7 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
 
           {/* 5) RESULTADO */}
           {secoes.length > 0 && validacao && (
-            <div className={card}>
+            <div ref={resultadoRef} className={card}>
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">5 · Resultado (editável)</p>
                 <div className="text-right">
