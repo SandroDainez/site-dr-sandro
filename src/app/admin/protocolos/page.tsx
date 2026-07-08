@@ -3,10 +3,16 @@ import AdminHelp from "@/components/admin/AdminHelp";
 import ColsShortcut from "@/components/admin/ColsShortcut";
 import AreaTypography from "@/components/admin/AreaTypography";
 import ProtocolosEditor from "./ProtocolosEditor";
+import ProtocolosEditoraAdmin from "./ProtocolosEditoraAdmin";
+import { listarProtocolos } from "@/app/admin/editora/arquiteto-protocolos/actions";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminProtocolosPage() {
   const protocolos = await getProtocolos();
   const typo = await getTypography();
+  const editoraRes = await listarProtocolos();
+  const protocolosEditora = editoraRes.ok ? editoraRes.data : [];
 
   return (
     <div className="max-w-3xl">
@@ -21,6 +27,8 @@ export default async function AdminProtocolosPage() {
       <AdminHelp>Clique em “Adicionar protocolo”. Preencha título, área e descrição; envie o PDF e/ou a imagem do infográfico. Salvar para publicar.</AdminHelp>
 
       <ColsShortcut />
+
+      <ProtocolosEditoraAdmin protocolos={protocolosEditora} />
 
       <ProtocolosEditor initialProtocolos={protocolos} />
 
