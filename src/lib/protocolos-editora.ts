@@ -45,23 +45,7 @@ import type { ProtocoloData } from "@/lib/content";
 const AREAS_VALIDAS = ["emergencias", "ti", "anestesiologia"] as const;
 type AreaValida = (typeof AREAS_VALIDAS)[number];
 const ehArea = (a: string): a is AreaValida => (AREAS_VALIDAS as readonly string[]).includes(a);
-function escHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-// Renderiza as seções do protocolo como HTML simples (h3 + parágrafos) para o card/expansão.
-function conteudoParaHtml(c: ProtocoloConteudo): string {
-  return (c.secoes ?? [])
-    .map((s) => {
-      const txt = (c.textoEditado?.[s.secao] ?? s.afirmacoes.map((a) => a.texto).join("\n")).trim();
-      if (!txt) return "";
-      const paras = txt.split("\n").map((t) => t.trim()).filter(Boolean).map((t) => `<p>${escHtml(t)}</p>`).join("");
-      return `<h3>${escHtml(s.secao)}</h3>${paras}`;
-    })
-    .filter(Boolean)
-    .join("");
-}
-
-// Lista os protocolos publicados JÁ no formato ProtocoloData (com o conteúdo completo em HTML),
+// Lista os protocolos publicados JÁ no formato ProtocoloData (abre como PDF no card),
 // para render com o card padrão e mesclar com os protocolos "de blob".
 export async function getProtocolosPublicadosData(): Promise<ProtocoloData[]> {
   if (!serviceConfigured()) return [];
@@ -90,12 +74,13 @@ export async function getProtocolosPublicadosData(): Promise<ProtocoloData[]> {
         id: p.slug,
         titulo: p.title,
         descricao: objetivo,
-        conteudo: conteudoParaHtml(conteudo),
+        // Sem texto inline comprido: o card abre como PDF (Ler / Tela cheia / Baixar).
+        conteudo: "",
         area,
         imageUrl: p.image_url ?? "",
         imageCaption: "",
-        arquivoUrl: "",
-        arquivoLabel: "",
+        arquivoUrl: `/api/protocolos/${p.slug}/pdf`,
+        arquivoLabel: "Baixar PDF",
         data: (ver?.created_at ?? p.updated_at ?? "").slice(0, 10),
         areas: areasValidas.filter((a) => a !== area),
       } satisfies ProtocoloData;
