@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Sparkles, Trash2, ExternalLink, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import ImagemProtocolo from "@/components/admin/ImagemProtocolo";
+import AreasEditora from "@/components/admin/AreasEditora";
 import { excluirDoc } from "@/app/admin/editora/arquiteto-protocolos/actions";
 
 type Prot = { id: string; title: string; slug: string; status: string; specialty: string };
@@ -46,8 +47,11 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-white">{p.title}</span>
               <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] uppercase text-white/50">{ESP[p.specialty] ?? p.specialty}</span>
               <span className={`rounded-full border px-2 py-0.5 text-[10px] ${p.status === "published" ? "border-accent/40 bg-accent/10 text-accent" : "border-white/15 text-white/45"}`}>{STATUS[p.status] ?? p.status}</span>
-              <button type="button" onClick={() => setAberto(aberto === p.id ? null : p.id)} className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-white/70 transition hover:text-white">
-                Imagem {aberto === p.id ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              <button type="button" onClick={() => setAberto(aberto === `img:${p.id}` ? null : `img:${p.id}`)} className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-white/70 transition hover:text-white">
+                Imagem {aberto === `img:${p.id}` ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+              </button>
+              <button type="button" onClick={() => setAberto(aberto === `area:${p.id}` ? null : `area:${p.id}`)} className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-white/70 transition hover:text-white">
+                Especialidades {aberto === `area:${p.id}` ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
               </button>
               <Link href="/admin/editora/arquiteto-protocolos" className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-white/70 transition hover:text-white">
                 <ExternalLink className="h-3 w-3" /> Arquiteto
@@ -56,7 +60,8 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
                 {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />} Excluir
               </button>
             </div>
-            {aberto === p.id && <div className="border-t border-white/10 p-3"><ImagemProtocolo protocolId={p.id} /></div>}
+            {aberto === `img:${p.id}` && <div className="border-t border-white/10 p-3"><ImagemProtocolo protocolId={p.id} /></div>}
+            {aberto === `area:${p.id}` && <div className="border-t border-white/10 p-3"><AreasEditora tabela="protocols" docId={p.id} /></div>}
           </div>
         ))}
       </div>
