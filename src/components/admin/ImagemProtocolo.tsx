@@ -23,7 +23,7 @@ export default function ImagemProtocolo({ protocolId }: { protocolId: string }) 
     if (!file.type.startsWith("image/")) { setErro("Envie um arquivo de imagem."); return; }
     setErro(null); setBusy(true);
     try {
-      const blob = await upload(`protocolos-imagem/${Date.now()}-${file.name}`, file, { access: "public", handleUploadUrl: "/api/upload" });
+      const blob = await upload(`protocolos-imagem/${Date.now()}-${file.name}`, file, { access: "private", handleUploadUrl: "/api/upload" });
       const r = await definirImagemProtocolo(protocolId, blob.url);
       if (r.ok) setUrl(blob.url); else setErro(r.error);
     } catch (e) {
