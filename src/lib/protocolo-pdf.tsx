@@ -1,5 +1,8 @@
-import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
 import type { ProtocoloPublico, ProtocoloConteudo } from "./protocolos-editora";
+
+// Desliga a hifenização: palavras quebram só em espaços (evita "hemor-ragico" no meio).
+Font.registerHyphenationCallback((word) => [word]);
 
 // Gerador de PDF do protocolo da Editora — capa + documento estilizado (paleta do template
 // de referência). Não é 1:1 com o HTML visual rico, mas é caprichado e profissional.
@@ -19,7 +22,7 @@ const CALLOUT_GOLD = new Set(["Armadilhas e pérolas clínicas", "Resumo executi
 const s = StyleSheet.create({
   page: { paddingTop: 30, paddingBottom: 42, paddingHorizontal: 40, fontSize: 10, fontFamily: "Helvetica", color: INK },
   // Capa
-  cover: { flexDirection: "column", justifyContent: "center", height: "100%", paddingHorizontal: 54 },
+  cover: { flexDirection: "column", paddingTop: 64, paddingHorizontal: 48 },
   coverBrand: { fontSize: 13, fontFamily: "Helvetica-Bold", color: TEAL, letterSpacing: 2 },
   coverTag: { fontSize: 8.5, color: MUTE, marginTop: 2, letterSpacing: 1 },
   coverRule: { height: 2, backgroundColor: GOLD, width: 64, marginVertical: 22 },
@@ -66,7 +69,7 @@ function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
           <Text style={s.coverTag}>Protocolos Médicos · Apoio à Prática Clínica</Text>
           <View style={s.coverRule} />
           <Text style={s.coverEyebrow}>Protocolo institucional · {esp}</Text>
-          <Text style={s.coverTitle}>{p.title}</Text>
+          <Text style={[s.coverTitle, { fontSize: p.title.length > 42 ? 20 : p.title.length > 28 ? 24 : 30 }]}>{p.title}</Text>
           <Text style={s.coverChip}>{esp}</Text>
           <Text style={s.coverMeta}>
             Documento de apoio à decisão clínica{p.publicado_em ? `\nPublicado em ${p.publicado_em.slice(0, 10)}` : ""}
