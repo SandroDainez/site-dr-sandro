@@ -2,11 +2,15 @@ import type OpenAI from "openai";
 import { getOpenAI, getDeepSeek, deepseekModel, AI_MODELS } from "./openai";
 import { aiProviders } from "./config";
 import type { Source } from "./types";
-import { buildCorrecaoProtocolosPrompt, type ItemCorrigir } from "./prompts/correcao-protocolos";
+import type { ItemCorrigir } from "./prompts/correcao-protocolos";
 
 // "Aplicar correções da IA": reancora as afirmações reprovadas na validação. Usa o provider
 // de GERAÇÃO (DeepSeek — contexto grande, sem o gargalo de TPM do gpt-4o). O CÓDIGO revalida
 // depois (citations.ts), então uma âncora inventada aqui simplesmente não conta.
+//
+// GENÉRICO: recebe o PROMPT já construído (cada módulo tem seu próprio builder — ver
+// prompts/correcao-protocolos.ts como referência) para poder adaptar o wording ao tipo de
+// conteúdo (protocolo, aula, texto científico, etc.) sem duplicar a lógica de chamada/parse.
 
 export type Correcao = { id: string; texto?: string; source_id: string | null; ancora: string | null; tipo?: "clinica" | "dose" | "geral" };
 type Usage = { tokensIn: number; tokensOut: number };
@@ -39,7 +43,7 @@ function mockCorrecoes(itens: ItemCorrigir[], sources: Source[]): Correcao[] {
   return itens.map((i) => ({ id: i.id, source_id: s?.id ?? null, ancora: s ? ancora : null, tipo: (i.tipo as Correcao["tipo"]) ?? "clinica" }));
 }
 
-export async function corrigirCitacoes(args: { itens: ItemCorrigir[]; sources: Source[] }): Promise<{ correcoes: Correcao[]; usage: Usage; provider: string; model: string }> {
+export async function corrigirCitacoes(args: { itens: ItemCorrigir[]; sources: Source[]; prompt: string }): Promise<{ correcoes: Correcao[]; usage: Usage; provider: string; model: string }> {
   if (args.itens.length === 0) return { correcoes: [], usage: { tokensIn: 0, tokensOut: 0 }, provider: "-", model: "-" };
   const gen = aiProviders().generation; // "deepseek" | "openai" | "mock"
   if (gen === "mock") {
@@ -47,7 +51,7 @@ export async function corrigirCitacoes(args: { itens: ItemCorrigir[]; sources: S
   }
   const client = gen === "deepseek" ? getDeepSeek() : getOpenAI();
   const model = gen === "deepseek" ? deepseekModel() : AI_MODELS.chat;
-  const prompt = buildCorrecaoProtocolosPrompt(args);
+  const prompt = args.prompt;
   try {
     const r = await client.chat.completions.create({
       model, messages: [{ role: "user", content: prompt }], temperature: 0, max_tokens: 6000, response_format: { type: "json_object" },

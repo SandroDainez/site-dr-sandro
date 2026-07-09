@@ -9,7 +9,7 @@ import { aiProviders } from "@/lib/ai/config";
 import { buildArquitetoProtocolosPrompt } from "@/lib/ai/prompts/arquiteto-protocolos";
 import { validarSecoes, consolidarValidacao, normalizar, type Validacao } from "@/lib/ai/citations";
 import { corrigirCitacoes } from "@/lib/ai/correcao";
-import type { ItemCorrigir } from "@/lib/ai/prompts/correcao-protocolos";
+import { buildCorrecaoProtocolosPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-protocolos";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
 
@@ -439,7 +439,7 @@ export async function aplicarCorrecoes(input: { protocolId: string; secoes: Seca
       return { ok: true, data: { secoes: input.secoes, validacao: consolidarValidacao(input.secoes, sources), corrigidas: 0, total: 0 } };
     }
 
-    const { correcoes } = await corrigirCitacoes({ itens, sources });
+    const { correcoes } = await corrigirCitacoes({ itens, sources, prompt: buildCorrecaoProtocolosPrompt({ itens, sources }) });
 
     // Aplica as correções numa cópia; o código revalida depois.
     const novo: SecaoGerada[] = input.secoes.map((sec) => ({ ...sec, afirmacoes: (sec.afirmacoes ?? []).map((a) => ({ ...a })) }));

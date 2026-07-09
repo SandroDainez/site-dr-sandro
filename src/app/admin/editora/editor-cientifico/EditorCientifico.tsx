@@ -1,15 +1,15 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu } from "lucide-react";
+import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu, PencilLine } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
 import { SCI_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/cientifico-estrutura";
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc } from "./actions";
+import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, excluirVersao, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc, aplicarCorrecoes } from "./actions";
 import FontesInput from "@/components/admin/FontesInput";
-import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
+import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive, Wand2 } from "lucide-react";
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   draft: { label: "Rascunho", cls: "border-white/15 text-white/50" },
@@ -60,9 +60,14 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
   const [revisao, setRevisao] = useState<RevisaoUI | null>(null);
   const [revisando, setRevisando] = useState(false);
 
+  // aplicar correções da IA (reancorar afirmações reprovadas)
+  const [corrigindo, setCorrigindo] = useState(false);
+  const [correcao, setCorrecao] = useState<{ corrigidas: number; total: number; antes: number; depois: number } | null>(null);
+
   const [salvo, setSalvo] = useState<{ versionNumber: number; confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
+  const [editandoVersao, setEditandoVersao] = useState<number | null>(null); // modo edição focado
 
   // publicação
   const [statusAtual, setStatusAtual] = useState<string>("");
@@ -74,20 +79,40 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
     const r = await listarSources(id);
     if (r.ok) setSources(r.data);
   }
+  // Validação MANUAL: o médico marca uma afirmação como "conferi na fonte" (resolve o aviso
+  // sem citação verbatim). Fica gravado na versão ao salvar; contado à parte da confiança.
+  function aceitarAfirmacao(si: number, ai: number, valor: boolean) {
+    setSecoes((prev) => prev.map((s, i) => (i !== si ? s : {
+      ...s, afirmacoes: s.afirmacoes.map((a, j) => (j !== ai ? a : { ...a, conferido: valor })),
+    })));
+  }
+  function excluirVersaoClick(versionId: string, versionNumber: number) {
+    if (!doc) return;
+    if (!window.confirm(`Excluir a Versão ${versionNumber}? Esta ação não pode ser desfeita.`)) return;
+    setError(null);
+    startTransition(async () => {
+      const r = await excluirVersao({ docId: doc.id, versionId });
+      if (r.ok) { carregarVersoes(doc.id); if (editandoVersao === versionNumber) setEditandoVersao(null); }
+      else setError(r.error);
+    });
+  }
   async function carregarVersoes(id: string, autoAbrirUltima = false) {
     const r = await listarVersoes(id);
     if (r.ok) {
       setVersoes(r.data);
-      // Ao abrir um texto, recarrega a versão mais recente no editor (senão vinha vazio).
-      if (autoAbrirUltima && r.data.length > 0) abrirVersao(r.data[0].id);
+      // Ao abrir um texto, recarrega a versão mais recente no editor (SEM entrar no modo
+      // edição focado; senão vinha vazio).
+      if (autoAbrirUltima && r.data.length > 0) abrirVersao(r.data[0].id, r.data[0].version_number, false);
     }
   }
   // Reabre o conteúdo de uma versão salva no editor (editar + salvar cria nova versão).
+  // foco=true → entra no MODO EDIÇÃO focado (esconde referências/geração, mostra banner).
   const resultadoRef = useRef<HTMLDivElement>(null);
-  async function abrirVersao(versionId: string) {
+  async function abrirVersao(versionId: string, versionNumber?: number, foco = false) {
     setError(null);
     const r = await carregarVersao(versionId);
     if (!r.ok) { setError(r.error); return; }
+    setEditandoVersao(foco ? (versionNumber ?? null) : null);
     setSecoes(r.data.secoes); setTimeout(() => resultadoRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
     const te = r.data.textoEditado && Object.keys(r.data.textoEditado).length
       ? r.data.textoEditado
@@ -95,10 +120,10 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
     setTextoEditado(te);
     if (r.data.especialidade) setEspecialidade(r.data.especialidade);
     setBlocos(SCI_BLOCOS.map(() => ({ status: "concluido" })));
-    setMetas([]); setSalvo(null); setRevisao(null);
+    setMetas([]); setSalvo(null); setRevisao(null); setCorrecao(null);
   }
   function abrirDoc(d: Doc) {
-    setDoc(d); setSecoes([]); setMetas([]); setSalvo(null); setError(null); setRevisao(null);
+    setDoc(d); setSecoes([]); setMetas([]); setSalvo(null); setError(null); setRevisao(null); setEditandoVersao(null);
     setBlocos(SCI_BLOCOS.map(() => ({ status: "pendente" }))); setTextoEditado({});
     setStatusAtual(d.status);
     carregarSources(d.id); carregarVersoes(d.id, true);
@@ -150,7 +175,7 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
   async function gerarDoBloco(start: number) {
     if (!doc) return;
     if (sources.length === 0) { setError("Adicione ao menos uma referência antes de gerar."); return; }
-    setError(null); setSalvo(null); setRevisao(null); setGerando(true);
+    setError(null); setSalvo(null); setRevisao(null); setGerando(true); setEditandoVersao(null);
     const metasLocal: Meta[] = start === 0 ? [] : metas.filter((m) => m.blocoIndex < start);
     let acumulado: SecaoGerada[] = metasLocal.flatMap((m) => m.secoes);
     setSecoes([...acumulado]); setMetas([...metasLocal]);
@@ -184,6 +209,22 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
     setRevisando(false);
   }
 
+  // Aplicar correções da IA: reancora as afirmações reprovadas e recalcula a confiança.
+  async function corrigirAgora() {
+    if (!doc || secoes.length === 0) return;
+    setError(null); setCorrigindo(true); setCorrecao(null); setSalvo(null);
+    const antes = validacao?.confidence ?? 0;
+    const r = await aplicarCorrecoes({ docId: doc.id, secoes });
+    if (r.ok) {
+      setSecoes(r.data.secoes);
+      const te: Record<string, string> = {};
+      for (const s of r.data.secoes) te[s.secao] = renderSecaoTexto(s);
+      setTextoEditado(te);
+      setCorrecao({ corrigidas: r.data.corrigidas, total: r.data.total, antes, depois: r.data.validacao.confidence });
+    } else setError(r.error);
+    setCorrigindo(false);
+  }
+
   function salvar() {
     if (!doc || secoes.length === 0) return;
     setError(null);
@@ -207,6 +248,18 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
 
   return (
     <div className="space-y-6">
+      {/* Banner do MODO EDIÇÃO focado */}
+      {editandoVersao != null && (
+        <div className="sticky top-2 z-20 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-accent/50 bg-accent/15 px-4 py-2.5 shadow-lg backdrop-blur">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-accent">
+            <PencilLine className="h-4 w-4" /> Editando a Versão {editandoVersao} — altere as seções abaixo e salve como nova versão.
+          </p>
+          <button type="button" onClick={() => setEditandoVersao(null)} className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.06] px-3 py-1 text-xs font-medium text-white/80 transition hover:text-white">
+            <X className="h-3.5 w-3.5" /> Sair da edição
+          </button>
+        </div>
+      )}
+
       {/* 1) TEXTO */}
       <div className={card}>
         <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">1 · Texto científico</p>
@@ -242,7 +295,8 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
 
       {doc && (
         <>
-          {/* 2) REFERÊNCIAS */}
+          {/* 2) REFERÊNCIAS + 3/4) GERAÇÃO — escondidos no modo edição focado */}
+          {!editandoVersao && (<>
           <div className={card}>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">2 · Referências ({sources.length})</p>
             {sources.length > 0 && (
@@ -312,6 +366,7 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
               </div>
             )}
           </div>
+          </>)}
 
           {/* 5) RESULTADO */}
           {secoes.length > 0 && validacao && (
@@ -319,8 +374,12 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/40">5 · Resultado (editável)</p>
                 <div className="text-right">
-                  <p className={`text-2xl font-bold ${corConf}`}>{pct}% <span className="text-xs font-medium text-white/40">confiança</span></p>
-                  <p className="text-[11px] text-white/40">{validacao.validadas}/{validacao.totalClinicas} afirmações que exigem fonte com citação validada · {validacao.semFonte} sem fonte · {validacao.invalidas} inválidas</p>
+                  <p className={`text-2xl font-bold ${corConf}`}>{pct}% <span className="text-xs font-medium text-white/40">citação automática</span></p>
+                  <p className="text-[11px] text-white/40">
+                    {validacao.validadas}/{validacao.totalClinicas} citadas pelo código
+                    {validacao.conferidas > 0 && <span className="text-accent"> · +{validacao.conferidas} conferidas por você = {Math.round(((validacao.validadas + validacao.conferidas) / Math.max(1, validacao.totalClinicas)) * 100)}% resolvidas</span>}
+                    {" · "}{validacao.semFonte + validacao.invalidas} pendentes
+                  </p>
                 </div>
               </div>
               <details className="mb-4 rounded-lg border border-white/10 bg-white/[0.02] p-3 text-[11px] text-white/50">
@@ -331,19 +390,32 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
               <div className="space-y-3">
                 {secoes.map((sec) => {
                   const itens = validacao.itens.filter((it) => it.secao === sec.secao);
-                  const problemas = itens.filter((it) => it.exigeFonte && it.status !== "valida");
+                  const problemas = itens.filter((it) => it.exigeFonte && it.status !== "valida" && !it.conferido);
+                  const conferidasSec = itens.filter((it) => it.exigeFonte && it.status !== "valida" && it.conferido);
                   return (
                     <div key={sec.secao} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
-                      <div className="mb-1.5 flex items-center gap-2">
+                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-white">{sec.secao}</p>
                         {problemas.length > 0 && <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] font-medium text-amber-300"><AlertTriangle className="h-3 w-3" /> {problemas.length} sem citação válida</span>}
+                        {conferidasSec.length > 0 && <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent"><CheckCircle2 className="h-3 w-3" /> {conferidasSec.length} conferida{conferidasSec.length > 1 ? "s" : ""} por você</span>}
                       </div>
                       <textarea className={inputCls + " min-h-[70px] resize-y font-mono text-[12px]"} value={textoEditado[sec.secao] ?? renderSecaoTexto(sec)} onChange={(e) => setTextoEditado((prev) => ({ ...prev, [sec.secao]: e.target.value }))} />
                       {problemas.length > 0 && (
-                        <ul className="mt-1.5 space-y-0.5">
-                          {problemas.map((p, idx) => (
-                            <li key={idx} className="flex items-center gap-1.5 text-[11px] text-amber-300/80">
-                              <X className="h-3 w-3 shrink-0" /> {p.status === "sem_fonte" ? "sem fonte" : p.status === "fonte_inexistente" ? "source_id inexistente" : "âncora não consta na referência"}: “{p.texto.slice(0, 60)}”
+                        <ul className="mt-1.5 space-y-1">
+                          {problemas.map((p) => (
+                            <li key={`${p.secaoIndex}:${p.afIndex}`} className="flex items-start gap-2 text-[11px] text-amber-300/80">
+                              <span className="min-w-0 flex-1"><X className="mr-1 inline h-3 w-3" />{p.status === "sem_fonte" ? "sem fonte" : p.status === "fonte_inexistente" ? "source_id inexistente" : "âncora não consta na referência"}: “{p.texto.slice(0, 60)}”</span>
+                              <button type="button" onClick={() => aceitarAfirmacao(p.secaoIndex, p.afIndex, true)} title="Já conferi na referência — resolver este aviso" className="shrink-0 inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent transition hover:bg-accent/20"><CheckCircle2 className="h-3 w-3" /> Aceitar (conferido)</button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {conferidasSec.length > 0 && (
+                        <ul className="mt-1.5 space-y-1">
+                          {conferidasSec.map((p) => (
+                            <li key={`${p.secaoIndex}:${p.afIndex}`} className="flex items-start gap-2 text-[11px] text-accent/75">
+                              <span className="min-w-0 flex-1"><CheckCircle2 className="mr-1 inline h-3 w-3" />conferido por você: “{p.texto.slice(0, 60)}”</span>
+                              <button type="button" onClick={() => aceitarAfirmacao(p.secaoIndex, p.afIndex, false)} className="shrink-0 rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/50 transition hover:text-white/80">desfazer</button>
                             </li>
                           ))}
                         </ul>
@@ -394,6 +466,30 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
                 )}
               </div>
 
+              {/* Aplicar correções da IA — reancora as afirmações reprovadas e sobe a confiança */}
+              {(() => {
+                const reprovadas = validacao ? validacao.totalClinicas - validacao.validadas - validacao.conferidas : 0;
+                return (
+                  <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-white"><Wand2 className="h-4 w-4 text-accent" /> Aplicar correções da IA</p>
+                        <p className="mt-0.5 text-[11px] text-white/45">A IA tenta reancorar as afirmações reprovadas num trecho verbatim da referência (ou ajustar o texto pra bater, ou marcar honestamente como sem fonte). O código revalida e a confiança sobe conforme as referências realmente cobrem. Não salva — revise e salve depois.</p>
+                      </div>
+                      <button type="button" onClick={corrigirAgora} disabled={corrigindo || gerando || busy || reprovadas === 0} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {corrigindo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />} {reprovadas === 0 ? "Nada a corrigir" : `Corrigir ${reprovadas} afirmação(ões)`}
+                      </button>
+                    </div>
+                    {correcao && (
+                      <p className="mt-3 border-t border-white/10 pt-3 text-[12px] text-white/70">
+                        ✓ {correcao.corrigidas} de {correcao.total} reancorada(s). Confiança {Math.round(correcao.antes * 100)}% → <strong className="text-accent">{Math.round(correcao.depois * 100)}%</strong>.
+                        {correcao.total - correcao.corrigidas > 0 && <span className="text-white/50"> As {correcao.total - correcao.corrigidas} restantes não têm respaldo literal nas referências — adicione referências que as cubram, ou edite/remova.</span>}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
               <div className="sticky bottom-4 mt-5 flex items-center gap-3">
                 <button type="button" onClick={salvar} disabled={busy || gerando} className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-on-accent shadow-lg transition hover:brightness-110 disabled:opacity-60">
                   {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Salvar como nova versão
@@ -417,16 +513,24 @@ export default function EditorCientifico({ docsIniciais, modo }: { docsIniciais:
               <>
               <div className="mb-2 space-y-1.5">
                 {versoes.map((v) => (
-                  <button key={v.id} type="button" onClick={() => abrirVersao(v.id)} disabled={gerando || busy}
-                    className="flex w-full items-center gap-2 rounded-lg border border-white/10 bg-white/[0.02] px-3 py-2 text-left text-sm transition hover:border-accent/40 hover:bg-white/[0.04] disabled:opacity-50">
-                    <FileText className="h-3.5 w-3.5 shrink-0 text-white/40" />
-                    <span className="text-white/70">Versão {v.version_number}</span>
-                    {v.is_published
-                      ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> pública (congelada)</span>
-                      : <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/45">rascunho</span>}
-                    <span className="ml-auto text-[10px] text-white/30">{dataCurta(v.created_at)}</span>
-                    <span className="shrink-0 text-[10px] font-medium text-accent/80">abrir p/ editar →</span>
-                  </button>
+                  <div key={v.id} className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.02] transition hover:border-accent/40 hover:bg-white/[0.04]">
+                    <button type="button" onClick={() => abrirVersao(v.id, v.version_number, true)} disabled={gerando || busy}
+                      className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left text-sm disabled:opacity-50">
+                      <FileText className="h-3.5 w-3.5 shrink-0 text-white/40" />
+                      <span className="text-white/70">Versão {v.version_number}</span>
+                      {v.is_published
+                        ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> pública (congelada)</span>
+                        : <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/45">rascunho</span>}
+                      <span className="ml-auto text-[10px] text-white/30">{dataCurta(v.created_at)}</span>
+                      <span className="shrink-0 text-[10px] font-medium text-accent/80">abrir p/ editar →</span>
+                    </button>
+                    {!v.is_published && (
+                      <button type="button" title="Excluir esta versão" onClick={() => excluirVersaoClick(v.id, v.version_number)} disabled={gerando || busy}
+                        className="shrink-0 px-2.5 py-2 text-rose-400/60 transition hover:text-rose-400 disabled:opacity-50">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 ))}
               </div>
               <p className="mb-4 text-[11px] text-white/35">Clique numa versão para reabrir o conteúdo no editor. Editar e salvar cria uma nova versão (as anteriores ficam no histórico).</p>

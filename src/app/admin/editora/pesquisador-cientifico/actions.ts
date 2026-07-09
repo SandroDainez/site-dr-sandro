@@ -8,7 +8,9 @@ import { getProvider } from "@/lib/ai/providers";
 import { aiProviders } from "@/lib/ai/config";
 import { buscarEvidencias } from "@/lib/ai/retrieval";
 import { buildPesquisadorPrompt } from "@/lib/ai/prompts/pesquisador-cientifico";
-import { consolidarValidacao, type Validacao } from "@/lib/ai/citations";
+import { consolidarValidacao, normalizar, type Validacao } from "@/lib/ai/citations";
+import { corrigirCitacoes } from "@/lib/ai/correcao";
+import { buildCorrecaoPesquisadorPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-pesquisador";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
 
@@ -209,6 +211,35 @@ export async function listarVersoes(docId: string): Promise<Result<VersaoResumo[
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Exclui UMA versão (rascunho). A versão publicada não pode ser excluída (está no ar —
+// despublique antes). Se for a versão corrente, reaponta current_version_id para a última
+// restante. Remove antes as linhas de auditoria (ai_generations) daquela versão (FK).
+export async function excluirVersao(input: { docId: string; versionId: string }): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data: v } = await supabase.from("research_versions").select("id, is_published").eq("id", input.versionId).maybeSingle();
+    if (!v) return { ok: false, error: "Versão não encontrada." };
+    if (v.is_published) return { ok: false, error: "Esta versão está publicada (no ar). Despublique antes de excluí-la." };
+
+    // Se for a versão corrente, reaponta para a última versão restante (ou null).
+    const { data: doc } = await supabase.from("research_docs").select("current_version_id").eq("id", input.docId).maybeSingle();
+    if (doc?.current_version_id === input.versionId) {
+      const { data: outras } = await supabase.from("research_versions")
+        .select("id").eq("doc_id", input.docId).neq("id", input.versionId)
+        .order("version_number", { ascending: false }).limit(1);
+      await supabase.from("research_docs").update({ current_version_id: outras?.[0]?.id ?? null }).eq("id", input.docId);
+    }
+
+    await supabase.from("ai_generations").delete().eq("research_version_id", input.versionId);
+    const { error } = await supabase.from("research_versions").delete().eq("id", input.versionId);
+    if (error) throw error;
+    revalidatePath("/admin/editora/pesquisador-cientifico");
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 function revalidarPublico(slug: string) {
   revalidatePath("/pesquisas");
   revalidatePath(`/pesquisas/${slug}`);
@@ -281,5 +312,59 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
     revalidatePath("/pesquisas"); revalidatePath("/admin/editora/pesquisador-cientifico");
     if (doc?.slug) revalidatePath(`/pesquisas/${doc.slug}`);
     return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// "Aplicar correções da IA": pega as afirmações cuja citação foi REPROVADA (clínicas/doses
+// sem âncora válida), pede à IA (DeepSeek) para reancorar/ajustar/marcar sem fonte nas
+// EVIDÊNCIAS salvas (biblioteca interna + PubMed), aplica e REVALIDA por código (âncora
+// inventada não conta). Não salva — devolve as seções corrigidas pro editor; o usuário
+// confere e salva. Sobe a confiança conforme as evidências realmente cobrem.
+export async function aplicarCorrecoes(input: { docId: string; secoes: SecaoGerada[]; evidencias: Source[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number }>> {
+  try {
+    await requireAdmin();
+    const sources = input.evidencias ?? [];
+    if (!input.secoes?.length) return { ok: false, error: "Gere a síntese antes de corrigir." };
+    if (sources.length === 0) return { ok: false, error: "Sem evidências salvas para corrigir contra." };
+
+    // Identifica as afirmações reprovadas (clinica|dose sem âncora válida), com id posicional.
+    const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
+    const reprovada = (a: SecaoGerada["afirmacoes"][number]) => {
+      if (a.tipo !== "clinica" && a.tipo !== "dose") return false;
+      if (a.conferido) return false; // já validada manualmente pelo médico — não reancorar
+      const txt = a.source_id ? mapa.get(a.source_id) : undefined;
+      const anc = normalizar(a.ancora ?? "");
+      return !(a.source_id && txt !== undefined && anc && txt.includes(anc));
+    };
+    const itens: ItemCorrigir[] = [];
+    input.secoes.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => {
+      if (reprovada(a)) itens.push({ id: `${si}:${ai}`, secao: sec.secao, texto: a.texto, tipo: a.tipo });
+    }));
+
+    if (itens.length === 0) {
+      return { ok: true, data: { secoes: input.secoes, validacao: consolidarValidacao(input.secoes, sources), corrigidas: 0, total: 0 } };
+    }
+
+    const { correcoes } = await corrigirCitacoes({ itens, sources, prompt: buildCorrecaoPesquisadorPrompt({ itens, sources }) });
+
+    // Aplica as correções numa cópia; o código revalida depois.
+    const novo: SecaoGerada[] = input.secoes.map((sec) => ({ ...sec, afirmacoes: (sec.afirmacoes ?? []).map((a) => ({ ...a })) }));
+    for (const c of correcoes) {
+      const [si, ai] = c.id.split(":").map((n) => parseInt(n, 10));
+      const alvo = novo[si]?.afirmacoes?.[ai];
+      if (!alvo) continue;
+      alvo.texto = c.texto ?? alvo.texto;
+      alvo.source_id = c.source_id ?? null;
+      alvo.ancora = c.ancora ?? null;
+      alvo.tipo = c.tipo ?? alvo.tipo;
+    }
+
+    const validacao = consolidarValidacao(novo, sources); // REVALIDA por código (anti-trapaça)
+    // Quantas das reprovadas agora ficaram válidas?
+    const aindaReprovada = new Set<string>();
+    novo.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => { if (reprovada(a)) aindaReprovada.add(`${si}:${ai}`); }));
+    const corrigidas = itens.filter((i) => !aindaReprovada.has(i.id)).length;
+
+    return { ok: true, data: { secoes: novo, validacao, corrigidas, total: itens.length } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }

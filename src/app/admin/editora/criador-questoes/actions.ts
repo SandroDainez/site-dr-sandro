@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin-auth";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { slugify } from "@/lib/editora";
-import { consolidarValidacao, type Validacao } from "@/lib/ai/citations";
-import type { Source, Issue } from "@/lib/ai/types";
+import { consolidarValidacao, normalizar, type Validacao } from "@/lib/ai/citations";
+import { corrigirCitacoes } from "@/lib/ai/correcao";
+import { buildCorrecaoQuestoesPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-questoes";
+import type { Source, Issue, Afirmacao } from "@/lib/ai/types";
 import { gerarQuestoesIA, revisarQuestoesIA } from "@/lib/ai/questoes-gen";
 import { mapEspecialidadeDB, questoesToSecoes, justificativaTexto, type QuestaoGerada } from "@/lib/editora/questao-estrutura";
 
@@ -357,6 +359,35 @@ export async function carregarVersao(versionId: string): Promise<Result<{ especi
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Exclui UMA versão (rascunho). A versão publicada não pode ser excluída (está no ar —
+// despublique antes). Se for a versão corrente, reaponta current_version_id para a última
+// restante. Remove antes as linhas de auditoria (ai_generations) daquela versão (FK).
+export async function excluirVersao(input: { docId: string; versionId: string }): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const supabase = createServiceClient();
+    const { data: v } = await supabase.from("questao_versions").select("id, is_published").eq("id", input.versionId).maybeSingle();
+    if (!v) return { ok: false, error: "Versão não encontrada." };
+    if (v.is_published) return { ok: false, error: "Esta versão está publicada (no ar). Despublique antes de excluí-la." };
+
+    // Se for a versão corrente, reaponta para a última versão restante (ou null).
+    const { data: doc } = await supabase.from("questao_docs").select("current_version_id").eq("id", input.docId).maybeSingle();
+    if (doc?.current_version_id === input.versionId) {
+      const { data: outras } = await supabase.from("questao_versions")
+        .select("id").eq("doc_id", input.docId).neq("id", input.versionId)
+        .order("version_number", { ascending: false }).limit(1);
+      await supabase.from("questao_docs").update({ current_version_id: outras?.[0]?.id ?? null }).eq("id", input.docId);
+    }
+
+    await supabase.from("ai_generations").delete().eq("questao_version_id", input.versionId);
+    const { error } = await supabase.from("questao_versions").delete().eq("id", input.versionId);
+    if (error) throw error;
+    revalidatePath("/admin/editora/criador-questoes");
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 // Exclui um documento (rascunho ou publicado). Despublica versões publicadas (imutáveis)
 // antes de apagar, senão a trigger bloqueia o DELETE em cascata.
 export async function excluirDoc(id: string): Promise<Result<null>> {
@@ -372,5 +403,62 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
     revalidatePath("/questoes"); revalidatePath("/admin/editora/criador-questoes");
     if (doc?.slug) revalidatePath(`/questoes/${doc.slug}`);
     return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// "Aplicar correções da IA": pega as afirmações da JUSTIFICATIVA cuja citação foi REPROVADA
+// (clínicas/doses sem âncora válida), pede à IA (DeepSeek) para reancorar/ajustar/marcar sem
+// fonte, aplica e REVALIDA por código (âncora inventada não conta). Não salva — devolve as
+// questões corrigidas pro editor; o usuário confere e salva. Sobe a confiança conforme as
+// referências realmente cobrem. Id posicional "questaoIndex:justIndex" (ex.: "2:0" = 1ª
+// afirmação da justificativa da questão de índice 2).
+export async function aplicarCorrecoes(input: { docId: string; questoes: QuestaoGerada[] }): Promise<Result<{ questoes: QuestaoGerada[]; validacao: Validacao; corrigidas: number; total: number }>> {
+  try {
+    await requireAdmin();
+    const sres = await listarSources(input.docId);
+    if (!sres.ok) return sres;
+    const sources = sres.data;
+    if (!input.questoes?.length) return { ok: false, error: "Gere as questões antes de corrigir." };
+
+    // Identifica as afirmações reprovadas (clinica|dose sem âncora válida), varrendo a
+    // justificativa de cada questão.
+    const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
+    const reprovada = (a: Afirmacao) => {
+      if (a.tipo !== "clinica" && a.tipo !== "dose") return false;
+      if (a.conferido) return false; // já validada manualmente pelo médico — não reancorar
+      const txt = a.source_id ? mapa.get(a.source_id) : undefined;
+      const anc = normalizar(a.ancora ?? "");
+      return !(a.source_id && txt !== undefined && anc && txt.includes(anc));
+    };
+    const itens: ItemCorrigir[] = [];
+    input.questoes.forEach((q, qi) => (q.justificativa ?? []).forEach((a, ji) => {
+      if (reprovada(a)) itens.push({ id: `${qi}:${ji}`, secao: `Questão ${qi + 1}`, texto: a.texto, tipo: a.tipo });
+    }));
+
+    if (itens.length === 0) {
+      return { ok: true, data: { questoes: input.questoes, validacao: consolidarValidacao(questoesToSecoes(input.questoes), sources), corrigidas: 0, total: 0 } };
+    }
+
+    const { correcoes } = await corrigirCitacoes({ itens, sources, prompt: buildCorrecaoQuestoesPrompt({ itens, sources }) });
+
+    // Aplica as correções numa cópia; o código revalida depois.
+    const novo: QuestaoGerada[] = input.questoes.map((q) => ({ ...q, justificativa: (q.justificativa ?? []).map((a) => ({ ...a })) }));
+    for (const c of correcoes) {
+      const [qi, ji] = c.id.split(":").map((n) => parseInt(n, 10));
+      const alvo = novo[qi]?.justificativa?.[ji];
+      if (!alvo) continue;
+      alvo.texto = c.texto ?? alvo.texto;
+      alvo.source_id = c.source_id ?? null;
+      alvo.ancora = c.ancora ?? null;
+      alvo.tipo = c.tipo ?? alvo.tipo;
+    }
+
+    const validacao = consolidarValidacao(questoesToSecoes(novo), sources); // REVALIDA por código (anti-trapaça)
+    // Quantas das reprovadas agora ficaram válidas?
+    const aindaReprovada = new Set<string>();
+    novo.forEach((q, qi) => (q.justificativa ?? []).forEach((a, ji) => { if (reprovada(a)) aindaReprovada.add(`${qi}:${ji}`); }));
+    const corrigidas = itens.filter((i) => !aindaReprovada.has(i.id)).length;
+
+    return { ok: true, data: { questoes: novo, validacao, corrigidas, total: itens.length } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
