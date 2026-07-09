@@ -169,7 +169,7 @@ export default function AtualizadorProtocolos({ docsIniciais, protocolos, modo }
     if (!doc || secoes.length === 0) return;
     setError(null); setCorrigindo(true); setCorrecao(null); setSalvo(null);
     const antes = validacao?.confidence ?? 0;
-    const r = await aplicarCorrecoes({ docId: doc.id, secoes });
+    const r = await aplicarCorrecoes({ docId: doc.id, secoes, evidencias });
     if (r.ok) {
       setSecoes(r.data.secoes);
       const te: Record<string, string> = {};

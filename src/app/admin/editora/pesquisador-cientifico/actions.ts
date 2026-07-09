@@ -133,6 +133,7 @@ export async function salvarVersao(input: {
       especialidade: input.especialidade,
       tema: input.tema,
       secoes: input.secoes,
+      evidencias: input.evidencias, // COMPLETAS (com texto) — necessário p/ reabrir/corrigir citações depois
       textoEditado: input.textoEditado ?? {},
       referencias: snapshotReferencias(input.secoes, input.evidencias),
       confidence: validacao.confidence,
@@ -173,7 +174,11 @@ export async function salvarVersao(input: {
 
 // Carrega o CONTEÚDO de uma versão salva (tema + secoes + evidencias + textoEditado +
 // especialidade) para reabrir no editor e editar. Editar + salvar cria nova versão (append-only).
-// Espelha salvarVersao: as evidencias vêm do snapshot de referencias gravado no content.
+// Prioriza `content.evidencias` (COMPLETAS, com texto — salvas a partir desta correção);
+// versões antigas só têm `referencias` (snapshot SEM texto: id/título/autor/ano) — nesse caso
+// a validação/correção fica limitada até gerar e salvar de novo. Bug anterior: sempre lia
+// `referencias` como se tivesse texto, então "Aplicar correções" nunca conseguia reancorar
+// nada após reabrir uma versão salva.
 export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; tema: string; secoes: SecaoGerada[]; evidencias: Source[]; textoEditado: Record<string, string> }>> {
   try {
     await requireAdmin();
@@ -184,15 +189,21 @@ export async function carregarVersao(versionId: string): Promise<Result<{ especi
     if (!data) return { ok: false, error: "Versão não encontrada." };
     const c = (data.content ?? {}) as {
       especialidade?: string; tema?: string; secoes?: SecaoGerada[];
-      referencias?: Source[]; textoEditado?: Record<string, string>;
+      evidencias?: Source[]; referencias?: { id: string; titulo?: string; tipo?: string; autor?: string | null; ano?: number | null; url?: string | null }[];
+      textoEditado?: Record<string, string>;
     };
+    const evidencias: Source[] = Array.isArray(c.evidencias) && c.evidencias.length > 0
+      ? c.evidencias
+      : (Array.isArray(c.referencias) ? c.referencias : []).map((r) => ({
+          id: r.id, titulo: r.titulo ?? "", tipo: r.tipo ?? "", autor: r.autor ?? undefined, ano: r.ano ?? null, texto: "", url: r.url ?? undefined,
+        }));
     return {
       ok: true,
       data: {
         especialidade: c.especialidade ?? "",
         tema: c.tema ?? "",
         secoes: Array.isArray(c.secoes) ? c.secoes : [],
-        evidencias: Array.isArray(c.referencias) ? c.referencias : [],
+        evidencias,
         textoEditado: c.textoEditado ?? {},
       },
     };
