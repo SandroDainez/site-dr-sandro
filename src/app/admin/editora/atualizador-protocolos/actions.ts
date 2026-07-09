@@ -167,6 +167,7 @@ export async function salvarVersao(input: {
       tema: input.tema,
       protocoloTitulo: input.tema,
       secoes: input.secoes,
+      evidencias: input.evidencias, // COMPLETAS (com texto) — necessário p/ reabrir/corrigir citações depois
       textoEditado: input.textoEditado ?? {},
       referencias: snapshotReferencias(input.secoes, input.evidencias),
       confidence: validacao.confidence,
@@ -209,10 +210,11 @@ export async function salvarVersao(input: {
 }
 
 // Carrega o CONTEÚDO de uma versão salva (secoes + textoEditado + tema + especialidade +
-// evidências reconstruídas do snapshot de referências) para reabrir no editor e editar.
-// Editar + salvar cria uma nova versão (append-only). Espelha o `content` do salvarVersao:
-// o content guarda `referencias` (snapshot slim), não os Source[] completos — reconstruímos
-// um Source[] mínimo por id p/ a lista de evidências e a validação por citação continuarem.
+// evidências) para reabrir no editor e editar. Editar + salvar cria uma nova versão
+// (append-only). Prioriza `content.evidencias` (COMPLETAS, com texto — salvas a partir desta
+// correção); versões antigas (salvas antes) só têm `referencias` (snapshot sem texto) — nesse
+// caso reconstruímos um Source[] com texto vazio (a validação/correção fica limitada até
+// gerar e salvar de novo).
 export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; tema: string; secoes: SecaoGerada[]; textoEditado: Record<string, string>; evidencias: Source[] }>> {
   try {
     await requireAdmin();
@@ -223,11 +225,14 @@ export async function carregarVersao(versionId: string): Promise<Result<{ especi
     if (!data) return { ok: false, error: "Versão não encontrada." };
     const c = (data.content ?? {}) as {
       especialidade?: string; tema?: string; secoes?: SecaoGerada[]; textoEditado?: Record<string, string>;
+      evidencias?: Source[];
       referencias?: { id: string; titulo?: string; tipo?: string; autor?: string | null; ano?: number | null; url?: string | null }[];
     };
-    const evidencias: Source[] = (Array.isArray(c.referencias) ? c.referencias : []).map((r) => ({
-      id: r.id, titulo: r.titulo ?? "", tipo: r.tipo ?? "", autor: r.autor ?? undefined, ano: r.ano ?? null, texto: "", url: r.url ?? undefined,
-    }));
+    const evidencias: Source[] = Array.isArray(c.evidencias) && c.evidencias.length > 0
+      ? c.evidencias
+      : (Array.isArray(c.referencias) ? c.referencias : []).map((r) => ({
+          id: r.id, titulo: r.titulo ?? "", tipo: r.tipo ?? "", autor: r.autor ?? undefined, ano: r.ano ?? null, texto: "", url: r.url ?? undefined,
+        }));
     return { ok: true, data: { especialidade: c.especialidade ?? "", tema: c.tema ?? "", secoes: Array.isArray(c.secoes) ? c.secoes : [], textoEditado: c.textoEditado ?? {}, evidencias } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
@@ -365,17 +370,17 @@ export async function excluirVersao(input: { docId: string; versionId: string })
 // EVIDÊNCIAS (não o texto completo do protocolo), aplica e REVALIDA por código (âncora
 // inventada não conta). Não salva — devolve as seções corrigidas pro editor; o usuário confere
 // e salva. Sobe a confiança conforme as evidências realmente cobrem.
-export async function aplicarCorrecoes(input: { docId: string; secoes: SecaoGerada[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number }>> {
+//
+// IMPORTANTE: recebe `evidencias` do CLIENT (o que está na tela), não busca do banco — o
+// snapshot salvo em `content.referencias` não tem o texto (só id/título/autor/ano), então
+// buscar do banco sempre resultava em texto vazio e a correção nunca conseguia reancorar
+// nada de verdade. Espelha o padrão do Comparador de Guidelines.
+export async function aplicarCorrecoes(input: { docId: string; secoes: SecaoGerada[]; evidencias: Source[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number }>> {
   try {
     await requireAdmin();
+    const sources = input.evidencias ?? [];
     if (!input.secoes?.length) return { ok: false, error: "Gere a atualização antes de corrigir." };
-    const { data: ult } = await createServiceClient().from("protocol_update_versions")
-      .select("content").eq("doc_id", input.docId).order("version_number", { ascending: false }).limit(1).maybeSingle();
-    const c = (ult?.content ?? {}) as { referencias?: { id: string; titulo?: string; tipo?: string; autor?: string | null; ano?: number | null; url?: string | null }[] };
-    const sources: Source[] = (Array.isArray(c.referencias) ? c.referencias : []).map((r) => ({
-      id: r.id, titulo: r.titulo ?? "", tipo: r.tipo ?? "", autor: r.autor ?? undefined, ano: r.ano ?? null, texto: "", url: r.url ?? undefined,
-    }));
-    if (sources.length === 0) return { ok: false, error: "Nenhuma evidência salva para este documento — gere e salve uma versão primeiro." };
+    if (sources.length === 0) return { ok: false, error: "Sem evidências para corrigir contra. Gere/reabra a atualização." };
 
     // Identifica as afirmações reprovadas (clinica|dose sem âncora válida), com id posicional.
     const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
