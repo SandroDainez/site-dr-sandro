@@ -28,6 +28,25 @@ export async function getAreasEditora(tabela: string, docId: string): Promise<Re
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Especialidade PRINCIPAL (coluna `specialty`, única) — diferente de `areas` (múltiplas,
+// "também aparece em"). Mudar a principal não mexe nas extras.
+export async function definirEspecialidadePrincipal(tabela: string, docId: string, especialidade: string): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    if (!validarTabelaEditora(tabela)) return { ok: false, error: "Tabela inválida." };
+    if (!AREA_IDS.includes(especialidade)) return { ok: false, error: "Especialidade inválida." };
+    const supabase = createServiceClient();
+    const { error } = await supabase.from(tabela).update({ specialty: especialidade }).eq("id", docId);
+    if (error) throw error;
+    for (const id of AREA_IDS) revalidatePath(`/especialidade/${id}`);
+    revalidatePath("/protocolos"); revalidatePath("/aulas"); revalidatePath("/flashcards");
+    revalidatePath("/questoes"); revalidatePath("/pesquisas"); revalidatePath("/comparativos");
+    revalidatePath("/atualizacoes-protocolos"); revalidatePath("/biblioteca-cientifica");
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 export async function definirAreasEditora(tabela: string, docId: string, areas: string[]): Promise<Result<string[]>> {
   try {
     await requireAdmin();

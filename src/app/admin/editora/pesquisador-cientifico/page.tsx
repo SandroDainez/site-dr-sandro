@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
 import ModuloResumo from "@/components/admin/ModuloResumo";
+import QuandoUsar from "@/components/admin/QuandoUsar";
 import PesquisadorCientifico from "./PesquisadorCientifico";
 import { aiMode } from "@/lib/ai/config";
 
@@ -31,6 +32,12 @@ export default async function PesquisadorCientificoPage() {
 
       <ModuloResumo slug="pesquisador-cientifico" />
 
+      <QuandoUsar>
+        <strong className="text-white">Use este quando:</strong> você tem uma <strong className="text-white/90">pergunta clínica pontual</strong>
+        (ex.: &quot;corticoide na SDRA moderada a grave ajuda?&quot;) — não um tema amplo de comparação entre diretrizes (isso é o
+        <strong className="text-white/90"> Comparador de Guidelines</strong>). Também não precisa colar nada: a IA busca sozinha (biblioteca interna +
+        PubMed) e devolve uma síntese crítica com as fontes. É o mais parecido com &quot;fazer uma revisão rápida da literatura&quot; sobre uma dúvida específica.
+      </QuandoUsar>
 
       <AdminHelp>
         1) Informe a <strong className="text-white/85">pergunta</strong> e a área. 2) Clique em <strong className="text-white/85">Buscar e sintetizar</strong>

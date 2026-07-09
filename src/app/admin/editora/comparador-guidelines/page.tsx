@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
 import ModuloResumo from "@/components/admin/ModuloResumo";
+import QuandoUsar from "@/components/admin/QuandoUsar";
 import ComparadorGuidelines from "./ComparadorGuidelines";
 import { aiMode } from "@/lib/ai/config";
 
@@ -31,6 +32,13 @@ export default async function ComparadorGuidelinesPage() {
 
       <ModuloResumo slug="comparador-guidelines" />
 
+      <QuandoUsar>
+        <strong className="text-white">Diferente dos outros:</strong> aqui você <strong className="text-white/90">não cola nada</strong> — só digita um
+        <strong className="text-white/90"> tema</strong> (ex.: &quot;anticoagulação na FA não valvar&quot;) e a IA busca sozinha (biblioteca interna + PubMed) o que
+        diferentes diretrizes dizem sobre ele, montando uma tabela de concordâncias/divergências. <strong className="text-white/90">Use quando quiser
+        saber se guidelines diferentes (AHA, ESC, SBC etc.) concordam</strong> sobre uma conduta. Se a pergunta é mais aberta (&quot;o que a evidência diz
+        sobre X&quot;), use o <strong className="text-white/90">Pesquisador Científico</strong> em vez deste.
+      </QuandoUsar>
 
       <AdminHelp>
         1) Informe um <strong className="text-white/85">tema</strong> e a área. 2) Clique em <strong className="text-white/85">Buscar e comparar</strong>

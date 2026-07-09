@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
 import ModuloResumo from "@/components/admin/ModuloResumo";
+import QuandoUsar from "@/components/admin/QuandoUsar";
 import EditorCientifico from "./EditorCientifico";
 import { aiMode } from "@/lib/ai/config";
 
@@ -33,6 +34,12 @@ export default async function EditorCientificoPage() {
 
       <ModuloResumo slug="editor-cientifico" />
 
+      <QuandoUsar>
+        <strong className="text-white">Use este quando:</strong> você tem referências prontas (diretrizes, artigos, livros) e quer que a IA
+        <strong className="text-white/90"> redija um texto científico do zero</strong> — revisão, artigo, resumo clínico. <strong className="text-white/90">Não</strong> é
+        para protocolo institucional (isso é o <strong className="text-white/90">Arquiteto de Protocolos</strong>, 33 seções fixas) nem para refinar um texto
+        que você já escreveu (isso é o <strong className="text-white/90">Editor Premium</strong> — você cola o rascunho e a IA densifica/refina em cima dele).
+      </QuandoUsar>
 
       <AdminHelp>
         1) Crie ou abra um texto na <strong className="text-white/85">biblioteca</strong>. 2) Cole as <strong className="text-white/85">referências</strong>

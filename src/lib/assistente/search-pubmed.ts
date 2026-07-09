@@ -50,7 +50,7 @@ async function esearch(term: string, comFiltro: boolean): Promise<string[]> {
     ? ` AND (Guideline[ptyp] OR Meta-Analysis[ptyp] OR systematic[sb] OR Randomized Controlled Trial[ptyp] OR Practice Guideline[ptyp])`
     : "";
   const reldate = comFiltro ? `&datetype=pdat&reldate=1825` : "";
-  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(term + filtro)}&retmax=5&sort=relevance&retmode=json${reldate}${apiKeyParam()}`;
+  const url = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(term + filtro)}&retmax=10&sort=relevance&retmode=json${reldate}${apiKeyParam()}`;
   const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
   if (!r.ok) return [];
   const d = await r.json();
@@ -95,9 +95,14 @@ function autoresDe(a: PubmedSummary | undefined): string {
 export async function searchPubMed(openai: OpenAI, perguntaPT: string): Promise<PubmedHit[]> {
   try {
     const termo = await buildPubmedQuery(openai, perguntaPT);
-    // 1) tenta com filtro de qualidade; se vazio, repete sem filtro (recall).
+    // 1) busca com filtro de qualidade (guideline/metanálise/RCT, últimos 5 anos).
     let ids = await esearch(termo, true);
-    if (ids.length === 0) ids = await esearch(termo, false);
+    // 2) se veio POUCO (não só zero), amplia com a busca sem filtro e une (sem duplicar) —
+    // preserva a prioridade das fontes de melhor qualidade, mas não trava a síntese em 1-2 fontes.
+    if (ids.length < 5) {
+      const amplos = await esearch(termo, false);
+      ids = [...ids, ...amplos.filter((id) => !ids.includes(id))].slice(0, 10);
+    }
     if (ids.length === 0) return [];
 
     const [resumo, abstracts] = await Promise.all([esummary(ids), efetchAbstracts(ids)]);

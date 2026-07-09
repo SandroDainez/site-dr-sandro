@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, Sparkles, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu, PencilLine } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
-import ImagemProtocolo from "@/components/admin/ImagemProtocolo";
+import ImagemEditora from "@/components/admin/ImagemEditora";
 import { PROTOCOLO_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE } from "@/lib/editora/protocolo-estrutura";
 import { dataCurta } from "@/lib/format-date";
 
@@ -550,7 +550,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
 
             <AreasEditora tabela="protocols" docId={protocolo.id} />
 
-            <div className="mt-3"><ImagemProtocolo protocolId={protocolo.id} /></div>
+            <div className="mt-3"><ImagemEditora tabela="protocols" docId={protocolo.id} /></div>
 
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={publicar} disabled={busy || versoes.length === 0} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
