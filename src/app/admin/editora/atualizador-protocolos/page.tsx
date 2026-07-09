@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listarDocs, listarProtocolosPublicados } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
 import ModuloResumo from "@/components/admin/ModuloResumo";
+import QuandoUsar from "@/components/admin/QuandoUsar";
 import AtualizadorProtocolos from "./AtualizadorProtocolos";
 import { aiMode } from "@/lib/ai/config";
 
@@ -32,6 +33,13 @@ export default async function AtualizadorProtocolosPage() {
 
       <ModuloResumo slug="atualizador-protocolos" />
 
+      <QuandoUsar>
+        <strong className="text-white">Não é automático</strong> — não roda sozinho, você aciona quando quiser conferir. Escolha um
+        <strong className="text-white/90"> protocolo já publicado</strong> (feito no Arquiteto) e clique em Buscar e gerar: a IA procura evidência
+        mais recente e mostra o que <strong className="text-white/90">mudaria</strong> (delta), citado. <strong className="text-white/90">Importante:
+        isto NÃO edita o protocolo original</strong> — gera um relatório separado (publicado em /atualizacoes-protocolos). Se achar que vale incorporar,
+        você mesmo edita o protocolo no Arquiteto usando esse relatório como referência.
+      </QuandoUsar>
 
       <AdminHelp>
         1) Escolha um <strong className="text-white/85">protocolo publicado</strong> (do Arquiteto). 2) Clique em

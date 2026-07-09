@@ -3,8 +3,10 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Sparkles, Trash2, ExternalLink, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
-import ImagemProtocolo from "@/components/admin/ImagemProtocolo";
+import ImagemEditora from "@/components/admin/ImagemEditora";
 import AreasEditora from "@/components/admin/AreasEditora";
+import { AREAS_SITE } from "@/lib/editora/areas";
+import { definirEspecialidadePrincipal } from "@/app/admin/editora/areas-actions";
 import { excluirDoc } from "@/app/admin/editora/arquiteto-protocolos/actions";
 
 type Prot = { id: string; title: string; slug: string; status: string; specialty: string };
@@ -18,6 +20,15 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
   const [erro, setErro] = useState<string | null>(null);
 
   if (lista.length === 0) return null;
+
+  function mudarEspecialidade(p: Prot, especialidade: string) {
+    setErro(null);
+    setLista((prev) => prev.map((x) => (x.id === p.id ? { ...x, specialty: especialidade } : x)));
+    start(async () => {
+      const r = await definirEspecialidadePrincipal("protocols", p.id, especialidade);
+      if (!r.ok) { setErro(r.error); setLista((prev) => prev.map((x) => (x.id === p.id ? { ...x, specialty: p.specialty } : x))); }
+    });
+  }
 
   function excluir(p: Prot) {
     if (!window.confirm(`Excluir o protocolo "${p.title}"? Esta ação não pode ser desfeita.`)) return;
@@ -45,7 +56,11 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
           <div key={p.id} className="rounded-xl border border-white/10 bg-white/[0.02]">
             <div className="flex flex-wrap items-center gap-2 px-3 py-2.5">
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-white">{p.title}</span>
-              <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] uppercase text-white/50">{ESP[p.specialty] ?? p.specialty}</span>
+              <select value={p.specialty} onChange={(e) => mudarEspecialidade(p, e.target.value)} disabled={busy}
+                className="rounded-full border border-white/15 bg-white/[0.04] px-2 py-0.5 text-[10px] uppercase text-white/70 outline-none">
+                {AREAS_SITE.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+                {!AREAS_SITE.some((a) => a.id === p.specialty) && <option value={p.specialty}>{ESP[p.specialty] ?? p.specialty}</option>}
+              </select>
               <span className={`rounded-full border px-2 py-0.5 text-[10px] ${p.status === "published" ? "border-accent/40 bg-accent/10 text-accent" : "border-white/15 text-white/45"}`}>{STATUS[p.status] ?? p.status}</span>
               <button type="button" onClick={() => setAberto(aberto === `img:${p.id}` ? null : `img:${p.id}`)} className="inline-flex items-center gap-1 rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-white/70 transition hover:text-white">
                 Imagem {aberto === `img:${p.id}` ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
@@ -60,7 +75,7 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
                 {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />} Excluir
               </button>
             </div>
-            {aberto === `img:${p.id}` && <div className="border-t border-white/10 p-3"><ImagemProtocolo protocolId={p.id} /></div>}
+            {aberto === `img:${p.id}` && <div className="border-t border-white/10 p-3"><ImagemEditora tabela="protocols" docId={p.id} /></div>}
             {aberto === `area:${p.id}` && <div className="border-t border-white/10 p-3"><AreasEditora tabela="protocols" docId={p.id} /></div>}
           </div>
         ))}

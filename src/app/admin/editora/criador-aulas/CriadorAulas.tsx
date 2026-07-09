@@ -3,7 +3,8 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Plus, Trash2, Loader2, GraduationCap, Save, CheckCircle2, Circle, AlertTriangle, FileText, X, RefreshCw, ShieldCheck, Cpu, PencilLine, Wand2 } from "lucide-react";
 import AreasEditora from "@/components/admin/AreasEditora";
-import { AULA_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE, PUBLICOS_ALVO } from "@/lib/editora/aula-estrutura";
+import ImagemEditora from "@/components/admin/ImagemEditora";
+import { AULA_BLOCOS, ESPECIALIDADES_MODULO, TIPOS_FONTE, PUBLICOS_ALVO, DURACOES_ALVO } from "@/lib/editora/aula-estrutura";
 import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
@@ -46,6 +47,7 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
   const [novoTitulo, setNovoTitulo] = useState("");
   const [especialidade, setEspecialidade] = useState<string>(ESPECIALIDADES_MODULO[0]);
   const [publicoAlvo, setPublicoAlvo] = useState<string>(PUBLICOS_ALVO[0]);
+  const [duracaoAlvo, setDuracaoAlvo] = useState<string>(DURACOES_ALVO[1]);
   const [sources, setSources] = useState<Source[]>([]);
 
 
@@ -116,6 +118,7 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
     setTextoEditado(te);
     if (r.data.especialidade) setEspecialidade(r.data.especialidade);
     if (r.data.publicoAlvo) setPublicoAlvo(r.data.publicoAlvo);
+    if (r.data.duracaoAlvo) setDuracaoAlvo(r.data.duracaoAlvo);
     setBlocos(AULA_BLOCOS.map(() => ({ status: "concluido" })));
     setMetas([]); setSalvo(null); setRevisao(null); setCorrecao(null);
   }
@@ -178,7 +181,7 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
     setBlocos((prev) => prev.map((b, idx) => (idx >= start ? { status: "pendente" } : b)));
     for (let i = start; i < AULA_BLOCOS.length; i++) {
       setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "gerando" } : b)));
-      const r = await gerarBloco({ docId: doc.id, blocoIndex: i, especialidade, publicoAlvo, secoesAnteriores: acumulado });
+      const r = await gerarBloco({ docId: doc.id, blocoIndex: i, especialidade, publicoAlvo, duracaoAlvo, secoesAnteriores: acumulado });
       if (!r.ok) {
         setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "erro", err: r.error } : b)));
         setError(`Bloco ${i + 1}: ${r.error}`); setGerando(false); return;
@@ -227,7 +230,7 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
       ? { provider: revisao.provider, model: revisao.model, tokensIn: revisao.usage.tokensIn, tokensOut: revisao.usage.tokensOut, issues: revisao.issues, corrigido: revisao.corrigido }
       : undefined;
     startTransition(async () => {
-      const r = await salvarVersao({ docId: doc.id, especialidade, publicoAlvo, secoes, textoEditado, geracoes: metas, revisao: revisaoMeta });
+      const r = await salvarVersao({ docId: doc.id, especialidade, publicoAlvo, duracaoAlvo, secoes, textoEditado, geracoes: metas, revisao: revisaoMeta });
       if (r.ok) { setSalvo({ versionNumber: r.data.versionNumber, confidence: r.data.validacao.confidence }); carregarVersoes(doc.id); }
       else setError(r.error);
     });
@@ -324,6 +327,10 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
               <div>
                 <label className={labelCls}>Público-alvo</label>
                 <select className={inputCls + " sm:w-52"} value={publicoAlvo} onChange={(e) => setPublicoAlvo(e.target.value)}>{PUBLICOS_ALVO.map((p) => <option key={p} value={p}>{p}</option>)}</select>
+              </div>
+              <div>
+                <label className={labelCls}>Duração alvo</label>
+                <select className={inputCls + " sm:w-56"} value={duracaoAlvo} onChange={(e) => setDuracaoAlvo(e.target.value)}>{DURACOES_ALVO.map((d) => <option key={d} value={d}>{d}</option>)}</select>
               </div>
               <button type="button" onClick={gerarTudo} disabled={gerando || busy || sources.length === 0} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed disabled:brightness-75">
                 {gerando ? <Loader2 className="h-4 w-4 animate-spin" /> : <GraduationCap className="h-4 w-4" />} Gerar aula ({AULA_BLOCOS.length} blocos)
@@ -534,6 +541,7 @@ export default function CriadorAulas({ docsIniciais, modo }: { docsIniciais: Doc
             )}
 
             <AreasEditora tabela="aula_docs" docId={doc.id} />
+            <ImagemEditora tabela="aula_docs" docId={doc.id} />
 
             <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={publicar} disabled={busy || versoes.length === 0} className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">

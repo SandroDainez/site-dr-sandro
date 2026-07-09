@@ -102,7 +102,7 @@ export async function removerSource(sourceId: string): Promise<Result<null>> {
 
 // Gera UM bloco de seções (slides), com sources + público-alvo + seções anteriores.
 export async function gerarBloco(input: {
-  docId: string; blocoIndex: number; especialidade: string; publicoAlvo: string; secoesAnteriores: SecaoGerada[];
+  docId: string; blocoIndex: number; especialidade: string; publicoAlvo: string; duracaoAlvo?: string; secoesAnteriores: SecaoGerada[];
 }): Promise<Result<{ secoes: SecaoGerada[]; validacaoBloco: Validacao; usage: { tokensIn: number; tokensOut: number }; provider: string; model: string }>> {
   try {
     await requireAdmin();
@@ -115,7 +115,7 @@ export async function gerarBloco(input: {
     if (sources.length === 0) return { ok: false, error: "Adicione ao menos uma referência antes de gerar." };
 
     const prompt = buildCriadorAulasPrompt({
-      especialidade: input.especialidade, publicoAlvo: input.publicoAlvo, sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores,
+      especialidade: input.especialidade, publicoAlvo: input.publicoAlvo, duracaoAlvo: input.duracaoAlvo, sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores,
     });
     const provider = getProvider(aiProviders().generation);
     const res = await provider.generate({
@@ -162,6 +162,7 @@ export async function salvarVersao(input: {
   docId: string;
   especialidade: string;
   publicoAlvo: string;
+  duracaoAlvo?: string;
   secoes: SecaoGerada[];
   textoEditado?: Record<string, string>;
   geracoes: { blocoIndex: number; provider: string; model: string; tokensIn: number; tokensOut: number; secoes: SecaoGerada[]; confidence: number; method: string }[];
@@ -184,6 +185,7 @@ export async function salvarVersao(input: {
     const content = {
       especialidade: input.especialidade,
       publicoAlvo: input.publicoAlvo,
+      duracaoAlvo: input.duracaoAlvo,
       secoes: input.secoes,
       textoEditado: input.textoEditado ?? {},
       referencias: snapshotReferencias(input.secoes, sources),
@@ -237,7 +239,7 @@ export async function salvarVersao(input: {
 
 // Carrega o CONTEÚDO de uma versão salva (secoes + textoEditado + especialidade +
 // publicoAlvo) para reabrir no editor e editar. Editar + salvar cria uma nova versão.
-export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; publicoAlvo: string; secoes: SecaoGerada[]; textoEditado: Record<string, string> }>> {
+export async function carregarVersao(versionId: string): Promise<Result<{ especialidade: string; publicoAlvo: string; duracaoAlvo: string; secoes: SecaoGerada[]; textoEditado: Record<string, string> }>> {
   try {
     await requireAdmin();
     if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
@@ -245,8 +247,8 @@ export async function carregarVersao(versionId: string): Promise<Result<{ especi
     const { data, error } = await supabase.from("aula_versions").select("content").eq("id", versionId).maybeSingle();
     if (error) throw error;
     if (!data) return { ok: false, error: "Versão não encontrada." };
-    const c = (data.content ?? {}) as { especialidade?: string; publicoAlvo?: string; secoes?: SecaoGerada[]; textoEditado?: Record<string, string> };
-    return { ok: true, data: { especialidade: c.especialidade ?? "", publicoAlvo: c.publicoAlvo ?? "", secoes: Array.isArray(c.secoes) ? c.secoes : [], textoEditado: c.textoEditado ?? {} } };
+    const c = (data.content ?? {}) as { especialidade?: string; publicoAlvo?: string; duracaoAlvo?: string; secoes?: SecaoGerada[]; textoEditado?: Record<string, string> };
+    return { ok: true, data: { especialidade: c.especialidade ?? "", publicoAlvo: c.publicoAlvo ?? "", duracaoAlvo: c.duracaoAlvo ?? "", secoes: Array.isArray(c.secoes) ? c.secoes : [], textoEditado: c.textoEditado ?? {} } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 

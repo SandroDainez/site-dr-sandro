@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listarDocs } from "./actions";
 import AdminHelp from "@/components/admin/AdminHelp";
 import ModuloResumo from "@/components/admin/ModuloResumo";
+import QuandoUsar from "@/components/admin/QuandoUsar";
 import EditorPremium from "./EditorPremium";
 import { aiMode } from "@/lib/ai/config";
 
@@ -31,6 +32,12 @@ export default async function EditorPremiumPage() {
 
       <ModuloResumo slug="editor-premium" />
 
+      <QuandoUsar>
+        <strong className="text-white">Use este quando:</strong> você <strong className="text-white/90">já tem um texto escrito</strong> (seu rascunho,
+        um material antigo, um resumo que você fez) e quer que a IA <strong className="text-white/90">refine em cima dele</strong> — mais densidade, melhor
+        forma, cada afirmação ancorada nas referências — <strong className="text-white/90">mantendo sua estrutura</strong>. Se você <strong className="text-white/90">não
+        tem nenhum rascunho</strong>, use o <strong className="text-white/90">Editor Científico</strong> (ele escreve do zero a partir só das referências).
+      </QuandoUsar>
 
       <AdminHelp>
         1) Crie/abra um texto na biblioteca. 2) Cole as <strong className="text-white/85">referências</strong>. 3) Cole o
