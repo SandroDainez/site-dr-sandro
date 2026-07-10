@@ -97,12 +97,19 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
             <button type="button" onClick={() => setFull("pdf")} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
               ⛶ Tela cheia
             </button>
-            <a href={item.arquivoUrl} target="_blank" rel="noreferrer" download className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
+            <a href={`${item.arquivoUrl}?dl=1`} rel="noreferrer" download className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
               {item.arquivoLabel || "Baixar PDF"} ↓
             </a>
           </div>
           {pdfOpen && (
-            <iframe src={item.arquivoUrl} title={item.titulo} allowFullScreen className="mt-3 w-full rounded-xl border border-white/10 bg-white" style={{ height: "78vh" }} />
+            <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
+              <div className="sticky top-2 z-[60] flex items-center justify-end border-b border-white/10 bg-[#0f1420] p-2 shadow-lg">
+                <button type="button" onClick={() => setPdfOpen(false)} className="rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25">
+                  ✕ Fechar leitura
+                </button>
+              </div>
+              <iframe src={item.arquivoUrl} title={item.titulo} allowFullScreen className="w-full bg-white" style={{ height: "78vh" }} />
+            </div>
           )}
         </div>
       )}
@@ -113,7 +120,7 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
             <h3 className="min-w-0 truncate text-base font-semibold text-white">{item.titulo}</h3>
             <div className="flex shrink-0 items-center gap-2">
               {full === "pdf" && item.arquivoUrl && (
-                <a href={item.arquivoUrl} target="_blank" rel="noreferrer" download className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/15">
+                <a href={`${item.arquivoUrl}?dl=1`} rel="noreferrer" download className="rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/15">
                   Baixar ↓
                 </a>
               )}
