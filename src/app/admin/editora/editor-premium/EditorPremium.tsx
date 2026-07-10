@@ -289,6 +289,7 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
                 <button type="button" onClick={criarNovo} disabled={busy || novoTitulo.trim().length < 3} className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50"><Plus className="h-4 w-4" /> Criar</button>
               </div>
             </div>
+                <p style={{fontSize:"40px",color:"red",fontWeight:"bold",background:"yellow"}}>MARCADOR-TESTE-7788</p>
                 <p className="mt-3 text-[11px] text-white/40">Depois de criar (ou abrir um existente acima), a área para colar as <strong className="text-white/60">referências</strong> aparece logo abaixo.</p>
           </div>
         )}
