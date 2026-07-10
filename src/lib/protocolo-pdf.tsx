@@ -94,15 +94,19 @@ function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
             const cor = crit ? RED : GOLD;
             const bg = crit ? "#fdf2f2" : "#fdf8ee";
             return (
-              <View key={i} style={[s.callout, { borderLeftColor: cor, backgroundColor: bg }]} wrap={false}>
-                <Text style={[s.calloutTitle, { color: cor }]}>{nome}</Text>
+              // SEM wrap={false}: seções longas (diretriz de completude) podem passar de uma
+              // página — bloquear a quebra fazia o react-pdf SOBREPOR o conteúdo em vez de
+              // paginar. Deixamos quebrar normalmente (o pior caso é um título isolado no
+              // rodapé da página, bem melhor que texto ilegível sobreposto).
+              <View key={i} style={[s.callout, { borderLeftColor: cor, backgroundColor: bg }]}>
+                <Text style={[s.calloutTitle, { color: cor }]} wrap={false}>{nome}</Text>
                 {paras.map((t, j) => <Text key={j} style={[s.li, { color: "#3b2f2f" }]}>• {t}</Text>)}
               </View>
             );
           }
           return (
-            <View key={i} wrap={false}>
-              <View style={s.h2wrap}>
+            <View key={i}>
+              <View style={s.h2wrap} wrap={false}>
                 <Text style={s.h2num}>{numeros[nome]}</Text>
                 <Text style={s.h2}>{nome}</Text>
               </View>
