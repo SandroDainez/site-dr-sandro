@@ -47,6 +47,26 @@ export async function definirEspecialidadePrincipal(tabela: string, docId: strin
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
+// Título do documento (coluna `title`) — edição rápida direto da listagem admin, sem precisar
+// abrir o módulo de geração. NÃO mexe no slug/conteúdo (renomear é seguro: a URL pública é
+// pelo slug, não pelo título).
+export async function definirTituloEditora(tabela: string, docId: string, titulo: string): Promise<Result<null>> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    if (!validarTabelaEditora(tabela)) return { ok: false, error: "Tabela inválida." };
+    const t = titulo.trim();
+    if (!t) return { ok: false, error: "Título não pode ficar vazio." };
+    const supabase = createServiceClient();
+    const { error } = await supabase.from(tabela).update({ title: t }).eq("id", docId);
+    if (error) throw error;
+    revalidatePath("/protocolos"); revalidatePath("/aulas"); revalidatePath("/flashcards");
+    revalidatePath("/questoes"); revalidatePath("/pesquisas"); revalidatePath("/comparativos");
+    revalidatePath("/atualizacoes-protocolos"); revalidatePath("/biblioteca-cientifica");
+    return { ok: true, data: null };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
 export async function definirAreasEditora(tabela: string, docId: string, areas: string[]): Promise<Result<string[]>> {
   try {
     await requireAdmin();
