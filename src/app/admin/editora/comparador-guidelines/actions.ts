@@ -13,6 +13,7 @@ import { corrigirCitacoes } from "@/lib/ai/correcao";
 import { buildCorrecaoComparadorPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-comparador";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
+import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeSecoes } from "@/lib/editora/biblioteca";
 
 // Comparador de Guidelines (retrieval). Sobre research_docs (tipo='comparador', migration 009).
 // Busca biblioteca interna + PubMed sobre um tema → tabela comparativa por aspectos, citada.
@@ -245,10 +246,10 @@ export async function publicarDoc(docId: string): Promise<Result<{ status: strin
   try {
     await requireAdmin();
     const supabase = createServiceClient();
-    const { data: doc } = await supabase.from("research_docs").select("slug").eq("id", docId).maybeSingle();
+    const { data: doc } = await supabase.from("research_docs").select("title,slug,specialty,areas").eq("id", docId).maybeSingle();
     if (!doc) return { ok: false, error: "Documento não encontrado." };
     const { data: alvo } = await supabase.from("research_versions")
-      .select("id,is_published").eq("doc_id", docId).order("version_number", { ascending: false }).limit(1).maybeSingle();
+      .select("id,is_published,content").eq("doc_id", docId).order("version_number", { ascending: false }).limit(1).maybeSingle();
     if (!alvo) return { ok: false, error: "Gere e salve uma versão antes de publicar." };
     if (!alvo.is_published) {
       const { data: pubAtual } = await supabase.from("research_versions").select("id").eq("doc_id", docId).eq("is_published", true).maybeSingle();
@@ -258,6 +259,15 @@ export async function publicarDoc(docId: string): Promise<Result<{ status: strin
     }
     const { error: eDoc } = await supabase.from("research_docs").update({ status: "published", current_version_id: alvo.id }).eq("id", docId);
     if (eDoc) throw eDoc;
+
+    const conteudo = alvo.content as { secoes?: SecaoGerada[]; textoEditado?: Record<string, string> };
+    await sincronizarBiblioteca(supabase, {
+      modulo: "comparador-guidelines", tabelaOrigem: "research_docs", docId,
+      titulo: doc.title, slug: doc.slug, urlPublica: `/comparativos/${doc.slug}`,
+      especialidade: doc.specialty, areas: doc.areas ?? [],
+      texto: textoConsolidadoDeSecoes(conteudo.secoes ?? [], conteudo.textoEditado),
+    });
+
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "published", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -273,6 +283,7 @@ export async function despublicarDoc(docId: string): Promise<Result<{ status: st
     if (pub) { const { error } = await supabase.rpc("unpublish_research_version", { p_version_id: pub.id }); if (error) throw error; }
     const { error: e2 } = await supabase.from("research_docs").update({ status: "ready_to_publish" }).eq("id", docId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "research_docs", docId);
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "ready_to_publish", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -288,6 +299,7 @@ export async function arquivarDoc(docId: string): Promise<Result<{ status: strin
     if (pub) { const { error } = await supabase.rpc("unpublish_research_version", { p_version_id: pub.id }); if (error) throw error; }
     const { error: e2 } = await supabase.from("research_docs").update({ status: "archived" }).eq("id", docId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "research_docs", docId);
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "archived", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -304,6 +316,7 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
     for (const p of pubs ?? []) { const { error } = await supabase.rpc("unpublish_research_version", { p_version_id: p.id }); if (error) throw error; }
     const { error } = await supabase.from("research_docs").delete().eq("id", id);
     if (error) throw error;
+    await removerDaBiblioteca(supabase, "research_docs", id);
     revalidatePath("/comparativos"); revalidatePath("/admin/editora/comparador-guidelines");
     if (doc?.slug) revalidatePath(`/comparativos/${doc.slug}`);
     return { ok: true, data: null };

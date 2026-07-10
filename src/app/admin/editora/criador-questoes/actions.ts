@@ -10,6 +10,7 @@ import { buildCorrecaoQuestoesPrompt, type ItemCorrigir } from "@/lib/ai/prompts
 import type { Source, Issue, Afirmacao } from "@/lib/ai/types";
 import { gerarQuestoesIA, revisarQuestoesIA } from "@/lib/ai/questoes-gen";
 import { mapEspecialidadeDB, questoesToSecoes, justificativaTexto, type QuestaoGerada } from "@/lib/editora/questao-estrutura";
+import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeQuestoes } from "@/lib/editora/biblioteca";
 
 // Criador de Questões (MCQ) — casa própria com pipeline completo (sources, citações,
 // confidence, versionamento imutável) sobre questao_docs/versions/sources (migration 007).
@@ -277,11 +278,11 @@ export async function publicarDoc(docId: string): Promise<Result<{ status: strin
   try {
     await requireAdmin();
     const supabase = createServiceClient();
-    const { data: doc } = await supabase.from("questao_docs").select("slug").eq("id", docId).maybeSingle();
+    const { data: doc } = await supabase.from("questao_docs").select("title,slug,specialty,areas").eq("id", docId).maybeSingle();
     if (!doc) return { ok: false, error: "Conjunto não encontrado." };
 
     const { data: alvo } = await supabase.from("questao_versions")
-      .select("id,is_published").eq("doc_id", docId).order("version_number", { ascending: false }).limit(1).maybeSingle();
+      .select("id,is_published,content").eq("doc_id", docId).order("version_number", { ascending: false }).limit(1).maybeSingle();
     if (!alvo) return { ok: false, error: "Gere e salve uma versão antes de publicar." };
 
     if (!alvo.is_published) {
@@ -300,6 +301,14 @@ export async function publicarDoc(docId: string): Promise<Result<{ status: strin
     if (eDoc) throw eDoc;
 
     await sincronizarNoQuiz(supabase, docId); // alimenta o quiz (soft)
+
+    const conteudo = alvo.content as { questoes?: QuestaoGerada[] };
+    await sincronizarBiblioteca(supabase, {
+      modulo: "criador-questoes", tabelaOrigem: "questao_docs", docId,
+      titulo: doc.title, slug: doc.slug, urlPublica: `/questoes/${doc.slug}`,
+      especialidade: doc.specialty, areas: doc.areas ?? [],
+      texto: textoConsolidadoDeQuestoes(conteudo.questoes ?? []),
+    });
 
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "published", slug: doc.slug } };
@@ -320,6 +329,7 @@ export async function despublicarDoc(docId: string): Promise<Result<{ status: st
 
     const { error: e2 } = await supabase.from("questao_docs").update({ status: "ready_to_publish" }).eq("id", docId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "questao_docs", docId);
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "ready_to_publish", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -339,6 +349,7 @@ export async function arquivarDoc(docId: string): Promise<Result<{ status: strin
 
     const { error: e2 } = await supabase.from("questao_docs").update({ status: "archived" }).eq("id", docId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "questao_docs", docId);
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "archived", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -400,6 +411,7 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
     await supabase.from("questoes").update({ ativo: false }).eq("editora_doc_id", id); // remove do quiz (soft)
     const { error } = await supabase.from("questao_docs").delete().eq("id", id);
     if (error) throw error;
+    await removerDaBiblioteca(supabase, "questao_docs", id);
     revalidatePath("/questoes"); revalidatePath("/admin/editora/criador-questoes");
     if (doc?.slug) revalidatePath(`/questoes/${doc.slug}`);
     return { ok: true, data: null };

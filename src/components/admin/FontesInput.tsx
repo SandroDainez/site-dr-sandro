@@ -2,9 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { upload } from "@vercel/blob/client";
-import { Plus, Loader2, FileText, Library, ClipboardPaste, Search, Check, Sparkles, BookOpen } from "lucide-react";
+import { Plus, Loader2, FileText, Library, ClipboardPaste, Search, Check, Sparkles, BookOpen, GraduationCap } from "lucide-react";
 import { extrairTextoPdf } from "@/app/admin/referencias/actions";
-import { buscarNaBiblioteca, buscarPorIA, type BibliotecaHit, type IaHit } from "@/app/admin/editora/fontes-actions";
+import { buscarNaBiblioteca, buscarPorIA, buscarNaBibliotecaEditora, type BibliotecaHit, type IaHit, type EditoraHit } from "@/app/admin/editora/fontes-actions";
 
 // Ingestão de FONTES em 3 modos: colar texto · enviar PDF (extrai o texto) · buscar na
 // biblioteca interna (kb_chunks). Em todos, o resultado é uma fonte {titulo,tipo,autor,ano,texto}
@@ -27,11 +27,12 @@ function agruparPorFonte<T extends { titulo: string }>(hits: T[]): [string, { h:
   return [...grupos.entries()];
 }
 
-type Modo = "texto" | "pdf" | "biblioteca" | "ia";
+type Modo = "texto" | "pdf" | "biblioteca" | "editora" | "ia";
 const MODOS: { id: Modo; label: string; icon: typeof FileText }[] = [
   { id: "texto", label: "Colar texto", icon: ClipboardPaste },
   { id: "pdf", label: "Enviar PDF", icon: FileText },
   { id: "biblioteca", label: "Buscar na biblioteca", icon: Library },
+  { id: "editora", label: "Reaproveitar da Editora", icon: GraduationCap },
   { id: "ia", label: "Buscar por IA (PubMed)", icon: Sparkles },
 ];
 
@@ -64,6 +65,13 @@ export default function FontesInput({
   const [hits, setHits] = useState<BibliotecaHit[]>([]);
   const [addedIdx, setAddedIdx] = useState<Set<number>>(new Set());
   const [addingIdx, setAddingIdx] = useState<number | null>(null);
+
+  // reaproveitar da Editora (biblioteca_editora — "banco 2")
+  const [qe, setQe] = useState("");
+  const [edBusy, setEdBusy] = useState(false);
+  const [edHits, setEdHits] = useState<EditoraHit[]>([]);
+  const [edAddedIdx, setEdAddedIdx] = useState<Set<number>>(new Set());
+  const [edAddingIdx, setEdAddingIdx] = useState<number | null>(null);
 
   // busca por IA (biblioteca interna + PubMed)
   const [qi, setQi] = useState("");
@@ -122,6 +130,25 @@ export default function FontesInput({
     });
   }
 
+  function buscarEditora() {
+    setErro(null); setEdBusy(true); setEdHits([]); setEdAddedIdx(new Set());
+    startTransition(async () => {
+      const r = await buscarNaBibliotecaEditora(qe);
+      if (r.ok) setEdHits(r.data);
+      else setErro(r.error);
+      setEdBusy(false);
+    });
+  }
+  function addEditoraHit(h: EditoraHit, idx: number) {
+    setErro(null); setEdAddingIdx(idx);
+    startTransition(async () => {
+      const r = await onAdd({ titulo: h.titulo, tipo: "editora", texto: h.conteudo });
+      if (r.ok) setEdAddedIdx((prev) => new Set(prev).add(idx));
+      else setErro(r.error ?? "Erro ao adicionar.");
+      setEdAddingIdx(null);
+    });
+  }
+
   function buscarIa() {
     setErro(null); setIaBusy(true); setIaHits([]); setIaAdded(new Set()); setIaMeta(null);
     startTransition(async () => {
@@ -158,7 +185,7 @@ export default function FontesInput({
       </div>
 
       {/* metadados (texto + pdf) */}
-      {modo !== "biblioteca" && (
+      {modo !== "biblioteca" && modo !== "editora" && (
         <div className="mb-2 grid gap-2 sm:grid-cols-[1fr_150px_1fr_90px]">
           <input className={inputCls} value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título da fonte" />
           <select className={inputCls} value={tipo} onChange={(e) => setTipo(e.target.value)}>{tipos.map((t) => <option key={t} value={t}>{t}</option>)}</select>
@@ -235,6 +262,38 @@ export default function FontesInput({
             </div>
           )}
           {!libBusy && hits.length === 0 && q && <p className="text-[11px] text-white/35">Sem resultados — tente outros termos.</p>}
+        </div>
+      )}
+
+      {modo === "editora" && (
+        <div className="space-y-2">
+          <p className="text-[11px] text-white/40">Busca no que a <strong className="text-white/60">própria Editora já publicou</strong> (qualquer módulo) — reaproveite um protocolo, aula, flashcard etc. já pronto como fonte deste trabalho.</p>
+          <div className="flex gap-2">
+            <input className={inputCls} value={qe} onChange={(e) => setQe(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") buscarEditora(); }} placeholder="Ex.: AVC isquêmico" />
+            <button type="button" onClick={buscarEditora} disabled={edBusy || qe.trim().length < 3} className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50">
+              {edBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />} Buscar
+            </button>
+          </div>
+          {edHits.length > 0 && (
+            <ul className="space-y-1.5">
+              {edHits.map((h, i) => {
+                const added = edAddedIdx.has(i);
+                return (
+                  <li key={i} className="flex items-start gap-2 rounded-lg border border-white/10 bg-white/[0.02] p-2.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[12px] font-medium text-white/80">{h.titulo}</p>
+                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-white/50">{h.conteudo}</p>
+                    </div>
+                    <button type="button" onClick={() => addEditoraHit(h, i)} disabled={added || edAddingIdx === i || busy}
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${added ? "border-accent/40 bg-accent/10 text-accent" : "border-white/15 text-white/70 hover:border-accent/40 hover:text-white"} disabled:opacity-60`}>
+                      {edAddingIdx === i ? <Loader2 className="h-3 w-3 animate-spin" /> : added ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />} {added ? "Adicionada" : "Adicionar"}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {!edBusy && edHits.length === 0 && qe && <p className="text-[11px] text-white/35">Sem resultados — tente outros termos.</p>}
         </div>
       )}
 

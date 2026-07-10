@@ -12,6 +12,7 @@ import { corrigirCitacoes } from "@/lib/ai/correcao";
 import { buildCorrecaoPremiumPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-premium";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { SCI_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/cientifico-estrutura";
+import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeSecoes } from "@/lib/editora/biblioteca";
 
 // Editor Premium — refinamento (densidade/forma) de um RASCUNHO a partir das referências.
 // Reaproveita a biblioteca científica (sci_docs / sci_versions / sci_sources, migration 004)
@@ -303,11 +304,11 @@ export async function publicarDoc(docId: string): Promise<Result<{ status: strin
   try {
     await requireAdmin();
     const supabase = createServiceClient();
-    const { data: doc } = await supabase.from("sci_docs").select("slug").eq("id", docId).maybeSingle();
+    const { data: doc } = await supabase.from("sci_docs").select("title,slug,specialty,areas").eq("id", docId).maybeSingle();
     if (!doc) return { ok: false, error: "Texto não encontrado." };
 
     const { data: alvo } = await supabase.from("sci_versions")
-      .select("id,is_published").eq("doc_id", docId).order("version_number", { ascending: false }).limit(1).maybeSingle();
+      .select("id,is_published,content").eq("doc_id", docId).order("version_number", { ascending: false }).limit(1).maybeSingle();
     if (!alvo) return { ok: false, error: "Gere e salve uma versão antes de publicar." };
 
     if (!alvo.is_published) {
@@ -324,6 +325,14 @@ export async function publicarDoc(docId: string): Promise<Result<{ status: strin
     const { error: eDoc } = await supabase.from("sci_docs")
       .update({ status: "published", current_version_id: alvo.id }).eq("id", docId);
     if (eDoc) throw eDoc;
+
+    const conteudo = (alvo.content ?? {}) as { secoes?: SecaoGerada[]; textoEditado?: Record<string, string> };
+    await sincronizarBiblioteca(supabase, {
+      modulo: "editor-premium", tabelaOrigem: "sci_docs", docId,
+      titulo: doc.title, slug: doc.slug, urlPublica: `/biblioteca-cientifica/${doc.slug}`,
+      especialidade: doc.specialty, areas: doc.areas ?? [],
+      texto: textoConsolidadoDeSecoes(conteudo.secoes ?? [], conteudo.textoEditado),
+    });
 
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "published", slug: doc.slug } };
@@ -342,6 +351,7 @@ export async function despublicarDoc(docId: string): Promise<Result<{ status: st
 
     const { error: e2 } = await supabase.from("sci_docs").update({ status: "ready_to_publish" }).eq("id", docId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "sci_docs", docId);
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "ready_to_publish", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -359,6 +369,7 @@ export async function arquivarDoc(docId: string): Promise<Result<{ status: strin
 
     const { error: e2 } = await supabase.from("sci_docs").update({ status: "archived" }).eq("id", docId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "sci_docs", docId);
     revalidarPublico(doc.slug);
     return { ok: true, data: { status: "archived", slug: doc.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -375,6 +386,7 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
     for (const p of pubs ?? []) { const { error } = await supabase.rpc("unpublish_sci_version", { p_version_id: p.id }); if (error) throw error; }
     const { error } = await supabase.from("sci_docs").delete().eq("id", id);
     if (error) throw error;
+    await removerDaBiblioteca(supabase, "sci_docs", id);
     revalidatePath("/biblioteca-cientifica"); revalidatePath("/admin/editora/editor-premium");
     if (doc?.slug) revalidatePath(`/biblioteca-cientifica/${doc.slug}`);
     return { ok: true, data: null };

@@ -37,6 +37,29 @@ export async function buscarNaBiblioteca(query: string): Promise<Result> {
   }
 }
 
+// Busca no que a PRÓPRIA Editora já publicou (biblioteca_editora — "banco 2", ver
+// src/lib/editora/biblioteca.ts). Distinta de buscarNaBiblioteca (kb_chunks, acervo manual).
+export type EditoraHit = { conteudo: string; titulo: string; tipo: string; url: string | null };
+type EditoraResult = { ok: true; data: EditoraHit[] } | { ok: false; error: string };
+export async function buscarNaBibliotecaEditora(query: string): Promise<EditoraResult> {
+  try {
+    await requireAdmin();
+    if (!serviceConfigured()) return { ok: false, error: "Supabase não configurado." };
+    const q = (query || "").trim();
+    if (q.length < 3) return { ok: false, error: "Digite ao menos 3 caracteres para buscar." };
+    const supabase = createServiceClient();
+    const { data, error } = await supabase.from("biblioteca_editora")
+      .select("titulo,texto,modulo,url_publica")
+      .or(`titulo.ilike.%${q}%,texto.ilike.%${q}%`)
+      .order("atualizado_em", { ascending: false })
+      .limit(15);
+    if (error) throw error;
+    return { ok: true, data: (data ?? []).map((r) => ({ conteudo: r.texto, titulo: r.titulo, tipo: r.modulo, url: r.url_publica })) };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
 // Busca por IA: biblioteca interna + PubMed (via a camada de retrieval, com cache). Cada
 // resultado (trecho interno ou abstract de artigo REAL, com PMID) pode virar fonte.
 export type IaHit = { conteudo: string; titulo: string; tipo: string; url: string | null; autor?: string; ano?: number | null };

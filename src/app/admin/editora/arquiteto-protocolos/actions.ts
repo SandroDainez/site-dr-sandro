@@ -12,6 +12,7 @@ import { corrigirCitacoes } from "@/lib/ai/correcao";
 import { buildCorrecaoProtocolosPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-protocolos";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
+import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeSecoes } from "@/lib/editora/biblioteca";
 
 type Result<T = unknown> = { ok: true; data: T } | { ok: false; error: string };
 const msg = (e: unknown) => String(e instanceof Error ? e.message : e);
@@ -262,12 +263,12 @@ export async function publicarProtocolo(protocolId: string): Promise<Result<{ st
   try {
     await requireAdmin();
     const supabase = createServiceClient();
-    const { data: prot } = await supabase.from("protocols").select("slug").eq("id", protocolId).maybeSingle();
+    const { data: prot } = await supabase.from("protocols").select("title,slug,specialty,areas").eq("id", protocolId).maybeSingle();
     if (!prot) return { ok: false, error: "Protocolo não encontrado." };
 
     // versão-alvo = a mais recente
     const { data: alvo } = await supabase.from("protocol_versions")
-      .select("id,is_published").eq("protocol_id", protocolId).order("version_number", { ascending: false }).limit(1).maybeSingle();
+      .select("id,is_published,content").eq("protocol_id", protocolId).order("version_number", { ascending: false }).limit(1).maybeSingle();
     if (!alvo) return { ok: false, error: "Gere e salve uma versão antes de publicar." };
 
     if (!alvo.is_published) {
@@ -286,6 +287,14 @@ export async function publicarProtocolo(protocolId: string): Promise<Result<{ st
       .update({ status: "published", current_version_id: alvo.id }).eq("id", protocolId);
     if (eProt) throw eProt;
 
+    const conteudo = alvo.content as { secoes?: SecaoGerada[]; textoEditado?: Record<string, string> };
+    await sincronizarBiblioteca(supabase, {
+      modulo: "arquiteto-protocolos", tabelaOrigem: "protocols", docId: protocolId,
+      titulo: prot.title, slug: prot.slug, urlPublica: `/protocolos/${prot.slug}`,
+      especialidade: prot.specialty, areas: prot.areas ?? [],
+      texto: textoConsolidadoDeSecoes(conteudo.secoes ?? [], conteudo.textoEditado),
+    });
+
     revalidarPublico(prot.slug);
     return { ok: true, data: { status: "published", slug: prot.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -303,6 +312,7 @@ export async function despublicarProtocolo(protocolId: string): Promise<Result<{
 
     const { error: e2 } = await supabase.from("protocols").update({ status: "ready_to_publish" }).eq("id", protocolId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "protocols", protocolId);
     revalidarPublico(prot.slug);
     return { ok: true, data: { status: "ready_to_publish", slug: prot.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -320,6 +330,7 @@ export async function arquivarProtocolo(protocolId: string): Promise<Result<{ st
 
     const { error: e2 } = await supabase.from("protocols").update({ status: "archived" }).eq("id", protocolId);
     if (e2) throw e2;
+    await removerDaBiblioteca(supabase, "protocols", protocolId);
     revalidarPublico(prot.slug);
     return { ok: true, data: { status: "archived", slug: prot.slug } };
   } catch (e) { return { ok: false, error: msg(e) }; }
@@ -336,6 +347,7 @@ export async function excluirDoc(id: string): Promise<Result<null>> {
     for (const p of pubs ?? []) { const { error } = await supabase.rpc("unpublish_protocol_version", { p_version_id: p.id }); if (error) throw error; }
     const { error } = await supabase.from("protocols").delete().eq("id", id);
     if (error) throw error;
+    await removerDaBiblioteca(supabase, "protocols", id);
     revalidatePath("/protocolos"); revalidatePath("/admin/editora/arquiteto-protocolos");
     if (doc?.slug) revalidatePath(`/protocolos/${doc.slug}`);
     return { ok: true, data: null };

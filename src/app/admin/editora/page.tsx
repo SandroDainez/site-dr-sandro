@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Newspaper, ArrowRight, Globe, PencilLine, Sparkles, ShieldCheck, Save, Send } from "lucide-react";
+import { Newspaper, ArrowRight, Globe, PencilLine, Sparkles, ShieldCheck, Save, Send, Library } from "lucide-react";
 import { EDITORA_MODULOS, GRUPOS } from "@/lib/editora-modulos";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +47,19 @@ export default function AdminEditoraPage() {
           Para publicar: role até a seção <strong className="text-white/60">“Publicação”</strong> no fim do módulo e clique em <strong className="text-white/60">Publicar</strong>.
         </p>
       </div>
+
+      {/* Biblioteca da Editora — catálogo de tudo já publicado, reaproveitável entre módulos */}
+      <Link
+        href="/admin/biblioteca-editora"
+        className="group mb-4 flex items-center gap-4 rounded-2xl border border-white/12 bg-white/[0.03] p-5 transition hover:border-white/25"
+      >
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/[0.04] text-white/70"><Library className="h-5 w-5" /></div>
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-white">Biblioteca da Editora</p>
+          <p className="text-sm text-white/55">Tudo que já foi publicado por qualquer módulo, num catálogo só — exporte, use como fonte de outro trabalho, ou mande pro Banco de Referências.</p>
+        </div>
+        <ArrowRight className="h-4 w-4 shrink-0 text-white/40 transition group-hover:translate-x-1 group-hover:text-white/70" />
+      </Link>
 
       {/* Artigos — ferramenta simples, separada dos módulos de IA */}
       <Link
