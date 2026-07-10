@@ -8,6 +8,14 @@ import { getImagemEditora, definirImagemEditora } from "@/app/admin/editora/imag
 // Imagem/infográfico + tamanho de QUALQUER doc da Editora (protocolo, aula, flashcard,
 // questão, pesquisa, comparativo, atualização) — genérico via tabela+docId, mesmo padrão
 // do AreasEditora. Aparece no card padrão do conteúdo publicado.
+//
+// IMPORTANTE: upload é access:"private" (padrão do projeto) — a URL crua do blob NÃO é
+// legível direto por uma tag <img> (precisa de token). Por isso guardamos a URL já
+// embrulhada em /api/img?url=... (mesmo padrão do AppsGratisEditor, que já funciona), que
+// busca o blob no servidor com o token e repassa a imagem.
+function proxied(url: string): string {
+  return url.startsWith("/api/img?url=") ? url : `/api/img?url=${encodeURIComponent(url)}`;
+}
 export default function ImagemEditora({ tabela, docId }: { tabela: string; docId: string }) {
   const [url, setUrl] = useState<string | null>(null);
   const [size, setSize] = useState<number>(176);
@@ -18,7 +26,8 @@ export default function ImagemEditora({ tabela, docId }: { tabela: string; docId
     let vivo = true;
     getImagemEditora(tabela, docId).then((r) => {
       if (!vivo || !r.ok) return;
-      setUrl(r.data.url);
+      // Auto-cura registros antigos que guardaram a URL crua do blob (antes deste fix).
+      setUrl(r.data.url ? proxied(r.data.url) : null);
       setSize(r.data.size ?? 176);
     });
     return () => { vivo = false; };
@@ -30,8 +39,9 @@ export default function ImagemEditora({ tabela, docId }: { tabela: string; docId
     setErro(null); setBusy(true);
     try {
       const blob = await upload(`editora-imagem/${Date.now()}-${file.name}`, file, { access: "private", handleUploadUrl: "/api/upload" });
-      const r = await definirImagemEditora(tabela, docId, blob.url, size);
-      if (r.ok) setUrl(blob.url); else setErro(r.error);
+      const src = proxied(blob.url);
+      const r = await definirImagemEditora(tabela, docId, src, size);
+      if (r.ok) setUrl(src); else setErro(r.error);
     } catch (e) {
       setErro("Falha no upload: " + (e instanceof Error ? e.message : String(e)));
     }
