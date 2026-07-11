@@ -2,12 +2,27 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { tokenAdminValido } from "@/lib/admin-token";
 
-// Next 16: "middleware" virou "proxy". Faz duas coisas:
+// Domínio "de fábrica" que a Vercel cria a partir do nome do projeto — não dá pra apagar
+// (é o domínio interno do projeto), mas favoritos/PWA salvos antes do domínio próprio
+// existir ficam presos nele para sempre. Redireciona pro domínio de marca única.
+const CANONICAL_HOST = "medcampus.com.br";
+const HOSTS_ANTIGOS = new Set(["site-dr-sandro.vercel.app"]);
+
+// Next 16: "middleware" virou "proxy". Faz três coisas:
+//  (0) Redireciona o domínio antigo da Vercel (*.vercel.app) pro domínio de marca única —
+//      sem isso, quem tem o app salvo desde antes do domínio próprio cai sempre no antigo.
 //  (1) CAMADA (a) de segurança do admin: barra /admin no edge para quem não tem o
 //      cookie admin válido (redireciona para /admin-login). Defesa em profundidade —
 //      o layout do admin e cada action também checam (camada b). Ver docs/AUTH-ADMIN.md.
 //  (2) Renova a sessão Supabase (cookies) a cada request, para os Server Components.
 export async function proxy(request: NextRequest) {
+  // ── Camada (0): domínio canônico único ─────────────────────────────────────
+  const host = request.headers.get("host") || "";
+  if (HOSTS_ANTIGOS.has(host)) {
+    const url = new URL(request.nextUrl.pathname + request.nextUrl.search, `https://${CANONICAL_HOST}`);
+    return NextResponse.redirect(url, 308);
+  }
+
   // ── Camada (a): gate do admin no edge ──────────────────────────────────────
   const { pathname } = request.nextUrl;
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin-login")) {
