@@ -904,6 +904,21 @@ export async function getAviso(): Promise<AvisoData> {
   return { ativo: !!a?.ativo, texto: typeof a?.texto === "string" ? a.texto : DEFAULT_AVISO.texto };
 }
 
+// Vídeo de boas-vindas flutuante (Dr. Sandro). `versao` muda a cada save → reaparece pra
+// quem já tinha fechado (é um recado novo). Editável no admin.
+export type VideoBoasVindasData = { ativo: boolean; videoUrl: string; titulo: string; subtitulo: string; versao: string };
+const DEFAULT_VIDEO_BV: VideoBoasVindasData = { ativo: false, videoUrl: "", titulo: "Bem-vindo ao MedCampus 👋", subtitulo: "Em 1 minuto, o que tem aqui e como aproveitar.", versao: "0" };
+export async function getVideoBoasVindas(): Promise<VideoBoasVindasData> {
+  const v = await readBlob<VideoBoasVindasData>("videoBoasVindas", DEFAULT_VIDEO_BV);
+  return {
+    ativo: !!v?.ativo,
+    videoUrl: typeof v?.videoUrl === "string" ? v.videoUrl : "",
+    titulo: typeof v?.titulo === "string" && v.titulo.trim() ? v.titulo : DEFAULT_VIDEO_BV.titulo,
+    subtitulo: typeof v?.subtitulo === "string" ? v.subtitulo : DEFAULT_VIDEO_BV.subtitulo,
+    versao: typeof v?.versao === "string" ? v.versao : "0",
+  };
+}
+
 // Cards por linha (colunas no desktop) por seção — editável no admin.
 export async function getCardCols(): Promise<Record<string, number>> {
   const saved = await readBlob<Record<string, number>>("cardCols", {});

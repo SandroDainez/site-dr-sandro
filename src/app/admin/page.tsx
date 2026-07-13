@@ -37,6 +37,14 @@ const sections = [
     border: "hover:border-amber-400/40",
   },
   {
+    href: "/admin/video-boas-vindas",
+    icon: PlayCircle,
+    label: "Vídeo de boas-vindas",
+    desc: "Cartão flutuante com um vídeo seu que abre sozinho ao entrar no site. Trocar reaparece pra todos.",
+    color: "text-accent",
+    border: "hover:border-accent/40",
+  },
+  {
     href: "/admin/usuarios",
     icon: Users,
     label: "Usuários (liberar acesso)",

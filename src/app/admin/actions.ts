@@ -80,6 +80,18 @@ export async function saveAviso(aviso: { ativo: boolean; texto: string }): Promi
   }
 }
 
+export async function saveVideoBoasVindas(v: { ativo: boolean; videoUrl: string; titulo: string; subtitulo: string }): Promise<Result> {
+  try {
+    await requireAdmin();
+    // Carimba uma versão nova a cada save → reaparece pra quem já tinha fechado (recado novo).
+    await writeBlob("videoBoasVindas", { ...v, versao: String(Date.now()) });
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erro ao salvar" };
+  }
+}
+
 export async function saveCardCols(cols: Record<string, number>): Promise<Result> {
   try {
     await requireAdmin();
