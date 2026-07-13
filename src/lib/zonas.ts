@@ -34,10 +34,12 @@ export const AREAS_FILTRO: { valor: AreaFiltro; label: string }[] = [
   { valor: "ti", label: "Terapia Intensiva" },
 ];
 
-// Um item pertence à área ativa se sua área principal bate OU está nas áreas extras.
-// "todos" mostra tudo. "geral"/sem área aparece em qualquer filtro (transversal).
+// Filtro de área. "Tudo" mostra tudo (inclusive o sem área/geral). Numa área ESPECÍFICA,
+// só aparece o que foi marcado com ela (principal ou extra) — conteúdo "geral"/sem área
+// NÃO polui as áreas específicas, fica só no "Tudo". Assunto de várias áreas = marcar cada
+// uma (multi-área) para aparecer nelas.
 export function itemNaArea(item: { area?: string; areas?: string[] }, area: AreaFiltro): boolean {
   if (area === "todos") return true;
-  if (!item.area || item.area === "geral") return true;
-  return item.area === area || (item.areas?.includes(area) ?? false);
+  const principal = item.area && item.area !== "geral" ? item.area : null;
+  return principal === area || (item.areas?.includes(area) ?? false);
 }
