@@ -14,6 +14,8 @@ import { searchPubMed } from "@/lib/assistente/search-pubmed";
 import { getOpenAI } from "@/lib/ai/openai";
 import { classificarRemocao } from "@/lib/ai/limpeza";
 import { buildLimpezaProtocolosPrompt, type ItemLimpar } from "@/lib/ai/prompts/limpeza-protocolos";
+import { checarAtualidade } from "@/lib/ai/atualidade";
+import { buildAtualidadeProtocolosPrompt, type FonteRecente } from "@/lib/ai/prompts/atualidade-protocolos";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
 import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeSecoes } from "@/lib/editora/biblioteca";
@@ -544,5 +546,55 @@ export async function limparProtocolo(input: { protocolId: string; secoes: Secao
 
     const validacao = consolidarValidacao(novo, sources);
     return { ok: true, data: { secoes: novo, validacao, removidas: idsRemover.size, candidatas: itens.length, motivos } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// CHECAR ATUALIDADE: busca no PubMed evidência RECENTE sobre o tema (diretrizes/metanálises/ensaios
+// recentes) e cruza com o protocolo — aponta conduta/dose/droga/alvo que a evidência atual recomenda
+// diferente, com a fonte (PMID/link) e a recomendação de agora. Não reescreve: relatório p/ o médico.
+export type AtualidadeReport = {
+  secao: string; trecho: string; problema: string; recomendacao_atual: string;
+  pmid: string; fonteTitulo: string; fonteAno: string; fonteUrl: string;
+};
+export async function validarAtualidade(input: { protocolId: string; secoes: SecaoGerada[]; titulo?: string }): Promise<Result<{ itens: AtualidadeReport[]; fontesConsultadas: number }>> {
+  try {
+    await requireAdmin();
+    if (!input.secoes?.length) return { ok: false, error: "Gere o protocolo antes de checar atualidade." };
+    if (!input.titulo?.trim()) return { ok: false, error: "O protocolo precisa de um título (tema) para buscar evidência recente." };
+
+    let openai: ReturnType<typeof getOpenAI>;
+    try { openai = getOpenAI(); } catch { return { ok: false, error: "Busca de evidência recente indisponível (sem chave OpenAI configurada)." }; }
+
+    // Puxa fontes RECENTES do PubMed (searchPubMed já prioriza diretriz/metanálise/RCT + recência).
+    // Duas consultas complementares (tema, tema+conduta) unidas e sem duplicar por PMID.
+    const [q1, q2] = await Promise.all([
+      searchPubMed(openai, input.titulo).catch(() => []),
+      searchPubMed(openai, `${input.titulo} — conduta, diretriz e tratamento atual`).catch(() => []),
+    ]);
+    const vistos = new Set<string>();
+    const fontes: FonteRecente[] = [];
+    for (const h of [...q1, ...q2]) {
+      if (!h.resumo || h.resumo.trim().length < 40 || vistos.has(h.pmid)) continue;
+      vistos.add(h.pmid);
+      fontes.push({ pmid: h.pmid, titulo: h.titulo, ano: h.ano, resumo: h.resumo });
+    }
+    if (fontes.length === 0) {
+      return { ok: true, data: { itens: [], fontesConsultadas: 0 } };
+    }
+    const fontesTop = fontes.slice(0, 14); // teto de contexto/custo
+
+    const { itens } = await checarAtualidade({ prompt: buildAtualidadeProtocolosPrompt({ titulo: input.titulo, secoes: input.secoes, fontes: fontesTop }) });
+
+    // Enriquece cada apontamento com o título/ano/URL da fonte recente citada (por PMID).
+    const porPmid = new Map(fontesTop.map((f) => [f.pmid, f]));
+    const report: AtualidadeReport[] = itens.map((i) => {
+      const f = porPmid.get(i.pmid);
+      return {
+        secao: i.secao, trecho: i.trecho, problema: i.problema, recomendacao_atual: i.recomendacao_atual,
+        pmid: i.pmid, fonteTitulo: f?.titulo ?? "", fonteAno: f?.ano ?? "",
+        fonteUrl: i.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${i.pmid}/` : "",
+      };
+    });
+    return { ok: true, data: { itens: report, fontesConsultadas: fontesTop.length } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }

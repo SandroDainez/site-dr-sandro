@@ -16,7 +16,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 };
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, excluirVersao, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc, aplicarCorrecoes, limparProtocolo } from "./actions";
+import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, excluirVersao, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc, aplicarCorrecoes, limparProtocolo, validarAtualidade, type AtualidadeReport } from "./actions";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive, Wand2 } from "lucide-react";
 import FontesInput from "@/components/admin/FontesInput";
 
@@ -68,6 +68,9 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   // limpeza (remover fora do tema / sem respaldo)
   const [limpando, setLimpando] = useState(false);
   const [limpeza, setLimpeza] = useState<{ removidas: number; candidatas: number } | null>(null);
+  // checar atualidade (evidência recente do PubMed × protocolo)
+  const [checandoAtual, setChecandoAtual] = useState(false);
+  const [atualidade, setAtualidade] = useState<{ itens: AtualidadeReport[]; fontesConsultadas: number } | null>(null);
 
   const [salvo, setSalvo] = useState<{ versionNumber: number; confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -256,6 +259,16 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
       setLimpeza({ removidas: r.data.removidas, candidatas: r.data.candidatas });
     } else setError(r.error);
     setLimpando(false);
+  }
+
+  // Checar atualidade: puxa evidência recente do PubMed sobre o tema e cruza com o protocolo.
+  async function checarAtualidadeAgora() {
+    if (!protocolo || secoes.length === 0) return;
+    setError(null); setChecandoAtual(true); setAtualidade(null);
+    const r = await validarAtualidade({ protocolId: protocolo.id, secoes, titulo: protocolo.title });
+    if (r.ok) setAtualidade(r.data);
+    else setError(r.error);
+    setChecandoAtual(false);
   }
 
   function salvar() {
@@ -532,6 +545,34 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
                       <p className="mt-2 text-[12px] text-white/70">
                         🧹 {limpeza.removidas} de {limpeza.candidatas} afirmação(ões) sem fonte removida(s) (fora do tema / inconsistente / sem respaldo). As demais foram mantidas (conteúdo legítimo). Revise e salve.
                       </p>
+                    )}
+
+                    {/* Checar atualidade — evidência recente do PubMed × protocolo */}
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+                      <p className="text-[11px] text-white/45 max-w-md">A <strong className="text-white/60">checagem de atualidade</strong> busca diretrizes/estudos <strong className="text-white/60">recentes</strong> no PubMed sobre o tema e cruza com o protocolo — aponta conduta, droga, dose ou alvo que a evidência atual recomenda diferente, com a fonte. Não reescreve: é um relatório pra você decidir.</p>
+                      <button type="button" onClick={checarAtualidadeAgora} disabled={checandoAtual || corrigindo || limpando || gerando || busy} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-sky-400/40 bg-sky-400/10 px-4 py-2 text-sm font-semibold text-sky-200 transition hover:bg-sky-400/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {checandoAtual ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Checar atualidade
+                      </button>
+                    </div>
+                    {atualidade && (
+                      atualidade.fontesConsultadas === 0 ? (
+                        <p className="mt-2 text-[12px] text-white/50">Não encontrei evidência recente no PubMed para comparar (tema muito específico ou sem resultados). Tente um título mais canônico.</p>
+                      ) : atualidade.itens.length === 0 ? (
+                        <p className="mt-2 text-[12px] text-emerald-300/80">✓ Nada aparece desatualizado frente às {atualidade.fontesConsultadas} fontes recentes consultadas.</p>
+                      ) : (
+                        <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                          <p className="text-[12px] text-white/70">{atualidade.itens.length} ponto(s) possivelmente desatualizado(s) (vs. {atualidade.fontesConsultadas} fontes recentes). Confira na fonte e edite se procede:</p>
+                          {atualidade.itens.map((it, k) => (
+                            <div key={k} className="rounded-lg border border-sky-400/20 bg-sky-400/[0.04] p-3 text-[12px]">
+                              {it.secao && <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-300/70">{it.secao}</p>}
+                              <p className="mt-0.5 text-white/80"><span className="text-white/45">No protocolo:</span> {it.trecho}</p>
+                              {it.problema && <p className="mt-0.5 text-amber-200/80"><span className="text-white/45">Superado:</span> {it.problema}</p>}
+                              {it.recomendacao_atual && <p className="mt-0.5 text-emerald-200/85"><span className="text-white/45">Atual:</span> {it.recomendacao_atual}</p>}
+                              {it.fonteUrl && <a href={it.fonteUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-sky-300 underline hover:text-sky-200">Fonte: {it.fonteTitulo || `PubMed ${it.pmid}`}{it.fonteAno ? ` (${it.fonteAno})` : ""} →</a>}
+                            </div>
+                          ))}
+                        </div>
+                      )
                     )}
                   </div>
                 );
