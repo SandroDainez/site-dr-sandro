@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOpenAI } from "@/lib/ai/openai";
+import { getOpenAI, AI_MODELS } from "@/lib/ai/openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import {
   getSemanaAtual, pubmedUrl, verificarCronSecret, PRINCIPIOS_AGENTE,
@@ -184,7 +184,7 @@ async function buscarSociedades(especialidade: string): Promise<Fonte[]> {
     const response = await (getOpenAI().chat.completions.create as unknown as (
       args: Record<string, unknown>
     ) => Promise<ChatCompletionResposta>)({
-      model: "gpt-4o-search-preview",
+      model: AI_MODELS.search,
       max_tokens: 1500,
       messages: [{
         role: "user",
@@ -237,7 +237,7 @@ async function buscarRegulatoriosBR(especialidade: string): Promise<Fonte[]> {
     const response = await (getOpenAI().chat.completions.create as unknown as (
       args: Record<string, unknown>
     ) => Promise<ChatCompletionResposta>)({
-      model: "gpt-4o-search-preview",
+      model: AI_MODELS.search,
       max_tokens: 1200,
       messages: [{
         role: "user",
@@ -312,7 +312,7 @@ Sua tarefa, tópico por tópico, com rigor de banca:
 Retorne APENAS JSON: {"topicos": [ ...os aprovados e corrigidos, mesmos campos do rascunho... ]}`;
   try {
     const r = await getOpenAI().chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.chat,
       messages: [{ role: "user", content: prompt }],
       max_tokens: 2500,
       temperature: 0.1,
@@ -339,7 +339,7 @@ ${lista}
 Escreva um RESUMO de 2-3 frases que sintetize FIELMENTE o que está nesses tópicos — e somente eles. Não cite nada que não esteja na lista. Priorize, na ordem, novos guidelines/posicionamentos e alertas regulatórios. Tom sóbrio de evidência, sem hype. Retorne APENAS JSON: {"resumo": "..."}`;
   try {
     const r = await getOpenAI().chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.chat,
       messages: [{ role: "user", content: prompt }],
       max_tokens: 350,
       temperature: 0.2,
@@ -376,7 +376,7 @@ Devolva EXATAMENTE o mesmo JSON, com a MESMA quantidade de tópicos e MESMA orde
 ${JSON.stringify(payload, null, 2)}
 Retorne APENAS JSON: {"resumo":"...","topicos":[{"titulo":"...","descricao":"...","relevancia_clinica":"..."}]}`;
     const r = await getOpenAI().chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.chat,
       messages: [{ role: "user", content: prompt }],
       max_tokens: 2500,
       temperature: 0,
@@ -463,7 +463,7 @@ Retorne APENAS JSON válido:
   while (tentativas < 3) {
     try {
       const r = await getOpenAI().chat.completions.create({
-        model: "gpt-4o",
+        model: AI_MODELS.chat,
         messages: [{ role: "user", content: prompt }],
         max_tokens: 2500,
         temperature: 0.2,

@@ -28,13 +28,16 @@ export function getDeepSeek(): OpenAI {
 export function deepseekModel(): string { return process.env.DEEPSEEK_MODEL || "deepseek-chat"; }
 export function openaiReviewModel(): string { return process.env.OPENAI_REVIEW_MODEL || "gpt-4o"; }
 
-// Modelos usados no projeto, num lugar só (facilita trocar/auditar).
+// Modelos usados no projeto, num lugar só (facilita trocar/auditar). Cada um pode ser
+// trocado por env var SEM deploy de código (mesmo padrão de deepseekModel/openaiReviewModel);
+// os defaults preservam exatamente o comportamento atual. Base para o futuro painel de IA
+// no admin poder alternar modelo/custo sem tocar em código.
 export const AI_MODELS = {
-  chat: "gpt-4o",
-  chatMini: "gpt-4o-mini",
-  search: "gpt-4o-search-preview",
-  embed: "text-embedding-3-small",
-} as const;
+  chat: process.env.OPENAI_CHAT_MODEL || "gpt-4o",
+  chatMini: process.env.OPENAI_MINI_MODEL || "gpt-4o-mini",
+  search: process.env.OPENAI_SEARCH_MODEL || "gpt-4o-search-preview",
+  embed: process.env.OPENAI_EMBED_MODEL || "text-embedding-3-small",
+};
 
 // Conveniência opcional: chat que devolve JSON já parseado. Não é obrigatório nos
 // call sites atuais (que seguem chamando getOpenAI() direto) — existe para a Editora

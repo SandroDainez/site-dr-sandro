@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOpenAI } from "@/lib/ai/openai";
+import { getOpenAI, AI_MODELS } from "@/lib/ai/openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { verificarCronSecret, PRINCIPIOS_AGENTE } from "@/lib/agents/utils";
 
@@ -134,7 +134,7 @@ async function buscarFoco(instrucao: string): Promise<Evento[]> {
       const response = await (getOpenAI().chat.completions.create as unknown as (
         args: Record<string, unknown>
       ) => Promise<ChatCompletionResposta>)({
-        model: "gpt-4o-search-preview",
+        model: AI_MODELS.search,
         max_tokens: 4000,
         messages: [{ role: "user", content: prompt }],
       });
@@ -152,7 +152,7 @@ async function buscarFoco(instrucao: string): Promise<Evento[]> {
   // Fallback sem web search (conhecimento do modelo)
   try {
     const response = await getOpenAI().chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.chat,
       messages: [{ role: "user", content: prompt + '\n\nRetorne {"eventos":[...]}.' }],
       max_tokens: 4000,
       response_format: { type: "json_object" },
@@ -229,7 +229,7 @@ ${lista}
 Retorne APENAS JSON: {"itens":[{"i":0,"manter":true,"especialidades":["anestesiologia"]}, ...]} com um item por índice.`;
   try {
     const r = await getOpenAI().chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.chat,
       messages: [{ role: "user", content: prompt }],
       max_tokens: 3000,
       temperature: 0,

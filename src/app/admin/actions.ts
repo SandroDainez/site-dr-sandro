@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { NavOverride } from "@/lib/nav-structure";
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
-import { getOpenAI } from "@/lib/ai/openai";
+import { getOpenAI, AI_MODELS } from "@/lib/ai/openai";
 import {
   writeBlob,
   getTypography,
@@ -468,7 +468,7 @@ Retorne APENAS JSON:
 
     const openai = getOpenAI();
     const r = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: AI_MODELS.chat,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.2,
       max_tokens: 2600,

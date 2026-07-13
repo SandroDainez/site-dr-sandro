@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOpenAI } from "@/lib/ai/openai";
+import { getOpenAI, AI_MODELS } from "@/lib/ai/openai";
 import { verificarCronSecret } from "@/lib/agents/utils";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { getContato } from "@/lib/content";
@@ -99,7 +99,7 @@ Retorne APENAS JSON:
     try {
       const openai = getOpenAI();
       const r = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: AI_MODELS.chat,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
         max_tokens: 2000,

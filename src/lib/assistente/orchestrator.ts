@@ -1,4 +1,5 @@
 import type OpenAI from "openai";
+import { AI_MODELS } from "@/lib/ai/openai";
 import { MEDICAL_ASSISTANT_SYSTEM_PROMPT } from "./system-prompt";
 import { searchInternalLibrary, libraryIsConfident, unirHits, type LibraryHit } from "./search-library";
 import { searchPubMed, type PubmedHit } from "./search-pubmed";
@@ -24,7 +25,7 @@ export const RECUSA_FORA_ESCOPO =
 async function dentroDoEscopo(openai: OpenAI, pergunta: string): Promise<boolean> {
   try {
     const r = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.chatMini,
       temperature: 0,
       max_tokens: 3,
       messages: [{
@@ -48,7 +49,7 @@ async function dentroDoEscopo(openai: OpenAI, pergunta: string): Promise<boolean
 async function planejarBusca(openai: OpenAI, pergunta: string): Promise<string[]> {
   try {
     const r = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.chatMini,
       temperature: 0,
       max_tokens: 300,
       response_format: { type: "json_object" },
@@ -123,7 +124,7 @@ export async function handleMedicalQuery(
     : `CONTEXTO RECUPERADO:\n${contexto}\n\nPERGUNTA DO USUÁRIO:\n${pergunta}`;
 
   const r = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: AI_MODELS.chat,
     temperature: 0.2,
     max_tokens: 1800,
     messages: [

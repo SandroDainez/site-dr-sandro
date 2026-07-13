@@ -1,4 +1,5 @@
 import type OpenAI from "openai";
+import { AI_MODELS } from "@/lib/ai/openai";
 import { pubmedUrl } from "@/lib/agents/utils";
 
 // Busca no PubMed (E-utilities) — só roda quando a biblioteca interna não cobre.
@@ -29,7 +30,7 @@ type PubmedSummary = {
 export async function buildPubmedQuery(openai: OpenAI, perguntaPT: string): Promise<string> {
   try {
     const r = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: AI_MODELS.chatMini,
       temperature: 0,
       max_tokens: 60,
       messages: [{

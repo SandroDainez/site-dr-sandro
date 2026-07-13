@@ -1,4 +1,4 @@
-import { getOpenAI } from "@/lib/ai/openai";
+import { getOpenAI, AI_MODELS } from "@/lib/ai/openai";
 
 // Embeddings p/ o RAG (assistente clínico). Modelo barato e bom: text-embedding-3-small (1536 dims).
 export async function embedTextos(textos: string[]): Promise<number[][]> {
@@ -12,7 +12,7 @@ export async function embedTextos(textos: string[]): Promise<number[][]> {
     let tent = 0;
     while (true) {
       try {
-        const r = await openai.embeddings.create({ model: "text-embedding-3-small", input: lote });
+        const r = await openai.embeddings.create({ model: AI_MODELS.embed, input: lote });
         for (const d of r.data) out.push(d.embedding as number[]);
         break;
       } catch (e) {
