@@ -5,7 +5,7 @@ import type { Source } from "../types";
 // fonte — ou ajustar o texto pra bater — ou marcar honestamente como sem fonte. O CÓDIGO
 // revalida depois (âncora inventada não cola), então este prompt não tem como "trapacear".
 
-export const CORRECAO_PROTOCOLOS_PROMPT_VERSION = "1.0.0";
+export const CORRECAO_PROTOCOLOS_PROMPT_VERSION = "1.1.0";
 
 export type ItemCorrigir = { id: string; secao: string; texto: string; tipo: string };
 
@@ -27,9 +27,15 @@ faça UMA opção, nesta ordem de preferência:
 (3) Se NENHUM source sustenta a afirmação: source_id=null, ancora=null, tipo="geral". NÃO invente
     âncora nem force citação — honestidade acima de tudo.
 
+IDIOMA (crítico): alguns SOURCES são abstracts do PubMed EM INGLÊS. A âncora é um trecho copiado
+palavra por palavra DO SOURCE, então ela fica NA LÍNGUA DO SOURCE — se o source é inglês, a
+âncora é em INGLÊS (ex.: "levosimendan was associated with fewer arrhythmic events"). NÃO
+traduza a âncora, nem tente ancorar com um trecho em português num source em inglês (nunca vai
+bater). O campo "texto" da afirmação PERMANECE em português — só a âncora acompanha a fonte.
+
 REGRAS: a âncora é SEMPRE um trecho existente, palavra por palavra, no texto do source citado
-(mesma grafia, números e pontuação). Nunca use o próprio texto da afirmação como âncora se ele
-não estiver literalmente no source.
+(mesma grafia, números e pontuação, no idioma do source). Nunca use o próprio texto da afirmação
+como âncora se ele não estiver literalmente no source.
 
 SOURCES:
 ${sourcesToText(sources)}
