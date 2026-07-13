@@ -7,7 +7,7 @@ import type { SecaoGerada } from "@/lib/ai/types";
 
 export type ResearchTipo = "comparador" | "pesquisador";
 
-export type ResearchResumo = { id: string; title: string; slug: string; specialty: string };
+export type ResearchResumo = { id: string; title: string; slug: string; specialty: string; areas: string[] };
 
 export type ReferenciaSnapshot = { id: string; titulo: string; tipo: string; autor?: string; ano?: number | null; url?: string };
 
@@ -34,7 +34,7 @@ export async function getResearchPublicados(tipo: ResearchTipo): Promise<Researc
   if (!serviceConfigured()) return [];
   try {
     const supabase = createPublicClient();
-    const { data } = await supabase.from("research_docs").select("id,title,slug,specialty").eq("tipo", tipo).eq("status", "published").order("updated_at", { ascending: false });
+    const { data } = await supabase.from("research_docs").select("id,title,slug,specialty,areas").eq("tipo", tipo).eq("status", "published").order("updated_at", { ascending: false });
     return (data as ResearchResumo[]) ?? [];
   } catch {
     return [];

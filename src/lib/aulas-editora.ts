@@ -4,7 +4,7 @@ import type { SecaoGerada } from "@/lib/ai/types";
 // Leitura PÚBLICA das aulas da Editora (aula_docs + aula_versions). Cliente ANÔNIMO →
 // a RLS garante que só o publicado apareça (status='published' + is_published=true). Migration 005.
 
-export type AulaPublicaResumo = { id: string; title: string; slug: string; specialty: string };
+export type AulaPublicaResumo = { id: string; title: string; slug: string; specialty: string; areas: string[] };
 
 export type ReferenciaSnapshot = { id: string; titulo: string; tipo: string; autor?: string; ano?: number | null };
 
@@ -31,7 +31,7 @@ export async function getAulasPublicadas(): Promise<AulaPublicaResumo[]> {
   if (!serviceConfigured()) return [];
   try {
     const supabase = createPublicClient();
-    const { data } = await supabase.from("aula_docs").select("id,title,slug,specialty").eq("status", "published").order("updated_at", { ascending: false });
+    const { data } = await supabase.from("aula_docs").select("id,title,slug,specialty,areas").eq("status", "published").order("updated_at", { ascending: false });
     return (data as AulaPublicaResumo[]) ?? [];
   } catch {
     return [];

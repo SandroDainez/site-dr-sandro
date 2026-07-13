@@ -4,7 +4,7 @@ import type { QuestaoGerada } from "@/lib/editora/questao-estrutura";
 // Leitura PÚBLICA dos conjuntos de questões da Editora (questao_docs + questao_versions).
 // Cliente ANÔNIMO → RLS só devolve o publicado. Migration 007.
 
-export type QuestaoDocResumo = { id: string; title: string; slug: string; specialty: string };
+export type QuestaoDocResumo = { id: string; title: string; slug: string; specialty: string; areas: string[] };
 
 export type ReferenciaSnapshot = { id: string; titulo: string; tipo: string; autor?: string; ano?: number | null };
 
@@ -30,7 +30,7 @@ export async function getQuestaoDocsPublicados(): Promise<QuestaoDocResumo[]> {
   if (!serviceConfigured()) return [];
   try {
     const supabase = createPublicClient();
-    const { data } = await supabase.from("questao_docs").select("id,title,slug,specialty").eq("status", "published").order("updated_at", { ascending: false });
+    const { data } = await supabase.from("questao_docs").select("id,title,slug,specialty,areas").eq("status", "published").order("updated_at", { ascending: false });
     return (data as QuestaoDocResumo[]) ?? [];
   } catch {
     return [];

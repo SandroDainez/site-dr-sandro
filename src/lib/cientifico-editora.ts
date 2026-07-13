@@ -5,7 +5,7 @@ import type { SecaoGerada } from "@/lib/ai/types";
 // Usa o cliente ANÔNIMO de propósito → a RLS garante que só o publicado apareça
 // (sci_docs.status='published' + sci_versions.is_published=true). Ver migration 004.
 
-export type CientificoPublicoResumo = { id: string; title: string; slug: string; specialty: string };
+export type CientificoPublicoResumo = { id: string; title: string; slug: string; specialty: string; areas: string[] };
 
 export type ReferenciaSnapshot = { id: string; titulo: string; tipo: string; autor?: string; ano?: number | null };
 
@@ -31,7 +31,7 @@ export async function getCientificosPublicados(): Promise<CientificoPublicoResum
   if (!serviceConfigured()) return [];
   try {
     const supabase = createPublicClient(); // anon → RLS só devolve status='published'
-    const { data } = await supabase.from("sci_docs").select("id,title,slug,specialty").eq("status", "published").order("updated_at", { ascending: false });
+    const { data } = await supabase.from("sci_docs").select("id,title,slug,specialty,areas").eq("status", "published").order("updated_at", { ascending: false });
     return (data as CientificoPublicoResumo[]) ?? [];
   } catch {
     return [];
