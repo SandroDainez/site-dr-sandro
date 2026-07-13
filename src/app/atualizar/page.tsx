@@ -8,6 +8,7 @@ import {
 import { getAtualizacoesPublicadas } from "@/lib/atualizacoes-editora";
 import { getResearchPublicados } from "@/lib/research-editora";
 import { getArtigosPublicados } from "@/lib/editora";
+import { fetchMedicalUpdates } from "@/lib/supabase/server";
 import SiteLogo from "@/components/SiteLogo";
 import SiteNav from "@/components/SiteNav";
 import AuthButton from "@/components/AuthButton";
@@ -21,8 +22,8 @@ import AtualizarView from "./AtualizarView";
 export const metadata = { title: "Atualizar — o que há de novo", description: "Atualizações clínicas, deltas de protocolo, pesquisas, comparativos de diretrizes e artigos." };
 
 export default async function AtualizarPage() {
-  const [atualizacoes, atualizacoesProto, pesquisas, comparativos, artigos, header, navItems, typo, navStyle] = await Promise.all([
-    getAtualizacoes(), getAtualizacoesPublicadas(), getResearchPublicados("pesquisador"), getResearchPublicados("comparador"), getArtigosPublicados(),
+  const [atualizacoes, aiBoletins, atualizacoesProto, pesquisas, comparativos, artigos, header, navItems, typo, navStyle] = await Promise.all([
+    getAtualizacoes(), fetchMedicalUpdates(), getAtualizacoesPublicadas(), getResearchPublicados("pesquisador"), getResearchPublicados("comparador"), getArtigosPublicados(),
     getHeader(), getNavItems(), getTypography(), getNavStyle(),
   ]);
 
@@ -46,7 +47,7 @@ export default async function AtualizarPage() {
 
 
       <main className="mx-auto w-full max-w-6xl px-6 py-12">
-        <AtualizarView atualizacoes={atualizacoes} atualizacoesProto={atualizacoesProto} pesquisas={pesquisas} comparativos={comparativos} artigos={artigos} />
+        <AtualizarView atualizacoes={atualizacoes} aiBoletins={aiBoletins} atualizacoesProto={atualizacoesProto} pesquisas={pesquisas} comparativos={comparativos} artigos={artigos} />
       </main>
 
       <SiteFooter />

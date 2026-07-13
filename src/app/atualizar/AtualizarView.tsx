@@ -15,24 +15,36 @@ import { itemNaArea } from "@/lib/zonas";
 
 const COR = "#b98af0";
 
+// Especialidade do Supabase → área do site (mesma regra do AtualizacoesFeed).
+const espToSite = (e: string): string => (e === "terapia_intensiva" ? "ti" : e);
+
 type Props = {
   atualizacoes: AtualizacaoData[];
+  aiBoletins: Record<string, unknown>[];
   atualizacoesProto: AtualizacaoResumo[];
   pesquisas: ResearchResumo[];
   comparativos: ResearchResumo[];
   artigos: Artigo[];
 };
 
-export default function AtualizarView({ atualizacoes, atualizacoesProto, pesquisas, comparativos, artigos }: Props) {
+export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesProto, pesquisas, comparativos, artigos }: Props) {
   const [area, setArea] = useAreaFiltro();
 
-  const itensAtualizacoes: ItemConteudo[] = useMemo(
-    () =>
-      atualizacoes
-        .map((a): ItemConteudo => ({ id: a.id, titulo: a.titulo, href: "/atualizacoes", tipo: "Atualização", area: a.area, areas: a.areas }))
-        .filter((i) => itemNaArea(i, area)),
-    [atualizacoes, area],
-  );
+  // Junta os boletins SEMANAIS da IA (Supabase) com as atualizações manuais (blob).
+  // Sem essa fonte, a zona só mostrava as manuais — por isso os semanais "sumiam".
+  const itensAtualizacoes: ItemConteudo[] = useMemo(() => {
+    const semanais: ItemConteudo[] = aiBoletins.map((b) => ({
+      id: `boletim-${String(b.id)}`,
+      titulo: String(b.titulo ?? "Boletim semanal"),
+      href: "/atualizacoes",
+      tipo: "Boletim semanal",
+      area: espToSite(String(b.especialidade ?? "")),
+    }));
+    const manuais: ItemConteudo[] = atualizacoes.map((a) => ({
+      id: a.id, titulo: a.titulo, href: "/atualizacoes", tipo: "Atualização", area: a.area, areas: a.areas,
+    }));
+    return [...semanais, ...manuais].filter((i) => itemNaArea(i, area));
+  }, [aiBoletins, atualizacoes, area]);
 
   const itensProto: ItemConteudo[] = useMemo(
     () =>
