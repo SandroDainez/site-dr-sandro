@@ -48,6 +48,7 @@ export default function AtualizacoesFeed({
   showTabs = false,
   limit,
   initialArea = "todas",
+  controlledArea,
   logos = {},
   cols = 3,
 }: {
@@ -56,11 +57,20 @@ export default function AtualizacoesFeed({
   showTabs?: boolean;
   limit?: number;
   initialArea?: string;
+  // Quando fornecido, o feed é filtrado por esta área (vinda de um filtro externo,
+  // ex.: o filtro de área da zona /atualizar) e NÃO mostra as próprias abas.
+  controlledArea?: string;
   logos?: Record<string, { logoUrl?: string; emoji?: string }>;
   cols?: number;
 }) {
   const valid = TABS.some((t) => t.value === initialArea) ? (initialArea as Area) : "todas";
-  const [area, setArea] = useState<Area>(valid);
+  const [areaState, setArea] = useState<Area>(valid);
+  const controlada = controlledArea != null;
+  const area: Area = controlada
+    ? (TABS.some((t) => t.value === controlledArea) ? (controlledArea as Area) : "todas")
+    : areaState;
+  const abasVisiveis = showTabs && !controlada;
+  const filtrarPorArea = area !== "todas" && (showTabs || controlada);
 
   // Só o boletim MAIS RECENTE por especialidade no feed — as semanas anteriores
   // ficam no histórico (/atualizacoes-semanais). Evita "novo + velho" da mesma área.
@@ -78,7 +88,7 @@ export default function AtualizacoesFeed({
     ...manuais.filter((m) => m.titulo).map((m) => ({ kind: "manual" as const, date: m.data ?? "", area: m.area, areas: m.areas, raw: m })),
   ];
 
-  const filtered = showTabs && area !== "todas"
+  const filtered = filtrarPorArea
     ? items.filter((it) => it.area === area || (it.kind === "manual" && it.areas?.includes(area)))
     : items;
 
@@ -87,7 +97,7 @@ export default function AtualizacoesFeed({
 
   return (
     <div>
-      {showTabs && (
+      {abasVisiveis && (
         <div className="mb-8 flex flex-wrap gap-2">
           {TABS.map((t) => (
             <button
@@ -121,7 +131,7 @@ export default function AtualizacoesFeed({
       {ai.length > 0 && (
         <div className="mt-6 text-center">
           <a
-            href={`/atualizacoes-semanais${showTabs && area !== "todas" ? `?area=${area}` : ""}`}
+            href={`/atualizacoes-semanais${area !== "todas" ? `?area=${area}` : ""}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/[0.06] px-4 py-2 text-sm font-medium text-accent transition hover:border-accent/60 hover:bg-accent/10"
           >
             Ver semanas anteriores (histórico de boletins) →

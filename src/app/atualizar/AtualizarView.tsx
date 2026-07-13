@@ -12,11 +12,12 @@ import FiltroArea from "@/components/zonas/FiltroArea";
 import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
 import type { ItemConteudo } from "@/components/zonas/ConteudoCard";
 import { itemNaArea } from "@/lib/zonas";
+import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 
 const COR = "#b98af0";
 
-// Especialidade do Supabase → área do site (mesma regra do AtualizacoesFeed).
-const espToSite = (e: string): string => (e === "terapia_intensiva" ? "ti" : e);
+// Filtro da zona ("todos"|área) → área do feed de atualizações ("todas"|área).
+const areaZonaParaFeed = (a: string): string => (a === "todos" ? "todas" : a);
 
 type Props = {
   atualizacoes: AtualizacaoData[];
@@ -29,22 +30,6 @@ type Props = {
 
 export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesProto, pesquisas, comparativos, artigos }: Props) {
   const [area, setArea] = useAreaFiltro();
-
-  // Junta os boletins SEMANAIS da IA (Supabase) com as atualizações manuais (blob).
-  // Sem essa fonte, a zona só mostrava as manuais — por isso os semanais "sumiam".
-  const itensAtualizacoes: ItemConteudo[] = useMemo(() => {
-    const semanais: ItemConteudo[] = aiBoletins.map((b) => ({
-      id: `boletim-${String(b.id)}`,
-      titulo: String(b.titulo ?? "Boletim semanal"),
-      href: "/atualizacoes",
-      tipo: "Boletim semanal",
-      area: espToSite(String(b.especialidade ?? "")),
-    }));
-    const manuais: ItemConteudo[] = atualizacoes.map((a) => ({
-      id: a.id, titulo: a.titulo, href: "/atualizacoes", tipo: "Atualização", area: a.area, areas: a.areas,
-    }));
-    return [...semanais, ...manuais].filter((i) => itemNaArea(i, area));
-  }, [aiBoletins, atualizacoes, area]);
 
   const itensProto: ItemConteudo[] = useMemo(
     () =>
@@ -90,7 +75,18 @@ export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesPr
 
       <FiltroArea value={area} onChange={setArea} />
 
-      <SecaoConteudo icon={Newspaper} titulo="Atualizações clínicas" sub="O que há de novo na prática, com a fonte." itens={itensAtualizacoes} cor={COR} emBreve="Nenhuma atualização nesta área ainda — chega em breve." />
+      {/* Atualizações clínicas: boletins semanais da IA + manuais, no mesmo feed da
+          página /atualizacoes. "Geral" mostra a semana mais recente de cada área;
+          numa área específica, só a dela. Semanas passadas ficam no histórico. */}
+      <section>
+        <div className="mb-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+            <Newspaper className="h-5 w-5" style={{ color: COR }} /> Atualizações clínicas
+          </h2>
+          <p className="mt-0.5 text-[13px] text-white/45">O que há de novo na prática, com a fonte. As semanas anteriores ficam no histórico.</p>
+        </div>
+        <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} controlledArea={areaZonaParaFeed(area)} />
+      </section>
 
       <SecaoConteudo icon={RefreshCw} titulo="Atualizações de protocolo" sub="O que mudou nas condutas institucionais." itens={itensProto} cor={COR} emBreve="Nenhuma atualização de protocolo nesta área ainda — chega em breve." />
 
