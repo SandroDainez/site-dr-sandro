@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 import type { AppData } from "@/lib/content";
 import { saveApps } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 
 const ICON_OPTIONS = [
   "Layers", "CalendarClock", "FileText", "Zap", "HeartPulse", "BookOpen", "AudioLines",
@@ -94,7 +95,7 @@ export default function AppsEditor({ initialApps }: Props) {
   function addApp() {
     setApps((prev) => [
       ...prev,
-      { title: "", subtitle: "", text: "", icon: "Layers", glow: GLOW_OPTIONS[0].value, highlights: [""], link: "" },
+      { title: "", subtitle: "", text: "", icon: "Layers", glow: GLOW_OPTIONS[0].value, highlights: [""], link: "", area: "geral", areas: [] },
     ]);
     setSaved(false);
   }
@@ -241,6 +242,21 @@ export default function AppsEditor({ initialApps }: Props) {
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Descrição</label>
             <RichTextEditor value={app.text} onChange={(html) => updateApp(index, "text", html)} />
           </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Área no site</label>
+            <select
+              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-accent/50"
+              value={app.area ?? "geral"}
+              onChange={(e) => updateApp(index, "area", e.target.value)}
+            >
+              <option value="geral">Geral</option>
+              <option value="emergencias">Emergências</option>
+              <option value="ti">Terapia Intensiva</option>
+              <option value="anestesiologia">Anestesiologia</option>
+            </select>
+          </div>
+          <AreasExtra value={app.areas ?? []} primary={app.area ?? "geral"} onChange={(areas) => updateApp(index, "areas", areas)} />
 
           <div>
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Link do app (URL — ex: https://anesmap.app)</label>

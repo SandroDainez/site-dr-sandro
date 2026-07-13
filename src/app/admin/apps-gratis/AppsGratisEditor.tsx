@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 import type { FreeAppData } from "@/lib/content";
 import { saveFreeApps } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 
 const ICON_OPTIONS = [
   "Layers", "CalendarClock", "FileText", "Zap", "HeartPulse", "BookOpen", "AudioLines",
@@ -23,7 +24,7 @@ export default function AppsGratisEditor({ initialApps }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
 
-  function update(index: number, field: keyof FreeAppData, value: string) {
+  function update(index: number, field: keyof FreeAppData, value: string | string[]) {
     setApps((prev) =>
       prev.map((a, i) => (i === index ? { ...a, [field]: value } : a))
     );
@@ -54,7 +55,7 @@ export default function AppsGratisEditor({ initialApps }: Props) {
   function addApp() {
     setApps((prev) => [
       ...prev,
-      { title: "", desc: "", icon: "BookOpen", link: "" },
+      { title: "", desc: "", icon: "BookOpen", link: "", area: "geral", areas: [] },
     ]);
     setSaved(false);
   }
@@ -179,6 +180,21 @@ export default function AppsGratisEditor({ initialApps }: Props) {
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Descrição</label>
             <RichTextEditor value={app.desc} onChange={(html) => update(index, "desc", html)} />
           </div>
+
+          <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Área no site</label>
+            <select
+              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-accent/50"
+              value={app.area ?? "geral"}
+              onChange={(e) => update(index, "area", e.target.value)}
+            >
+              <option value="geral">Geral</option>
+              <option value="emergencias">Emergências</option>
+              <option value="ti">Terapia Intensiva</option>
+              <option value="anestesiologia">Anestesiologia</option>
+            </select>
+          </div>
+          <AreasExtra value={app.areas ?? []} primary={app.area ?? "geral"} onChange={(areas) => update(index, "areas", areas)} />
 
           <div>
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Link (URL)</label>

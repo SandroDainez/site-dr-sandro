@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 import type { PodcastData } from "@/lib/content";
 import { savePodcasts } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 
 type Props = { initialPodcasts: PodcastData[] };
 
@@ -32,7 +33,7 @@ export default function PodcastEditor({ initialPodcasts }: Props) {
   function addItem() {
     setItems((prev) => [
       ...prev,
-      { id: uid(), titulo: "", descricao: "", imageUrl: "", audioUrl: "", embedUrl: "", duracao: "", data: new Date().toISOString().slice(0, 10) },
+      { id: uid(), titulo: "", descricao: "", area: "geral", areas: [], imageUrl: "", audioUrl: "", embedUrl: "", duracao: "", data: new Date().toISOString().slice(0, 10) },
     ]);
     setSaved(false);
   }
@@ -102,6 +103,18 @@ export default function PodcastEditor({ initialPodcasts }: Props) {
               <label className={labelCls}>Descrição</label>
               <RichTextEditor value={ep.descricao} onChange={(html) => update(i, { descricao: html })} />
             </div>
+
+            {/* Área no site (p/ hubs e filtro) */}
+            <div>
+              <label className={labelCls}>Área no site</label>
+              <select className={inputCls} value={ep.area ?? "geral"} onChange={(e) => update(i, { area: e.target.value as PodcastData["area"] })}>
+                <option value="geral">Geral</option>
+                <option value="emergencias">Emergências</option>
+                <option value="ti">Terapia Intensiva</option>
+                <option value="anestesiologia">Anestesiologia</option>
+              </select>
+            </div>
+            <AreasExtra value={ep.areas ?? []} primary={ep.area ?? "geral"} onChange={(areas) => update(i, { areas })} />
 
             {/* Capa */}
             <div>

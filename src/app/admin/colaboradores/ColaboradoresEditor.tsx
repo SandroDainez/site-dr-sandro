@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 import type { ColaboradorData } from "@/lib/content";
 import { saveColaboradores } from "@/app/admin/actions";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import AreasExtra from "@/components/admin/AreasExtra";
 import { BIO_CORES_LISTA } from "@/lib/bio-cor";
 import { QR_TIPOS } from "@/lib/qr-link";
 
@@ -38,7 +39,7 @@ export default function ColaboradoresEditor({ initialItems }: Props) {
   function addItem() {
     setItems((prev) => [
       ...prev,
-      { id: uid(), titulo: "", descricao: "", medico: "", especialidade: "", videoUrl: "", imageUrl: "", duracao: "", data: new Date().toISOString().slice(0, 10), bio: "", links: [] },
+      { id: uid(), titulo: "", descricao: "", medico: "", especialidade: "", area: "geral", areas: [], videoUrl: "", imageUrl: "", duracao: "", data: new Date().toISOString().slice(0, 10), bio: "", links: [] },
     ]);
     setSaved(false);
   }
@@ -108,10 +109,27 @@ export default function ColaboradoresEditor({ initialItems }: Props) {
                 <input className={inputCls} value={item.medico} onChange={(e) => update(i, { medico: e.target.value })} placeholder="Dra. Ana Souza" />
               </div>
               <div>
-                <label className={labelCls}>Especialidade</label>
+                <label className={labelCls}>Especialidade (credencial)</label>
                 <input className={inputCls} value={item.especialidade} onChange={(e) => update(i, { especialidade: e.target.value })} placeholder="Cardiologia" />
               </div>
             </div>
+
+            {/* Área no site (p/ hubs e filtro) — separado da credencial acima */}
+            <div>
+              <label className={labelCls}>Área no site</label>
+              <select
+                className={inputCls}
+                value={item.area ?? "geral"}
+                onChange={(e) => update(i, { area: e.target.value as ColaboradorData["area"] })}
+              >
+                <option value="geral">Geral</option>
+                <option value="emergencias">Emergências</option>
+                <option value="ti">Terapia Intensiva</option>
+                <option value="anestesiologia">Anestesiologia</option>
+              </select>
+              <p className="mt-1 text-[11px] text-white/35">Em qual área do site esta aula/entrevista aparece. Diferente da <strong className="text-white/55">credencial</strong> do profissional acima.</p>
+            </div>
+            <AreasExtra value={item.areas ?? []} primary={item.area ?? "geral"} onChange={(areas) => update(i, { areas })} />
 
             <div>
               <label className={labelCls}>Assunto (agrupar aulas)</label>

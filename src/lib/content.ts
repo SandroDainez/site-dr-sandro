@@ -34,6 +34,8 @@ export type AppData = {
   link: string;
   thumbnailUrl?: string;
   thumbnailSize?: number; // tamanho da miniatura/logo em px (default 48)
+  area?: "emergencias" | "ti" | "anestesiologia" | "geral"; // área no site (p/ hubs/filtro); default "geral"
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };
 
 export type FreeAppData = {
@@ -43,6 +45,8 @@ export type FreeAppData = {
   link: string;
   imageUrl?: string; // logo/imagem própria do app (substitui o ícone)
   imageSize?: number; // tamanho do logo em px (default 28)
+  area?: "emergencias" | "ti" | "anestesiologia" | "geral"; // área no site (p/ hubs/filtro); default "geral"
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };
 
 // Apps genéricos do dia a dia (finanças, organização, produtividade — podem ser
@@ -285,6 +289,8 @@ export type PodcastData = {
   id: string;
   titulo: string;
   descricao: string; // rich text (HTML, sanitizado ao renderizar)
+  area?: "emergencias" | "ti" | "anestesiologia" | "geral"; // área no site (p/ hubs/filtro); default "geral"
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
   imageUrl: string; // capa do episódio
   audioUrl: string; // gravação enviada (proxied /api/img) ou link direto de áudio (.mp3)
   embedUrl: string; // link externo: Spotify / YouTube / Apple Podcasts
@@ -305,7 +311,9 @@ export type ColaboradorData = {
   titulo: string;
   descricao: string; // rich text
   medico: string; // nome do profissional que cedeu o material
-  especialidade: string; // ex: "Cardiologia"
+  especialidade: string; // credencial do profissional (texto livre) — ex: "Cardiologia"
+  area?: "emergencias" | "ti" | "anestesiologia" | "geral"; // área no site (p/ hubs/filtro); default "geral"
+  areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
   assunto?: string; // agrupa aulas do mesmo tema (ex.: "Raquianestesia") num card-playlist
   videoUrl: string; // YouTube ou /api/img de blob
   imageUrl: string; // thumbnail (opcional)
