@@ -48,7 +48,13 @@ export function applyNavOverride(groups: NavGroup[], ov?: NavOverride): NavGroup
   const relabel = (l: string) => (ov.labels?.[l]?.trim() ? ov.labels![l].trim() : l);
 
   let tops = groups.filter((g) => !hidden.has(g.label));
-  if (ov.order?.length) {
+  // Só aplica a ordem salva se ela cobrir TODOS os grupos atuais. Uma ordem antiga
+  // (de uma estrutura passada) tipicamente não inclui os grupos novos — nesse caso
+  // ela é ignorada e vale a ordem do código, evitando que grupos novos sejam jogados
+  // pro fim e um antigo (ex.: "Mais") fique na frente deles. Um salvamento legítimo do
+  // admin sempre grava a lista completa, então continua sendo respeitado.
+  const ordemCobreTudo = !!ov.order?.length && groups.every((g) => ov.order!.includes(g.label));
+  if (ordemCobreTudo) {
     const idx = (l: string) => { const i = ov.order!.indexOf(l); return i < 0 ? 999 : i; };
     tops = [...tops].sort((a, b) => idx(a.label) - idx(b.label));
   }
