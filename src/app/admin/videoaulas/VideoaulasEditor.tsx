@@ -611,10 +611,10 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
               )}
             </div>
 
-            {/* Thumbnail upload */}
+            {/* Capa do vídeo (thumbnail) */}
             <div>
               <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
-                Thumbnail
+                Capa do vídeo
               </label>
               <div className="flex items-center gap-3">
                 <button
@@ -624,7 +624,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                   className="flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white/70 transition hover:border-accent/40 hover:text-white disabled:opacity-50"
                 >
                   <Upload className="h-4 w-4" />
-                  {uploadingIdx === idx ? "Enviando..." : "Upload de thumbnail"}
+                  {uploadingIdx === idx ? "Enviando..." : "Enviar capa"}
                 </button>
                 {item.imageUrl && (
                   <button
@@ -657,7 +657,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                   />
                   <div className="mt-3">
                     <div className="mb-1 flex items-center justify-between">
-                      <label className="text-xs text-white/40">Altura da miniatura no site</label>
+                      <label className="text-xs text-white/40">Altura da capa no site</label>
                       <span className="text-xs font-semibold tabular-nums text-accent">{item.imageSize ?? 176}px</span>
                     </div>
                     <input
@@ -680,7 +680,7 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
             {/* imageCaption */}
             <div>
               <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
-                Legenda da thumbnail
+                Legenda da capa
               </label>
               <input
                 type="text"

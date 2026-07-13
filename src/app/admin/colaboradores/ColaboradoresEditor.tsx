@@ -221,7 +221,7 @@ export default function ColaboradoresEditor({ initialItems }: Props) {
 
             {/* Thumbnail */}
             <div>
-              <label className={labelCls}>Thumbnail (opcional)</label>
+              <label className={labelCls}>Capa do vídeo (opcional)</label>
               <div className="flex items-center gap-3">
                 {item.imageUrl ? (
                   <div className="relative h-14 w-24 shrink-0 overflow-hidden rounded-lg border border-white/15 bg-black/30">
@@ -230,11 +230,11 @@ export default function ColaboradoresEditor({ initialItems }: Props) {
                     <button type="button" onClick={() => update(i, { imageUrl: "" })} className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white" title="Remover"><X className="h-3 w-3" /></button>
                   </div>
                 ) : (
-                  <div className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg border border-dashed border-white/20 text-white/30 text-[10px]">thumb</div>
+                  <div className="flex h-14 w-24 shrink-0 items-center justify-center rounded-lg border border-dashed border-white/20 text-white/30 text-[10px]">capa</div>
                 )}
                 <input type="file" accept="image/*" id={`thumb-${i}`} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleUpload(`thumb-${i}`, f, (url) => update(i, { imageUrl: url })); e.target.value = ""; }} />
                 <label htmlFor={`thumb-${i}`} className={`flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-3 py-1.5 text-xs text-white transition hover:bg-white/10 ${upThumb ? "pointer-events-none opacity-50" : ""}`}>
-                  {upThumb ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando...</> : <><Upload className="h-3.5 w-3.5" /> Enviar thumbnail</>}
+                  {upThumb ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando...</> : <><Upload className="h-3.5 w-3.5" /> Enviar capa</>}
                 </label>
               </div>
             </div>
