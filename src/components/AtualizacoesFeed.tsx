@@ -83,9 +83,21 @@ export default function AtualizacoesFeed({
     aiRecentes.push(u);
   }
 
+  // Dedup defensivo das manuais por id (dado duplicado no blob gerava cards repetidos
+  // e colisão de key no React — só o primeiro respondia ao clique).
+  const manuaisUnicas: AtualizacaoData[] = [];
+  const idsVistos = new Set<string>();
+  for (const m of manuais) {
+    if (!m.titulo) continue;
+    const chave = String(m.id ?? `${m.titulo}-${m.data ?? ""}`);
+    if (idsVistos.has(chave)) continue;
+    idsVistos.add(chave);
+    manuaisUnicas.push(m);
+  }
+
   const items: Item[] = [
     ...aiRecentes.map((u) => ({ kind: "ai" as const, date: (u.data_publicacao ?? "").slice(0, 10), area: espToSite(u.especialidade ?? ""), raw: u })),
-    ...manuais.filter((m) => m.titulo).map((m) => ({ kind: "manual" as const, date: m.data ?? "", area: m.area, areas: m.areas, raw: m })),
+    ...manuaisUnicas.map((m) => ({ kind: "manual" as const, date: m.data ?? "", area: m.area, areas: m.areas, raw: m })),
   ];
 
   const filtered = filtrarPorArea
@@ -116,7 +128,7 @@ export default function AtualizacoesFeed({
           <p className="text-sm text-white/50">Nenhuma atualização ainda.</p>
         </div>
       ) : (
-        <div className="card-grid gap-5" style={colStyle(cols)}>
+        <div className="card-grid items-start gap-5" style={colStyle(cols)}>
           {shown.map((it) =>
             it.kind === "ai"
               ? <BoletimCard key={`ai-${it.raw.id}`} update={it.raw} logo={logos[it.area]} />
