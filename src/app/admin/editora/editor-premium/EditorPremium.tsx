@@ -9,6 +9,7 @@ import { dataCurta } from "@/lib/format-date";
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { criarDoc, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, excluirVersao, publicarDoc, despublicarDoc, arquivarDoc, excluirDoc, aplicarCorrecoes } from "./actions";
+import { buscarNaBibliotecaEditora } from "@/app/admin/editora/fontes-actions";
 import FontesInput from "@/components/admin/FontesInput";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive } from "lucide-react";
 
@@ -48,6 +49,10 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
   const [especialidade, setEspecialidade] = useState<string>(ESPECIALIDADES_MODULO[0]);
   const [sources, setSources] = useState<Source[]>([]);
   const [rascunho, setRascunho] = useState("");
+  // Importar conteúdo já publicado (biblioteca_editora) direto pro rascunho a refinar.
+  const [importQuery, setImportQuery] = useState("");
+  const [importResultados, setImportResultados] = useState<{ conteudo: string; titulo: string; tipo: string }[] | null>(null);
+  const [importando, setImportando] = useState(false);
 
   // form de referência
 
@@ -322,6 +327,64 @@ export default function EditorPremium({ docsIniciais, modo }: { docsIniciais: Do
           {/* 3) RASCUNHO */}
           <div className={card}>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-white/40">3 · Rascunho a refinar</p>
+
+            {/* Importar de algo já publicado (protocolo, aula, artigo…) — sem copiar/colar */}
+            <div className="mb-3 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+              <p className="text-[11px] font-semibold text-white/60">Melhorar algo que já temos — importe da Editora</p>
+              <div className="mt-2 flex gap-2">
+                <input
+                  className={inputCls + " flex-1"}
+                  value={importQuery}
+                  onChange={(e) => setImportQuery(e.target.value)}
+                  onKeyDown={async (e) => {
+                    if (e.key !== "Enter" || !importQuery.trim()) return;
+                    setImportando(true); setImportResultados(null);
+                    const r = await buscarNaBibliotecaEditora(importQuery.trim());
+                    setImportResultados(r.ok ? r.data.map((x) => ({ conteudo: x.conteudo, titulo: x.titulo, tipo: x.tipo })) : []);
+                    setImportando(false);
+                  }}
+                  placeholder="Buscar um protocolo/aula/artigo já publicado (tecle Enter)…"
+                />
+                <button
+                  type="button"
+                  disabled={importando || !importQuery.trim()}
+                  onClick={async () => {
+                    setImportando(true); setImportResultados(null);
+                    const r = await buscarNaBibliotecaEditora(importQuery.trim());
+                    setImportResultados(r.ok ? r.data.map((x) => ({ conteudo: x.conteudo, titulo: x.titulo, tipo: x.tipo })) : []);
+                    setImportando(false);
+                  }}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.05] px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+                >
+                  {importando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} Buscar
+                </button>
+              </div>
+              {importResultados && (
+                importResultados.length === 0 ? (
+                  <p className="mt-2 text-[11px] text-white/40">Nada encontrado na Editora para esse termo.</p>
+                ) : (
+                  <div className="mt-2 space-y-1.5">
+                    {importResultados.map((r, i) => (
+                      <div key={i} className="flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-[12px] font-medium text-white">{r.titulo}</p>
+                          <p className="text-[10px] uppercase tracking-wide text-white/35">{r.tipo} · {r.conteudo.trim().length} caracteres</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => { setRascunho(r.conteudo); if (!novoTitulo.trim()) setNovoTitulo(r.titulo); setImportResultados(null); setImportQuery(""); }}
+                          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-[11px] font-semibold text-accent transition hover:bg-accent/20"
+                        >
+                          Usar como rascunho
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+              <p className="mt-2 text-[10px] text-white/30">Isso traz o texto pro rascunho abaixo — o Premium refina em cima dele, mantendo cada afirmação ancorada nas referências. Não esqueça de anexar as referências no passo 2.</p>
+            </div>
+
             <textarea className={inputCls + " min-h-[160px] resize-y"} value={rascunho} onChange={(e) => setRascunho(e.target.value)} placeholder="Cole o rascunho do texto que você quer densificar e melhorar. O Editor Premium reescreve com mais densidade e forma, mantendo cada afirmação ancorada nas referências (o que não tiver respaldo vira ⚠ sem fonte)." />
             <p className="mt-1 text-[11px] text-white/35">{rascunho.trim().length} caracteres. Vazio? O Premium compõe a partir apenas das referências.</p>
           </div>
