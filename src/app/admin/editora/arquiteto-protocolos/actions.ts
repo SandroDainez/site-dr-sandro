@@ -104,7 +104,7 @@ export async function removerSource(sourceId: string): Promise<Result<null>> {
 // Gera UM bloco (3-4 seções), recebendo os sources completos (do banco) + as seções
 // já geradas como contexto. Valida as citações DO BLOCO antes de devolver.
 export async function gerarBloco(input: {
-  protocolId: string; blocoIndex: number; especialidade: string; secoesAnteriores: SecaoGerada[];
+  protocolId: string; blocoIndex: number; especialidade: string; secoesAnteriores: SecaoGerada[]; titulo?: string;
 }): Promise<Result<{ secoes: SecaoGerada[]; validacaoBloco: Validacao; usage: { tokensIn: number; tokensOut: number }; provider: string; model: string }>> {
   try {
     await requireAdmin();
@@ -118,7 +118,7 @@ export async function gerarBloco(input: {
 
     // Monta o prompt (usado pelos providers reais; o mock ignora) e chama o provider.
     const prompt = buildArquitetoProtocolosPrompt({
-      especialidade: input.especialidade, sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores,
+      especialidade: input.especialidade, titulo: input.titulo, sources, secoesAlvo: bloco, secoesAnteriores: input.secoesAnteriores,
     });
     const provider = getProvider(aiProviders().generation); // mock | deepseek (AI_PROVIDER)
     const res = await provider.generate({
@@ -138,7 +138,7 @@ export type RevisaoResultado = {
   issues: Issue[]; corrigido: SecaoGerada[]; usage: { tokensIn: number; tokensOut: number };
   provider: string; model: string; confidence: number; method: string;
 };
-export async function revisar(input: { protocolId: string; secoes: SecaoGerada[] }): Promise<Result<RevisaoResultado>> {
+export async function revisar(input: { protocolId: string; secoes: SecaoGerada[]; titulo?: string }): Promise<Result<RevisaoResultado>> {
   try {
     await requireAdmin();
     const sres = await listarSources(input.protocolId);
@@ -150,6 +150,7 @@ export async function revisar(input: { protocolId: string; secoes: SecaoGerada[]
       modulo: "arquiteto-protocolos",
       draft: { provider: "", model: "", secoes: input.secoes, usage: { tokensIn: 0, tokensOut: 0 } },
       sources,
+      titulo: input.titulo,
     });
     const val = consolidarValidacao(input.secoes, sources); // confidence pelo CÓDIGO (não pela IA)
     return { ok: true, data: { issues: rev.issues, corrigido: rev.corrigido.secoes, usage: rev.usage, provider: rev.provider, model: rev.model, confidence: val.confidence, method: val.method } };

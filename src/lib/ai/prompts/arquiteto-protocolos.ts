@@ -69,11 +69,12 @@ const GUIA_SECOES: Record<string, string> = {
 // sources completos + seções já geradas (contexto) + seções-alvo deste bloco.
 export function buildArquitetoProtocolosPrompt(args: {
   especialidade?: string;
+  titulo?: string;
   sources: Source[];
   secoesAlvo: string[];
   secoesAnteriores: SecaoGerada[];
 }): string {
-  const { especialidade, sources, secoesAlvo, secoesAnteriores } = args;
+  const { especialidade, titulo, sources, secoesAlvo, secoesAnteriores } = args;
 
   const alvoComGuia = secoesAlvo.map((s) => {
     const guia = GUIA_SECOES[s];
@@ -85,7 +86,13 @@ export function buildArquitetoProtocolosPrompt(args: {
   return `Você é um ARQUITETO DE PROTOCOLOS clínicos institucionais${especialidade ? ` (área: ${especialidade})` : ""}.
 Sua tarefa: redigir APENAS as seções deste bloco de um protocolo institucional MÉDICO, com
 o rigor de um documento de comissão hospitalar (fiel à diretriz-fonte, acionável à beira-leito).
-
+${titulo ? `
+TEMA DESTE PROTOCOLO (ESCOPO — crítico): "${titulo}". Este documento trata EXCLUSIVAMENTE deste
+assunto. NÃO misture outras doenças/condições/temas. NÃO inclua nada que não pertença a um
+protocolo DESTE assunto (ex.: manejo de outra doença, tópicos tangenciais, conteúdo de outra
+especialidade). Se um SOURCE trouxer material de outro tema, IGNORE a parte fora do escopo —
+use só o que é do tema acima. Cada afirmação de cada seção deve ser sobre "${titulo}".
+` : ""}
 ${BLOCO_ANTI_ALUCINACAO}
 
 PADRÃO DE QUALIDADE (protocolo institucional):

@@ -10,7 +10,7 @@ import { buildRevisaoPesquisadorPrompt } from "./revisao-pesquisador";
 // Dispatcher do prompt de REVISÃO (estágio 2) por módulo. O provider é agnóstico de módulo:
 // recebe ReviewInput.modulo e este dispatcher escolhe o prompt certo. Novo módulo = 1 case.
 // Default = protocolos (preserva o comportamento do piloto).
-export function buildRevisaoPrompt(modulo: string, args: { secoes: SecaoGerada[]; sources: Source[] }): string {
+export function buildRevisaoPrompt(modulo: string, args: { secoes: SecaoGerada[]; sources: Source[]; titulo?: string }): string {
   switch (modulo) {
     case "editor-cientifico":
     case "editor-premium": // refinamento produz o mesmo tipo de texto → mesmo revisor científico

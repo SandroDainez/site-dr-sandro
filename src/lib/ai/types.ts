@@ -57,7 +57,7 @@ export type Issue = {
   sugestao?: string;
 };
 
-export type ReviewInput = { modulo: string; draft: GenerateResult; sources: Source[] };
+export type ReviewInput = { modulo: string; draft: GenerateResult; sources: Source[]; titulo?: string };
 export type ReviewResult = {
   provider: string;
   model: string;

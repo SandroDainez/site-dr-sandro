@@ -23,19 +23,20 @@ function protocoloCompacto(secoes: SecaoGerada[]): string {
     .join("\n\n");
 }
 
-export function buildRevisaoProtocolosPrompt(args: { secoes: SecaoGerada[]; sources: Source[] }): string {
-  const { secoes, sources } = args;
+export function buildRevisaoProtocolosPrompt(args: { secoes: SecaoGerada[]; sources: Source[]; titulo?: string }): string {
+  const { secoes, sources, titulo } = args;
   return `Você é um REVISOR SÊNIOR (nível editor de revista médica) de um protocolo clínico institucional.
 Recebe o protocolo e a lista de fontes usadas. Seu trabalho é APONTAR problemas com sugestão
 concreta — NÃO reescreva o documento (a correção é aplicada manualmente).
 
-Primeiro, identifique o TEMA/DOENÇA central do protocolo pelo título e pelas seções.
+${titulo ? `O TEMA CENTRAL deste protocolo é: "${titulo}". Todo o conteúdo deve tratar EXCLUSIVAMENTE deste assunto.` : "Primeiro, identifique o TEMA/DOENÇA central do protocolo pelo título e pelas seções."}
 
 VERIFIQUE (a validação de citação/âncora contra o texto das fontes JÁ é feita por código — não reconfira):
 0. COERÊNCIA DE TEMA (crítico): sinalize como severidade ALTA (tipo "off_topic") QUALQUER afirmação,
-   trecho ou seção que seja de OUTRA doença/especialidade que não o tema central do protocolo — mesmo
-   que esteja bem escrita e citada. Ex.: conteúdo de nefrologia num protocolo de AVC; manejo de sepse
-   num protocolo de via aérea. Aponte o trecho exato e sugira REMOVER (não pertence a este protocolo).
+   trecho ou seção que NÃO seja do tema central${titulo ? ` ("${titulo}")` : ""} — de outra doença/especialidade,
+   OU tangencial/que não caiba num protocolo deste assunto — mesmo que esteja bem escrita e citada.
+   Ex.: conteúdo de nefrologia num protocolo de AVC; manejo de sepse num protocolo de via aérea.
+   Aponte o trecho exato e sugira REMOVER (não pertence a este protocolo).
 1. Consistência entre as seções: contradições, repetições, ordem ilógica, lacunas importantes.
 2. Doses/medicamentos clinicamente plausíveis (número, unidade, via, intervalo) — sinalize o que parecer suspeito.
 3. Afirmações vagas, genéricas ou clinicamente questionáveis — sinalize com sugestão de melhoria.

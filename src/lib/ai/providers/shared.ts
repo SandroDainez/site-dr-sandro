@@ -34,7 +34,7 @@ export async function gerarSecoes(client: OpenAI, model: string, providerName: s
 // Estágio 2 — revisão do protocolo montado. NÃO reescreve em silêncio: devolve
 // APONTAMENTOS (issues) + versão corrigida à parte.
 export async function revisarProtocolo(client: OpenAI, model: string, providerName: string, input: ReviewInput): Promise<ReviewResult> {
-  const prompt = buildRevisaoPrompt(input.modulo, { secoes: input.draft.secoes, sources: input.sources });
+  const prompt = buildRevisaoPrompt(input.modulo, { secoes: input.draft.secoes, sources: input.sources, titulo: input.titulo });
   try {
     const r = await client.chat.completions.create({
       model,

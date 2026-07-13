@@ -189,11 +189,11 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
       setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "gerando" } : b)));
       // Auto-retry: falha de bloco costuma ser transiente (timeout/limite momentâneo do
       // DeepSeek). Tenta até 3x, com uma pausa entre elas, antes de mostrar erro.
-      let r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado });
+      let r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado, titulo: protocolo.title });
       for (let tent = 1; !r.ok && tent < 3; tent++) {
         setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "gerando", err: `tentativa ${tent + 1}…` } : b)));
         await new Promise((res) => setTimeout(res, 1500));
-        r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado });
+        r = await gerarBloco({ protocolId: protocolo.id, blocoIndex: i, especialidade, secoesAnteriores: acumulado, titulo: protocolo.title });
       }
       if (!r.ok) {
         setBlocos((prev) => prev.map((b, idx) => (idx === i ? { status: "erro", err: r.error } : b)));
@@ -215,7 +215,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   async function revisarAgora() {
     if (!protocolo || secoes.length === 0) return;
     setError(null); setRevisando(true); setRevisao(null);
-    const r = await revisar({ protocolId: protocolo.id, secoes });
+    const r = await revisar({ protocolId: protocolo.id, secoes, titulo: protocolo.title });
     if (r.ok) setRevisao({ issues: r.data.issues, corrigido: r.data.corrigido, usage: r.data.usage, provider: r.data.provider, model: r.data.model });
     else setError(r.error);
     setRevisando(false);
