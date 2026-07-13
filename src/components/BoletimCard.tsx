@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { ChevronDown, Sparkles, Download, Printer } from "lucide-react";
 import UpdateContent, { type UpdateContentData } from "./UpdateContent";
 import { dataCurta } from "@/lib/format-date";
 
@@ -63,6 +63,26 @@ export default function BoletimCard({ update, manual = false, logo }: { update: 
       {open && (
         <div className="mt-3 border-t border-accent/15 pt-4">
           <UpdateContent update={update} />
+
+          {/* Baixar / imprimir — só para os boletins da IA (têm id no banco). */}
+          {!manual && update.id != null && (
+            <div className="mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-4">
+              <a
+                href={`/api/atualizacoes/${update.id}/pdf?dl=1`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/15 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+              >
+                <Download className="h-3.5 w-3.5" /> Baixar PDF
+              </a>
+              <a
+                href={`/api/atualizacoes/${update.id}/pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-semibold text-white/70 transition hover:text-white"
+              >
+                <Printer className="h-3.5 w-3.5" /> Imprimir
+              </a>
+            </div>
+          )}
         </div>
       )}
 

@@ -51,3 +51,20 @@ export async function fetchMedicalUpdates(especialidade?: string): Promise<Recor
     return [];
   }
 }
+
+// Busca UM boletim publicado pelo id (para gerar o PDF de download). null se não achar.
+export async function fetchMedicalUpdateById(id: string): Promise<Record<string, unknown> | null> {
+  if (!supabaseConfigured()) return null;
+  try {
+    const supabase = createPublicClient();
+    const { data } = await supabase
+      .from("medical_updates")
+      .select("*")
+      .eq("id", id)
+      .eq("publicado", true)
+      .maybeSingle();
+    return data ?? null;
+  } catch {
+    return null;
+  }
+}
