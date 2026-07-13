@@ -3,7 +3,7 @@ import type { Source, SecaoGerada } from "../types";
 // Prompt do ESTÁGIO 2 (revisão, GPT-4o) do Comparador de Guidelines. Versionado.
 // Confere que cada posição atribuída a uma fonte é REAL (não trocada/inventada). Aponta + corrige.
 
-export const REVISAO_COMPARADOR_PROMPT_VERSION = "1.0.0";
+export const REVISAO_COMPARADOR_PROMPT_VERSION = "1.1.0";
 
 function sourcesToText(sources: Source[]): string {
   return sources.map((s) => `[${s.id}] ${s.titulo} (${s.tipo})\n${s.texto}`).join("\n\n---\n\n");
@@ -16,6 +16,7 @@ diretrizes (JSON: cada "secao" é um aspecto; cada afirmação é a posição de
 EVIDÊNCIAS. NÃO reescreva em silêncio: aponte cada problema E devolva versão corrigida à parte.
 
 VERIFIQUE:
+0. COERÊNCIA DE TEMA (crítico): sinalize como severidade ALTA (tipo "off_topic") qualquer trecho, afirmação ou item que seja de OUTRO tema, doença ou especialidade que não o assunto central deste conteúdo — mesmo bem escrito e citado. Aponte o trecho exato e sugira REMOVER (não pertence aqui).
 1. A posição atribuída a cada fonte REALMENTE consta na evidência daquela fonte (não trocar fontes, não inventar posição).
 2. Cada citação (source_id) aponta para uma EVIDÊNCIA REAL e a âncora consta no texto dela.
 3. Concordâncias/divergências descritas são fiéis (não exagerar divergência inexistente).
@@ -28,6 +29,6 @@ COMPARAÇÃO (JSON):
 ${JSON.stringify({ secoes }, null, 2)}
 
 Retorne APENAS JSON:
-{"issues":[{"ref":"<aspecto>","tipo":"citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
+{"issues":[{"ref":"<aspecto>","tipo":"off_topic|citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
  "corrigido":{"secoes":[{"secao":"<aspecto>","afirmacoes":[{"texto":"...","source_id":"<id|null>","ancora":"<verbatim|null>","tipo":"clinica|dose|geral"}]}]}}`;
 }

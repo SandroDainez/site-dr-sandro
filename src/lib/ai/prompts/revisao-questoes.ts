@@ -5,7 +5,7 @@ import type { QuestaoGerada } from "@/lib/editora/questao-estrutura";
 // crítica → revisão sempre roda. APONTA problemas e devolve versão corrigida (não reescreve
 // em silêncio). Versionado.
 
-export const REVISAO_QUESTOES_PROMPT_VERSION = "1.0.0";
+export const REVISAO_QUESTOES_PROMPT_VERSION = "1.1.0";
 
 function sourcesToText(sources: Source[]): string {
   return sources.map((s) => `[${s.id}] ${s.titulo} (${s.tipo})\n${s.texto}`).join("\n\n---\n\n");
@@ -18,6 +18,7 @@ múltipla escolha (JSON) e as REFERÊNCIAS. NÃO reescreva em silêncio: aponte 
 devolva uma versão corrigida à parte.
 
 VERIFIQUE (correção é crítica):
+0. COERÊNCIA DE TEMA (crítico): sinalize como severidade ALTA (tipo "off_topic") qualquer trecho, afirmação ou item que seja de OUTRO tema, doença ou especialidade que não o assunto central deste conteúdo — mesmo bem escrito e citado. Aponte o trecho exato e sugira REMOVER (não pertence aqui).
 1. O GABARITO ("correta") está realmente certo segundo as referências. Se estiver errado, aponte (severidade alta) e corrija o índice.
 2. Há EXATAMENTE uma alternativa correta; os distratores são plausíveis e inequivocamente incorretos.
 3. Cada citação da justificativa (source_id) aponta para uma REFERÊNCIA REAL e a âncora consta no texto dela.
@@ -31,6 +32,6 @@ QUESTÕES (JSON):
 ${JSON.stringify({ questoes }, null, 2)}
 
 Retorne APENAS JSON:
-{"issues":[{"ref":"<enunciado ou nº>","tipo":"gabarito_errado|citacao_invalida|sem_fonte|impreciso|dose_suspeita|ambiguo|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
+{"issues":[{"ref":"<enunciado ou nº>","tipo":"off_topic|gabarito_errado|citacao_invalida|sem_fonte|impreciso|dose_suspeita|ambiguo|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
  "corrigido":{"questoes":[{"enunciado":"...","opcoes":["..."],"correta":<índice>,"justificativa":[{"texto":"...","source_id":"<id|null>","ancora":"<verbatim|null>","tipo":"clinica|dose|geral"}]}]}}`;
 }

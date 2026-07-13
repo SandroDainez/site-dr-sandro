@@ -4,7 +4,7 @@ import type { Source, SecaoGerada } from "../types";
 // Cada "secao" é a FRENTE do cartão; suas "afirmacoes" são o VERSO. A revisão APONTA
 // problemas e devolve versão corrigida — NUNCA reescreve em silêncio.
 
-export const REVISAO_FLASHCARDS_PROMPT_VERSION = "1.0.0";
+export const REVISAO_FLASHCARDS_PROMPT_VERSION = "1.1.0";
 
 function sourcesToText(sources: Source[]): string {
   return sources.map((s) => `[${s.id}] ${s.titulo} (${s.tipo})\n${s.texto}`).join("\n\n---\n\n");
@@ -17,6 +17,7 @@ export function buildRevisaoFlashcardsPrompt(args: { secoes: SecaoGerada[]; sour
 NÃO reescreva em silêncio: aponte cada problema E devolva uma versão corrigida à parte.
 
 VERIFIQUE:
+0. COERÊNCIA DE TEMA (crítico): sinalize como severidade ALTA (tipo "off_topic") qualquer trecho, afirmação ou item que seja de OUTRO tema, doença ou especialidade que não o assunto central deste conteúdo — mesmo bem escrito e citado. Aponte o trecho exato e sugira REMOVER (não pertence aqui).
 1. A frente (pergunta) é clara e a resposta no verso realmente responde à pergunta.
 2. Cada citação (source_id) aponta para uma REFERÊNCIA REAL, e a âncora consta no texto dela.
 3. Doses/números foram TRANSCRITOS FIELMENTE das referências — sinalize divergências.
@@ -30,6 +31,6 @@ FLASHCARDS (JSON):
 ${JSON.stringify({ secoes }, null, 2)}
 
 Retorne APENAS JSON:
-{"issues":[{"ref":"<frente do cartão>","tipo":"citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
+{"issues":[{"ref":"<frente do cartão>","tipo":"off_topic|citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
  "corrigido":{"secoes":[{"secao":"<frente>","afirmacoes":[{"texto":"<verso>","source_id":"<id|null>","ancora":"<verbatim|null>","tipo":"clinica|dose|geral"}]}]}}`;
 }

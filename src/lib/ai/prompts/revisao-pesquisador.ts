@@ -3,7 +3,7 @@ import type { Source, SecaoGerada } from "../types";
 // Prompt do ESTÁGIO 2 (revisão, GPT-4o) do Pesquisador Científico. Versionado.
 // Confere que cada afirmação da síntese tem respaldo REAL nas evidências. Aponta + corrige.
 
-export const REVISAO_PESQUISADOR_PROMPT_VERSION = "1.0.0";
+export const REVISAO_PESQUISADOR_PROMPT_VERSION = "1.1.0";
 
 function sourcesToText(sources: Source[]): string {
   return sources.map((s) => `[${s.id}] ${s.titulo} (${s.tipo})\n${s.texto}`).join("\n\n---\n\n");
@@ -15,6 +15,7 @@ export function buildRevisaoPesquisadorPrompt(args: { secoes: SecaoGerada[]; sou
 e as EVIDÊNCIAS recuperadas. NÃO reescreva em silêncio: aponte cada problema E devolva versão corrigida.
 
 VERIFIQUE:
+0. COERÊNCIA DE TEMA (crítico): sinalize como severidade ALTA (tipo "off_topic") qualquer trecho, afirmação ou item que seja de OUTRO tema, doença ou especialidade que não o assunto central deste conteúdo — mesmo bem escrito e citado. Aponte o trecho exato e sugira REMOVER (não pertence aqui).
 1. Cada afirmação da síntese é REALMENTE sustentada por uma evidência da lista (sem superinterpretar/generalizar).
 2. Cada citação (source_id) aponta para uma EVIDÊNCIA REAL e a âncora consta no texto dela.
 3. Números/estatísticas/doses transcritos fielmente; sinalize divergências.
@@ -27,6 +28,6 @@ SÍNTESE (JSON):
 ${JSON.stringify({ secoes }, null, 2)}
 
 Retorne APENAS JSON:
-{"issues":[{"ref":"<seção>","tipo":"citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
+{"issues":[{"ref":"<seção>","tipo":"off_topic|citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}],
  "corrigido":{"secoes":[{"secao":"<nome>","afirmacoes":[{"texto":"...","source_id":"<id|null>","ancora":"<verbatim|null>","tipo":"clinica|dose|geral"}]}]}}`;
 }
