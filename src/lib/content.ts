@@ -1010,7 +1010,16 @@ export async function getHomeHidden(): Promise<string[]> {
 // Fallback vazio: o site mostra apenas o que for cadastrado no admin.
 // (os exemplos default ficam disponíveis só como referência, não vão ao ar)
 export async function getAtualizacoes(): Promise<AtualizacaoData[]> {
-  return readBlob("atualizacoes", []);
+  const todas = await readBlob<AtualizacaoData[]>("atualizacoes", []);
+  // Deduplica por id: entradas repetidas (mesmo id) quebravam o React (key colidida →
+  // só a 1ª abria) e apareciam em dobro. Mantém a primeira ocorrência.
+  const vistos = new Set<string>();
+  return todas.filter((a) => {
+    const k = a.id ?? "";
+    if (vistos.has(k)) return false;
+    vistos.add(k);
+    return true;
+  });
 }
 
 export async function getProtocolos(): Promise<ProtocoloData[]> {
