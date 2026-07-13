@@ -64,7 +64,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
 
   // aplicar correções da IA (reancorar afirmações reprovadas)
   const [corrigindo, setCorrigindo] = useState(false);
-  const [correcao, setCorrecao] = useState<{ corrigidas: number; total: number; antes: number; depois: number } | null>(null);
+  const [correcao, setCorrecao] = useState<{ corrigidas: number; total: number; antes: number; depois: number; fontesExternas: number } | null>(null);
 
   const [salvo, setSalvo] = useState<{ versionNumber: number; confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -232,7 +232,9 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
       const te: Record<string, string> = {};
       for (const s of r.data.secoes) te[s.secao] = renderSecaoTexto(s);
       setTextoEditado(te);
-      setCorrecao({ corrigidas: r.data.corrigidas, total: r.data.total, antes, depois: r.data.validacao.confidence });
+      setCorrecao({ corrigidas: r.data.corrigidas, total: r.data.total, antes, depois: r.data.validacao.confidence, fontesExternas: r.data.fontesExternas });
+      // Se anexou fontes do PubMed, recarrega a lista de fontes pra elas aparecerem.
+      if (r.data.fontesExternas > 0) { const sr = await listarSources(protocolo.id); if (sr.ok) setSources(sr.data); }
     } else setError(r.error);
     setCorrigindo(false);
   }
@@ -486,7 +488,7 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-white"><Wand2 className="h-4 w-4 text-accent" /> Aplicar correções da IA</p>
-                        <p className="mt-0.5 text-[11px] text-white/45">A IA tenta reancorar as afirmações reprovadas num trecho verbatim da fonte (ou ajustar o texto pra bater, ou marcar honestamente como sem fonte). O código revalida e a confiança sobe conforme as fontes cobrem. Não salva — revise e salve depois.</p>
+                        <p className="mt-0.5 text-[11px] text-white/45">A IA reancora as afirmações reprovadas num trecho verbatim da fonte. O que a biblioteca não cobrir, ela busca no <strong className="text-white/60">PubMed</strong> (abstract real, PMID verificável), anexa como fonte e ancora. O código revalida — nada é inventado; o que não sustentar fica marcado. Não salva — revise e salve depois.</p>
                       </div>
                       <button type="button" onClick={corrigirAgora} disabled={corrigindo || gerando || busy || reprovadas === 0} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50 disabled:cursor-not-allowed">
                         {corrigindo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />} {reprovadas === 0 ? "Nada a corrigir" : `Corrigir ${reprovadas} afirmação(ões)`}
@@ -495,7 +497,8 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
                     {correcao && (
                       <p className="mt-3 border-t border-white/10 pt-3 text-[12px] text-white/70">
                         ✓ {correcao.corrigidas} de {correcao.total} reancorada(s). Confiança {Math.round(correcao.antes * 100)}% → <strong className="text-accent">{Math.round(correcao.depois * 100)}%</strong>.
-                        {correcao.total - correcao.corrigidas > 0 && <span className="text-white/50"> As {correcao.total - correcao.corrigidas} restantes não têm respaldo literal nas fontes — adicione fontes que as cubram, ou edite/remova.</span>}
+                        {correcao.fontesExternas > 0 && <span className="text-accent/80"> {correcao.fontesExternas} fonte(s) do PubMed anexada(s) automaticamente.</span>}
+                        {correcao.total - correcao.corrigidas > 0 && <span className="text-white/50"> As {correcao.total - correcao.corrigidas} restantes não acharam respaldo literal (nem na biblioteca, nem no PubMed) — edite, aceite como conferido, ou remova.</span>}
                       </p>
                     )}
                   </div>

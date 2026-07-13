@@ -10,6 +10,8 @@ import { buildArquitetoProtocolosPrompt } from "@/lib/ai/prompts/arquiteto-proto
 import { validarSecoes, consolidarValidacao, normalizar, type Validacao } from "@/lib/ai/citations";
 import { corrigirCitacoes } from "@/lib/ai/correcao";
 import { buildCorrecaoProtocolosPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-protocolos";
+import { searchPubMed } from "@/lib/assistente/search-pubmed";
+import { getOpenAI } from "@/lib/ai/openai";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
 import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeSecoes } from "@/lib/editora/biblioteca";
@@ -404,7 +406,7 @@ export async function carregarVersao(versionId: string): Promise<Result<{ especi
 // sem âncora válida), pede à IA (DeepSeek) para reancorar/ajustar/marcar sem fonte, aplica e
 // REVALIDA por código (âncora inventada não conta). Não salva — devolve as seções corrigidas
 // pro editor; o usuário confere e salva. Sobe a confiança conforme as fontes realmente cobrem.
-export async function aplicarCorrecoes(input: { protocolId: string; secoes: SecaoGerada[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number }>> {
+export async function aplicarCorrecoes(input: { protocolId: string; secoes: SecaoGerada[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number; fontesExternas: number }>> {
   try {
     await requireAdmin();
     const sres = await listarSources(input.protocolId);
@@ -412,8 +414,10 @@ export async function aplicarCorrecoes(input: { protocolId: string; secoes: Seca
     const sources = sres.data;
     if (!input.secoes?.length) return { ok: false, error: "Gere o protocolo antes de corrigir." };
 
-    // Identifica as afirmações reprovadas (clinica|dose sem âncora válida), com id posicional.
-    const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
+    // `sources` cresce se buscarmos fontes externas; `mapa` (id → texto normalizado) é
+    // reconstruído a cada mudança para a revalidação por código enxergar as novas fontes.
+    let mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
+    const rebuildMapa = () => { mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)])); };
     const reprovada = (a: SecaoGerada["afirmacoes"][number]) => {
       if (a.tipo !== "clinica" && a.tipo !== "dose") return false;
       if (a.conferido) return false; // já validada manualmente pelo médico — não reancorar
@@ -421,35 +425,75 @@ export async function aplicarCorrecoes(input: { protocolId: string; secoes: Seca
       const anc = normalizar(a.ancora ?? "");
       return !(a.source_id && txt !== undefined && anc && txt.includes(anc));
     };
-    const itens: ItemCorrigir[] = [];
-    input.secoes.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => {
-      if (reprovada(a)) itens.push({ id: `${si}:${ai}`, secao: sec.secao, texto: a.texto, tipo: a.tipo });
-    }));
+    const itensDe = (): ItemCorrigir[] => {
+      const out: ItemCorrigir[] = [];
+      novo.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => {
+        if (reprovada(a)) out.push({ id: `${si}:${ai}`, secao: sec.secao, texto: a.texto, tipo: a.tipo });
+      }));
+      return out;
+    };
 
-    if (itens.length === 0) {
-      return { ok: true, data: { secoes: input.secoes, validacao: consolidarValidacao(input.secoes, sources), corrigidas: 0, total: 0 } };
-    }
-
-    const { correcoes } = await corrigirCitacoes({ itens, sources, prompt: buildCorrecaoProtocolosPrompt({ itens, sources }) });
-
-    // Aplica as correções numa cópia; o código revalida depois.
+    // Cópia editável; o código revalida sempre depois de aplicar.
     const novo: SecaoGerada[] = input.secoes.map((sec) => ({ ...sec, afirmacoes: (sec.afirmacoes ?? []).map((a) => ({ ...a })) }));
-    for (const c of correcoes) {
-      const [si, ai] = c.id.split(":").map((n) => parseInt(n, 10));
-      const alvo = novo[si]?.afirmacoes?.[ai];
-      if (!alvo) continue;
-      alvo.texto = c.texto ?? alvo.texto;
-      alvo.source_id = c.source_id ?? null;
-      alvo.ancora = c.ancora ?? null;
-      alvo.tipo = c.tipo ?? alvo.tipo;
+    const aplicar = (correcoes: Awaited<ReturnType<typeof corrigirCitacoes>>["correcoes"]) => {
+      for (const c of correcoes) {
+        const [si, ai] = c.id.split(":").map((n) => parseInt(n, 10));
+        const alvo = novo[si]?.afirmacoes?.[ai];
+        if (!alvo) continue;
+        alvo.texto = c.texto ?? alvo.texto;
+        alvo.source_id = c.source_id ?? null;
+        alvo.ancora = c.ancora ?? null;
+        alvo.tipo = c.tipo ?? alvo.tipo;
+      }
+    };
+
+    const itensIniciais = itensDe();
+    const total = itensIniciais.length;
+    if (total === 0) {
+      return { ok: true, data: { secoes: input.secoes, validacao: consolidarValidacao(input.secoes, sources), corrigidas: 0, total: 0, fontesExternas: 0 } };
     }
 
-    const validacao = consolidarValidacao(novo, sources); // REVALIDA por código (anti-trapaça)
-    // Quantas das reprovadas agora ficaram válidas?
-    const aindaReprovada = new Set<string>();
-    novo.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => { if (reprovada(a)) aindaReprovada.add(`${si}:${ai}`); }));
-    const corrigidas = itens.filter((i) => !aindaReprovada.has(i.id)).length;
+    // ── Passo 1: reancorar nas fontes já anexadas (biblioteca) ──────────────────
+    const p1 = await corrigirCitacoes({ itens: itensIniciais, sources, prompt: buildCorrecaoProtocolosPrompt({ itens: itensIniciais, sources }) });
+    aplicar(p1.correcoes);
 
-    return { ok: true, data: { secoes: novo, validacao, corrigidas, total: itens.length } };
+    // ── Passo 2: o que sobrou sem fonte → buscar suporte REAL no PubMed ─────────
+    // Anexa o abstract como fonte do protocolo e reancora. O código revalida (o trecho
+    // tem que existir literalmente no abstract) — nada é inventado; se não sustentar, fica.
+    let fontesExternas = 0;
+    const restantes = itensDe();
+    if (restantes.length > 0) {
+      let openai: ReturnType<typeof getOpenAI> | null = null;
+      try { openai = getOpenAI(); } catch { openai = null; } // sem chave OpenAI → pula busca externa
+      if (openai) {
+        const pmidsAdicionados = new Set(sources.map((s) => String((s as { pmid?: string }).pmid ?? "")));
+        for (const item of restantes.slice(0, 12)) { // teto de segurança (custo/tempo)
+          let hits: Awaited<ReturnType<typeof searchPubMed>> = [];
+          try { hits = await searchPubMed(openai, item.texto); } catch { hits = []; }
+          const hit = hits.find((h) => h.resumo && h.resumo.trim().length > 40 && !pmidsAdicionados.has(h.pmid));
+          if (!hit) continue;
+          const add = await adicionarSource({
+            protocolId: input.protocolId, titulo: hit.titulo || `PubMed ${hit.pmid}`, tipo: "pubmed",
+            autor: hit.autores || undefined, ano: hit.ano ? parseInt(hit.ano, 10) : null, texto: hit.resumo,
+          });
+          if (add.ok) { sources.push(add.data); pmidsAdicionados.add(hit.pmid); fontesExternas++; }
+        }
+        if (fontesExternas > 0) {
+          rebuildMapa();
+          const itens2 = itensDe();
+          if (itens2.length > 0) {
+            const p2 = await corrigirCitacoes({ itens: itens2, sources, prompt: buildCorrecaoProtocolosPrompt({ itens: itens2, sources }) });
+            aplicar(p2.correcoes);
+          }
+        }
+      }
+    }
+
+    rebuildMapa();
+    const validacao = consolidarValidacao(novo, sources); // REVALIDA por código (anti-trapaça)
+    const aindaReprovada = new Set(itensDe().map((i) => i.id));
+    const corrigidas = itensIniciais.filter((i) => !aindaReprovada.has(i.id)).length;
+
+    return { ok: true, data: { secoes: novo, validacao, corrigidas, total, fontesExternas } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
