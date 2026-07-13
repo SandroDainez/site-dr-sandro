@@ -470,7 +470,7 @@ export default function CriadorFlashcards({ docsIniciais, modo }: { docsIniciais
                       <FileText className="h-3.5 w-3.5 shrink-0 text-white/40" />
                       <span className="text-white/70">Versão {v.version_number}</span>
                       {v.is_published
-                        ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> pública (congelada)</span>
+                        ? <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold text-accent"><CheckPub className="h-3 w-3" /> publicada (no ar)</span>
                         : <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] text-white/45">rascunho</span>}
                       <span className="ml-auto text-[10px] text-white/30">{dataCurta(v.created_at)}</span>
                       <span className="shrink-0 text-[10px] font-medium text-accent/80">abrir p/ editar →</span>
@@ -506,7 +506,7 @@ export default function CriadorFlashcards({ docsIniciais, modo }: { docsIniciais
               )}
               <button type="button" onClick={excluir} disabled={busy} className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/25 px-4 py-1.5 text-xs font-medium text-rose-300/80 transition hover:border-rose-400/50 hover:text-rose-300 disabled:opacity-50"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
             </div>
-            <p className="mt-2 text-[11px] text-white/35">Publicar congela a versão mais recente (imutável) e a torna pública em /flashcards. Editar depois cria um novo rascunho; a versão pública só muda quando você republicar.</p>
+            <p className="mt-2 text-[11px] text-white/35">Publicar trava a versão mais recente (imutável) e a torna pública em /flashcards. Editar depois cria um novo rascunho; a versão pública só muda quando você republicar.</p>
           </div>
         </>
       )}
