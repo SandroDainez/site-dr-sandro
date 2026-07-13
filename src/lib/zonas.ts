@@ -17,7 +17,7 @@ export const ZONAS: Zona[] = [
   { slug: "aprender", href: "/aprender", label: "Aprender",      papel: "formação",      cor: "#5b9dff" },
   { slug: "atualizar",href: "/atualizar",label: "Atualizar",     papel: "o que há de novo", cor: "#b98af0" },
   { slug: "treinar",  href: "/treinar",  label: "Treinar",       papel: "testar-se",     cor: "#2ce6b8" },
-  { slug: "aberto",   href: "/aberto",   label: "Aberto",        papel: "podcast · extras", cor: "#ff9d4d" },
+  { slug: "aberto",   href: "/aberto",   label: "Extras",        papel: "podcast · curiosidades · IA", cor: "#ff9d4d" },
   { slug: "meu",      href: "/minha-area", label: "Meu MedCampus", papel: "perfil · assinatura", cor: "#e8b84a" },
 ];
 

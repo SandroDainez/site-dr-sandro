@@ -15,7 +15,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import AbertoView from "./AbertoView";
 
-export const metadata = { title: "Aberto — além da clínica", description: "Podcast, entrevistas, curiosidades, links úteis e dicas de IA — o lado leve e curioso da medicina." };
+export const metadata = { title: "Extras — além da clínica", description: "Podcast, entrevistas, curiosidades, links úteis e dicas de IA — o lado leve e curioso da medicina." };
 
 export default async function AbertoPage() {
   const [podcasts, header, navItems, typo, navStyle] = await Promise.all([

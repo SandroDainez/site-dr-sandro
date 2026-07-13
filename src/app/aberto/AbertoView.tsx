@@ -48,7 +48,7 @@ export default function AbertoView({ podcasts }: Props) {
     <div className="space-y-12">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: COR }}>🟠 Aberto · além da clínica</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: COR }}>🟠 Extras · além da clínica</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Um respiro além da beira do leito</h1>
           <p className="mt-2 max-w-2xl text-sm text-white/55">Podcast, entrevistas, curiosidades, links úteis e dicas de IA — o lado leve e curioso da medicina.</p>
         </div>

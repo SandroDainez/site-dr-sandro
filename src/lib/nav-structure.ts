@@ -19,7 +19,7 @@ export const NAV_GROUPS: NavGroup[] = [
   { label: "Aprender", href: "/aprender" },
   { label: "Atualizar", href: "/atualizar" },
   { label: "Treinar", href: "/treinar" },
-  { label: "Aberto", href: "/aberto" },
+  { label: "Extras", href: "/aberto" },
   {
     label: "Mais",
     children: [
