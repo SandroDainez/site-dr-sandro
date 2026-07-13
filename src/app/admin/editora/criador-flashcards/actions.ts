@@ -7,9 +7,9 @@ import { slugify } from "@/lib/editora";
 import { getProvider } from "@/lib/ai/providers";
 import { aiProviders } from "@/lib/ai/config";
 import { buildCriadorFlashcardsPrompt } from "@/lib/ai/prompts/criador-flashcards";
-import { consolidarValidacao, normalizar, type Validacao } from "@/lib/ai/citations";
-import { corrigirCitacoes } from "@/lib/ai/correcao";
-import { buildCorrecaoFlashcardsPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-flashcards";
+import { consolidarValidacao, type Validacao } from "@/lib/ai/citations";
+import { aplicarCorrecoesComPubMed } from "@/lib/ai/correcao-fluxo";
+import { buildCorrecaoFlashcardsPrompt } from "@/lib/ai/prompts/correcao-flashcards";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { mapEspecialidadeDB } from "@/lib/editora/flashcard-estrutura";
 import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeSecoes } from "@/lib/editora/biblioteca";
@@ -282,7 +282,7 @@ export async function excluirVersao(input: { docId: string; versionId: string })
 // sem fonte, aplica e REVALIDA por código (âncora inventada não conta). Não salva — devolve
 // os cartões corrigidos pro editor; o usuário confere e salva. Sobe a confiança conforme as
 // referências realmente cobrem. Espelha aplicarCorrecoes do Arquiteto de Protocolos.
-export async function aplicarCorrecoes(input: { docId: string; secoes: SecaoGerada[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number }>> {
+export async function aplicarCorrecoes(input: { docId: string; secoes: SecaoGerada[] }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; corrigidas: number; total: number; fontesExternas: number }>> {
   try {
     await requireAdmin();
     const sres = await listarSources(input.docId);
@@ -291,44 +291,15 @@ export async function aplicarCorrecoes(input: { docId: string; secoes: SecaoGera
     if (!input.secoes?.length) return { ok: false, error: "Gere os flashcards antes de corrigir." };
 
     // Identifica as afirmações reprovadas (clinica|dose sem âncora válida), com id posicional.
-    const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
-    const reprovada = (a: SecaoGerada["afirmacoes"][number]) => {
-      if (a.tipo !== "clinica" && a.tipo !== "dose") return false;
-      if (a.conferido) return false; // já validada manualmente pelo médico — não reancorar
-      const txt = a.source_id ? mapa.get(a.source_id) : undefined;
-      const anc = normalizar(a.ancora ?? "");
-      return !(a.source_id && txt !== undefined && anc && txt.includes(anc));
-    };
-    const itens: ItemCorrigir[] = [];
-    input.secoes.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => {
-      if (reprovada(a)) itens.push({ id: `${si}:${ai}`, secao: sec.secao, texto: a.texto, tipo: a.tipo });
-    }));
-
-    if (itens.length === 0) {
-      return { ok: true, data: { secoes: input.secoes, validacao: consolidarValidacao(input.secoes, sources), corrigidas: 0, total: 0 } };
-    }
-
-    const { correcoes } = await corrigirCitacoes({ itens, sources, prompt: buildCorrecaoFlashcardsPrompt({ itens, sources }) });
-
-    // Aplica as correções numa cópia; o código revalida depois.
-    const novo: SecaoGerada[] = input.secoes.map((sec) => ({ ...sec, afirmacoes: (sec.afirmacoes ?? []).map((a) => ({ ...a })) }));
-    for (const c of correcoes) {
-      const [si, ai] = c.id.split(":").map((n) => parseInt(n, 10));
-      const alvo = novo[si]?.afirmacoes?.[ai];
-      if (!alvo) continue;
-      alvo.texto = c.texto ?? alvo.texto;
-      alvo.source_id = c.source_id ?? null;
-      alvo.ancora = c.ancora ?? null;
-      alvo.tipo = c.tipo ?? alvo.tipo;
-    }
-
-    const validacao = consolidarValidacao(novo, sources); // REVALIDA por código (anti-trapaça)
-    // Quantas das reprovadas agora ficaram válidas?
-    const aindaReprovada = new Set<string>();
-    novo.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => { if (reprovada(a)) aindaReprovada.add(`${si}:${ai}`); }));
-    const corrigidas = itens.filter((i) => !aindaReprovada.has(i.id)).length;
-
-    return { ok: true, data: { secoes: novo, validacao, corrigidas, total: itens.length } };
+    const data = await aplicarCorrecoesComPubMed({
+      secoes: input.secoes, sources,
+      buildPrompt: (itens, srcs) => buildCorrecaoFlashcardsPrompt({ itens, sources: srcs }),
+      adicionarFonte: async (hit) => {
+        const r = await adicionarSource({ docId: input.docId, titulo: hit.titulo || `PubMed ${hit.pmid}`, tipo: "pubmed", autor: hit.autores || undefined, ano: hit.ano ? parseInt(hit.ano, 10) : null, texto: hit.resumo });
+        return r.ok ? r.data : null;
+      },
+    });
+    return { ok: true, data };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }
 
