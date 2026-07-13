@@ -8,6 +8,7 @@ import ProtocoloCard from "@/components/ProtocoloCard";
 import FiltroArea from "@/components/zonas/FiltroArea";
 import EmBreve from "@/components/zonas/EmBreve";
 import { sanitizeRichText } from "@/lib/rich-text";
+import { iconMap } from "@/lib/icon-map";
 import { itemNaArea, type AreaFiltro } from "@/lib/zonas";
 
 type Props = {
@@ -96,13 +97,28 @@ export default function PlantaoView({ protocolos, procedimentos, calculadoras }:
         <SecaoHead icon={Calculator} titulo="Calculadoras e ferramentas" sub="Apps de apoio, de uso livre." />
         {calcs.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {calcs.map((app) => (
-              <a key={app.title} href={app.link || "#"} target={app.link ? "_blank" : undefined} rel="noreferrer" className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-white/20">
-                <h3 className="text-base font-semibold leading-snug text-white">{app.title}</h3>
-                {app.desc && <p className="mt-2 line-clamp-2 text-sm text-white/55" dangerouslySetInnerHTML={{ __html: sanitizeRichText(app.desc) }} />}
-                <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-accent">Abrir <ArrowRight className="h-3.5 w-3.5" /></span>
-              </a>
-            ))}
+            {calcs.map((app) => {
+              const AppIcon = iconMap[app.icon] ?? Calculator;
+              return (
+                <a key={app.title} href={app.link || "#"} target={app.link ? "_blank" : undefined} rel="noreferrer" className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-white/20">
+                  <div className="mb-3 flex items-center gap-3">
+                    {app.imageUrl ? (
+                      <div className="shrink-0 overflow-hidden rounded-xl border border-white/15 bg-white/10" style={{ width: app.imageSize ?? 44, height: app.imageSize ?? 44 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={app.imageUrl} alt={app.title} className="h-full w-full object-contain" />
+                      </div>
+                    ) : (
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10">
+                        <AppIcon className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <h3 className="min-w-0 text-base font-semibold leading-snug text-white">{app.title}</h3>
+                  </div>
+                  {app.desc && <p className="line-clamp-2 text-sm text-white/55" dangerouslySetInnerHTML={{ __html: sanitizeRichText(app.desc) }} />}
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-accent">Abrir <ArrowRight className="h-3.5 w-3.5" /></span>
+                </a>
+              );
+            })}
           </div>
         ) : (
           <EmBreve texto="Nenhuma calculadora nesta área ainda — chega em breve." />
