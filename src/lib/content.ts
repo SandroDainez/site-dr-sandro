@@ -1,6 +1,7 @@
 import { list, put } from "@vercel/blob";
 import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER, CARD_COL_SECTIONS, DEFAULT_CARD_COLS, SECOES_OCULTAS_HOME } from "./home-sections";
 import { NAV_GROUPS, applyNavOverride, type NavGroup, type NavOverride } from "./nav-structure";
+import { finalidadeEfetiva, type Finalidade } from "./finalidades";
 import { unstable_cache, revalidateTag } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
@@ -833,6 +834,57 @@ export async function getFreeApps(): Promise<FreeAppData[]> {
 
 export async function getUtilApps(): Promise<UtilAppData[]> {
   return readBlob("utilApps", defaultUtilApps);
+}
+
+// ── Aplicativos (UNIFICADO) ──────────────────────────────────────────────────
+// Fonte única de apps. Cada app carrega o próprio "acesso" (grátis/assinatura) e a
+// "finalidade" (grupo na home) — em vez de estar espalhado em 3 blobs (apps/freeApps/
+// utilApps). Migração automática e SEM gravar: enquanto o blob "aplicativos" não existir,
+// getAplicativos junta os 3 legados na forma nova. No primeiro Salvar do admin, "aplicativos"
+// passa a existir e vira a fonte de verdade.
+export type AplicativoData = {
+  id: string;
+  title: string;
+  subtitle?: string;   // linha de destaque (opcional)
+  text: string;        // descrição (rich text)
+  icon?: string;       // ícone de reserva quando não há logo
+  glow?: string;       // cor do brilho do card (opcional)
+  imageUrl?: string;   // logo do app
+  imageSize?: number;
+  highlights?: string[];
+  link: string;
+  acesso: "gratis" | "assinatura";
+  finalidade: Finalidade;
+  rotulo?: string;     // rótulo livre p/ utilidades (ex.: "Finanças", "Organização")
+  area?: "emergencias" | "ti" | "anestesiologia" | "geral";
+  areas?: ("emergencias" | "ti" | "anestesiologia")[];
+};
+
+function slugId(s: string): string {
+  return (s || "app").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+}
+
+export async function getAplicativos(): Promise<AplicativoData[]> {
+  const existente = await readBlob<AplicativoData[]>("aplicativos", []);
+  if (existente.length > 0) return existente;
+  // Ainda não migrado → monta a partir dos 3 legados (sem gravar).
+  const [apps, free, util] = await Promise.all([getApps(), getFreeApps(), getUtilApps()]);
+  const a: AplicativoData[] = apps.map((x) => ({
+    id: `a-${slugId(x.title)}`, title: x.title, subtitle: x.subtitle, text: x.text, icon: x.icon,
+    glow: x.glow, imageUrl: x.thumbnailUrl, imageSize: x.thumbnailSize, highlights: x.highlights,
+    link: x.link, acesso: "assinatura", finalidade: finalidadeEfetiva(x.finalidade, x.title, x.subtitle, x.text),
+    area: x.area, areas: x.areas,
+  }));
+  const f: AplicativoData[] = free.map((x) => ({
+    id: `f-${slugId(x.title)}`, title: x.title, text: x.desc, icon: x.icon, imageUrl: x.imageUrl,
+    imageSize: x.imageSize, link: x.link, acesso: "gratis",
+    finalidade: finalidadeEfetiva(x.finalidade, x.title, x.desc), area: x.area, areas: x.areas,
+  }));
+  const u: AplicativoData[] = util.map((x) => ({
+    id: `u-${slugId(x.title)}`, title: x.title, text: x.desc, icon: x.icon, imageUrl: x.imageUrl,
+    imageSize: x.imageSize, link: x.link, acesso: "gratis", finalidade: "utilidade", rotulo: x.categoria,
+  }));
+  return [...a, ...f, ...u];
 }
 
 export async function getContentItems(): Promise<ContentItemData[]> {

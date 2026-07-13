@@ -26,7 +26,6 @@ import {
   Type,
   UserCircle,
   Users,
-  Wallet,
   ListOrdered,
   Menu,
   Brain,
@@ -70,9 +69,7 @@ const navGroups = [
   {
     title: "Apps",
     items: [
-      { href: "/admin/apps", label: "Apps por assinatura", icon: Layers, hint: "Apps médicos pagos / por assinatura." },
-      { href: "/admin/apps-gratis", label: "Apps grátis", icon: BookOpen, hint: "Apps médicos de acesso gratuito." },
-      { href: "/admin/apps-uteis", label: "Apps do dia a dia", icon: Wallet, hint: "Apps genéricos: finanças, organização, produtividade." },
+      { href: "/admin/aplicativos", label: "Aplicativos", icon: Layers, hint: "Todos os apps num lugar só. Por app: Grátis × Assinatura e a finalidade (grupo na home)." },
     ],
   },
   {

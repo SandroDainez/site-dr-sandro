@@ -13,6 +13,7 @@ import {
   type SectionStyle,
   type EventoData,
   type AppData,
+  type AplicativoData,
   type ContatoData,
   type HeroData,
   type HeaderData,
@@ -119,6 +120,18 @@ export async function saveApps(apps: AppData[]): Promise<Result> {
   try {
     await requireAdmin();
     await writeBlob("apps", apps);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: String(e instanceof Error ? e.message : e) };
+  }
+}
+
+// Fonte única de apps (grátis + assinatura + utilidades), com acesso e finalidade por app.
+export async function saveAplicativos(apps: AplicativoData[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("aplicativos", apps);
     revalidatePath("/");
     return { ok: true };
   } catch (e) {

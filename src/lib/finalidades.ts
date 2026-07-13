@@ -6,7 +6,7 @@ export type Finalidade = "decisao" | "estudo" | "gestao" | "utilidade";
 export const FINALIDADES: { valor: Finalidade; label: string; sub: string }[] = [
   { valor: "decisao", label: "Decisão clínica", sub: "Apoio à beira do leito e na emergência." },
   { valor: "estudo", label: "Estudo e preparação", sub: "Residência, título e atualização." },
-  { valor: "gestao", label: "Gestão e trabalho", sub: "Escalas, equipe e organização." },
+  { valor: "gestao", label: "Gestão e equipes", sub: "Escalas, plantões e organização da equipe." },
   { valor: "utilidade", label: "Utilidades do dia a dia", sub: "Ferramentas gerais e de produtividade." },
 ];
 

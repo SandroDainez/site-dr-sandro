@@ -39,16 +39,13 @@ import MobileNav from "@/components/MobileNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import { secText } from "@/lib/section-texts";
 import { uiText } from "@/lib/ui-texts";
-import { sanitizeRichText } from "@/lib/rich-text";
 import AppsUnificados from "@/components/AppsUnificados";
 import {
-  getApps,
+  getAplicativos,
   getContato,
   getEventos,
   getHero,
   getHeader,
-  getFreeApps,
-  getUtilApps,
   getCourses,
   getWhyUs,
   getSiteConfig,
@@ -89,14 +86,12 @@ function computeHomeOrder(list: string[]): Record<string, number> {
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolosBlob, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols, especialidades, protocolosEditoraData, homeHidden] = await Promise.all([
+  const [eventos, aplicativos, contato, hero, header, courses, whyUs, siteConfig, atualizacoes, protocolosBlob, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols, especialidades, protocolosEditoraData, homeHidden] = await Promise.all([
     getEventos(),
-    getApps(),
+    getAplicativos(),
     getContato(),
     getHero(),
     getHeader(),
-    getFreeApps(),
-    getUtilApps(),
     getCourses(),
     getWhyUs(),
     getSiteConfig(),
@@ -272,132 +267,9 @@ export default async function Home() {
             </div>
           </div>
 
-          <AppsUnificados apps={apps} freeApps={freeApps} utilApps={utilApps} cols={cardCols["apps-assinatura"] ?? 3} />
+          <AppsUnificados aplicativos={aplicativos} cols={cardCols["apps-assinatura"] ?? 3} />
         </section>
 
-        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps" style={secStyle("apps-gratis")}>
-          <div className="mb-10">
-            <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "freeApps", "eyebrow")}</p>
-            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "freeApps", "title")}</h2>
-          </div>
-
-          <div className="card-grid gap-5" style={colStyle(cardCols["apps-gratis"] ?? 3)}>
-            {freeApps.map((item) => {
-              const FreeIcon = iconMap[item.icon] ?? BookOpen;
-              const inner = (
-                <>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-emerald-500/10 to-transparent" />
-                  <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-all duration-500 group-hover:bg-white/20" />
-                  <div className="relative">
-                    <div className="mb-6 flex items-center justify-between">
-                      {item.imageUrl ? (
-                        <div
-                          className="overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]"
-                          style={{ width: item.imageSize ?? 48, height: item.imageSize ?? 48 }}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />
-                        </div>
-                      ) : (
-                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
-                          <FreeIcon className="h-5 w-5 text-white" />
-                        </div>
-                      )}
-                      <span className="rounded-full border border-emerald-400/30 bg-emerald-400/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-300">
-                        Gratuito
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-medium tracking-tight">{item.title}</h3>
-                    <p
-                      className="mt-4 text-sm leading-relaxed text-muted"
-                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.desc) }}
-                    />
-                    <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]">
-                      {item.link ? "Abrir app" : "Em breve"} <ArrowRight className="h-3.5 w-3.5" />
-                    </span>
-                  </div>
-                </>
-              );
-              const cls =
-                "group finex-scan relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20";
-              return item.link ? (
-                <a key={item.title} href={item.link} target="_blank" rel="noreferrer" className={`${cls} block`}>
-                  {inner}
-                </a>
-              ) : (
-                <article key={item.title} className={cls}>{inner}</article>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Apps para o dia a dia (genéricos / não-médicos) */}
-        {utilApps.length > 0 && (
-        <section id="apps-uteis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="utilApps" style={secStyle("apps-uteis")}>
-          <div className="mb-10">
-            <div className="flex items-center gap-2">
-              <p className="text-xs uppercase tracking-[0.16em] text-amber-300">{secText(st, "utilApps", "eyebrow")}</p>
-              <span className="rounded-full border border-amber-400/40 bg-amber-400/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-amber-300">Novo</span>
-            </div>
-            <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "utilApps", "title")}</h2>
-            <p className="mt-3 max-w-2xl text-sm text-white/50">{secText(st, "utilApps", "desc")}</p>
-          </div>
-
-          <div className="card-grid gap-5" style={colStyle(cardCols["apps-uteis"] ?? 3)}>
-            {utilApps.map((item) => {
-              const UtilIcon = iconMap[item.icon] ?? Wallet;
-              const inner = (
-                <>
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-amber-500/10 to-transparent" />
-                  <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-all duration-500 group-hover:bg-white/20" />
-                  <div className="relative">
-                    <div className="mb-6 flex items-center justify-between">
-                      {item.imageUrl ? (
-                        <div
-                          className="overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]"
-                          style={{ width: item.imageSize ?? 48, height: item.imageSize ?? 48 }}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={item.imageUrl} alt={item.title} className="h-full w-full object-contain" />
-                        </div>
-                      ) : (
-                        <div
-                          className="flex items-center justify-center rounded-2xl border border-white/15 bg-white/10"
-                          style={{ width: item.imageSize ?? 48, height: item.imageSize ?? 48 }}
-                        >
-                          <UtilIcon className="text-amber-300" style={{ width: (item.imageSize ?? 48) * 0.42, height: (item.imageSize ?? 48) * 0.42 }} />
-                        </div>
-                      )}
-                      {item.categoria && (
-                        <span className="rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-300">
-                          {item.categoria}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-2xl font-medium tracking-tight">{item.title}</h3>
-                    <p
-                      className="mt-4 text-sm leading-relaxed text-muted"
-                      dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.desc) }}
-                    />
-                    <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]">
-                      {item.link ? "Abrir app" : "Em breve"} <ArrowRight className="h-3.5 w-3.5" />
-                    </span>
-                  </div>
-                </>
-              );
-              const cls =
-                "group finex-scan relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20";
-              return item.link ? (
-                <a key={item.title} href={item.link} target="_blank" rel="noreferrer" className={`${cls} block`}>
-                  {inner}
-                </a>
-              ) : (
-                <article key={item.title} className={cls}>{inner}</article>
-              );
-            })}
-          </div>
-        </section>
-        )}
 
         {/* Atualizações — feed único (boletins da IA + manuais), recentes */}
         {(atualizacoes.length > 0 || aiBoletins.length > 0) && (() => {
