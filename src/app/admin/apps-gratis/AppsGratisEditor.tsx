@@ -182,6 +182,20 @@ export default function AppsGratisEditor({ initialApps }: Props) {
           </div>
 
           <div>
+            <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Finalidade (agrupa na home)</label>
+            <select
+              className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-accent/50"
+              value={app.finalidade ?? ""}
+              onChange={(e) => update(index, "finalidade", e.target.value)}
+            >
+              <option value="">Automático (deduz pelo texto)</option>
+              <option value="decisao">Decisão clínica</option>
+              <option value="estudo">Estudo e preparação</option>
+              <option value="gestao">Gestão e trabalho</option>
+              <option value="utilidade">Utilidades</option>
+            </select>
+          </div>
+          <div>
             <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-muted">Área no site</label>
             <select
               className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-accent/50"

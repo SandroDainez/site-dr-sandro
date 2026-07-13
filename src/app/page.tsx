@@ -7,7 +7,6 @@ import {
   BookOpen,
   BrainCircuit,
   CalendarClock,
-  CheckCircle2,
   FileText,
   GraduationCap,
   HeartPulse,
@@ -41,6 +40,7 @@ import { buildTypographyCss } from "@/lib/typography-sections";
 import { secText } from "@/lib/section-texts";
 import { uiText } from "@/lib/ui-texts";
 import { sanitizeRichText } from "@/lib/rich-text";
+import AppsUnificados from "@/components/AppsUnificados";
 import {
   getApps,
   getContato,
@@ -272,76 +272,7 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="card-grid gap-5" style={colStyle(cardCols["apps-assinatura"] ?? 3)}>
-            {apps.map((app, idx) => {
-              const AppIcon = iconMap[app.icon] ?? Layers;
-              return (
-              <article
-                key={app.title}
-                className={`group finex-scan card-open relative overflow-hidden rounded-3xl border border-white/10 bg-panel p-7 transition duration-300 hover:-translate-y-1 hover:border-white/20 ${idx === apps.length - 1 ? "md:col-span-2 xl:col-span-1" : ""}`}
-              >
-                <div className={`pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b ${app.glow}`} />
-                <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-white/10 blur-2xl transition-all duration-500 group-hover:bg-white/20" />
-                <div className="pointer-events-none absolute bottom-0 left-1/2 h-20 w-2/3 -translate-x-1/2 rounded-full bg-accent-blue/20 blur-2xl opacity-0 transition duration-500 group-hover:opacity-100" />
-                <div className="relative">
-                  <div className="mb-6 flex items-center justify-between">
-                    {app.thumbnailUrl ? (
-                      <div
-                        className="overflow-hidden rounded-2xl border border-white/15 bg-white/10 shadow-[0_0_20px_rgba(0,0,0,0.4)]"
-                        style={{ width: app.thumbnailSize ?? 48, height: app.thumbnailSize ?? 48 }}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={app.thumbnailUrl}
-                          alt={app.title}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
-                        <AppIcon className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-                    <span className="rounded-full border border-accent/30 bg-accent/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-accent">
-                      Assinatura
-                    </span>
-                  </div>
-                  <h3 className="text-2xl font-medium tracking-tight">{app.title}</h3>
-                  <p
-                    className="mt-1 text-sm text-accent-blue"
-                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(app.subtitle) }}
-                  />
-                  <p
-                    className="mt-4 text-sm leading-relaxed text-muted"
-                    dangerouslySetInnerHTML={{ __html: sanitizeRichText(app.text) }}
-                  />
-                  <div className="card-open-content mt-0 space-y-1.5">
-                    {app.highlights.map((highlight) => (
-                      <div key={highlight} className="flex items-center gap-2 text-xs text-white/80">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-accent" />
-                        <span>{highlight}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {app.link ? (
-                    <a
-                      href={app.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]"
-                    >
-                      Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
-                    </a>
-                  ) : (
-                    <button className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white transition group-hover:scale-[1.02] group-hover:bg-white/10 group-hover:shadow-[0_0_30px_rgba(95,143,255,0.35)]">
-                      Ver detalhes <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  )}
-                </div>
-              </article>
-              );
-            })}
-          </div>
+          <AppsUnificados apps={apps} freeApps={freeApps} utilApps={utilApps} cols={cardCols["apps-assinatura"] ?? 3} />
         </section>
 
         <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps" style={secStyle("apps-gratis")}>

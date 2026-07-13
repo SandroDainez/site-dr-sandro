@@ -33,6 +33,7 @@ export type AppData = {
   link: string;
   thumbnailUrl?: string;
   thumbnailSize?: number; // tamanho da miniatura/logo em px (default 48)
+  finalidade?: "decisao" | "estudo" | "gestao" | "utilidade"; // pra que serve (agrupa na home); default = inferido do texto
   area?: "emergencias" | "ti" | "anestesiologia" | "geral"; // área no site (p/ hubs/filtro); default "geral"
   areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };
@@ -44,6 +45,7 @@ export type FreeAppData = {
   link: string;
   imageUrl?: string; // logo/imagem própria do app (substitui o ícone)
   imageSize?: number; // tamanho do logo em px (default 28)
+  finalidade?: "decisao" | "estudo" | "gestao" | "utilidade"; // pra que serve (agrupa na home); default = inferido do texto
   area?: "emergencias" | "ti" | "anestesiologia" | "geral"; // área no site (p/ hubs/filtro); default "geral"
   areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };

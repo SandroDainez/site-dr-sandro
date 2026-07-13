@@ -9,7 +9,7 @@ type Entry = { key: string; group: string; label: string; eyebrow: string; title
 export const SECTION_TEXTS: Entry[] = [
   // ── Página inicial ───────────────────────────────────────────────
   { key: "especialidades_band", group: "Página inicial", label: "Navegue por especialidade (home)", eyebrow: "Comece por aqui", title: "Navegue por especialidade" },
-  { key: "apps", group: "Página inicial", label: "Apps por assinatura", eyebrow: "Aplicativos por assinatura", title: "Apps médicos para decisão clínica", desc: "Ferramentas de apoio à decisão clínica. Não substituem a avaliação, o julgamento e a responsabilidade do médico. A palavra final é sempre do profissional responsável." },
+  { key: "apps", group: "Página inicial", label: "Aplicativos", eyebrow: "Aplicativos", title: "Aplicativos MedCampus", desc: "Apps para o seu dia a dia médico, organizados por finalidade — decisão clínica, estudo, gestão e utilidades. As ferramentas de decisão clínica não substituem a avaliação, o julgamento e a responsabilidade do médico: a palavra final é sempre do profissional responsável." },
   { key: "freeApps", group: "Página inicial", label: "Apps grátis", eyebrow: "Aplicativos gratuitos", title: "Acesso aberto imediato" },
   { key: "utilApps", group: "Página inicial", label: "Apps do dia a dia", eyebrow: "Para o seu dia a dia", title: "Apps para organização e finanças pessoais", desc: "Ferramentas que ajudam no dia a dia — controle de gastos, organização pessoal, planejamento financeiro e mais. Úteis também fora da medicina, pra facilitar a sua rotina." },
   { key: "atualizacoes", group: "Página inicial", label: "Atualizações (home)", eyebrow: "Conteúdo recente", title: "Atualizações clínicas" },
