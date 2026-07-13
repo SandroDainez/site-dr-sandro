@@ -24,6 +24,7 @@ import {
 import AgendaCientifica from "@/components/AgendaCientifica";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
+import ZonasEntrada from "@/components/zonas/ZonasEntrada";
 import AssistenteButton from "@/components/AssistenteButton";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 import { fetchMedicalUpdates } from "@/lib/supabase/server";
@@ -199,6 +200,10 @@ export default async function Home() {
               {uiText(ui, "heroChip")}
             </div>
           </div>
+        </section>
+
+        <section className="mx-auto w-full max-w-7xl px-6 pb-20" style={{ order: -150 }}>
+          <ZonasEntrada />
         </section>
 
         <section className="mx-auto w-full max-w-7xl px-6 pb-20" data-typo="marquee" style={{ order: -100 }}>
