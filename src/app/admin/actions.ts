@@ -57,6 +57,18 @@ export async function saveHomeOrder(order: string[]): Promise<Result> {
   }
 }
 
+// Seções da home escondidas (lista de ids). Espelha saveHomeOrder.
+export async function saveHomeHidden(hidden: string[]): Promise<Result> {
+  try {
+    await requireAdmin();
+    await writeBlob("homeHidden", hidden);
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Erro ao salvar" };
+  }
+}
+
 export async function saveAviso(aviso: { ativo: boolean; texto: string }): Promise<Result> {
   try {
     await requireAdmin();

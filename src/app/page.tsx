@@ -25,7 +25,6 @@ import AgendaCientifica from "@/components/AgendaCientifica";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
 import ZonasEntrada from "@/components/zonas/ZonasEntrada";
-import { SECOES_OCULTAS_HOME } from "@/lib/home-sections";
 import AssistenteButton from "@/components/AssistenteButton";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 import { fetchMedicalUpdates } from "@/lib/supabase/server";
@@ -67,6 +66,7 @@ import {
   getNavItems,
   getNavStyle,
   getHomeOrder,
+  getHomeHidden,
   getCardCols,
   headerSubtitleLines,
 } from "@/lib/content";
@@ -89,7 +89,7 @@ function computeHomeOrder(list: string[]): Record<string, number> {
 }
 
 export default async function Home() {
-  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolosBlob, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols, especialidades, protocolosEditoraData] = await Promise.all([
+  const [eventos, apps, contato, hero, header, freeApps, utilApps, courses, whyUs, siteConfig, atualizacoes, protocolosBlob, videoaulas, podcasts, colaboradores, acervo, procedimentos, st, ui, typo, navItems, navStyle, homeOrderList, cardCols, especialidades, protocolosEditoraData, homeHidden] = await Promise.all([
     getEventos(),
     getApps(),
     getContato(),
@@ -116,12 +116,14 @@ export default async function Home() {
     getCardCols(),
     getEspecialidades(),
     getProtocolosPublicadosData(),
+    getHomeHidden(),
   ]);
   const homeOrder = computeHomeOrder(homeOrderList);
-  // Estilo de cada seção: se está oculta na reestruturação (vive nas zonas), some da home;
-  // senão, posiciona pela ordem. Reversível via SECOES_OCULTAS_HOME.
+  // Estilo de cada seção: se está oculta (editável no admin /ordem-home), some da home;
+  // senão, posiciona pela ordem.
+  const ocultas = new Set(homeHidden);
   const secStyle = (id: string): React.CSSProperties =>
-    SECOES_OCULTAS_HOME.has(id) ? { display: "none" } : { order: homeOrder[id] };
+    ocultas.has(id) ? { display: "none" } : { order: homeOrder[id] };
   // Lista ÚNICA de protocolos: Editora (card padrão) + "de blob".
   const protocolos = [...protocolosEditoraData, ...protocolosBlob];
   // Logo por área (p/ reaproveitar nos cards de Atualizações) — chave em forma "site"

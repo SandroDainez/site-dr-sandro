@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { getHomeOrder } from "@/lib/content";
+import { getHomeOrder, getHomeHidden } from "@/lib/content";
 import AdminHelp from "@/components/admin/AdminHelp";
 import OrdemHomeEditor from "./OrdemHomeEditor";
 
 export default async function OrdemHomePage() {
-  const order = await getHomeOrder();
+  const [order, hidden] = await Promise.all([getHomeOrder(), getHomeHidden()]);
   return (
     <div className="max-w-2xl pb-24">
       <div className="mb-6">
@@ -18,9 +18,9 @@ export default async function OrdemHomePage() {
         </p>
       </div>
 
-      <AdminHelp>Use as setas ↑ ↓ para reordenar e clique em Salvar. Pode voltar ao padrão a qualquer momento.</AdminHelp>
+      <AdminHelp>Use as setas ↑ ↓ para reordenar, e o olho 👁 para <strong>mostrar/ocultar</strong> cada seção na home. As ocultas por padrão são as que agora vivem dentro das zonas (Plantão, Aprender…). Clique em Salvar. Pode voltar ao padrão a qualquer momento.</AdminHelp>
 
-      <OrdemHomeEditor initial={order} />
+      <OrdemHomeEditor initial={order} initialHidden={hidden} />
     </div>
   );
 }

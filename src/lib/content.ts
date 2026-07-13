@@ -1,5 +1,5 @@
 import { list, put } from "@vercel/blob";
-import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER, CARD_COL_SECTIONS, DEFAULT_CARD_COLS } from "./home-sections";
+import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER, CARD_COL_SECTIONS, DEFAULT_CARD_COLS, SECOES_OCULTAS_HOME } from "./home-sections";
 import { NAV_GROUPS, applyNavOverride, type NavGroup, type NavOverride } from "./nav-structure";
 import { unstable_cache, revalidateTag } from "next/cache";
 import fs from "fs/promises";
@@ -928,6 +928,14 @@ export async function getHomeOrder(): Promise<string[]> {
   }
   for (const id of HOME_SECTION_IDS) if (!seen.has(id)) ordered.push(id);
   return ordered;
+}
+
+// Seções da home ESCONDIDAS (editável no admin /ordem-home). Default = as que a
+// reestruturação tirou por já viverem nas zonas (SECOES_OCULTAS_HOME). Só ids válidos.
+export async function getHomeHidden(): Promise<string[]> {
+  const saved = await readBlob<string[]>("homeHidden", [...SECOES_OCULTAS_HOME]);
+  const base = Array.isArray(saved) ? saved : [...SECOES_OCULTAS_HOME];
+  return base.filter((id) => (HOME_SECTION_IDS as readonly string[]).includes(id));
 }
 
 // Fallback vazio: o site mostra apenas o que for cadastrado no admin.
