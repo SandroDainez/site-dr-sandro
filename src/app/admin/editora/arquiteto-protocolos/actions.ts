@@ -12,6 +12,8 @@ import { corrigirCitacoes } from "@/lib/ai/correcao";
 import { buildCorrecaoProtocolosPrompt, type ItemCorrigir } from "@/lib/ai/prompts/correcao-protocolos";
 import { searchPubMed } from "@/lib/assistente/search-pubmed";
 import { getOpenAI } from "@/lib/ai/openai";
+import { classificarRemocao } from "@/lib/ai/limpeza";
+import { buildLimpezaProtocolosPrompt, type ItemLimpar } from "@/lib/ai/prompts/limpeza-protocolos";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
 import { PROTOCOLO_BLOCOS, mapEspecialidadeDB } from "@/lib/editora/protocolo-estrutura";
 import { sincronizarBiblioteca, removerDaBiblioteca, textoConsolidadoDeSecoes } from "@/lib/editora/biblioteca";
@@ -496,5 +498,51 @@ export async function aplicarCorrecoes(input: { protocolId: string; secoes: Seca
     const corrigidas = itensIniciais.filter((i) => !aindaReprovada.has(i.id)).length;
 
     return { ok: true, data: { secoes: novo, validacao, corrigidas, total, fontesExternas } };
+  } catch (e) { return { ok: false, error: msg(e) }; }
+}
+
+// LIMPEZA: das afirmações que sobraram SEM âncora válida (biblioteca+PubMed), remove só as que
+// a IA julgar FORA DO TEMA, inconsistentes ou factualmente sem respaldo — preservando erros-exemplo,
+// checklists de segurança e conhecimento-consenso. Conservador (na dúvida, mantém). Não salva:
+// devolve as seções já sem os trechos removidos; o médico revisa e salva.
+export async function limparProtocolo(input: { protocolId: string; secoes: SecaoGerada[]; titulo?: string }): Promise<Result<{ secoes: SecaoGerada[]; validacao: Validacao; removidas: number; candidatas: number; motivos: Record<string, number> }>> {
+  try {
+    await requireAdmin();
+    const sres = await listarSources(input.protocolId);
+    if (!sres.ok) return sres;
+    const sources = sres.data;
+    if (!input.secoes?.length) return { ok: false, error: "Gere o protocolo antes de limpar." };
+
+    const mapa = new Map(sources.map((s) => [s.id, normalizar(s.texto)]));
+    const semAncora = (a: SecaoGerada["afirmacoes"][number]) => {
+      if (a.tipo !== "clinica" && a.tipo !== "dose") return false;
+      if (a.conferido) return false; // conferida pelo médico → nunca remove
+      const txt = a.source_id ? mapa.get(a.source_id) : undefined;
+      const anc = normalizar(a.ancora ?? "");
+      return !(a.source_id && txt !== undefined && anc && txt.includes(anc));
+    };
+    const itens: ItemLimpar[] = [];
+    input.secoes.forEach((sec, si) => (sec.afirmacoes ?? []).forEach((a, ai) => {
+      if (semAncora(a)) itens.push({ id: `${si}:${ai}`, secao: sec.secao, texto: a.texto, tipo: a.tipo });
+    }));
+
+    if (itens.length === 0) {
+      return { ok: true, data: { secoes: input.secoes, validacao: consolidarValidacao(input.secoes, sources), removidas: 0, candidatas: 0, motivos: {} } };
+    }
+
+    const { remover } = await classificarRemocao({ itens, prompt: buildLimpezaProtocolosPrompt({ titulo: input.titulo, secoes: input.secoes, itens }) });
+    const idsRemover = new Set(remover.map((r) => r.id));
+    const motivos: Record<string, number> = {};
+    for (const r of remover) motivos[r.motivo || "outros"] = (motivos[r.motivo || "outros"] ?? 0) + 1;
+
+    // Remove por id posicional (si:ai). Re-fluxo é automático: o texto exibido é a junção das
+    // afirmações restantes, então tirar uma afirmação simplesmente some com a linha.
+    const novo: SecaoGerada[] = input.secoes.map((sec, si) => ({
+      ...sec,
+      afirmacoes: (sec.afirmacoes ?? []).filter((_, ai) => !idsRemover.has(`${si}:${ai}`)),
+    }));
+
+    const validacao = consolidarValidacao(novo, sources);
+    return { ok: true, data: { secoes: novo, validacao, removidas: idsRemover.size, candidatas: itens.length, motivos } };
   } catch (e) { return { ok: false, error: msg(e) }; }
 }

@@ -16,7 +16,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
 };
 import { validarSecoes } from "@/lib/ai/citations";
 import type { Source, SecaoGerada, Issue } from "@/lib/ai/types";
-import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, excluirVersao, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc, aplicarCorrecoes } from "./actions";
+import { criarProtocolo, listarSources, adicionarSource, removerSource, gerarBloco, revisar, salvarVersao, listarVersoes, carregarVersao, excluirVersao, publicarProtocolo, despublicarProtocolo, arquivarProtocolo, excluirDoc, aplicarCorrecoes, limparProtocolo } from "./actions";
 import { CheckCircle2 as CheckPub, Globe, EyeOff, Archive, Wand2 } from "lucide-react";
 import FontesInput from "@/components/admin/FontesInput";
 
@@ -65,6 +65,9 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
   // aplicar correções da IA (reancorar afirmações reprovadas)
   const [corrigindo, setCorrigindo] = useState(false);
   const [correcao, setCorrecao] = useState<{ corrigidas: number; total: number; antes: number; depois: number; fontesExternas: number } | null>(null);
+  // limpeza (remover fora do tema / sem respaldo)
+  const [limpando, setLimpando] = useState(false);
+  const [limpeza, setLimpeza] = useState<{ removidas: number; candidatas: number } | null>(null);
 
   const [salvo, setSalvo] = useState<{ versionNumber: number; confidence: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -237,6 +240,22 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
       if (r.data.fontesExternas > 0) { const sr = await listarSources(protocolo.id); if (sr.ok) setSources(sr.data); }
     } else setError(r.error);
     setCorrigindo(false);
+  }
+
+  // Limpeza: remove afirmações sem âncora que a IA julgar fora do tema/inconsistentes/sem respaldo.
+  async function limparAgora() {
+    if (!protocolo || secoes.length === 0) return;
+    if (!window.confirm("Remover as afirmações sem fonte que forem fora do tema, inconsistentes ou sem respaldo? As pérolas, erros-exemplo e checklists são preservados. Nada é salvo até você clicar em Salvar.")) return;
+    setError(null); setLimpando(true); setLimpeza(null); setSalvo(null);
+    const r = await limparProtocolo({ protocolId: protocolo.id, secoes, titulo: protocolo.title });
+    if (r.ok) {
+      setSecoes(r.data.secoes);
+      const te: Record<string, string> = {};
+      for (const s of r.data.secoes) te[s.secao] = renderSecaoTexto(s);
+      setTextoEditado(te);
+      setLimpeza({ removidas: r.data.removidas, candidatas: r.data.candidatas });
+    } else setError(r.error);
+    setLimpando(false);
   }
 
   function salvar() {
@@ -498,7 +517,20 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
                       <p className="mt-3 border-t border-white/10 pt-3 text-[12px] text-white/70">
                         ✓ {correcao.corrigidas} de {correcao.total} reancorada(s). Confiança {Math.round(correcao.antes * 100)}% → <strong className="text-accent">{Math.round(correcao.depois * 100)}%</strong>.
                         {correcao.fontesExternas > 0 && <span className="text-accent/80"> {correcao.fontesExternas} fonte(s) do PubMed anexada(s) automaticamente.</span>}
-                        {correcao.total - correcao.corrigidas > 0 && <span className="text-white/50"> As {correcao.total - correcao.corrigidas} restantes não acharam respaldo literal (nem na biblioteca, nem no PubMed) — edite, aceite como conferido, ou remova.</span>}
+                        {correcao.total - correcao.corrigidas > 0 && <span className="text-white/50"> As {correcao.total - correcao.corrigidas} restantes não acharam respaldo literal (nem na biblioteca, nem no PubMed) — use a limpeza abaixo, edite, ou aceite como conferido.</span>}
+                      </p>
+                    )}
+
+                    {/* Limpeza — remove as sem respaldo que forem fora do tema/inconsistentes */}
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+                      <p className="text-[11px] text-white/45 max-w-md">Depois de corrigir, a <strong className="text-white/60">limpeza</strong> tira do protocolo o que sobrou <strong className="text-white/60">sem fonte E</strong> for fora do tema, inconsistente ou sem respaldo. Preserva pérolas, erros-exemplo e checklists. Conservador — na dúvida, mantém. Não salva.</p>
+                      <button type="button" onClick={limparAgora} disabled={limpando || corrigindo || gerando || busy || reprovadas === 0} className="inline-flex shrink-0 items-center gap-2 rounded-full border border-rose-400/40 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-400/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {limpando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />} {reprovadas === 0 ? "Nada a limpar" : "Remover fora do tema / sem respaldo"}
+                      </button>
+                    </div>
+                    {limpeza && (
+                      <p className="mt-2 text-[12px] text-white/70">
+                        🧹 {limpeza.removidas} de {limpeza.candidatas} afirmação(ões) sem fonte removida(s) (fora do tema / inconsistente / sem respaldo). As demais foram mantidas (conteúdo legítimo). Revise e salve.
                       </p>
                     )}
                   </div>
