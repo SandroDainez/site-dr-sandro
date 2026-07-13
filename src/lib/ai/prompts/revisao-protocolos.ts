@@ -7,7 +7,7 @@ import type { Source, SecaoGerada } from "../types";
 //     as âncoras verbatim do protocolo — só os TEXTOS das afirmações + a lista de fontes.
 // v2: removido o "corrigido" (reescrita do doc inteiro) — estourava o teto de saída.
 
-export const REVISAO_PROTOCOLOS_PROMPT_VERSION = "3.0.0";
+export const REVISAO_PROTOCOLOS_PROMPT_VERSION = "3.1.0";
 
 // Lista compacta das fontes (id + título + tipo) — SEM o texto, que é o que inflava o pedido.
 function fontesLista(sources: Source[]): string {
@@ -29,7 +29,13 @@ export function buildRevisaoProtocolosPrompt(args: { secoes: SecaoGerada[]; sour
 Recebe o protocolo e a lista de fontes usadas. Seu trabalho é APONTAR problemas com sugestão
 concreta — NÃO reescreva o documento (a correção é aplicada manualmente).
 
+Primeiro, identifique o TEMA/DOENÇA central do protocolo pelo título e pelas seções.
+
 VERIFIQUE (a validação de citação/âncora contra o texto das fontes JÁ é feita por código — não reconfira):
+0. COERÊNCIA DE TEMA (crítico): sinalize como severidade ALTA (tipo "off_topic") QUALQUER afirmação,
+   trecho ou seção que seja de OUTRA doença/especialidade que não o tema central do protocolo — mesmo
+   que esteja bem escrita e citada. Ex.: conteúdo de nefrologia num protocolo de AVC; manejo de sepse
+   num protocolo de via aérea. Aponte o trecho exato e sugira REMOVER (não pertence a este protocolo).
 1. Consistência entre as seções: contradições, repetições, ordem ilógica, lacunas importantes.
 2. Doses/medicamentos clinicamente plausíveis (número, unidade, via, intervalo) — sinalize o que parecer suspeito.
 3. Afirmações vagas, genéricas ou clinicamente questionáveis — sinalize com sugestão de melhoria.
@@ -43,5 +49,5 @@ PROTOCOLO:
 ${protocoloCompacto(secoes)}
 
 Liste no máximo os ~25 apontamentos mais relevantes (priorize alta severidade). Retorne APENAS JSON:
-{"issues":[{"ref":"<seção ou trecho>","tipo":"citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}]}`;
+{"issues":[{"ref":"<seção ou trecho>","tipo":"off_topic|citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}]}`;
 }
