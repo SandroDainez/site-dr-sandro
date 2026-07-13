@@ -9,6 +9,10 @@ export type NavGroup = { label: string; href?: string; children?: NavLink[] };
 // cursos, apps, eventos, podcast, especialidades...) continua todo no site e acessível DENTRO
 // das zonas — por isso não precisa mais poluir o topo. O que não é zona (perfil, contato,
 // atalhos que a pessoa ainda procura direto) fica em "Mais".
+// "Mais" fica por ÚLTIMO (é o "resto", depois das 6 zonas) e é enxuto. As especialidades
+// NÃO ficam aqui: viraram um FILTRO que acompanha a pessoa dentro de cada zona (ver
+// FiltroArea/useAreaFiltro). As páginas /especialidade/* continuam existindo e acessíveis,
+// só não poluem mais o topo.
 export const NAV_GROUPS: NavGroup[] = [
   { label: "Início", href: "/" },
   { label: "Plantão", href: "/plantao" },
@@ -22,9 +26,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Meu MedCampus", href: "/minha-area" },
       { label: "Cursos", href: "/cursos" },
       { label: "Eventos", href: "#eventos" },
-      { label: "Emergências", href: "/especialidade/emergencias", emoji: "🚑" },
-      { label: "Terapia Intensiva", href: "/especialidade/ti", emoji: "🏥" },
-      { label: "Anestesiologia", href: "/especialidade/anestesiologia", emoji: "🩺" },
       { label: "Contato", href: "#contato" },
     ],
   },
