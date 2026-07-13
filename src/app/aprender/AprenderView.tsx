@@ -10,7 +10,7 @@ import FiltroArea from "@/components/zonas/FiltroArea";
 import SecaoConteudo from "@/components/zonas/SecaoConteudo";
 import EmBreve from "@/components/zonas/EmBreve";
 import type { ItemConteudo } from "@/components/zonas/ConteudoCard";
-import { itemNaArea, type AreaFiltro } from "@/lib/zonas";
+import { itemNaArea, areaDoTexto, type AreaFiltro } from "@/lib/zonas";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import ColaboradoresList from "@/app/colaboradores/ColaboradoresList";
 
@@ -55,7 +55,14 @@ export default function AprenderView({ cursos, aulas, videoaulas, cientificos, c
 
   // Tipos com card RICO próprio — filtra os dados crus e reusa o componente original.
   const videoaulasFiltradas = useMemo(() => videoaulas.filter((v) => itemNaArea(v, area)), [videoaulas, area]);
-  const colaboradoresFiltrados = useMemo(() => colaboradores.filter((c) => itemNaArea(c, area)), [colaboradores, area]);
+  // Convidados: se "Área no site" não foi preenchida, deduz da credencial (especialidade).
+  const colaboradoresFiltrados = useMemo(
+    () => colaboradores.filter((c) => {
+      const areaEfetiva = c.area && c.area !== "geral" ? c.area : areaDoTexto(c.especialidade);
+      return itemNaArea({ area: areaEfetiva, areas: c.areas }, area);
+    }),
+    [colaboradores, area],
+  );
 
   return (
     <div className="space-y-12">

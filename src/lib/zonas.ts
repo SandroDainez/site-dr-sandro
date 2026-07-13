@@ -34,6 +34,19 @@ export const AREAS_FILTRO: { valor: AreaFiltro; label: string }[] = [
   { valor: "ti", label: "Terapia Intensiva" },
 ];
 
+// Deduz a área do site a partir de um texto livre de especialidade/credencial
+// (ex.: "Anestesiologia", "Medicina Intensiva", "Emergência"). Usado como FALLBACK quando
+// o campo "Área no site" não foi preenchido — assim conteúdo antigo (que só tem a credencial
+// em texto) já filtra certo, sem re-marcar tudo à mão. Retorna undefined se não reconhecer.
+export function areaDoTexto(texto?: string): AreaFiltro | undefined {
+  if (!texto) return undefined;
+  const t = texto.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (t.includes("anestesi")) return "anestesiologia";
+  if (t.includes("emerg")) return "emergencias";
+  if (t.includes("intensiv") || t.includes("terapia intensiva") || /\bti\b/.test(t)) return "ti";
+  return undefined;
+}
+
 // Filtro de área. "Tudo" mostra tudo (inclusive o sem área/geral). Numa área ESPECÍFICA,
 // só aparece o que foi marcado com ela (principal ou extra) — conteúdo "geral"/sem área
 // NÃO polui as áreas específicas, fica só no "Tudo". Assunto de várias áreas = marcar cada
