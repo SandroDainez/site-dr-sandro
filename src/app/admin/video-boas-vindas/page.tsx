@@ -19,7 +19,7 @@ export default async function VideoBoasVindasPage() {
         </p>
       </div>
 
-      <AdminHelp>Cole o link do vídeo (YouTube), escreva um título e ligue. Sem som automático — a pessoa clica pra ouvir. Para tirar, é só desligar e salvar.</AdminHelp>
+      <AdminHelp>Envie um vídeo do seu computador (MP4/MOV) <strong>ou</strong> cole um link do YouTube, escreva um título e ligue. Sem som automático — a pessoa clica pra ouvir. Para tirar, é só desligar e salvar.</AdminHelp>
 
       <VideoBoasVindasEditor initial={video} />
     </div>

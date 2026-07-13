@@ -17,6 +17,7 @@ export default function VideoBoasVindas({ data }: { data: VideoBoasVindasData })
 
   const ativo = data.ativo && !!data.videoUrl;
   const yt = ativo ? ytId(data.videoUrl) : null;
+  const proprio = ativo && !yt; // vídeo enviado (hospedado no site) → toca com <video>
 
   useEffect(() => {
     if (!ativo) return;
@@ -39,7 +40,7 @@ export default function VideoBoasVindas({ data }: { data: VideoBoasVindasData })
   }
   function abrir() { setReabrir(false); setAberto(true); }
   function darPlay() {
-    if (yt) setTocando(true);
+    if (yt || proprio) setTocando(true);
     else window.open(data.videoUrl, "_blank", "noopener");
   }
 
@@ -68,11 +69,17 @@ export default function VideoBoasVindas({ data }: { data: VideoBoasVindasData })
         <div className="aspect-video w-full bg-black">
           <iframe src={ytEmbed(yt)} title={data.titulo} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen className="h-full w-full" />
         </div>
+      ) : tocando && proprio ? (
+        <div className="aspect-video w-full bg-black">
+          <video src={data.videoUrl} controls autoPlay playsInline className="h-full w-full" />
+        </div>
       ) : (
         <button type="button" onClick={darPlay} className="group relative block aspect-video w-full">
           {yt ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={ytThumb(yt)} alt="" className="h-full w-full object-cover" />
+          ) : proprio ? (
+            <video src={data.videoUrl} muted playsInline preload="metadata" className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full bg-[radial-gradient(80%_100%_at_50%_0%,rgba(44,230,184,0.28),#0b0f18)]" />
           )}
