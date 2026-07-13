@@ -1,8 +1,7 @@
 import { list, put } from "@vercel/blob";
-import { cache } from "react";
 import { HOME_SECTION_IDS, DEFAULT_HOME_ORDER, CARD_COL_SECTIONS, DEFAULT_CARD_COLS } from "./home-sections";
 import { NAV_GROUPS, applyNavOverride, type NavGroup, type NavOverride } from "./nav-structure";
-import { unstable_noStore as noStore } from "next/cache";
+import { unstable_cache, revalidateTag } from "next/cache";
 import fs from "fs/promises";
 import path from "path";
 
@@ -727,47 +726,43 @@ async function writeLocal<T>(key: string, data: T): Promise<void> {
   );
 }
 
-// A URL de cada blob é estável (addRandomSuffix:false + allowOverwrite reusa o
-// mesmo pathname), então memoizamos por chave para eliminar o list() — a ida de
-// rede mais cara — em todas as leituras após a primeira (por instância warm da
-// função). O conteúdo continua sendo buscado com no-store, então o frescor das
-// edições do admin NÃO muda: zero risco de conteúdo desatualizado.
-const blobUrlCache = new Map<string, string>();
+// Tag única que invalida TODO o cache de conteúdo. É religada em writeBlob() a
+// cada edição do admin (via revalidateTag). Assim o "frescor" das edições NÃO
+// muda — a diferença é que, ENTRE edições, as leituras vêm do Data Cache da
+// Vercel em vez de rebaixar o JSON do Blob a cada page view. Esse re-download a
+// cada request era a causa do Blob Data Transfer alto na fatura.
+export const CONTENT_CACHE_TAG = "site-content";
 
-// Busca o JSON de um blob por chave. Envolto em React cache() para deduplicar
-// leituras da MESMA chave dentro de um único request (ex.: header/navItems/ui que
-// página, nav e rodapé leem em paralelo). É memo por-request: cada novo request
-// refaz o fetch no-store, então o frescor das edições do admin não muda.
+// Busca o JSON de um blob por chave, cacheado no Data Cache da Vercel.
+// - Sem cache-buster e sem no-store: o mesmo conteúdo deixa de ser re-baixado do
+//   Blob a cada page view (essa repetição era o custo de egress).
+// - Invalidado na hora por revalidateTag(CONTENT_CACHE_TAG) quando o admin salva;
+//   o revalidate de 1h é apenas uma rede de segurança de auto-recuperação.
+// A chave dinâmica entra em keyParts para garantir uma entrada de cache por chave.
 // Retorna undefined quando o blob não existe (o chamador aplica o fallback).
-const fetchBlobJson = cache(async (key: string): Promise<unknown | undefined> => {
-  noStore();
-  const token = process.env.BLOB_READ_WRITE_TOKEN as string;
-  const pathname = `${BLOB_PREFIX}${key}.json`;
-  try {
-    let url = blobUrlCache.get(key);
-    if (!url) {
-      const { blobs } = await list({ prefix: pathname });
-      const blob = blobs.find((b) => b.pathname === pathname);
-      if (!blob) return undefined;
-      url = blob.url;
-      blobUrlCache.set(key, url);
-    }
-    // store is private: pass token as Bearer to authorize the fetch
-    const res = await fetch(url + "?_cb=" + Date.now(), {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-    if (!res.ok) {
-      // URL memoizada pode ter ficado inválida — descarta e re-descobre no próximo request
-      blobUrlCache.delete(key);
-      return undefined;
-    }
-    return await res.json();
-  } catch {
-    blobUrlCache.delete(key);
-    return undefined;
-  }
-});
+function fetchBlobJson(key: string): Promise<unknown | undefined> {
+  return unstable_cache(
+    async (): Promise<unknown | undefined> => {
+      const token = process.env.BLOB_READ_WRITE_TOKEN as string;
+      const pathname = `${BLOB_PREFIX}${key}.json`;
+      try {
+        const { blobs } = await list({ prefix: pathname });
+        const blob = blobs.find((b) => b.pathname === pathname);
+        if (!blob) return undefined;
+        // store is private: pass token as Bearer to authorize the fetch
+        const res = await fetch(blob.url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return undefined;
+        return await res.json();
+      } catch {
+        return undefined;
+      }
+    },
+    ["content-blob-json", key],
+    { tags: [CONTENT_CACHE_TAG], revalidate: 3600 }
+  )();
+}
 
 async function readBlob<T>(key: string, fallback: T): Promise<T> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return readLocal(key, fallback);
@@ -791,6 +786,14 @@ export async function writeBlob<T>(key: string, data: T): Promise<void> {
     allowOverwrite: true,
     contentType: "application/json",
   });
+  // Invalida o Data Cache na hora para a edição do admin aparecer imediatamente.
+  // (As actions já chamam revalidatePath; isto cobre o novo cache por tag.)
+  try {
+    // Next 16: revalidateTag(tag, profile) — "max" purga a entrada na hora.
+    revalidateTag(CONTENT_CACHE_TAG, "max");
+  } catch {
+    // Fora de um contexto de request (ex.: script/seed) revalidateTag não se aplica.
+  }
 }
 
 // ─── Public read functions ────────────────────────────────────────────────────

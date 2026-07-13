@@ -22,9 +22,20 @@ export async function GET(req: NextRequest) {
     }
 
     const contentType = res.headers.get("content-type") ?? "application/octet-stream";
+    // Respostas completas (200: imagens, PDFs) ganham s-maxage para o CDN da Vercel
+    // guardar o arquivo e parar de rebaixá-lo do Blob a cada acesso — era isso que
+    // inflava Blob Data Transfer + Fast Origin Transfer. A janela de frescor de 24h
+    // (max-age) é a mesma de antes, então nenhuma imagem substituída fica "presa"
+    // por mais tempo do que já ficava. Respostas parciais (206, streaming de vídeo
+    // por Range) não são cacheadas pelo CDN de qualquer forma: mantemos só o cache
+    // de navegador nelas.
+    const isPartial = res.status === 206;
+    const cacheControl = isPartial
+      ? "public, max-age=86400"
+      : "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800";
     const headers = new Headers({
       "Content-Type": contentType,
-      "Cache-Control": "public, max-age=86400",
+      "Cache-Control": cacheControl,
       "Accept-Ranges": "bytes",
     });
 
