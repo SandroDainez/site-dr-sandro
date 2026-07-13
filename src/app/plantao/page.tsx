@@ -13,7 +13,6 @@ import SearchButton from "@/components/SearchButton";
 import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
-import ZonasNav from "@/components/zonas/ZonasNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import PlantaoView from "./PlantaoView";
 
@@ -44,7 +43,6 @@ export default async function PlantaoPage() {
         </div>
       </header>
 
-      <ZonasNav ativa="plantao" />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-12">
         <PlantaoView protocolos={protocolos} procedimentos={procedimentos} calculadoras={freeApps} />

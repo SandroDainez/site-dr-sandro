@@ -5,41 +5,29 @@
 export type NavLink = { label: string; href: string; emoji?: string; logoUrl?: string };
 export type NavGroup = { label: string; href?: string; children?: NavLink[] };
 
+// Menu = as 6 zonas da reestruturação (ver src/lib/zonas.ts). O conteúdo antigo (protocolos,
+// cursos, apps, eventos, podcast, especialidades...) continua todo no site e acessível DENTRO
+// das zonas — por isso não precisa mais poluir o topo. O que não é zona (perfil, contato,
+// atalhos que a pessoa ainda procura direto) fica em "Mais".
 export const NAV_GROUPS: NavGroup[] = [
   { label: "Início", href: "/" },
-  {
-    label: "Especialidades",
-    children: [
-      { label: "Emergências", href: "/especialidade/emergencias", emoji: "🚑" },
-      { label: "Terapia Intensiva", href: "/especialidade/ti", emoji: "🏥" },
-      { label: "Anestesiologia", href: "/especialidade/anestesiologia", emoji: "🩺" },
-    ],
-  },
-  { label: "Cursos", href: "/cursos" },
-  {
-    label: "Apps",
-    children: [
-      { label: "Apps gratuitos", href: "#apps-gratis" },
-      { label: "Apps por assinatura", href: "#apps-assinatura" },
-      { label: "Apps do dia a dia", href: "#apps-uteis" },
-    ],
-  },
-  { label: "Eventos", href: "#eventos" },
-  // Secundários recolhidos em "Mais" para a barra caber numa linha só.
+  { label: "Plantão", href: "/plantao" },
+  { label: "Aprender", href: "/aprender" },
+  { label: "Atualizar", href: "/atualizar" },
+  { label: "Treinar", href: "/treinar" },
+  { label: "Aberto", href: "/aberto" },
   {
     label: "Mais",
     children: [
-      { label: "Atualizações", href: "/atualizacoes" },
-      { label: "Artigos", href: "/artigos" },
-      { label: "Videoaulas", href: "/videoaulas" },
-      { label: "Protocolos", href: "/protocolos" },
-      { label: "Procedimentos", href: "/procedimentos" },
-      { label: "Podcast", href: "/podcast" },
-      { label: "Parceiros", href: "/colaboradores" },
-      { label: "Outros assuntos", href: "/acervo" },
+      { label: "Meu MedCampus", href: "/minha-area" },
+      { label: "Cursos", href: "/cursos" },
+      { label: "Eventos", href: "#eventos" },
+      { label: "Emergências", href: "/especialidade/emergencias", emoji: "🚑" },
+      { label: "Terapia Intensiva", href: "/especialidade/ti", emoji: "🏥" },
+      { label: "Anestesiologia", href: "/especialidade/anestesiologia", emoji: "🩺" },
+      { label: "Contato", href: "#contato" },
     ],
   },
-  { label: "Contato", href: "#contato" },
 ];
 
 // Edições do menu feitas no admin (guardadas no blob "navOverride"). As CHAVES são

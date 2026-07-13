@@ -13,7 +13,6 @@ import SearchButton from "@/components/SearchButton";
 import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
-import ZonasNav from "@/components/zonas/ZonasNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import TreinarView from "./TreinarView";
 
@@ -43,7 +42,6 @@ export default async function TreinarPage() {
         </div>
       </header>
 
-      <ZonasNav ativa="treinar" />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-12">
         <TreinarView questoes={questoes} flashcards={flashcards} />

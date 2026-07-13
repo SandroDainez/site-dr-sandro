@@ -12,7 +12,6 @@ import SearchButton from "@/components/SearchButton";
 import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
-import ZonasNav from "@/components/zonas/ZonasNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import AbertoView from "./AbertoView";
 
@@ -42,7 +41,6 @@ export default async function AbertoPage() {
         </div>
       </header>
 
-      <ZonasNav ativa="aberto" />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-12">
         <AbertoView podcasts={podcasts} />

@@ -14,7 +14,6 @@ import SearchButton from "@/components/SearchButton";
 import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
-import ZonasNav from "@/components/zonas/ZonasNav";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import AprenderView from "./AprenderView";
 
@@ -44,7 +43,6 @@ export default async function AprenderPage() {
         </div>
       </header>
 
-      <ZonasNav ativa="aprender" />
 
       <main className="mx-auto w-full max-w-6xl px-6 py-12">
         <AprenderView cursos={cursos} aulas={aulas} videoaulas={videoaulas} cientificos={cientificos} colaboradores={colaboradores} />
