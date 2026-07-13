@@ -41,6 +41,10 @@ VERIFIQUE (a validação de citação/âncora contra o texto das fontes JÁ é f
 2. Doses/medicamentos clinicamente plausíveis (número, unidade, via, intervalo) — sinalize o que parecer suspeito.
 3. Afirmações vagas, genéricas ou clinicamente questionáveis — sinalize com sugestão de melhoria.
 4. Clareza e acionabilidade à beira-leito (critérios objetivos, cortes numéricos onde couber).
+5. ATUALIDADE (tipo "desatualizado"): sinalize conduta, dose, droga ou meta que pareça SUPERADA
+   por diretriz/consenso mais recente (ex.: droga de 1ª linha que mudou, alvo/corte revisado).
+   Aponte o trecho e sugira a versão atual — sem inventar; se não tiver certeza, marque como a
+   confirmar na fonte atual.
 Não proponha inventar conteúdo: se algo não tem respaldo, a correção é marcar como incerto, não preencher.
 
 FONTES USADAS:
@@ -50,5 +54,5 @@ PROTOCOLO:
 ${protocoloCompacto(secoes)}
 
 Liste no máximo os ~25 apontamentos mais relevantes (priorize alta severidade). Retorne APENAS JSON:
-{"issues":[{"ref":"<seção ou trecho>","tipo":"off_topic|citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}]}`;
+{"issues":[{"ref":"<seção ou trecho>","tipo":"off_topic|desatualizado|citacao_invalida|sem_fonte|impreciso|dose_suspeita|estilo","severidade":"alta|media|baixa","descricao":"<o que está errado>","sugestao":"<como corrigir>"}]}`;
 }

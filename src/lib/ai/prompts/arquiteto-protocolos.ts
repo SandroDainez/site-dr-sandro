@@ -97,6 +97,14 @@ ${BLOCO_ANTI_ALUCINACAO}
 
 PADRÃO DE QUALIDADE (protocolo institucional):
 - Documento MÉDICO: NÃO gere seções de enfermagem, farmácia ou fisioterapia.
+- O QUE CABE NUM PROTOCOLO: isto é um PROTOCOLO institucional — inclua só o que pertence a um
+  protocolo (critérios diagnósticos, avaliação, conduta/tratamento, doses, monitorização,
+  complicações, critérios de alta/transferência, segurança). NÃO inclua o que NÃO cabe: revisão
+  fisiopatológica longa, digressão histórica, opinião, conteúdo de outro documento (aula/artigo).
+- ATUALIDADE (crítico): use a recomendação MAIS ATUAL disponível nas fontes. Se um SOURCE estiver
+  claramente SUPERADO por diretriz/consenso mais recente (mudança de conduta, dose ou droga),
+  prefira o mais novo e NÃO afirme conduta ultrapassada. Na dúvida entre versões, marque como
+  incerto ("sem fonte") em vez de repetir o antigo — nunca perpetue erro/desatualização.
 - COMPLETUDE: cada seção deve ser DETALHADA e exaustiva — extraia dos sources TODOS os pontos
   relevantes para aquela seção (condutas, cortes numéricos, doses, critérios, exceções, ressalvas),
   não faça um resumo raso. Uma seção clínica típica tem várias afirmações específicas (não 2-3
