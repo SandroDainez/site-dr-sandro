@@ -1,16 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { GraduationCap, PlayCircle, FlaskConical, Users, BookOpen } from "lucide-react";
 import type { CursoData, VideoaulaData, ColaboradorData } from "@/lib/content";
 import type { AulaPublicaResumo } from "@/lib/aulas-editora";
 import type { CientificoPublicoResumo } from "@/lib/cientifico-editora";
 import FiltroArea from "@/components/zonas/FiltroArea";
+import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
 import SecaoConteudo from "@/components/zonas/SecaoConteudo";
 import EmBreve from "@/components/zonas/EmBreve";
 import type { ItemConteudo } from "@/components/zonas/ConteudoCard";
-import { itemNaArea, areaDoTexto, type AreaFiltro } from "@/lib/zonas";
+import { itemNaArea, areaDoTexto } from "@/lib/zonas";
 import { VideoCard } from "@/app/videoaulas/VideoaulasGrid";
 import ColaboradoresList from "@/app/colaboradores/ColaboradoresList";
 
@@ -38,7 +39,7 @@ type Props = {
 };
 
 export default function AprenderView({ cursos, aulas, videoaulas, cientificos, colaboradores }: Props) {
-  const [area, setArea] = useState<AreaFiltro>("todos");
+  const [area, setArea] = useAreaFiltro();
 
   const cursosItens = useMemo<ItemConteudo[]>(
     () => cursos.map((c) => ({ id: c.id, titulo: c.titulo, href: `/cursos/${c.id}`, tipo: "Curso", area: c.area, areas: c.areas })).filter((item) => itemNaArea(item, area)),

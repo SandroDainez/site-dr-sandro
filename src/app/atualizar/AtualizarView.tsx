@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Newspaper, RefreshCw, Search, GitCompare, FileText, CalendarDays, ArrowRight } from "lucide-react";
 import type { AtualizacaoData } from "@/lib/content";
@@ -9,8 +9,9 @@ import type { ResearchResumo } from "@/lib/research-editora";
 import type { Artigo } from "@/lib/editora";
 import SecaoConteudo from "@/components/zonas/SecaoConteudo";
 import FiltroArea from "@/components/zonas/FiltroArea";
+import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
 import type { ItemConteudo } from "@/components/zonas/ConteudoCard";
-import { itemNaArea, type AreaFiltro } from "@/lib/zonas";
+import { itemNaArea } from "@/lib/zonas";
 
 const COR = "#b98af0";
 
@@ -23,7 +24,7 @@ type Props = {
 };
 
 export default function AtualizarView({ atualizacoes, atualizacoesProto, pesquisas, comparativos, artigos }: Props) {
-  const [area, setArea] = useState<AreaFiltro>("todos");
+  const [area, setArea] = useAreaFiltro();
 
   const itensAtualizacoes: ItemConteudo[] = useMemo(
     () =>

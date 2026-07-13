@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Mic, MessageSquare, Sparkles, Link as LinkIcon, type LucideIcon } from "lucide-react";
 import type { PodcastData } from "@/lib/content";
 import FiltroArea from "@/components/zonas/FiltroArea";
+import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
 import SecaoConteudo from "@/components/zonas/SecaoConteudo";
 import EmBreve from "@/components/zonas/EmBreve";
-import { itemNaArea, type AreaFiltro } from "@/lib/zonas";
+import { itemNaArea } from "@/lib/zonas";
 
 const COR = "#ff9d4d";
 
@@ -26,7 +27,7 @@ function SecaoHead({ icon: Icon, titulo, sub }: { icon: LucideIcon; titulo: stri
 }
 
 export default function AbertoView({ podcasts }: Props) {
-  const [area, setArea] = useState<AreaFiltro>("todos");
+  const [area, setArea] = useAreaFiltro();
 
   const episodios = useMemo(
     () =>

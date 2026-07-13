@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Repeat, ArrowRight, ListChecks, Layers } from "lucide-react";
 import type { QuestaoDocResumo } from "@/lib/questoes-editora";
 import type { FlashcardPublicoResumo } from "@/lib/flashcards-editora";
 import FiltroArea from "@/components/zonas/FiltroArea";
+import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
 import SecaoConteudo from "@/components/zonas/SecaoConteudo";
 import type { ItemConteudo } from "@/components/zonas/ConteudoCard";
-import { itemNaArea, type AreaFiltro } from "@/lib/zonas";
+import { itemNaArea } from "@/lib/zonas";
 
 const COR = "#2ce6b8";
 
@@ -18,7 +19,7 @@ type Props = {
 };
 
 export default function TreinarView({ questoes, flashcards }: Props) {
-  const [area, setArea] = useState<AreaFiltro>("todos");
+  const [area, setArea] = useAreaFiltro();
 
   const questoesItens = useMemo<ItemConteudo[]>(
     () =>

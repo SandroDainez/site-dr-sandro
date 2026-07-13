@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Sparkles, ClipboardList, Stethoscope, Calculator, ArrowRight } from "lucide-react";
 import type { ProtocoloData, AcervoItemData, FreeAppData } from "@/lib/content";
 import ProtocoloCard from "@/components/ProtocoloCard";
 import FiltroArea from "@/components/zonas/FiltroArea";
+import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
 import EmBreve from "@/components/zonas/EmBreve";
 import { sanitizeRichText } from "@/lib/rich-text";
 import { iconMap } from "@/lib/icon-map";
-import { itemNaArea, type AreaFiltro } from "@/lib/zonas";
+import { itemNaArea } from "@/lib/zonas";
 
 type Props = {
   protocolos: ProtocoloData[];
@@ -29,7 +30,7 @@ function SecaoHead({ icon: Icon, titulo, sub }: { icon: typeof ClipboardList; ti
 }
 
 export default function PlantaoView({ protocolos, procedimentos, calculadoras }: Props) {
-  const [area, setArea] = useState<AreaFiltro>("todos");
+  const [area, setArea] = useAreaFiltro();
 
   const proto = useMemo(() => protocolos.filter((p) => itemNaArea(p, area)), [protocolos, area]);
   const procs = useMemo(() => procedimentos.filter((p) => itemNaArea(p, area) && p.titulo), [procedimentos, area]);
