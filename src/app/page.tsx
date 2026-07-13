@@ -25,6 +25,7 @@ import AgendaCientifica from "@/components/AgendaCientifica";
 import AuthButton from "@/components/AuthButton";
 import SearchButton from "@/components/SearchButton";
 import ZonasEntrada from "@/components/zonas/ZonasEntrada";
+import { SECOES_OCULTAS_HOME } from "@/lib/home-sections";
 import AssistenteButton from "@/components/AssistenteButton";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
 import { fetchMedicalUpdates } from "@/lib/supabase/server";
@@ -117,6 +118,10 @@ export default async function Home() {
     getProtocolosPublicadosData(),
   ]);
   const homeOrder = computeHomeOrder(homeOrderList);
+  // Estilo de cada seção: se está oculta na reestruturação (vive nas zonas), some da home;
+  // senão, posiciona pela ordem. Reversível via SECOES_OCULTAS_HOME.
+  const secStyle = (id: string): React.CSSProperties =>
+    SECOES_OCULTAS_HOME.has(id) ? { display: "none" } : { order: homeOrder[id] };
   // Lista ÚNICA de protocolos: Editora (card padrão) + "de blob".
   const protocolos = [...protocolosEditoraData, ...protocolosBlob];
   // Logo por área (p/ reaproveitar nos cards de Atualizações) — chave em forma "site"
@@ -253,7 +258,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps" style={{ order: homeOrder["apps-assinatura"] }}>
+        <section id="apps-assinatura" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="apps" style={secStyle("apps-assinatura")}>
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "apps", "eyebrow")}</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">
@@ -337,7 +342,7 @@ export default async function Home() {
           </div>
         </section>
 
-        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps" style={{ order: homeOrder["apps-gratis"] }}>
+        <section id="apps-gratis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="freeApps" style={secStyle("apps-gratis")}>
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "freeApps", "eyebrow")}</p>
             <h2 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">{secText(st, "freeApps", "title")}</h2>
@@ -395,7 +400,7 @@ export default async function Home() {
 
         {/* Apps para o dia a dia (genéricos / não-médicos) */}
         {utilApps.length > 0 && (
-        <section id="apps-uteis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="utilApps" style={{ order: homeOrder["apps-uteis"] }}>
+        <section id="apps-uteis" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="utilApps" style={secStyle("apps-uteis")}>
           <div className="mb-10">
             <div className="flex items-center gap-2">
               <p className="text-xs uppercase tracking-[0.16em] text-amber-300">{secText(st, "utilApps", "eyebrow")}</p>
@@ -476,7 +481,7 @@ export default async function Home() {
           const visibleAreas = areaConfig.filter((a) => grouped[a.key].length > 0);
           if (visibleAreas.length === 0 && aiBoletins.length === 0) return null;
           return (
-            <section id="atualizacoes" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes" style={{ order: homeOrder["atualizacoes"] }}>
+            <section id="atualizacoes" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="atualizacoes" style={secStyle("atualizacoes")}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "atualizacoes", "eyebrow")}</p>
@@ -512,7 +517,7 @@ export default async function Home() {
           const recent = sorted.slice(0, (cardCols["protocolos"] ?? 3) * 3);
           const hasContent = protocolos.length > 0;
           return (
-            <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos" style={{ order: homeOrder["protocolos"] }}>
+            <section id="protocolos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="protocolos" style={secStyle("protocolos")}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "protocolos", "eyebrow")}</p>
@@ -563,7 +568,7 @@ export default async function Home() {
           );
           const recent = sorted.slice(0, (cardCols["videoaulas"] ?? 3) * 3);
           return (
-            <section id="videoaulas" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas" style={{ order: homeOrder["videoaulas"] }}>
+            <section id="videoaulas" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="videoaulas" style={secStyle("videoaulas")}>
               <div className="mb-8 flex items-end justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "videoaulas", "eyebrow")}</p>
@@ -597,7 +602,7 @@ export default async function Home() {
 
         {/* Colaboradores teaser */}
         {colaboradores.filter((c) => c.titulo).length > 0 && (
-          <section id="colaboradores" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="colaboradores" style={{ order: homeOrder["colaboradores"] }}>
+          <section id="colaboradores" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="colaboradores" style={secStyle("colaboradores")}>
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "colaboradores", "eyebrow")}</p>
@@ -617,7 +622,7 @@ export default async function Home() {
           </section>
         )}
 
-        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="cursos" style={{ order: homeOrder["cursos"] }}>
+        <section id="cursos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="cursos" style={secStyle("cursos")}>
           <div className="finex-glass rounded-[2rem] p-8 md:p-12">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
               <div>
@@ -663,7 +668,7 @@ export default async function Home() {
 
         {/* Podcast teaser */}
         {podcasts.filter((p) => p.titulo).length > 0 && (
-          <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="podcast" style={{ order: homeOrder["podcast"] }}>
+          <section id="podcast" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="podcast" style={secStyle("podcast")}>
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "podcast", "eyebrow")}</p>
@@ -682,7 +687,7 @@ export default async function Home() {
 
         {/* Acervo teaser (sempre visível; mostra "em breve" quando vazio) */}
         {(
-          <section id="acervo" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="acervo" style={{ order: homeOrder["acervo"] }}>
+          <section id="acervo" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="acervo" style={secStyle("acervo")}>
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "acervo", "eyebrow")}</p>
@@ -700,7 +705,7 @@ export default async function Home() {
         )}
 
         {/* Procedimentos teaser */}
-        <section id="procedimentos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="procedimentos" style={{ order: homeOrder["procedimentos"] }}>
+        <section id="procedimentos" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="procedimentos" style={secStyle("procedimentos")}>
           <div className="mb-8 flex items-end justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "procedimentos", "eyebrow")}</p>
@@ -717,11 +722,11 @@ export default async function Home() {
         </section>
 
         {/* Calendário ÚNICO: cursos/imersões + congressos científicos juntos */}
-        <div data-typo="eventos" style={{ order: homeOrder["eventos"] }}>
+        <div data-typo="eventos" style={secStyle("eventos")}>
           <AgendaCientifica cursos={eventos} />
         </div>
 
-        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="contato" style={{ order: homeOrder["contato"] }}>
+        <section id="contato" className="scroll-mt-32 mx-auto w-full max-w-7xl px-6 pb-24" data-typo="contato" style={secStyle("contato")}>
           <div className="finex-glass rounded-[2rem] p-8 md:p-10">
             <p className="text-xs uppercase tracking-[0.16em] text-accent">{secText(st, "contato", "eyebrow")}</p>
             <h3 className="mt-3 text-3xl font-medium tracking-tight md:text-4xl">

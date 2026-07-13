@@ -10,6 +10,16 @@ export const HOME_SECTION_IDS = [
 
 export const DEFAULT_HOME_ORDER: string[] = [...HOME_SECTION_IDS];
 
+// Seções da home ESCONDIDAS por padrão na reestruturação: esse conteúdo agora vive dentro
+// das ZONAS (Plantão/Aprender/Atualizar/Aberto), então repeti-lo na home virou redundância.
+// Totalmente reversível: tire o id daqui e a seção volta pra home. (Depois pode virar um
+// controle no admin.) Mantidos na home: especialidades, apps por assinatura, cursos,
+// eventos, "por que nós", contato.
+export const SECOES_OCULTAS_HOME = new Set<string>([
+  "atualizacoes", "protocolos", "procedimentos", "videoaulas", "podcast",
+  "colaboradores", "acervo", "apps-gratis", "apps-uteis",
+]);
+
 // Seções cujo nº de colunas (cards por linha) é configurável no admin.
 // def = padrão no desktop; tablet cai p/ 2 e celular p/ 1 (via .card-grid no CSS).
 export const CARD_COL_SECTIONS: { key: string; label: string; def: number }[] = [
