@@ -21,8 +21,22 @@ const MES_LONGO = [
 
 function partes(data: string | undefined | null): { y: number; m: number; d: number } | null {
   if (!data) return null;
-  // pega a PARTE de data ("YYYY-MM-DD") de qualquer string ISO, ignorando hora/fuso
-  const m = String(data).match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  const s = String(data);
+  // TIMESTAMP completo (com hora, ex.: created_at "2026-07-14T00:36:00Z"): converte para a
+  // data no fuso de São Paulo (UTC−3 fixo, sem horário de verão desde 2019). Sem isso, um
+  // registro salvo à noite no BR (já dia seguinte em UTC) mostrava o DIA ERRADO. Determinístico
+  // (Date.parse de ISO-com-fuso dá epoch fixo; getUTC* não depende do fuso local) → sem
+  // divergência servidor×cliente (não reintroduz o bug de hidratação #418).
+  if (/\d{4}-\d{2}-\d{2}[T ]\d{2}:/.test(s)) {
+    // Normaliza p/ ISO estrito: espaço→T e offset curto "+00"→"+00:00" (Postgres devolve assim).
+    const ms = Date.parse(s.replace(" ", "T").replace(/([+-]\d{2})$/, "$1:00"));
+    if (!Number.isNaN(ms)) {
+      const sp = new Date(ms - 3 * 3600 * 1000);
+      return { y: sp.getUTCFullYear(), m: sp.getUTCMonth() + 1, d: sp.getUTCDate() };
+    }
+  }
+  // DATA pura ("YYYY-MM-DD", sem hora): usa direto — não tem fuso a converter.
+  const m = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (!m) return null;
   const y = +m[1], mo = +m[2], d = +m[3];
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;

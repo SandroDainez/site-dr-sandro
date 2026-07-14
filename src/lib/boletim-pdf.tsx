@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
 import { pdfSafe } from "./pdf-safe";
+import { dataCurta } from "./format-date";
 
 // Desliga a hifenização: palavras quebram só em espaços.
 Font.registerHyphenationCallback((word) => [word]);
@@ -59,7 +60,7 @@ function BoletimDoc({ b }: { b: BoletimPdf }) {
   const titulo = pdfSafe(b.titulo ?? "Boletim clínico");
   const topicos = (b.topicos ?? []).filter((t) => t.titulo || t.descricao);
   const fontes = (b.fontes ?? []).filter((f) => f.titulo || f.journal);
-  const dataPub = b.data_publicacao ? b.data_publicacao.slice(0, 10) : "";
+  const dataPub = b.data_publicacao ? dataCurta(b.data_publicacao) : ""; // fuso de São Paulo (não UTC)
   return (
     <Document title={titulo} author="MedCampus">
       {/* CAPA */}
