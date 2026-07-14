@@ -45,6 +45,16 @@ const s = StyleSheet.create({
 });
 
 
+// Data no fuso de São Paulo (não UTC). Bug: publicar de noite no BR fazia o .slice(0,10) do
+// timestamp UTC mostrar o dia SEGUINTE (ex.: "2026-07-14" publicado no dia 13). dd/mm/aaaa.
+function dataPublicacao(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(iso));
+  } catch {
+    return iso.slice(0, 10);
+  }
+}
+
 function textoSecao(secao: string, c: ProtocoloConteudo): string {
   if (c.textoEditado?.[secao]) return pdfSafe(c.textoEditado[secao]);
   const sec = c.secoes?.find((x) => x.secao === secao);
@@ -75,7 +85,7 @@ function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
           <Text style={[s.coverTitle, { fontSize: titulo.length > 42 ? 20 : titulo.length > 28 ? 24 : 30 }]}>{titulo}</Text>
           <Text style={s.coverChip}>{esp}</Text>
           <Text style={s.coverMeta}>
-            Documento de apoio à decisão clínica{p.publicado_em ? `\nPublicado em ${p.publicado_em.slice(0, 10)}` : ""}
+            Documento de apoio à decisão clínica{p.publicado_em ? `\nPublicado em ${dataPublicacao(p.publicado_em)}` : ""}
           </Text>
           <Text style={s.coverAviso}>Material educacional. Não substitui o julgamento clínico individualizado — a palavra final é sempre do profissional responsável.</Text>
         </View>
