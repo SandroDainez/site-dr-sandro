@@ -37,7 +37,14 @@ VERIFIQUE (a validação de citação/âncora contra o texto das fontes JÁ é f
    OU tangencial/que não caiba num protocolo deste assunto — mesmo que esteja bem escrita e citada.
    Ex.: conteúdo de nefrologia num protocolo de AVC; manejo de sepse num protocolo de via aérea.
    Aponte o trecho exato e sugira REMOVER (não pertence a este protocolo).
-1. Consistência entre as seções: contradições, repetições, ordem ilógica, lacunas importantes.
+1. Consistência entre as seções: contradições, repetições EXCESSIVAS (marque se o documento repete
+   muito o mesmo ponto), ordem ilógica, lacunas importantes.
+1b. ESCOPO CRUZADO (tipo "off_topic", alta): marque seções inteiras que pertencem a OUTRO protocolo
+   (parada/RCP, técnica de desfibrilação, arritmias específicas, emergência hipertensiva, TEP, pediatria
+   num protocolo adulto) — deveriam ser só referência cruzada. Marque também condição de OUTRO tipo de
+   choque (TEP/tamponamento = obstrutivo) listada como ETIOLOGIA em vez de diagnóstico diferencial.
+1c. CATEGÓRICO DEMAIS (tipo "impreciso"): recomendação escrita como regra automática onde a conduta
+   depende de fenótipo/seleção de paciente (qual inotrópico, qual dispositivo/MCS, indicação de suporte).
 2. Doses/medicamentos clinicamente plausíveis (número, unidade, via, intervalo) — sinalize o que parecer suspeito.
 3. Afirmações vagas, genéricas ou clinicamente questionáveis — sinalize com sugestão de melhoria.
 4. Clareza e acionabilidade à beira-leito (critérios objetivos, cortes numéricos onde couber).

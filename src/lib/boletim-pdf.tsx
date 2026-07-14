@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
+import { pdfSafe } from "./pdf-safe";
 
 // Desliga a hifenização: palavras quebram só em espaços.
 Font.registerHyphenationCallback((word) => [word]);
@@ -55,7 +56,7 @@ const s = StyleSheet.create({
 
 function BoletimDoc({ b }: { b: BoletimPdf }) {
   const esp = ESP_LABEL[b.especialidade ?? ""] ?? b.especialidade ?? "";
-  const titulo = b.titulo ?? "Boletim clínico";
+  const titulo = pdfSafe(b.titulo ?? "Boletim clínico");
   const topicos = (b.topicos ?? []).filter((t) => t.titulo || t.descricao);
   const fontes = (b.fontes ?? []).filter((f) => f.titulo || f.journal);
   const dataPub = b.data_publicacao ? b.data_publicacao.slice(0, 10) : "";
@@ -88,7 +89,7 @@ function BoletimDoc({ b }: { b: BoletimPdf }) {
         {b.resumo ? (
           <View style={s.resumoBox}>
             <Text style={s.resumoTitle}>Resumo da semana</Text>
-            <Text style={s.resumoText}>{b.resumo}</Text>
+            <Text style={s.resumoText}>{pdfSafe(b.resumo)}</Text>
           </View>
         ) : null}
 
@@ -103,9 +104,9 @@ function BoletimDoc({ b }: { b: BoletimPdf }) {
           return (
             <View key={i} style={s.topico} wrap={false}>
               {novo ? <Text style={s.novoTag}>{novo}</Text> : null}
-              {t.titulo ? <Text style={s.topTitulo}>{t.titulo}</Text> : null}
-              {t.descricao ? <Text style={s.topDesc}>{t.descricao}</Text> : null}
-              {t.relevancia_clinica ? <Text style={s.topRel}>Relevância clínica: {t.relevancia_clinica}</Text> : null}
+              {t.titulo ? <Text style={s.topTitulo}>{pdfSafe(t.titulo)}</Text> : null}
+              {t.descricao ? <Text style={s.topDesc}>{pdfSafe(t.descricao)}</Text> : null}
+              {t.relevancia_clinica ? <Text style={s.topRel}>Relevância clínica: {pdfSafe(t.relevancia_clinica ?? "")}</Text> : null}
               {fonteLinha ? <Text style={s.topFonte}>Fonte: {fonteLinha}</Text> : null}
             </View>
           );

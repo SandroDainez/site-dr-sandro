@@ -101,6 +101,16 @@ PADRÃO DE QUALIDADE (protocolo institucional):
   protocolo (critérios diagnósticos, avaliação, conduta/tratamento, doses, monitorização,
   complicações, critérios de alta/transferência, segurança). NÃO inclua o que NÃO cabe: revisão
   fisiopatológica longa, digressão histórica, opinião, conteúdo de outro documento (aula/artigo).
+- ESCOPO CRUZADO (crítico): NÃO transcreva o corpo de OUTRO protocolo. Temas com protocolo próprio
+  (parada cardíaca/RCP, técnica detalhada de desfibrilação/cardioversão, arritmias específicas,
+  emergência hipertensiva, TEP, sepse, via aérea difícil) entram só como REFERÊNCIA CRUZADA de 1
+  linha ("seguir protocolo institucional de X"), NUNCA como seções inteiras. Público ADULTO por
+  padrão: não inclua doses/condutas PEDIÁTRICAS a menos que o tema diga o contrário.
+- MECANISMO CORRETO: condição de OUTRO tipo de choque (ex.: TEP e tamponamento = choque OBSTRUTIVO)
+  vai no DIAGNÓSTICO DIFERENCIAL, não como etiologia do choque deste protocolo (se for cardiogênico).
+- NÃO CATEGÓRICO ONDE HÁ SELEÇÃO: onde a conduta depende de fenótipo/seleção de paciente (ex.: qual
+  inotrópico, qual dispositivo de suporte, indicação de MCS), escreva com a ressalva ("considerar em
+  paciente selecionado…"), não como regra automática. Fidelidade à força real da recomendação na fonte.
 - ATUALIDADE (crítico): use a recomendação MAIS ATUAL disponível nas fontes. Se um SOURCE estiver
   claramente SUPERADO por diretriz/consenso mais recente (mudança de conduta, dose ou droga),
   prefira o mais novo e NÃO afirme conduta ultrapassada. Na dúvida entre versões, marque como

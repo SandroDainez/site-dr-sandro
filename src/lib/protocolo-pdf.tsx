@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
 import type { ProtocoloPublico, ProtocoloConteudo } from "./protocolos-editora";
+import { pdfSafe } from "./pdf-safe";
 
 // Desliga a hifenização: palavras quebram só em espaços (evita "hemor-ragico" no meio).
 Font.registerHyphenationCallback((word) => [word]);
@@ -43,14 +44,16 @@ const s = StyleSheet.create({
   footer: { position: "absolute", bottom: 20, left: 40, right: 40, fontSize: 7, color: "#9aa0a6", textAlign: "center", borderTopWidth: 0.5, borderTopColor: "#e5e7eb", paddingTop: 5 },
 });
 
+
 function textoSecao(secao: string, c: ProtocoloConteudo): string {
-  if (c.textoEditado?.[secao]) return c.textoEditado[secao];
+  if (c.textoEditado?.[secao]) return pdfSafe(c.textoEditado[secao]);
   const sec = c.secoes?.find((x) => x.secao === secao);
-  return sec ? sec.afirmacoes.map((a) => a.texto).join("\n") : "";
+  return sec ? pdfSafe(sec.afirmacoes.map((a) => a.texto).join("\n")) : "";
 }
 
 function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
   const esp = ESP_LABEL[p.specialty] ?? p.specialty;
+  const titulo = pdfSafe(p.title);
   const nomes = (p.conteudo.secoes ?? []).map((x) => x.secao).filter((n) => n !== "Título" && n !== "Controle do documento");
   // Numeração das seções normais (callouts não entram na contagem) — precomputada.
   const numeros: Record<string, number> = {};
@@ -69,7 +72,7 @@ function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
           <Text style={s.coverTag}>Protocolos Médicos · Apoio à Prática Clínica</Text>
           <View style={s.coverRule} />
           <Text style={s.coverEyebrow}>Protocolo institucional · {esp}</Text>
-          <Text style={[s.coverTitle, { fontSize: p.title.length > 42 ? 20 : p.title.length > 28 ? 24 : 30 }]}>{p.title}</Text>
+          <Text style={[s.coverTitle, { fontSize: titulo.length > 42 ? 20 : titulo.length > 28 ? 24 : 30 }]}>{titulo}</Text>
           <Text style={s.coverChip}>{esp}</Text>
           <Text style={s.coverMeta}>
             Documento de apoio à decisão clínica{p.publicado_em ? `\nPublicado em ${p.publicado_em.slice(0, 10)}` : ""}
@@ -82,7 +85,7 @@ function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
       <Page size="A4" style={s.page}>
         <View style={s.runHead} fixed>
           <Text>MedCampus · {esp}</Text>
-          <Text>{p.title}</Text>
+          <Text>{titulo}</Text>
         </View>
 
         {nomes.map((nome, i) => {
