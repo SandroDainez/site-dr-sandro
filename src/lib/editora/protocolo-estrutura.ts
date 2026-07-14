@@ -33,7 +33,7 @@ export const PROTOCOLO_SECOES: string[] = [
   // Tratamento
   "Tratamento",
   "Doses e medicamentos",
-  "Prescrição médica modelo",
+  "Plano inicial de manejo — modelo operacional",
   // Seguimento e decisão de fluxo
   "Monitorização e reavaliação",
   "Critérios de internação",
@@ -44,8 +44,7 @@ export const PROTOCOLO_SECOES: string[] = [
   "Complicações",
   // Segurança e qualidade
   "Segurança do paciente",
-  "Erros frequentes",
-  "Armadilhas e pérolas clínicas",
+  "Erros frequentes e armadilhas clínicas",
   "Indicadores de qualidade",
   // Síntese e apoio à beira-leito
   "Resumo executivo",
@@ -68,11 +67,11 @@ export const PROTOCOLO_BLOCOS: string[][] = [
   ["Classificação e estratificação de gravidade", "Diagnóstico diferencial"],
   ["Avaliação inicial (ABCDE)", "Exames complementares", "Estabilização imediata"],
   ["Tratamento"],
-  ["Doses e medicamentos", "Prescrição médica modelo"],
+  ["Doses e medicamentos", "Plano inicial de manejo — modelo operacional"],
   ["Monitorização e reavaliação", "Critérios de internação", "Critérios de UTI", "Critérios de alta"],
   ["Situações e populações especiais", "Complicações"],
-  ["Segurança do paciente", "Erros frequentes"],
-  ["Armadilhas e pérolas clínicas", "Indicadores de qualidade"],
+  ["Segurança do paciente", "Erros frequentes e armadilhas clínicas"],
+  ["Indicadores de qualidade"],
   ["Resumo executivo", "Fluxograma", "Checklist"],
   ["Fundamentação científica", "Referências"],
 ];
@@ -83,12 +82,19 @@ export const PROTOCOLO_BLOCOS: string[][] = [
 // metas SUGERIDAS/EDITÁVEIS (institucionais), não números de guideline.
 export const PROTOCOLO_SECOES_OPERACIONAIS: string[] = [
   "Controle do documento",
-  "Prescrição médica modelo",
+  "Plano inicial de manejo — modelo operacional",
   "Indicadores de qualidade",
   "Resumo executivo",
   "Fluxograma",
   "Checklist",
 ];
+
+// Apelido de EXIBIÇÃO: protocolos já gerados guardam o nome ANTIGO da seção. Aqui mapeamos
+// o nome salvo → nome novo, só na hora de mostrar (PDF/web), sem regerar nem tocar no dado.
+export const SECAO_ALIAS: Record<string, string> = {
+  "Prescrição médica modelo": "Plano inicial de manejo — modelo operacional",
+};
+export const nomeExibicaoSecao = (secao: string): string => SECAO_ALIAS[secao] ?? secao;
 
 // Escolha de especialidade/tipo do módulo (mais granular que a coluna do banco).
 export const ESPECIALIDADES_MODULO = [

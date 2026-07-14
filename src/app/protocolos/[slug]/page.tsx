@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProtocoloPublicado, type ProtocoloConteudo } from "@/lib/protocolos-editora";
 import { slugify } from "@/lib/editora";
+import { nomeExibicaoSecao } from "@/lib/editora/protocolo-estrutura";
 import { dataCurta } from "@/lib/format-date";
 import { getHeader, getNavItems, getTypography, headerSubtitleLines, getNavStyle } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
@@ -84,7 +85,7 @@ export default async function ProtocoloPublicoPage({ params }: { params: Promise
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35">Seções</p>
             <ul className="space-y-0.5 lg:max-h-[70vh] lg:overflow-auto">
               {secoes.map((s) => (
-                <li key={s}><a href={`#${slugify(s)}`} className="block rounded-md px-2 py-1 text-[13px] text-white/55 transition hover:bg-white/[0.05] hover:text-white">{s}</a></li>
+                <li key={s}><a href={`#${slugify(s)}`} className="block rounded-md px-2 py-1 text-[13px] text-white/55 transition hover:bg-white/[0.05] hover:text-white">{nomeExibicaoSecao(s)}</a></li>
               ))}
             </ul>
           </nav>
@@ -97,7 +98,7 @@ export default async function ProtocoloPublicoPage({ params }: { params: Promise
               return (
                 <section key={sec.secao} id={slugify(sec.secao)} className="scroll-mt-24">
                   <h2 className={`mb-2 flex items-center gap-2 text-xl font-semibold ${isDose ? "text-accent" : "text-white"}`}>
-                    {isDose && <Pill className="h-5 w-5" />}{sec.secao}
+                    {isDose && <Pill className="h-5 w-5" />}{nomeExibicaoSecao(sec.secao)}
                   </h2>
                   <div className={`whitespace-pre-wrap text-[15px] leading-relaxed text-white/80 ${isDose ? "rounded-2xl border border-accent/30 bg-accent/[0.06] p-4" : ""}`}>
                     {texto || <span className="text-white/30">—</span>}

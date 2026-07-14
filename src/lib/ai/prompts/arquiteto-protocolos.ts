@@ -43,14 +43,12 @@ const GUIA_SECOES: Record<string, string> = {
     "Abordagem sistematizada (ABCDE quando aplicável) da avaliação inicial. tipo: clinica.",
   "Doses e medicamentos":
     "Doses TRANSCRITAS FIELMENTE dos sources (âncora verbatim). tipo: dose. Nunca de memória.",
-  "Prescrição médica modelo":
-    "Prescrição passo a passo (itens acionáveis) DERIVADA do Tratamento/Doses já gerados neste protocolo. Reaproveite as doses já citadas (mantendo tipo: dose + âncora nas linhas com dose). Estrutura/ordenação da prescrição é tipo: geral. Não introduza medicamento ou dose que não esteja nos sources.",
+  "Plano inicial de manejo — modelo operacional":
+    "Plano inicial passo a passo (itens acionáveis: classificar, definir fenótipo, acionar equipes, prescrever) DERIVADO do Tratamento/Doses já gerados neste protocolo. Reaproveite as doses já citadas (mantendo tipo: dose + âncora nas linhas com dose). Estrutura/ordenação é tipo: geral. Não introduza medicamento ou dose que não esteja nos sources.",
   "Segurança do paciente":
     "Alertas de segurança CRÍTICOS (ex.: não atrasar tratamento, risco de erro). Alertas que afirmam fato clínico são tipo: clinica com âncora; recomendações de processo são tipo: geral.",
-  "Erros frequentes":
-    "Erros comuns associados a dano. Se o erro decorre de fato clínico do source, tipo: clinica com âncora; senão tipo: geral.",
-  "Armadilhas e pérolas clínicas":
-    "Pontos-chave, armadilhas e pérolas de alto valor. Fato clínico → tipo: clinica com âncora; recomendação prática → tipo: geral.",
+  "Erros frequentes e armadilhas clínicas":
+    "Erros comuns associados a dano + armadilhas e pérolas de alto valor, numa lista única e enxuta (sem repetir o que já está em 'Segurança do paciente'). Fato clínico do source → tipo: clinica com âncora; recomendação prática → tipo: geral.",
   "Indicadores de qualidade":
     "Indicadores de processo e resultado com METAS SUGERIDAS E EDITÁVEIS (institucionais). tipo: geral. Deixe explícito que as metas são propostas a validar pela instituição — NÃO apresente número como se fosse recomendação de guideline, a menos que conste literalmente no source (aí tipo: dose com âncora).",
   "Resumo executivo":
@@ -125,6 +123,10 @@ PADRÃO DE QUALIDADE (protocolo institucional):
 - Seções OPERACIONAIS/de síntese (governança, prescrição modelo, indicadores, resumo, fluxograma,
   checklist): use tipo "geral", SINTETIZANDO o que já foi gerado/citado — sem fabricar fato, dose ou meta.
 - Coerência: respeite as seções já geradas (não repita, não contradiga).
+- NÃO REPITA a mesma advertência/mensagem em várias seções. Cada alerta clínico aparece UMA vez,
+  na seção mais apropriada (ex.: um risco de conduta em "Segurança do paciente" OU em "Erros
+  frequentes e armadilhas clínicas", não nos dois). "Resumo executivo"/"Checklist" sintetizam em
+  formato diferente, sem recopiar frases inteiras já ditas. Redundância é defeito editorial.
 
 SOURCES (material fornecido — use SÓ isto):
 ${sourcesToText(sources)}

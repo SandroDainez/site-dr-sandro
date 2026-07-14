@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
 import type { ProtocoloPublico, ProtocoloConteudo } from "./protocolos-editora";
+import { nomeExibicaoSecao } from "./editora/protocolo-estrutura";
 import { pdfSafe } from "./pdf-safe";
 
 // Desliga a hifenização: palavras quebram só em espaços (evita "hemor-ragico" no meio).
@@ -16,8 +17,9 @@ const INK = "#20232a";
 const MUTE = "#6b7280";
 const ESP_LABEL: Record<string, string> = { emergencias: "Emergências", ti: "Terapia Intensiva", anestesiologia: "Anestesiologia", geral: "Geral" };
 
-// Seções que viram CAIXA de destaque, por tom.
-const CALLOUT_CRIT = new Set(["Segurança do paciente", "Erros frequentes"]);
+// Seções que viram CAIXA de destaque, por tom. (Inclui nomes NOVOS e ANTIGOS p/ protocolos
+// já gerados: "Erros frequentes"/"Armadilhas" legados + "Erros frequentes e armadilhas clínicas".)
+const CALLOUT_CRIT = new Set(["Segurança do paciente", "Erros frequentes", "Erros frequentes e armadilhas clínicas"]);
 const CALLOUT_GOLD = new Set(["Armadilhas e pérolas clínicas", "Resumo executivo"]);
 
 const s = StyleSheet.create({
@@ -112,7 +114,7 @@ function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
               // paginar. Deixamos quebrar normalmente (o pior caso é um título isolado no
               // rodapé da página, bem melhor que texto ilegível sobreposto).
               <View key={i} style={[s.callout, { borderLeftColor: cor, backgroundColor: bg }]}>
-                <Text style={[s.calloutTitle, { color: cor }]} wrap={false}>{nome}</Text>
+                <Text style={[s.calloutTitle, { color: cor }]} wrap={false}>{nomeExibicaoSecao(nome)}</Text>
                 {paras.map((t, j) => <Text key={j} style={[s.li, { color: "#3b2f2f" }]}>• {t}</Text>)}
               </View>
             );
@@ -121,7 +123,7 @@ function ProtocoloDoc({ p }: { p: ProtocoloPublico }) {
             <View key={i}>
               <View style={s.h2wrap} wrap={false}>
                 <Text style={s.h2num}>{numeros[nome]}</Text>
-                <Text style={s.h2}>{nome}</Text>
+                <Text style={s.h2}>{nomeExibicaoSecao(nome)}</Text>
               </View>
               {paras.map((t, j) => <Text key={j} style={s.p}>{t}</Text>)}
             </View>
