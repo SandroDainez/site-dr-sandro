@@ -54,6 +54,20 @@ export const INVARIANTES: Invariante[] = [
     severidade: "alta",
   },
   {
+    id: "propofol-analgesia-instavel",
+    tema: "Propofol — sem analgesia e redução no instável",
+    gatilhos: /propofol/i,
+    // presente = a resposta diz que o propofol NÃO dá analgesia E que se reduz/individualiza no instável.
+    presente: (r) =>
+      tem(r, /(sem|n[ãa]o (produz|oferece|fornece|tem|possui|confere)?\s*)analgesia|nenhuma analgesia|desprovido de analgesia/i) &&
+      tem(r, /reduz\w*|individualiz\w*|menor dose|dose reduzida|titul\w*/i),
+    exigencia:
+      "Ao falar de propofol na indução, a resposta DEVE afirmar que o propofol NÃO oferece analgesia (associar analgésico) e que a dose deve ser REDUZIDA/individualizada em idoso/frágil/hipovolêmico/choque — não existe percentual universal de redução para instáveis.",
+    canonico:
+      "**Propofol:** não oferece analgesia (associe analgésico quando indicado) e causa hipotensão/depressão miocárdica dose-dependente. No paciente instável (idoso, frágil, hipovolêmico, choque) **reduza e individualize a dose** — não há percentual universal de redução; titule pelo efeito hemodinâmico.",
+    severidade: "alta",
+  },
+  {
     id: "inducao-choque",
     tema: "Indução no choque",
     gatilhos:
