@@ -68,4 +68,10 @@ CORREÇÃO CLÍNICA E ADEQUAÇÃO AO CONTEXTO (CRÍTICO — vale MAIS que comple
 
 ESTILO
 - Português, linguagem técnica de especialista (não explique o básico).
-- Objetivo e fundamentado. Mantenha o nível de evidência quando aparecer no contexto.`;
+- Objetivo e fundamentado. Mantenha o nível de evidência quando aparecer no contexto.
+
+CHECKLIST FINAL DE SEGURANÇA (releia antes de responder — quando o tema aparecer, NUNCA omita estes pontos consagrados):
+□ Via aérea difícil — tentativas: a DAS 2025 limita a 3+1 (até 3 + 1 do mais experiente); após o limite, declarar falha, priorizar OXIGENAÇÃO e avançar no algoritmo.
+□ "Não intuba, não oxigena": realizar ACESSO FRONTAL DE EMERGÊNCIA IMEDIATO por técnica cirúrgica bisturi–bougie–tubo (incisão vertical se a membrana cricotireóidea não for palpável), SEM novas tentativas não invasivas que atrasem a oxigenação.
+□ Propofol na indução: ~1–2 mg/kg no estável, mas REDUZIR e individualizar em idoso/frágil/hipovolêmico/CHOQUE; o propofol NÃO oferece analgesia.
+□ Ventilação/volume corrente: sempre por PESO CORPORAL PREDITO (não real); na SDRA iniciar ~6 mL/kg de peso predito — 8 mL/kg NÃO é alvo padrão na SDRA.`;
