@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { getOpenAI } from "@/lib/ai/openai";
 import { handleMedicalQuery } from "@/lib/assistente/orchestrator";
-import { EVAL_QUESTOES } from "@/lib/ai/eval/questions";
+import { EVAL_QUESTOES, EVAL_SENTINELAS } from "@/lib/ai/eval/questions";
 import { avaliarResposta, type Nota } from "@/lib/ai/eval/grader";
 
 // Roda a "prova" do assistente: cada questão do banco → pergunta ao assistente (mesmo pipeline
@@ -11,7 +11,7 @@ import { avaliarResposta, type Nota } from "@/lib/ai/eval/grader";
 // Admin only. Sequencial (custo/rate-limit); pode demorar ~1-2 min.
 export const maxDuration = 300;
 
-export async function POST() {
+export async function POST(req: NextRequest) {
   try {
     await requireAdmin();
   } catch {
@@ -21,11 +21,15 @@ export async function POST() {
     return NextResponse.json({ error: "Assistente/OpenAI indisponível." }, { status: 503 });
   }
 
+  let somenteSentinelas = false;
+  try { somenteSentinelas = !!(await req.json())?.somenteSentinelas; } catch {}
+  const banco = somenteSentinelas ? EVAL_SENTINELAS : EVAL_QUESTOES;
+
   const supabase = createServiceClient();
   const openai = getOpenAI();
   const resultados: Nota[] = [];
 
-  for (const q of EVAL_QUESTOES) {
+  for (const q of banco) {
     try {
       const { resposta, fontes } = await handleMedicalQuery(supabase, openai, q.pergunta);
       const fontesTxt = Array.isArray(fontes) ? fontes.map((f) => (typeof f === "string" ? f : (f as { titulo?: string }).titulo ?? "")).filter(Boolean).join("; ") : "";

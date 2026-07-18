@@ -30,10 +30,13 @@ export default function AvaliacaoAssistente() {
   const [resultados, setResultados] = useState<Nota[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
-  async function rodar() {
+  async function rodar(somenteSentinelas: boolean) {
     setRodando(true); setErro(null); setResumo(null); setResultados(null);
     try {
-      const r = await fetch("/api/admin/eval-assistente", { method: "POST" });
+      const r = await fetch("/api/admin/eval-assistente", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ somenteSentinelas }),
+      });
       const j = await r.json();
       if (!r.ok) { setErro(j.error ?? "Falha ao rodar a avaliação."); return; }
       setResumo(j.resumo); setResultados(j.resultados);
@@ -49,11 +52,16 @@ export default function AvaliacaoAssistente() {
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
         <div>
           <p className="text-sm font-semibold text-white">Rodar a prova do assistente</p>
-          <p className="mt-0.5 text-xs text-white/50 max-w-xl">Faz cada pergunta do banco ao assistente real (biblioteca → PubMed → IA → guardrails) e um juiz-IA compara com o seu gabarito. Pode levar 1-2 minutos.</p>
+          <p className="mt-0.5 text-xs text-white/50 max-w-xl">Faz cada pergunta do banco ao assistente real (biblioteca → PubMed → IA → guardrails) e um juiz-IA compara com o seu gabarito. <strong className="text-white/70">Sentinelas</strong> (risco alto/dose) roda rápido; <strong className="text-white/70">tudo</strong> é o exame completo (mais lento).</p>
         </div>
-        <button type="button" onClick={rodar} disabled={rodando} className="inline-flex shrink-0 items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
-          {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} {rodando ? "Rodando…" : "Rodar avaliação"}
-        </button>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <button type="button" onClick={() => rodar(true)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50">
+            {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Rodar sentinelas
+          </button>
+          <button type="button" onClick={() => rodar(false)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
+            {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} {rodando ? "Rodando…" : "Rodar tudo (68)"}
+          </button>
+        </div>
       </div>
 
       {erro && <p className="text-sm text-rose-300">{erro}</p>}

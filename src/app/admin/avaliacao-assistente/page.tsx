@@ -18,7 +18,7 @@ export default function AvaliacaoAssistentePage() {
         </p>
       </div>
 
-      <AdminHelp>Clique em “Rodar avaliação” e aguarde 1-2 min. Cada questão reprova na hora se houver erro grave ou dose errada. Banco atual: {EVAL_QUESTOES.length} questões (piloto de ISR) — cresce à medida que você adiciona temas.</AdminHelp>
+      <AdminHelp>Clique em “Rodar avaliação” e aguarde 1-2 min. Cada questão reprova na hora se houver erro grave ou dose errada. Banco atual: {EVAL_QUESTOES.length} questões (ISR completo) — cresce à medida que você adiciona temas.</AdminHelp>
 
       <AvaliacaoAssistente />
     </div>
