@@ -125,7 +125,7 @@ export async function handleMedicalQuery(
 
   const r = await openai.chat.completions.create({
     model: AI_MODELS.chat,
-    temperature: 0.2,
+    temperature: 0, // determinístico p/ segurança clínica + consistência entre respostas (menos ruído)
     max_tokens: 1800,
     messages: [
       { role: "system", content: MEDICAL_ASSISTANT_SYSTEM_PROMPT },
