@@ -142,8 +142,36 @@ export default function ArquitetoProtocolos({ protocolosIniciais, modo }: { prot
     setProtocolo((prev) => (prev ? { ...prev, status } : prev));
     setProtocolos((prev) => prev.map((p) => (protocolo && p.id === protocolo.id ? { ...p, status } : p)));
   }
+  // Trava de publicação: NÃO bloqueia, mas avisa quando há pendência de qualidade (as mesmas
+  // coisas que o revisor externo pega). Desenho incentiva o bom fluxo: rodou as checagens e ficou
+  // limpo → publica sem atrito; deixou pendência → confirma consciente ("publicar mesmo assim?").
   function publicar() {
-    if (!protocolo) return; setError(null);
+    if (!protocolo) return;
+    const avisos: string[] = [];
+    if (validacao) {
+      const reprovadas = validacao.totalClinicas - validacao.validadas - validacao.conferidas;
+      if (reprovadas > 0) avisos.push(`${reprovadas} afirmação(ões) clínica(s)/dose sem citação válida nem conferida por você — use "Corrigir" ou "Remover fora do tema".`);
+      const pct = Math.round(validacao.confidence * 100);
+      if (pct < 85) avisos.push(`Confiança de citação em ${pct}% (recomendado ≥ 85%).`);
+    }
+    if (revisao) {
+      const graves = revisao.issues.filter((i) => i.severidade === "alta").length;
+      if (graves > 0) avisos.push(`${graves} apontamento(s) de ALTA severidade na revisão ainda não resolvido(s).`);
+    }
+    if (atualidade && atualidade.itens.length > 0) {
+      avisos.push(`${atualidade.itens.length} ponto(s) possivelmente desatualizado(s) apontado(s) na checagem de atualidade.`);
+    } else if (!atualidade) {
+      avisos.push(`A checagem de atualidade (PubMed) não foi rodada nesta sessão — recomendável antes de publicar.`);
+    }
+    if (avisos.length > 0) {
+      const ok = window.confirm(
+        "⚠ Antes de publicar, confira estes pontos (é o que o revisor externo costuma pegar):\n\n" +
+        avisos.map((a) => "• " + a).join("\n\n") +
+        "\n\nIsto NÃO impede publicar. Publicar mesmo assim?"
+      );
+      if (!ok) return;
+    }
+    setError(null);
     startTransition(async () => { const r = await publicarProtocolo(protocolo.id); if (r.ok) { aplicarStatus(r.data.status); carregarVersoes(protocolo.id); } else setError(r.error); });
   }
   function despublicar() {
