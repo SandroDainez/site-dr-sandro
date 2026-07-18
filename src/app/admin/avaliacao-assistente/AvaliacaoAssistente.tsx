@@ -41,34 +41,69 @@ function montarResumo(rs: Nota[]): Resumo {
 
 const BATCH = 6; // questões por chamada — evita estourar o tempo da função serverless
 
+// Agrega N rodadas da mesma questão por MAIORIA (mata o ruído run-a-run do LLM+RAG):
+// aprovado/erro grave = o que aconteceu na maioria; notas = média.
+function agregar(runs: Nota[][]): Nota[] {
+  const ids = runs[0]?.map((r) => r.id) ?? [];
+  return ids.map((id) => {
+    const ns = runs.map((run) => run.find((x) => x.id === id)).filter(Boolean) as Nota[];
+    const n = ns.length || 1;
+    const avg = (k: (x: Nota) => number) => Math.round(ns.reduce((s, x) => s + k(x), 0) / n);
+    const cnt = (p: (x: Nota) => boolean) => ns.filter(p).length;
+    const aprovado = cnt((x) => x.aprovado) > n / 2;
+    const erroGrave = cnt((x) => x.erroGrave) >= n / 2;
+    const doseOk = cnt((x) => x.doseOk === false) >= n / 2 ? false : (ns.some((x) => x.doseOk === true) ? true : null);
+    const base = ns[0];
+    const rep = ns.find((x) => x.aprovado === aprovado) ?? base;
+    return {
+      ...base, correcao: avg((x) => x.correcao), cobertura: avg((x) => x.cobertura), fidelidade: avg((x) => x.fidelidade),
+      doseOk, erroGrave, aprovado,
+      reconheceuIncerteza: cnt((x) => x.reconheceuIncerteza) >= n / 2, citouFonte: cnt((x) => x.citouFonte) >= n / 2,
+      erroGraveDesc: ns.find((x) => x.erroGrave)?.erroGraveDesc ?? "",
+      comentario: `[${cnt((x) => x.aprovado)}/${n} aprovado] ${rep.comentario}`,
+    } as Nota;
+  });
+}
+
 export default function AvaliacaoAssistente() {
   const [rodando, setRodando] = useState(false);
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [resultados, setResultados] = useState<Nota[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
-  const [progresso, setProgresso] = useState<{ feito: number; total: number } | null>(null);
+  const [progresso, setProgresso] = useState<{ feito: number; total: number; rodada?: string } | null>(null);
+  const [robusto, setRobusto] = useState(false); // "melhor de 3" — mata o ruído
 
-  async function rodar(somenteSentinelas: boolean) {
-    setRodando(true); setErro(null); setResumo(null); setResultados(null); setProgresso(null);
+  // Uma passada completa (em lotes). Lança erro em falha (o chamador trata).
+  async function rodarUmaVez(somenteSentinelas: boolean, onProg: (feito: number, total: number) => void): Promise<Nota[]> {
     const acc: Nota[] = [];
     let offset = 0, total = Infinity;
+    while (offset < total) {
+      const r = await fetch("/api/admin/eval-assistente", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ somenteSentinelas, offset, limit: BATCH }),
+      });
+      const raw = await r.text();
+      let j: { resultados?: Nota[]; total?: number; error?: string };
+      try { j = JSON.parse(raw); } catch { throw new Error("O servidor demorou demais ou reiniciou. Rode de novo (ou use as sentinelas)."); }
+      if (!r.ok) throw new Error(j.error ?? "Falha ao rodar a avaliação.");
+      acc.push(...(j.resultados ?? []));
+      total = j.total ?? acc.length;
+      offset += BATCH;
+      onProg(Math.min(acc.length, total), total);
+    }
+    return acc;
+  }
+
+  async function rodar(somenteSentinelas: boolean, reps: number) {
+    setRodando(true); setErro(null); setResumo(null); setResultados(null); setProgresso(null);
     try {
-      while (offset < total) {
-        const r = await fetch("/api/admin/eval-assistente", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ somenteSentinelas, offset, limit: BATCH }),
-        });
-        const raw = await r.text();
-        let j: { resultados?: Nota[]; total?: number; error?: string };
-        try { j = JSON.parse(raw); }
-        catch { setErro("O servidor demorou demais ou reiniciou. Tente as sentinelas (mais rápido) ou rode de novo."); return; }
-        if (!r.ok) { setErro(j.error ?? "Falha ao rodar a avaliação."); return; }
-        acc.push(...(j.resultados ?? []));
-        total = j.total ?? acc.length;
-        offset += BATCH;
-        setProgresso({ feito: Math.min(acc.length, total), total });
-        setResultados([...acc]);
-        setResumo(montarResumo(acc));
+      const runs: Nota[][] = [];
+      for (let i = 0; i < reps; i++) {
+        const res = await rodarUmaVez(somenteSentinelas, (feito, total) =>
+          setProgresso({ feito, total, rodada: reps > 1 ? `rodada ${i + 1}/${reps}` : undefined }));
+        runs.push(res);
+        const agg = reps > 1 ? agregar(runs) : res;
+        setResultados(agg); setResumo(montarResumo(agg));
       }
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Falha de rede.");
@@ -84,19 +119,25 @@ export default function AvaliacaoAssistente() {
           <p className="text-sm font-semibold text-white">Rodar a prova do assistente</p>
           <p className="mt-0.5 text-xs text-white/50 max-w-xl">Faz cada pergunta do banco ao assistente real (biblioteca → PubMed → IA → guardrails) e um juiz-IA compara com o seu gabarito. <strong className="text-white/70">Sentinelas</strong> (risco alto/dose) roda rápido; <strong className="text-white/70">tudo</strong> é o exame completo (mais lento).</p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <button type="button" onClick={() => rodar(true)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50">
-            {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Rodar sentinelas
-          </button>
-          <button type="button" onClick={() => rodar(false)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
-            {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} {rodando ? "Rodando…" : "Rodar tudo (68)"}
-          </button>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-white/60">
+            <input type="checkbox" checked={robusto} disabled={rodando} onChange={(e) => setRobusto(e.target.checked)} className="h-4 w-4 accent-accent" />
+            Melhor de 3 (mais estável, ~3× mais lento)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => rodar(true, robusto ? 3 : 1)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50">
+              {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Rodar sentinelas
+            </button>
+            <button type="button" onClick={() => rodar(false, robusto ? 3 : 1)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
+              {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} {rodando ? "Rodando…" : "Rodar tudo (68)"}
+            </button>
+          </div>
         </div>
       </div>
 
       {progresso && rodando && (
         <div className="rounded-xl border border-accent/20 bg-accent/[0.04] p-3">
-          <p className="text-[12px] text-white/70">Rodando… <strong className="text-accent">{progresso.feito}/{progresso.total}</strong> questões avaliadas (o placar vai preenchendo conforme avança).</p>
+          <p className="text-[12px] text-white/70">Rodando{progresso.rodada ? ` (${progresso.rodada})` : ""}… <strong className="text-accent">{progresso.feito}/{progresso.total}</strong> questões avaliadas (o placar vai preenchendo conforme avança).</p>
           <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
             <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${Math.round((progresso.feito / Math.max(1, progresso.total)) * 100)}%` }} />
           </div>
