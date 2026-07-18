@@ -21,15 +21,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Assistente/OpenAI indisponível." }, { status: 503 });
   }
 
-  let somenteSentinelas = false;
-  try { somenteSentinelas = !!(await req.json())?.somenteSentinelas; } catch {}
-  const banco = somenteSentinelas ? EVAL_SENTINELAS : EVAL_QUESTOES;
+  // Roda em LOTES (o cliente chama de N em N) para não estourar o tempo da função serverless.
+  let somenteSentinelas = false, offset = 0, limit = 100;
+  try {
+    const b = await req.json();
+    somenteSentinelas = !!b?.somenteSentinelas;
+    if (Number.isFinite(b?.offset)) offset = Math.max(0, Math.floor(b.offset));
+    if (Number.isFinite(b?.limit)) limit = Math.max(1, Math.min(100, Math.floor(b.limit)));
+  } catch {}
+  const base = somenteSentinelas ? EVAL_SENTINELAS : EVAL_QUESTOES;
+  const lote = base.slice(offset, offset + limit);
 
   const supabase = createServiceClient();
   const openai = getOpenAI();
   const resultados: Nota[] = [];
 
-  for (const q of banco) {
+  for (const q of lote) {
     try {
       const { resposta, fontes } = await handleMedicalQuery(supabase, openai, q.pergunta);
       const fontesTxt = Array.isArray(fontes) ? fontes.map((f) => (typeof f === "string" ? f : (f as { titulo?: string }).titulo ?? "")).filter(Boolean).join("; ") : "";
@@ -44,18 +51,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const n = resultados.length || 1;
-  const media = (k: (r: Nota) => number) => Math.round(resultados.reduce((s, r) => s + k(r), 0) / n);
-  const resumo = {
-    total: resultados.length,
-    aprovadas: resultados.filter((r) => r.aprovado).length,
-    errosGraves: resultados.filter((r) => r.erroGrave).length,
-    dosesErradas: resultados.filter((r) => r.doseOk === false).length,
-    correcao: media((r) => r.correcao),
-    cobertura: media((r) => r.cobertura),
-    fidelidade: media((r) => r.fidelidade),
-    citouFonte: resultados.filter((r) => r.citouFonte).length,
-  };
-
-  return NextResponse.json({ resumo, resultados });
+  // Devolve só o LOTE + o total do banco. O cliente acumula os lotes e monta o placar final.
+  return NextResponse.json({ resultados, total: base.length, offset, limit });
 }

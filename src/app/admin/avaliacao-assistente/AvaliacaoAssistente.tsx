@@ -24,26 +24,56 @@ function Metric({ label, value, suf = "%", bom }: { label: string; value: number
   );
 }
 
+function montarResumo(rs: Nota[]): Resumo {
+  const n = rs.length || 1;
+  const media = (k: (r: Nota) => number) => Math.round(rs.reduce((s, r) => s + k(r), 0) / n);
+  return {
+    total: rs.length,
+    aprovadas: rs.filter((r) => r.aprovado).length,
+    errosGraves: rs.filter((r) => r.erroGrave).length,
+    dosesErradas: rs.filter((r) => r.doseOk === false).length,
+    correcao: media((r) => r.correcao),
+    cobertura: media((r) => r.cobertura),
+    fidelidade: media((r) => r.fidelidade),
+    citouFonte: rs.filter((r) => r.citouFonte).length,
+  };
+}
+
+const BATCH = 6; // questões por chamada — evita estourar o tempo da função serverless
+
 export default function AvaliacaoAssistente() {
   const [rodando, setRodando] = useState(false);
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [resultados, setResultados] = useState<Nota[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [progresso, setProgresso] = useState<{ feito: number; total: number } | null>(null);
 
   async function rodar(somenteSentinelas: boolean) {
-    setRodando(true); setErro(null); setResumo(null); setResultados(null);
+    setRodando(true); setErro(null); setResumo(null); setResultados(null); setProgresso(null);
+    const acc: Nota[] = [];
+    let offset = 0, total = Infinity;
     try {
-      const r = await fetch("/api/admin/eval-assistente", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ somenteSentinelas }),
-      });
-      const j = await r.json();
-      if (!r.ok) { setErro(j.error ?? "Falha ao rodar a avaliação."); return; }
-      setResumo(j.resumo); setResultados(j.resultados);
+      while (offset < total) {
+        const r = await fetch("/api/admin/eval-assistente", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ somenteSentinelas, offset, limit: BATCH }),
+        });
+        const raw = await r.text();
+        let j: { resultados?: Nota[]; total?: number; error?: string };
+        try { j = JSON.parse(raw); }
+        catch { setErro("O servidor demorou demais ou reiniciou. Tente as sentinelas (mais rápido) ou rode de novo."); return; }
+        if (!r.ok) { setErro(j.error ?? "Falha ao rodar a avaliação."); return; }
+        acc.push(...(j.resultados ?? []));
+        total = j.total ?? acc.length;
+        offset += BATCH;
+        setProgresso({ feito: Math.min(acc.length, total), total });
+        setResultados([...acc]);
+        setResumo(montarResumo(acc));
+      }
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Falha de rede.");
     } finally {
-      setRodando(false);
+      setRodando(false); setProgresso(null);
     }
   }
 
@@ -63,6 +93,15 @@ export default function AvaliacaoAssistente() {
           </button>
         </div>
       </div>
+
+      {progresso && rodando && (
+        <div className="rounded-xl border border-accent/20 bg-accent/[0.04] p-3">
+          <p className="text-[12px] text-white/70">Rodando… <strong className="text-accent">{progresso.feito}/{progresso.total}</strong> questões avaliadas (o placar vai preenchendo conforme avança).</p>
+          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="h-full rounded-full bg-accent transition-all" style={{ width: `${Math.round((progresso.feito / Math.max(1, progresso.total)) * 100)}%` }} />
+          </div>
+        </div>
+      )}
 
       {erro && <p className="text-sm text-rose-300">{erro}</p>}
 
