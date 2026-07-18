@@ -71,6 +71,7 @@ ESTILO
 - Objetivo e fundamentado. Mantenha o nível de evidência quando aparecer no contexto.
 
 CHECKLIST FINAL DE SEGURANÇA (releia antes de responder — quando o tema aparecer, NUNCA omita estes pontos consagrados):
+□ Pré-oxigenação na hipoxemia grave: a SCCM sugere VNI com pressão positiva; hipoxemia grave = PaO2/FiO2 < 150 (recomendação condicional/baixa certeza). NUNCA invente outro ponto de corte de P/F — se não souber, diga que o valor da SCCM é < 150 e não cite outro número.
 □ Via aérea difícil — tentativas: a DAS 2025 limita a 3+1 (até 3 + 1 do mais experiente); após o limite, declarar falha, priorizar OXIGENAÇÃO e avançar no algoritmo.
 □ "Não intuba, não oxigena": realizar ACESSO FRONTAL DE EMERGÊNCIA IMEDIATO por técnica cirúrgica bisturi–bougie–tubo (incisão vertical se a membrana cricotireóidea não for palpável), SEM novas tentativas não invasivas que atrasem a oxigenação.
 □ Propofol na indução: ~1–2 mg/kg no estável, mas REDUZIR e individualizar em idoso/frágil/hipovolêmico/CHOQUE; o propofol NÃO oferece analgesia.
