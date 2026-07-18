@@ -54,6 +54,32 @@ export const INVARIANTES: Invariante[] = [
     severidade: "alta",
   },
   {
+    id: "confirmacao-capnografia",
+    tema: "Confirmação do tubo — capnografia",
+    gatilhos:
+      /confirmar? (a )?(posi[çc][ãa]o|intuba[çc][ãa]o|posicionamento)|posi[çc][ãa]o (traqueal|do tubo)|confirmar? o tubo|principal m[ée]todo.{0,30}(confirma|tubo|traqueal)/i,
+    // presente = a resposta cita a capnografia (método objetivo principal de confirmação).
+    presente: (r) => tem(r, /capnograf/i),
+    exigencia:
+      "Sobre confirmar a posição do tubo, a resposta DEVE citar a CAPNOGRAFIA com curva contínua como método objetivo principal (ausculta/expansão/condensação/saturação são complementares e não substituem); ausência persistente de curva → intubação esofágica até prova em contrário.",
+    canonico:
+      "**Confirmação do tubo:** a **capnografia com curva contínua** é o método objetivo principal — ausculta, expansão torácica, condensação e saturação são complementares e **não substituem**. Ausência persistente de curva capnográfica → tratar como **intubação esofágica até prova em contrário**.",
+    severidade: "alta",
+  },
+  {
+    id: "tentativas-das-3mais1",
+    tema: "Via aérea difícil — limite de tentativas (DAS)",
+    gatilhos:
+      /quantas tentativas|n[úu]mero de tentativas|limite de tentativas|tentativas.{0,25}(aceit|permit|intuba|laringoscop|\bdas\b)/i,
+    // presente = a resposta traz a regra 3+1 da DAS (3 + 1 do mais experiente).
+    presente: (r) => tem(r, /3\s*\+\s*1|tr[êe]s\s*\+\s*1|3\s*mais\s*(1|uma)|tr[êe]s mais (uma|1)/i),
+    exigencia:
+      "Sobre o número/limite de tentativas de intubação, a resposta DEVE trazer a regra da DAS 2025: no máximo 3 tentativas + 1 pelo profissional mais experiente (3+1), cada tentativa com uma mudança que aumente a chance. NÃO afirmar outro número (ex.: '3 por operador') como regra.",
+    canonico:
+      "**Limite de tentativas (DAS 2025):** no máximo **3 tentativas + 1** pelo profissional mais experiente (regra **3+1**). Cada tentativa deve trazer uma MUDANÇA que aumente a chance de sucesso; não é obrigatório esgotar o limite (hipoxemia/trauma → progredir antes). Atingido o limite: declarar falha, priorizar OXIGENAÇÃO e avançar no algoritmo.",
+    severidade: "alta",
+  },
+  {
     id: "propofol-analgesia-instavel",
     tema: "Propofol — sem analgesia e redução no instável",
     gatilhos: /propofol/i,
