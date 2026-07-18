@@ -54,6 +54,24 @@ export const INVARIANTES: Invariante[] = [
     severidade: "alta",
   },
   {
+    id: "bloqueio-exige-hipnose",
+    tema: "Bloqueio neuromuscular exige hipnose — risco de consciência sob paralisia",
+    gatilhos:
+      /rocur[ôo]nio|succinilcolina|bloquead(or|ores) neuromuscular|bloqueio neuromuscular|consci[êe]ncia sob paralisia|sob paralisia|paralisia (muscular|farmacol[óo]gica|neuromuscular)/i,
+    // presente = a resposta sinaliza que o bloqueador não dá consciência/analgesia e exige
+    // hipnose/sedação (antes e mantida após), ou cita explicitamente o risco de awareness.
+    presente: (r) =>
+      tem(
+        r,
+        /consci[êe]ncia sob paralisia|awareness|paralisia sem (hipnose|sedaç)|n[ãa]o (produz|confere|garante|d[áa]|oferece)[^.]{0,25}(inconsci|hipnose|amn[ée]sia|sedaç|analgesia)|garantir (hipnose|sedaç|inconsci)|hipnose adequada|sedaç[ãa]o[^.]{0,25}(imediat|manter|cont[íi]nua|ap[óo]s a? ?intuba)/i,
+      ),
+    exigencia:
+      "Quando há bloqueador neuromuscular (rocurônio/succinilcolina) na ISR, a resposta DEVE deixar claro que o bloqueador NÃO produz inconsciência/amnésia/analgesia — exige HIPNOSE adequada e SEDAÇÃO/ANALGESIA imediata e mantida após a intubação (sobretudo rocurônio, de ação prolongada), sob risco de CONSCIÊNCIA SOB PARALISIA (awareness).",
+    canonico:
+      "**Bloqueio neuromuscular exige hipnose:** o bloqueador **não** produz inconsciência, amnésia ou analgesia — garanta **hipnose adequada** antes/junto e **sedação/analgesia imediata e contínua após a intubação** (sobretudo com rocurônio, de ação prolongada), sob risco de **consciência sob paralisia (awareness)**.",
+    severidade: "alta",
+  },
+  {
     id: "confirmacao-capnografia",
     tema: "Confirmação do tubo — capnografia",
     gatilhos:
