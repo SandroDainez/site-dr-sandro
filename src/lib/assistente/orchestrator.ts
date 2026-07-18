@@ -150,7 +150,7 @@ export async function handleMedicalQuery(
     gerar(
       `CORREÇÃO OBRIGATÓRIA (a resposta anterior omitiu/contrariou pontos NÃO NEGOCIÁVEIS de segurança). Refaça a resposta completa, mantendo o que estava certo, e garanta EXPLICITAMENTE cada ponto abaixo:\n${regras.map((i) => `- ${i.exigencia}`).join("\n")}`,
     );
-  const aud = await auditarResposta(openai, pergunta, resposta, regenerar);
+  const aud = await auditarResposta(pergunta, resposta, regenerar);
   resposta = aud.resposta;
 
   // STEP 5 — guardrails: PMID inventado é removido; resposta clínica sem fonte recebe aviso.
