@@ -4,6 +4,8 @@ import { MEDICAL_ASSISTANT_SYSTEM_PROMPT } from "./system-prompt";
 import { searchInternalLibrary, libraryIsConfident, unirHits, type LibraryHit } from "./search-library";
 import { searchPubMed, type PubmedHit } from "./search-pubmed";
 import { stripFabricatedPmids, garantirDisclaimer } from "./guardrails";
+import { auditarResposta } from "./auditor";
+import type { Invariante } from "./safety-invariants";
 
 export type Fonte = { titulo: string; url: string | null; tipo: string; pmid?: string };
 export type AssistResult = {
@@ -123,23 +125,40 @@ export async function handleMedicalQuery(
     ? `CONTEXTO RECUPERADO: (nenhum trecho da biblioteca nem do PubMed cobriu esta pergunta)\n\nPERGUNTA DO USUÁRIO:\n${pergunta}`
     : `CONTEXTO RECUPERADO:\n${contexto}\n\nPERGUNTA DO USUÁRIO:\n${pergunta}`;
 
-  const r = await openai.chat.completions.create({
-    model: AI_MODELS.chat,
-    temperature: 0, // determinístico p/ segurança clínica + consistência entre respostas (menos ruído)
-    max_tokens: 1800,
-    messages: [
-      { role: "system", content: MEDICAL_ASSISTANT_SYSTEM_PROMPT },
-      { role: "user", content: userContent },
-    ],
-  });
-  let resposta = r.choices[0].message.content ?? "";
+  // Writer reusável: gera a resposta com o system prompt (+ regras obrigatórias extra, quando
+  // o auditor pede regeneração). Mesma base/contexto/temperatura — só reforça o que faltou.
+  const gerar = async (systemExtra?: string): Promise<string> => {
+    const system = systemExtra ? `${MEDICAL_ASSISTANT_SYSTEM_PROMPT}\n\n${systemExtra}` : MEDICAL_ASSISTANT_SYSTEM_PROMPT;
+    const r = await openai.chat.completions.create({
+      model: AI_MODELS.chat,
+      temperature: 0, // determinístico p/ segurança clínica + consistência entre respostas (menos ruído)
+      max_tokens: 1800,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: userContent },
+      ],
+    });
+    return r.choices[0].message.content ?? "";
+  };
 
-  // STEP 4 — guardrails: PMID inventado é removido; resposta clínica sem fonte recebe aviso.
+  let resposta = await gerar();
+
+  // STEP 4 — AUDITOR: garante que ressalvas consagradas (não intuba/não oxigena, SDRA 6 mL/kg,
+  // indução no choque...) não sejam omitidas nem contrariadas. Regenera 1x com a regra obrigatória
+  // e, se ainda faltar, anexa o texto canônico (backstop determinístico). Só roda quando o tema aparece.
+  const regenerar = (regras: Invariante[]): Promise<string> =>
+    gerar(
+      `CORREÇÃO OBRIGATÓRIA (a resposta anterior omitiu/contrariou pontos NÃO NEGOCIÁVEIS de segurança). Refaça a resposta completa, mantendo o que estava certo, e garanta EXPLICITAMENTE cada ponto abaixo:\n${regras.map((i) => `- ${i.exigencia}`).join("\n")}`,
+    );
+  const aud = await auditarResposta(openai, pergunta, resposta, regenerar);
+  resposta = aud.resposta;
+
+  // STEP 5 — guardrails: PMID inventado é removido; resposta clínica sem fonte recebe aviso.
   const pmidsReais = new Set(pubmed.map((p) => p.pmid));
   resposta = stripFabricatedPmids(resposta, pmidsReais).texto;
   resposta = garantirDisclaimer(resposta, lib.length > 0 || pubmed.length > 0);
 
-  // STEP 5 — fontes para a UI (internas + PubMed), sem duplicar título.
+  // STEP 6 — fontes para a UI (internas + PubMed), sem duplicar título.
   // Link da fonte interna: só expõe URL EXTERNA real (diretriz/DOI/site). NÃO linka o PDF
   // do livro no blob privado (dava "Forbidden" e exporia obra com direitos autorais) nem o
   // placeholder "/assistente": nesses casos o chip é só ATRIBUIÇÃO (de qual obra veio).

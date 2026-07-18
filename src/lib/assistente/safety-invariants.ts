@@ -1,0 +1,63 @@
+// INVARIANTES DE SEGURANÇA do assistente clínico.
+// São ressalvas CONSAGRADAS que MUDAM a conduta e que, quando o tema aparece, a resposta
+// NUNCA pode omitir nem contrariar. O prompt já pede isso — mas prompt é probabilístico.
+// O auditor (auditor.ts) usa esta lista para GARANTIR de forma determinística que a ressalva
+// esteja presente, regenerando a resposta e, no limite, anexando o texto canônico.
+//
+// Como crescer: para um novo tema (SCA, sepse, AVC...), basta adicionar um item aqui com
+// seus gatilhos, a exigência (o que o auditor confere) e o texto canônico (o que se garante).
+// NÃO precisa mexer no pipeline.
+
+export type Invariante = {
+  id: string;
+  tema: string;
+  // O tema apareceu? Casa na PERGUNTA ou na RESPOSTA. Barato — só dispara o auditor quando bate.
+  gatilhos: RegExp;
+  // O que a resposta PRECISA afirmar (instrução para o checador-IA julgar presença/contradição).
+  exigencia: string;
+  // Texto consagrado a GARANTIR na resposta se o checador achar que faltou (backstop determinístico).
+  canonico: string;
+  severidade: "alta" | "media";
+};
+
+export const INVARIANTES: Invariante[] = [
+  {
+    id: "fona-das",
+    tema: "Via aérea — 'não intuba, não oxigena' (CICO/FONA)",
+    gatilhos:
+      /n[ãa]o\s+intuba.{0,15}n[ãa]o\s+oxigena|cannot intubate.{0,15}cannot oxygenate|\bcico\b|acesso frontal|front[- ]of[- ]neck|\bfona\b|cricotire|cricotomia|via a[ée]rea de resgate|via a[ée]rea cir[úu]rgica/i,
+    exigencia:
+      "Em 'não intuba, não oxigena', a resposta DEVE indicar ACESSO FRONTAL DE EMERGÊNCIA IMEDIATO ao pescoço pela TÉCNICA CIRÚRGICA da DAS (bisturi–bougie–tubo), sem novas tentativas não invasivas que atrasem a oxigenação. Se indicar apenas punção/cânula/dispositivo, ou só disser 'cricotireoidostomia' sem a técnica cirúrgica bisturi–bougie–tubo, ou mandar tentar de novo antes → está FALTANDO/CONTRADIZ.",
+    canonico:
+      "**Acesso frontal de emergência (técnica cirúrgica — DAS 2025):** realize IMEDIATAMENTE por **bisturi–bougie–tubo** (incisão vertical na pele quando a membrana cricotireóidea não for palpável). Não retarde com novas tentativas de laringoscopia ou dispositivos supraglóticos — a prioridade é oxigenar.",
+    severidade: "alta",
+  },
+  {
+    id: "vt-sdra-peso-predito",
+    tema: "Ventilação — volume corrente na SDRA",
+    gatilhos:
+      /\bsdra\b|\bsara\b|\bards\b|volume corrente|ventila[çc][ãa]o protetora|peso (corporal )?predito|mL\s*\/\s*kg|ml\/kg/i,
+    exigencia:
+      "Quando se fala de volume corrente/ventilação protetora, a resposta DEVE dizer que o volume corrente é calculado pelo PESO PREDITO (não real) e que na SDRA se inicia ~6 mL/kg de peso predito. Apresentar 8 mL/kg como ALVO PADRÃO na SDRA, ou usar peso real → CONTRADIZ. Não mencionar o alvo de ~6 mL/kg na SDRA quando o tema é ventilação na SDRA → FALTANDO.",
+    canonico:
+      "**Volume corrente na SDRA:** calcule pelo **peso corporal predito** (nunca peso real) e inicie em **~6 mL/kg de peso predito**, ajustando por platô/driving pressure. **8 mL/kg não é alvo padrão na SDRA.**",
+    severidade: "alta",
+  },
+  {
+    id: "inducao-choque",
+    tema: "Indução no choque",
+    gatilhos:
+      /choqu\w+|hipotens\w+|instab\w+ hemodin|vasopressor|induç[ãa]o.{0,20}(choque|hipoten|inst[aá]vel)/i,
+    exigencia:
+      "Ao induzir no paciente em choque/instável, a resposta DEVE: ter vasopressor PREPARADO/disponível antes da indução (iniciar/manter infusão na perfusão inadequada) e REDUZIR/individualizar a dose do indutor. Afirmar dose plena de indutor como segura no choque, sem qualquer redução/ressalva → CONTRADIZ.",
+    canonico:
+      "**Indução no choque:** tenha **vasopressor preparado e disponível ANTES da indução** (mantenha/inicie a infusão se a perfusão estiver inadequada) e **reduza/individualize a dose do indutor** (o propofol não oferece analgesia e agrava a hipotensão). Evite bolus de cristaloide de rotina só para 'cobrir' a indução.",
+    severidade: "alta",
+  },
+];
+
+// Filtra os invariantes cujo tema apareceu na pergunta ou na resposta (gate barato).
+export function invariantesDisparados(pergunta: string, resposta: string): Invariante[] {
+  const alvo = `${pergunta}\n${resposta}`;
+  return INVARIANTES.filter((inv) => inv.gatilhos.test(alvo));
+}
