@@ -30,6 +30,7 @@ import {
   Menu,
   Brain,
   Feather,
+  ClipboardCheck,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
 
@@ -48,6 +49,7 @@ const navGroups = [
       { href: "/admin/conteudo-automatico", label: "Conteúdo automático (IA)", icon: Sparkles, hint: "Agentes de IA: atualizações clínicas semanais e eventos científicos. Status e executar agora." },
       { href: "/admin/referencias", label: "Biblioteca do Assistente (IA)", icon: BookOpen, hint: "Livros, artigos, diretrizes e PDFs que alimentam o assistente clínico. Reindexar após adicionar." },
       { href: "/admin/melhoria", label: "Sugestões de melhoria (IA)", icon: Sparkles, hint: "Relatório: o que os usuários buscam e o assistente não responde → o que adicionar ao portal." },
+      { href: "/admin/avaliacao-assistente", label: "Avaliação do Assistente", icon: ClipboardCheck, hint: "A 'prova' do assistente: banco de perguntas com gabarito, notas de correção/dose/fonte. Confiança medida, não prometida." },
     ],
   },
   {
