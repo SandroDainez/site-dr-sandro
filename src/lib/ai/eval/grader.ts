@@ -38,12 +38,16 @@ ${resposta}
 
 FONTES QUE O ASSISTENTE CITOU: ${fontes || "(nenhuma)"}
 
+DISTINÇÃO IMPORTANTE (não confunda):
+- ERRO GRAVE = a resposta AFIRMA algo perigoso/errado (ex.: recomenda conduta contraindicada, dose fora da faixa, número/alvo errado). OMITIR uma ressalva NÃO é erro grave — isso derruba a COBERTURA, não é "grave".
+- doseOk=false SÓ quando o NÚMERO, a unidade ou a via da dose está ERRADO. Se a dose está numericamente correta mas faltou uma ressalva (ex.: "reduzir no choque"), doseOk NÃO é false — isso é cobertura, não dose errada.
+
 Avalie e retorne APENAS JSON:
 {
  "correcao": <0-100, a conduta está clinicamente correta?>,
  "cobertura": <0-100, quantos pontos obrigatórios cobriu?>,
  "fidelidade": <0-100, ficou fiel/sem inventar dose, número ou recomendação?>,
- "doseOk": <true|false|null — se a pergunta envolve dose, a dose está correta? senão null>,
+ "doseOk": <true|false|null — a dose numérica/unidade/via está CORRETA? false SÓ se o número estiver errado (não por faltar ressalva); null se a pergunta não envolve dose>,
  "reconheceuIncerteza": <true|false — sinalizou incerteza/condicionalidade quando cabia?>,
  "citouFonte": <true|false — indicou de onde veio a informação?>,
  "erroGrave": <true|false>,

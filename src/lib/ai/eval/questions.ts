@@ -324,7 +324,9 @@ export const EVAL_QUESTOES: EvalQuestao[] = [
       "~1 a 2 mg/kg no estável, MAS frequentemente excessivo em idoso/frágil/hipovolêmico/choque — reduzir e individualizar",
       "não existe % universal de redução para instáveis",
     ],
-    errosGraves: ["recomendar 1-2 mg/kg de propofol sem ressalva no paciente em choque/instável"],
+    // A dose 1-2 mg/kg está CORRETA; omitir a ressalva de reduzir no choque baixa a cobertura,
+    // mas não é erro grave nem dose errada. Grave só se recomendar dose PLENA como segura no choque.
+    errosGraves: ["afirmar que a dose plena de propofol é segura no choque, sem qualquer redução/ressalva"],
     fontes: ["Bula/fonte farmacológica", SCCM],
   },
   {
