@@ -158,12 +158,12 @@ export const INVARIANTES: Invariante[] = [
     id: "minoca-dapt-nao-automatico",
     tema: "SCA — MINOCA é diagnóstico de trabalho, sem DAPT automático",
     gatilhos: /\bminoca\b|coron[áa]ri\w* não obstrutiv|artérias coronárias não obstrutivas|sem estenose coronariana obstrutiva|coronariografia sem estenose/i,
-    // presente = trata MINOCA como diagnóstico de trabalho / investigar mecanismo, ou nega DAPT automático.
+    // presente = a resposta traz o ponto CRÍTICO de segurança: NÃO prescrever dupla antiagregação
+    // (DAPT) automaticamente no MINOCA. É o que o gabarito cobra; se faltar, anexa a canônica inteira
+    // (que também cobre diagnóstico de trabalho + investigar mecanismo + registrar incerteza).
     presente: (r) =>
-      tem(r, /diagn[óo]stico de trabalho/i) ||
-      tem(r, /investiga\w+[^.]{0,25}(mecanismo|etiolog|causa)/i) ||
-      tem(r, /(dirigi\w+|direcionad\w+|tratar)[^.]{0,20}mecanismo/i) ||
-      tem(r, /n[ãa]o[^.]{0,50}autom[áa]tic/i),
+      tem(r, /antiagrega|\bdapt\b|antitromb/i) &&
+      tem(r, /n[ãa]o[^.]{0,80}(autom|rotin|emp[íi]ric|indiscrimin|todo)/i),
     exigencia:
       "Em MINOCA/coronárias não obstrutivas, a resposta DEVE tratar MINOCA como diagnóstico de TRABALHO (não etiologia definitiva), indicar INVESTIGAR o mecanismo e NÃO prescrever dupla antiagregação (DAPT) automaticamente — dirigir o tratamento ao mecanismo identificado.",
     canonico:
