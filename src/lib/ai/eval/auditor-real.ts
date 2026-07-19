@@ -42,7 +42,7 @@ Responda APENAS JSON:
 export async function auditarRespostaReal(pergunta: string, resposta: string, fontes: string): Promise<NotaReal> {
   // Sinal determinístico: alguma ressalva consagrada faltando? (não deveria, pois o pipeline real já
   // roda o auditor — se faltar aqui é sinal de bug/regressão que vale destacar).
-  const disparados = invariantesDisparados(pergunta, resposta);
+  const disparados = invariantesDisparados(pergunta);
   const faltando = invariantesFaltando(disparados, resposta).map((i) => `Ressalva consagrada ausente: ${i.tema}`);
 
   try {

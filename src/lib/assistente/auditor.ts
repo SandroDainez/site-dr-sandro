@@ -16,7 +16,7 @@ export async function auditarResposta(
   resposta: string,
   regenerar: (regras: Invariante[]) => Promise<string>,
 ): Promise<AuditResult> {
-  const disparados = invariantesDisparados(pergunta, resposta);
+  const disparados = invariantesDisparados(pergunta);
   if (disparados.length === 0) return { resposta, regenerou: false, anexou: [] };
 
   let faltando = invariantesFaltando(disparados, resposta);

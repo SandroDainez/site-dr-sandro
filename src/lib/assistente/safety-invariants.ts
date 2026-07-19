@@ -70,7 +70,7 @@ export const INVARIANTES: Invariante[] = [
     id: "bloqueio-exige-hipnose",
     tema: "Bloqueio neuromuscular exige hipnose — risco de consciência sob paralisia",
     gatilhos:
-      /rocur[ôo]nio|succinilcolina|bloquead(or|ores) neuromuscular|bloqueio neuromuscular|consci[êe]ncia sob paralisia|sob paralisia|paralisia (muscular|farmacol[óo]gica|neuromuscular)/i,
+      /rocur[ôo]nio|succinilcolina|bloquead(or|ores) neuromuscular|bloqueio neuromuscular|consci[êe]ncia sob paralisia|sob paralisia|paralisia (muscular|farmacol[óo]gica|neuromuscular)|sedaç[ãa]o e analgesia/i,
     // presente = a resposta sinaliza que o bloqueador não dá consciência/analgesia e exige
     // hipnose/sedação (antes e mantida após), ou cita explicitamente o risco de awareness.
     presente: (r) =>
@@ -172,10 +172,12 @@ export const INVARIANTES: Invariante[] = [
   },
 ];
 
-// Filtra os invariantes cujo tema apareceu na pergunta ou na resposta (gate barato).
-export function invariantesDisparados(pergunta: string, resposta: string): Invariante[] {
-  const alvo = `${pergunta}\n${resposta}`;
-  return INVARIANTES.filter((inv) => inv.gatilhos.test(alvo));
+// Filtra os invariantes cujo tema apareceu na PERGUNTA (o que o usuário realmente perguntou).
+// Só a pergunta — NÃO a resposta: a resposta pode conter frases soltas de outro tema (ex.: RAG
+// puxou trecho de via aérea numa pergunta de cardiologia) e disparar uma ressalva fora de contexto.
+// A pergunta define o assunto; assim cada invariante fica restrito ao seu domínio.
+export function invariantesDisparados(pergunta: string): Invariante[] {
+  return INVARIANTES.filter((inv) => inv.gatilhos.test(pergunta));
 }
 
 // Dos invariantes disparados, quais a resposta NÃO cumpre (determinístico) — só alta severidade.
