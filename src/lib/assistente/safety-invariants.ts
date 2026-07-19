@@ -139,6 +139,37 @@ export const INVARIANTES: Invariante[] = [
       "**Indução no choque:** tenha **vasopressor preparado e disponível ANTES da indução** (mantenha/inicie a infusão se a perfusão estiver inadequada) e **reduza/individualize a dose do indutor** (o propofol não oferece analgesia e agrava a hipotensão). Evite bolus de cristaloide de rotina só para 'cobrir' a indução.",
     severidade: "alta",
   },
+  // ————— SCA (Síndromes Coronarianas Agudas) —————
+  {
+    id: "bre-novo-nao-stemi",
+    tema: "SCA — bloqueio de ramo esquerdo novo não é STEMI",
+    gatilhos: /bloqueio de ramo|\bbre\b|ritmo estimulado|ritmo de marca-?passo/i,
+    // presente = a resposta diz que BRE novo isolado NÃO é STEMI/infarto, ou cita critérios de concordância (Sgarbossa).
+    presente: (r) =>
+      tem(r, /isolad[oa]/i) && tem(r, /n[ãa]o[^.]{0,60}(stemi|infarto)/i) ||
+      tem(r, /sgarbossa|concord[âa]ncia|discord[âa]ncia (proporcional|excessiva)/i),
+    exigencia:
+      "Quando há bloqueio de ramo (esp. BRE) ou ritmo estimulado, a resposta DEVE afirmar que bloqueio de ramo esquerdo NOVO isolado NÃO é critério de STEMI nem diagnóstico de infarto; avaliar com clínica, ECGs prévios e critérios de concordância/discordância (Sgarbossa/Smith).",
+    canonico:
+      "**Bloqueio de ramo esquerdo (BRE) novo:** isoladamente **não** é critério de STEMI nem diagnóstico de infarto. Integre clínica, ECGs prévios e critérios de **concordância/discordância (Sgarbossa / Smith-modificado)** — não indique reperfusão apenas pelo BRE novo.",
+    severidade: "alta",
+  },
+  {
+    id: "minoca-dapt-nao-automatico",
+    tema: "SCA — MINOCA é diagnóstico de trabalho, sem DAPT automático",
+    gatilhos: /\bminoca\b|coronárias não obstrutivas|artérias coronárias não obstrutivas/i,
+    // presente = trata MINOCA como diagnóstico de trabalho / investigar mecanismo, ou nega DAPT automático.
+    presente: (r) =>
+      tem(r, /diagn[óo]stico de trabalho/i) ||
+      tem(r, /investiga\w+[^.]{0,25}(mecanismo|etiolog|causa)/i) ||
+      tem(r, /(dirigi\w+|direcionad\w+|tratar)[^.]{0,20}mecanismo/i) ||
+      tem(r, /n[ãa]o[^.]{0,50}autom[áa]tic/i),
+    exigencia:
+      "Em MINOCA/coronárias não obstrutivas, a resposta DEVE tratar MINOCA como diagnóstico de TRABALHO (não etiologia definitiva), indicar INVESTIGAR o mecanismo e NÃO prescrever dupla antiagregação (DAPT) automaticamente — dirigir o tratamento ao mecanismo identificado.",
+    canonico:
+      "**MINOCA:** é um **diagnóstico de trabalho** (IAM com coronárias não obstrutivas), **não** uma etiologia definitiva — **investigue o mecanismo** (ruptura/erosão, SCAD, embolia, vasoespasmo, microvascular; eco, RM precoce, OCT/IVUS seletivo) e **direcione o tratamento a ele**. Não prescreva **dupla antiagregação automaticamente**; registre a incerteza quando o mecanismo for indeterminado.",
+    severidade: "alta",
+  },
 ];
 
 // Filtra os invariantes cujo tema apareceu na pergunta ou na resposta (gate barato).
