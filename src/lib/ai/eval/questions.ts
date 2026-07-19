@@ -4,6 +4,10 @@
 // Tema fechado: ISR (Intubação em Sequência Rápida) — 68 questões.
 // `sentinela: true` = subconjunto de risco alto/dose p/ rodar rápido no dia a dia.
 
+// EVAL_SCA vem de outro arquivo (banco por tema). Import de VALOR; questions-sca só importa o
+// TIPO daqui (erasado em runtime), então não há ciclo em tempo de execução.
+import { EVAL_SCA } from "./questions-sca";
+
 export type EvalQuestao = {
   id: string;
   tema: string;
@@ -764,4 +768,23 @@ export const EVAL_QUESTOES: EvalQuestao[] = [
 ];
 
 // Subconjunto rápido (risco alto / dose / segurança crítica) p/ rodar no dia a dia.
+// Retrocompat: EVAL_SENTINELAS = sentinelas do ISR (o banco histórico).
 export const EVAL_SENTINELAS = EVAL_QUESTOES.filter((q) => q.sentinela);
+
+// ————— MULTI-TEMA —————
+// EVAL_QUESTOES é o banco ISR (histórico). Aqui juntamos todos os temas e expomos helpers
+// para o eval rodar POR TEMA (ISR, SCA, …). Adicionar um tema = criar questions-<tema>.ts,
+// importar acima e concatenar aqui; o resto (rota + UI) já lê por tema.
+export const EVAL_TODAS: EvalQuestao[] = [...EVAL_QUESTOES, ...EVAL_SCA];
+
+// Temas na ordem de primeira aparição (p/ o seletor da UI).
+export const TEMAS: string[] = EVAL_TODAS.reduce<string[]>((acc, q) => {
+  if (!acc.includes(q.tema)) acc.push(q.tema);
+  return acc;
+}, []);
+
+// Banco de um tema (todas as questões dele). Se o tema não existir, cai no ISR.
+export function bancoDoTema(tema?: string | null): EvalQuestao[] {
+  const t = tema && TEMAS.includes(tema) ? tema : TEMAS[0];
+  return EVAL_TODAS.filter((q) => q.tema === t);
+}

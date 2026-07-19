@@ -65,13 +65,17 @@ function agregar(runs: Nota[][]): Nota[] {
   });
 }
 
-export default function AvaliacaoAssistente() {
+type Contagem = { total: number; sentinelas: number };
+
+export default function AvaliacaoAssistente({ temas, contagens }: { temas: string[]; contagens: Record<string, Contagem> }) {
   const [rodando, setRodando] = useState(false);
+  const [tema, setTema] = useState(temas[0] ?? "ISR");
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [resultados, setResultados] = useState<Nota[] | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState<{ feito: number; total: number; rodada?: string } | null>(null);
   const [robusto, setRobusto] = useState(false); // "melhor de 3" — mata o ruído
+  const cont = contagens[tema] ?? { total: 0, sentinelas: 0 };
 
   // Uma passada completa (em lotes). Lança erro em falha (o chamador trata).
   async function rodarUmaVez(somenteSentinelas: boolean, onProg: (feito: number, total: number) => void): Promise<Nota[]> {
@@ -80,7 +84,7 @@ export default function AvaliacaoAssistente() {
     while (offset < total) {
       const r = await fetch("/api/admin/eval-assistente", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ somenteSentinelas, offset, limit: BATCH }),
+        body: JSON.stringify({ somenteSentinelas, tema, offset, limit: BATCH }),
       });
       const raw = await r.text();
       let j: { resultados?: Nota[]; total?: number; error?: string };
@@ -120,16 +124,24 @@ export default function AvaliacaoAssistente() {
           <p className="mt-0.5 text-xs text-white/50 max-w-xl">Faz cada pergunta do banco ao assistente real (biblioteca → PubMed → IA → guardrails) e um juiz-IA compara com o seu gabarito. <strong className="text-white/70">Sentinelas</strong> (risco alto/dose) roda rápido; <strong className="text-white/70">tudo</strong> é o exame completo (mais lento).</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
+          {temas.length > 1 && (
+            <label className="flex items-center gap-2 text-xs text-white/60">
+              Tema
+              <select value={tema} disabled={rodando} onChange={(e) => setTema(e.target.value)} className="rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5 text-sm text-white">
+                {temas.map((t) => <option key={t} value={t}>{t} ({contagens[t]?.total ?? 0})</option>)}
+              </select>
+            </label>
+          )}
           <label className="flex cursor-pointer items-center gap-2 text-xs text-white/60">
             <input type="checkbox" checked={robusto} disabled={rodando} onChange={(e) => setRobusto(e.target.checked)} className="h-4 w-4 accent-accent" />
             Melhor de 3 (mais estável, ~3× mais lento)
           </label>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => rodar(true, robusto ? 3 : 1)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50">
-              {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Rodar sentinelas
+            <button type="button" onClick={() => rodar(true, robusto ? 3 : 1)} disabled={rodando || cont.sentinelas === 0} className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent/20 disabled:opacity-50">
+              {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Rodar sentinelas ({cont.sentinelas})
             </button>
             <button type="button" onClick={() => rodar(false, robusto ? 3 : 1)} disabled={rodando} className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50">
-              {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} {rodando ? "Rodando…" : "Rodar tudo (68)"}
+              {rodando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} {rodando ? "Rodando…" : `Rodar tudo (${cont.total})`}
             </button>
           </div>
         </div>

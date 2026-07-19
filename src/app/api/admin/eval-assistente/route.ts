@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import { getOpenAI } from "@/lib/ai/openai";
 import { handleMedicalQuery } from "@/lib/assistente/orchestrator";
-import { EVAL_QUESTOES, EVAL_SENTINELAS } from "@/lib/ai/eval/questions";
+import { bancoDoTema } from "@/lib/ai/eval/questions";
 import { avaliarResposta, type Nota } from "@/lib/ai/eval/grader";
 
 // Roda a "prova" do assistente: cada questão do banco → pergunta ao assistente (mesmo pipeline
@@ -22,14 +22,16 @@ export async function POST(req: NextRequest) {
   }
 
   // Roda em LOTES (o cliente chama de N em N) para não estourar o tempo da função serverless.
-  let somenteSentinelas = false, offset = 0, limit = 100;
+  let somenteSentinelas = false, offset = 0, limit = 100, tema: string | null = null;
   try {
     const b = await req.json();
     somenteSentinelas = !!b?.somenteSentinelas;
+    if (typeof b?.tema === "string") tema = b.tema;
     if (Number.isFinite(b?.offset)) offset = Math.max(0, Math.floor(b.offset));
     if (Number.isFinite(b?.limit)) limit = Math.max(1, Math.min(100, Math.floor(b.limit)));
   } catch {}
-  const base = somenteSentinelas ? EVAL_SENTINELAS : EVAL_QUESTOES;
+  const banco = bancoDoTema(tema);
+  const base = somenteSentinelas ? banco.filter((q) => q.sentinela) : banco;
   const lote = base.slice(offset, offset + limit);
 
   const supabase = createServiceClient();

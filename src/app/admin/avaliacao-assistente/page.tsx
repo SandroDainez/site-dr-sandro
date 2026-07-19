@@ -2,10 +2,17 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import AdminHelp from "@/components/admin/AdminHelp";
-import { EVAL_QUESTOES } from "@/lib/ai/eval/questions";
+import { TEMAS, bancoDoTema } from "@/lib/ai/eval/questions";
 import AvaliacaoAssistente from "./AvaliacaoAssistente";
 
 export default function AvaliacaoAssistentePage() {
+  // Contagem por tema (total e sentinelas) p/ os rótulos dos botões.
+  const contagens = Object.fromEntries(
+    TEMAS.map((t) => {
+      const banco = bancoDoTema(t);
+      return [t, { total: banco.length, sentinelas: banco.filter((q) => q.sentinela).length }];
+    }),
+  );
   return (
     <div className="max-w-4xl pb-24">
       <div className="mb-6">
@@ -18,9 +25,9 @@ export default function AvaliacaoAssistentePage() {
         </p>
       </div>
 
-      <AdminHelp>Clique em “Rodar avaliação” e aguarde 1-2 min. Cada questão reprova na hora se houver erro grave ou dose errada. Banco atual: {EVAL_QUESTOES.length} questões (ISR completo) — cresce à medida que você adiciona temas.</AdminHelp>
+      <AdminHelp>Escolha o <strong className="text-white/70">tema</strong> e clique em rodar. Cada questão reprova na hora se houver erro grave ou dose errada. Temas disponíveis: {TEMAS.join(", ")} — cresce à medida que você adiciona bancos.</AdminHelp>
 
-      <AvaliacaoAssistente />
+      <AvaliacaoAssistente temas={TEMAS} contagens={contagens} />
     </div>
   );
 }
