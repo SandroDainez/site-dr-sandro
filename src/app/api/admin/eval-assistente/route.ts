@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     try {
       const { resposta, fontes } = await handleMedicalQuery(supabase, openai, q.pergunta);
       const fontesTxt = Array.isArray(fontes) ? fontes.map((f) => (typeof f === "string" ? f : (f as { titulo?: string }).titulo ?? "")).filter(Boolean).join("; ") : "";
-      const nota = await avaliarResposta(openai, q, resposta ?? "", fontesTxt);
+      const nota = await avaliarResposta(q, resposta ?? "", fontesTxt);
       resultados.push(nota);
     } catch (e) {
       resultados.push({

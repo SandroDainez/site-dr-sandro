@@ -1,5 +1,4 @@
-import type OpenAI from "openai";
-import { AI_MODELS } from "@/lib/ai/openai";
+import { getEvalJudge } from "@/lib/ai/openai";
 import type { EvalQuestao } from "./questions";
 
 // Juiz-IA do eval: compara a resposta do assistente com o gabarito (obrigatórios + erros graves)
@@ -58,10 +57,11 @@ Avalie e retorne APENAS JSON:
 function num(v: unknown, d = 0): number { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : d; }
 function bool(v: unknown): boolean { return v === true; }
 
-export async function avaliarResposta(openai: OpenAI, q: EvalQuestao, resposta: string, fontes: string): Promise<Nota> {
+export async function avaliarResposta(q: EvalQuestao, resposta: string, fontes: string): Promise<Nota> {
   try {
-    const r = await openai.chat.completions.create({
-      model: AI_MODELS.chat, temperature: 0, response_format: { type: "json_object" },
+    const { client, model } = getEvalJudge();
+    const r = await client.chat.completions.create({
+      model, temperature: 0, response_format: { type: "json_object" },
       messages: [{ role: "user", content: JUDGE_PROMPT(q, resposta, fontes) }],
     });
     const p = JSON.parse(r.choices[0].message.content ?? "{}");

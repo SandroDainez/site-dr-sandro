@@ -39,6 +39,23 @@ export const AI_MODELS = {
   embed: process.env.OPENAI_EMBED_MODEL || "text-embedding-3-small",
 };
 
+// JUIZ do eval (medição, NÃO produção). O juiz só compara resposta × gabarito — não é o
+// assistente testado, então pode usar um modelo mais barato sem afetar o que é medido.
+// Default = DeepSeek: tira o juiz INTEIRO da cota da OpenAI (que é o gargalo do assistente).
+// Trocável por env EVAL_JUDGE_PROVIDER=openai (usa gpt-4o-mini). Fallback seguro p/ OpenAI mini
+// se o DeepSeek não estiver configurado, para o eval nunca quebrar por falta de key.
+export function getEvalJudge(): { client: OpenAI; model: string } {
+  const provider = (process.env.EVAL_JUDGE_PROVIDER || "deepseek").toLowerCase();
+  if (provider !== "openai") {
+    try {
+      return { client: getDeepSeek(), model: deepseekModel() };
+    } catch {
+      // DeepSeek indisponível → cai para OpenAI mini.
+    }
+  }
+  return { client: getOpenAI(), model: AI_MODELS.chatMini };
+}
+
 // Conveniência opcional: chat que devolve JSON já parseado. Não é obrigatório nos
 // call sites atuais (que seguem chamando getOpenAI() direto) — existe para a Editora
 // e novas features não reimplementarem o boilerplate de response_format + JSON.parse.
