@@ -31,6 +31,7 @@ import {
   Brain,
   Feather,
   ClipboardCheck,
+  Radar,
 } from "lucide-react";
 import { adminLogout } from "@/app/admin-login/actions";
 
@@ -50,6 +51,7 @@ const navGroups = [
       { href: "/admin/referencias", label: "Biblioteca do Assistente (IA)", icon: BookOpen, hint: "Livros, artigos, diretrizes e PDFs que alimentam o assistente clínico. Reindexar após adicionar." },
       { href: "/admin/melhoria", label: "Sugestões de melhoria (IA)", icon: Sparkles, hint: "Relatório: o que os usuários buscam e o assistente não responde → o que adicionar ao portal." },
       { href: "/admin/avaliacao-assistente", label: "Avaliação do Assistente", icon: ClipboardCheck, hint: "A 'prova' do assistente: banco de perguntas com gabarito, notas de correção/dose/fonte. Confiança medida, não prometida." },
+      { href: "/admin/amostra-trafego", label: "Amostra de tráfego real", icon: Radar, hint: "Pega perguntas REAIS dos usuários, roda no assistente e um juiz sem gabarito destaca as respostas arriscadas p/ você ler. A prova de vida real." },
     ],
   },
   {
