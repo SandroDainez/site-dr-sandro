@@ -143,7 +143,7 @@ export const INVARIANTES: Invariante[] = [
   {
     id: "bre-novo-nao-stemi",
     tema: "SCA — bloqueio de ramo esquerdo novo não é STEMI",
-    gatilhos: /bloqueio de ramo|\bbre\b|ritmo estimulado|ritmo de marca-?passo/i,
+    gatilhos: /bloqueio de ramo|\bbre\b|ritmo estimulado|ritmo de marca-?passo|diferenc\w+ stemi|crit[ée]rios? (de |eletrocardiogr\w+ (de )?)?stemi|diagn[óo]stico de stemi/i,
     // presente = a resposta diz que BRE novo isolado NÃO é STEMI/infarto, ou cita critérios de concordância (Sgarbossa).
     presente: (r) =>
       tem(r, /isolad[oa]/i) && tem(r, /n[ãa]o[^.]{0,60}(stemi|infarto)/i) ||
