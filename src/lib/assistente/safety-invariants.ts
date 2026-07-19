@@ -157,7 +157,7 @@ export const INVARIANTES: Invariante[] = [
   {
     id: "minoca-dapt-nao-automatico",
     tema: "SCA — MINOCA é diagnóstico de trabalho, sem DAPT automático",
-    gatilhos: /\bminoca\b|coronárias não obstrutivas|artérias coronárias não obstrutivas/i,
+    gatilhos: /\bminoca\b|coron[áa]ri\w* não obstrutiv|artérias coronárias não obstrutivas|sem estenose coronariana obstrutiva|coronariografia sem estenose/i,
     // presente = trata MINOCA como diagnóstico de trabalho / investigar mecanismo, ou nega DAPT automático.
     presente: (r) =>
       tem(r, /diagn[óo]stico de trabalho/i) ||
