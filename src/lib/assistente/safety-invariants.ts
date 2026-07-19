@@ -41,6 +41,19 @@ export const INVARIANTES: Invariante[] = [
     severidade: "alta",
   },
   {
+    id: "preoxigenacao-pf150",
+    tema: "Pré-oxigenação na hipoxemia grave — corte P/F < 150",
+    gatilhos:
+      /pr[ée]-?oxigena|hipoxemia grave|pao2\s*\/\s*fio2|pa?o2\/?fio2|rela[çc][ãa]o p\s*\/\s*f|ventila[çc][ãa]o n[ãa]o[- ]invasiva|\bvni\b/i,
+    // presente = a resposta traz o corte de P/F < 150 (SCCM) para hipoxemia grave.
+    presente: (r) => tem(r, /\b150\b/),
+    exigencia:
+      "Na pré-oxigenação da hipoxemia grave, a resposta DEVE usar pressão positiva/VNI e trazer o corte de PaO2/FiO2 < 150 (SCCM) como definição de hipoxemia grave, sinalizando ser recomendação condicional/de baixa certeza. NÃO inventar outro ponto de corte de P/F.",
+    canonico:
+      "**Hipoxemia grave na pré-oxigenação:** use **pressão positiva/VNI**; o corte de **PaO2/FiO2 < 150** (SCCM) define hipoxemia grave — recomendação **condicional, de baixa certeza**. Não use outro ponto de corte.",
+    severidade: "alta",
+  },
+  {
     id: "vt-sdra-peso-predito",
     tema: "Ventilação — volume corrente na SDRA",
     gatilhos:
