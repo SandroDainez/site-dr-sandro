@@ -17,6 +17,7 @@ import AssistenteButton from "@/components/AssistenteButton";
 import MobileNav from "@/components/MobileNav";
 import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
+import AgendaCientifica from "@/components/AgendaCientifica";
 import AtualizarView from "./AtualizarView";
 
 export const metadata = { title: "Atualizar — o que há de novo", description: "Atualizações clínicas, deltas de protocolo, pesquisas, comparativos de diretrizes e artigos." };
@@ -48,6 +49,10 @@ export default async function AtualizarPage() {
 
       <main className="mx-auto w-full max-w-6xl px-6 py-12">
         <AtualizarView atualizacoes={atualizacoes} aiBoletins={aiBoletins} atualizacoesProto={atualizacoesProto} pesquisas={pesquisas} comparativos={comparativos} artigos={artigos} />
+        {/* Calendário de eventos ABERTO (não um card) — server component busca no Supabase. */}
+        <div className="mt-12">
+          <AgendaCientifica embedded titulo="Agenda de eventos científicos" subtitulo="Congressos, simpósios e inscrições — Brasil e mundo." />
+        </div>
       </main>
 
       <SiteFooter />
