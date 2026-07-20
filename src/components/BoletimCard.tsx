@@ -93,9 +93,10 @@ export default function BoletimCard({ update, manual = false, logo }: { update: 
       {/* Título */}
       <h3 className="text-[15px] font-semibold leading-snug text-white">{update.titulo}</h3>
 
-      {/* Resumo (recortado quando fechado) */}
-      {update.resumo && (
-        <p className={`mt-2 flex-1 text-sm leading-relaxed text-white/55 ${open ? "" : "line-clamp-3"}`}>{update.resumo}</p>
+      {/* Resumo — SÓ no preview (fechado). Ao abrir, o UpdateContent já mostra o resumo;
+          mostrar aqui também duplicava o parágrafo (ficava repetido). */}
+      {!open && update.resumo && (
+        <p className="mt-2 flex-1 text-sm leading-relaxed text-white/55 line-clamp-3">{update.resumo}</p>
       )}
 
       {/* Conteúdo completo ao expandir */}
