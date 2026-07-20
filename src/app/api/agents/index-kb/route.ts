@@ -112,6 +112,7 @@ export async function POST(request: NextRequest) {
   // O admin chama em loop até "pendentes" zerar; nada se perde no caminho.
   const CHUNK_BUDGET = 400;
   let inseridas = 0, fontesOk = 0, chunksNaChamada = 0, falhas = 0, pendentes = 0;
+  let ultimoErro = ""; // mensagem da 1ª falha real (embedding/insert) — devolvida p/ o admin ver o motivo
   for (const { f, h, cs } of incompletas) {
     if (chunksNaChamada >= CHUNK_BUDGET) { pendentes++; continue; } // não coube nesta chamada
     const sh = existHash.get(f.fonteId);
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
     // problemática NÃO pode bloquear todas as outras (era o que impedia referências novas de
     // indexar quando algo mais velho falhava na frente). Ela fica pendente e é retomada depois.
     try { vetores = await embedTextos(fatia); }
-    catch { falhas++; pendentes++; continue; }
+    catch (e) { falhas++; pendentes++; if (!ultimoErro) ultimoErro = `embedding (${f.meta.fonte_titulo}): ${e instanceof Error ? e.message : String(e)}`; continue; }
     const pecas = fatia.map((c, j) => ({ conteudo: c, ...f.meta, area: f.meta.area ?? null, fonte_id: f.fonteId, hash: h, embedding: toVector(vetores[j]) }));
     let okFonte = true;
     for (let i = 0; i < pecas.length; i += 100) {
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
       let { error } = await supabase.from("kb_chunks").insert(lote);
       if (error) ({ error } = await supabase.from("kb_chunks").insert(lote)); // 1 retry
       if (!error) { inseridas += lote.length; chunksNaChamada += lote.length; }
-      else { falhas++; okFonte = false; break; }
+      else { falhas++; okFonte = false; if (!ultimoErro) ultimoErro = `insert (${f.meta.fonte_titulo}): ${error.message ?? String(error)}`; break; }
     }
     if (!okFonte) { pendentes++; continue; }                        // insert falhou → pula SÓ esta fonte
     if (feitos + fatia.length >= cs.length) fontesOk++;            // fonte concluída
@@ -150,6 +151,7 @@ export async function POST(request: NextRequest) {
     fontes: fontesOk,             // fontes concluídas nesta chamada
     pendentes,                    // fontes que ainda faltam (chame de novo até zerar)
     falhas,
+    erro: ultimoErro || null,     // motivo real da 1ª falha (embedding/insert), p/ o admin ver
     removidas: sumiram.length,
     total: totalNoBanco ?? 0,     // total de trechos no banco
   });

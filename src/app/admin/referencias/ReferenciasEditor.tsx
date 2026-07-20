@@ -77,15 +77,24 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
     let concluido = false;
     let houveErro = false;
     let ultimoTotal = 0;
+    let semProgresso = 0; // rodadas seguidas sem inserir nada — trava = pára e mostra o motivo
     try {
       // Cada chamada processa um lote curto e RESUMÍVEL; repetimos até a fila zerar.
       // Limite alto p/ aguentar bibliotecas grandes numa só sessão (retoma de onde parou).
       for (let volta = 0; volta < 300; volta++) {
         const r = await reindexarAssistente();
         if (!r.ok) { setErr(r.error ?? "Falha ao reindexar."); houveErro = true; break; }
-        const d = (r.data as { falhas?: number; total?: number; pendentes?: number } | undefined) || {};
+        const d = (r.data as { falhas?: number; total?: number; pendentes?: number; trechos?: number; erro?: string | null } | undefined) || {};
         totalFalhas += d.falhas ?? 0;
         ultimoTotal = Number(d.total ?? ultimoTotal);
+        // Trava: rodou mas não inseriu NADA (0 trechos) com fila pendente → algo está falhando de
+        // verdade. Pára em 2 rodadas assim e mostra o motivo, em vez de "rodar rodar" 300 vezes.
+        if ((Number(d.trechos ?? 0) === 0) && d.pendentes && d.pendentes > 0) {
+          if (++semProgresso >= 2) {
+            setErr(`A indexação travou sem inserir nada (${d.pendentes} na fila). Motivo: ${d.erro || "desconhecido"}`);
+            houveErro = true; break;
+          }
+        } else { semProgresso = 0; }
         if (d.pendentes && d.pendentes > 0) {
           setMsg(`Indexando… ${ultimoTotal.toLocaleString("pt-BR")} trechos · ${d.pendentes} material(is) na fila`);
         } else {
