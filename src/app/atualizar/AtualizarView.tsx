@@ -75,18 +75,31 @@ export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesPr
 
       <FiltroArea value={area} onChange={setArea} />
 
-      {/* Atualizações clínicas: boletins semanais da IA + manuais, no mesmo feed da
-          página /atualizacoes. "Geral" mostra a semana mais recente de cada área;
-          numa área específica, só a dela. Semanas passadas ficam no histórico. */}
+      {/* Boletins semanais da IA — 1 por área, o mais recente. Semanas anteriores no histórico.
+          SEPARADO dos destaques manuais para não misturar os dois tipos de conteúdo. */}
       <section>
         <div className="mb-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
-            <Newspaper className="h-5 w-5" style={{ color: COR }} /> Atualizações clínicas
+            <Newspaper className="h-5 w-5" style={{ color: COR }} /> Boletins da semana
           </h2>
-          <p className="mt-0.5 text-[13px] text-white/45">O que há de novo na prática, com a fonte. As semanas anteriores ficam no histórico.</p>
+          <p className="mt-0.5 text-[13px] text-white/45">Resumo clínico automático por área, com a fonte. As semanas anteriores ficam no histórico.</p>
         </div>
-        <AtualizacoesFeed ai={aiBoletins} manuais={atualizacoes} controlledArea={areaZonaParaFeed(area)} />
+        <AtualizacoesFeed ai={aiBoletins} manuais={[]} controlledArea={areaZonaParaFeed(area)} />
       </section>
+
+      {/* Destaques clínicos — atualizações selecionadas MANUALMENTE (estudos, diretrizes).
+          Só aparece se houver alguma; não se mistura com os boletins automáticos. */}
+      {atualizacoes.length > 0 && (
+        <section>
+          <div className="mb-4">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+              <FileText className="h-5 w-5" style={{ color: COR }} /> Destaques clínicos
+            </h2>
+            <p className="mt-0.5 text-[13px] text-white/45">Estudos e atualizações selecionados a dedo pela equipe.</p>
+          </div>
+          <AtualizacoesFeed ai={[]} manuais={atualizacoes} controlledArea={areaZonaParaFeed(area)} />
+        </section>
+      )}
 
       <SecaoConteudo icon={RefreshCw} titulo="Atualizações de protocolo" sub="O que mudou nas condutas institucionais." itens={itensProto} cor={COR} emBreve="Nenhuma atualização de protocolo nesta área ainda — chega em breve." />
 
