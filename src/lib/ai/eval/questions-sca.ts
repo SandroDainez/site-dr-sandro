@@ -12,6 +12,11 @@ const ACC = "ACC/AHA 2025 (SCA)";
 const ESC = "ESC 2023 (SCA)";
 const MINOCA = "AHA MINOCA 2019";
 const SCAD = "AHA SCAD 2018";
+// Módulo II (epidemiologia e fatores de risco)
+const CCD = "ACC/AHA Doença Coronariana Crônica 2023";
+const KDIGO = "KDIGO DRC 2024";
+const COCAINA = "AHA Cocaína 2008 / Richards 2016 / Lo 2019";
+const ESCPREG = "ESC Gravidez 2025";
 
 export const EVAL_SCA: EvalQuestao[] = [
   {
@@ -360,5 +365,191 @@ export const EVAL_SCA: EvalQuestao[] = [
       "registrar MINOCA como se fosse uma etiologia definitiva",
     ],
     fontes: [MINOCA, UDMI],
+  },
+
+  // ————— MÓDULO II — Epidemiologia e fatores de risco (Q21–Q31 do banco autoral) —————
+  {
+    id: "sca-25", tema: "SCA", risco: "medio",
+    pergunta: "Quais são os principais fatores de risco modificáveis ou parcialmente modificáveis para doença arterial coronariana?",
+    obrigatorios: [
+      "tabagismo/exposição ao tabaco, hipertensão, dislipidemia aterogênica (LDL/não-HDL/ApoB), inatividade física, alimentação não saudável e excesso de peso",
+      "diabetes é fator PARCIALMENTE modificável (o diagnóstico não é reversível, mas o risco/controle sim)",
+      "a ausência de fatores tradicionais NÃO exclui SCA",
+      "separar fatores de risco de critérios diagnósticos",
+    ],
+    errosGraves: [
+      "incluir idade, sexo ou história familiar entre os fatores modificáveis",
+      "afirmar que a ausência de fatores exclui doença coronariana",
+      "prescrever consumo de álcool para prevenção cardiovascular",
+    ],
+    fontes: [CCD, ACC],
+  },
+  {
+    id: "sca-26", tema: "SCA", risco: "medio",
+    pergunta: "Quais são os principais fatores de risco não modificáveis e como devem ser interpretados?",
+    obrigatorios: [
+      "idade, história familiar de DCV aterosclerótica prematura e predisposição genética (hipercolesterolemia familiar, Lp(a) elevada)",
+      "sexo biológico pode modificar incidência/momento, mas NÃO deve excluir doença em mulheres",
+      "fatores não modificáveis orientam a intensidade da prevenção, não diagnosticam SCA",
+      "evitar interpretação determinística de raça/ancestralidade",
+    ],
+    errosGraves: [
+      "afirmar que mulheres em idade fértil não apresentam SCA",
+      "considerar história familiar irrelevante",
+      "confundir hipercolesterolemia familiar com dieta rica em gordura",
+      "misturar trombofilia e aterosclerose como se fossem o mesmo mecanismo",
+    ],
+    fontes: [CCD, ESC],
+  },
+  {
+    id: "sca-27", tema: "SCA", risco: "medio",
+    pergunta: "Como o diabetes mellitus modifica a apresentação e o prognóstico da síndrome coronariana aguda?",
+    obrigatorios: [
+      "maior risco aterosclerótico, doença mais difusa/multiarterial e pior prognóstico",
+      "dor torácica típica continua possível; pode haver sintomas menos reconhecidos ou isquemia silenciosa",
+      "manter ECG + troponina seriada",
+      "no controle glicêmico agudo, EVITAR hipoglicemia (e hiperglicemia importante)",
+    ],
+    errosGraves: [
+      "afirmar que o IAM no diabético é sempre indolor",
+      "atribuir toda troponina elevada ao diabetes",
+      "atrasar a investigação por ausência de dor típica",
+      "fazer controle glicêmico excessivamente intensivo com risco de hipoglicemia",
+    ],
+    fontes: [ACC, ESC],
+  },
+  {
+    id: "sca-28", tema: "SCA", risco: "alto", sentinela: true,
+    pergunta: "Como a doença renal crônica influencia o risco, a apresentação e a investigação da síndrome coronariana aguda?",
+    obrigatorios: [
+      "DRC aumenta acentuadamente o risco CV e pode dar apresentações menos específicas",
+      "troponina pode estar cronicamente > percentil 99 = lesão miocárdica real, NÃO 'falso-positivo renal'",
+      "IAM exige elevação/queda de troponina + evidência de isquemia; não existe delta universal",
+      "ajustar doses à função renal; NÃO negar angiografia/reperfusão apenas pela creatinina",
+    ],
+    errosGraves: [
+      "descartar a troponina como 'falso-positivo renal'",
+      "diagnosticar IAM só por troponina elevada, ou excluir IAM atribuindo o resultado à DRC",
+      "usar doses plenas de fármacos de eliminação renal sem ajuste",
+      "negar coronariografia unicamente pela função renal",
+    ],
+    fontes: [KDIGO, ACC],
+  },
+  {
+    id: "sca-29", tema: "SCA", risco: "alto", sentinela: true,
+    pergunta: "Como o sexo feminino influencia a apresentação clínica e o reconhecimento da síndrome coronariana aguda?",
+    obrigatorios: [
+      "mulheres podem apresentar dor torácica típica; avaliar com a MESMA prontidão e critérios de risco",
+      "reconhecer maior risco de atraso e subdiagnóstico",
+      "maior frequência relativa de SCAD e MINOCA",
+      "manter investigação e urgência equivalentes (não reduzir pela variável sexo)",
+    ],
+    errosGraves: [
+      "afirmar que mulheres geralmente não têm dor torácica",
+      "atribuir os sintomas à ansiedade sem avaliação adequada",
+      "considerar a mulher jovem protegida contra IAM ou reduzir a urgência diagnóstica pelo sexo",
+      "presumir que toda SCA feminina é não obstrutiva",
+      "classificar Takotsubo como IAM/SCA sem evidência de isquemia coronariana aguda",
+    ],
+    fontes: [ACC, ESC],
+  },
+  {
+    id: "sca-30", tema: "SCA", risco: "medio",
+    pergunta: "Como a idade avançada e a fragilidade modificam a apresentação, o prognóstico e o tratamento da síndrome coronariana aguda?",
+    obrigatorios: [
+      "maior carga aterosclerótica, comorbidades e risco (choque, IC, sangramento, injúria renal); pior prognóstico",
+      "apresentações sem dor ou menos específicas (dispneia, síncope, confusão, queda, deterioração funcional)",
+      "diferenciar idade cronológica de fragilidade; individualizar por risco, função e objetivos de cuidado",
+      "NÃO negar terapia potencialmente benéfica (reperfusão/angiografia) apenas pela idade",
+    ],
+    errosGraves: [
+      "tratar todo idoso como frágil",
+      "negar reperfusão ou angiografia apenas pela idade cronológica",
+      "ignorar peso e função renal no ajuste de doses",
+    ],
+    fontes: [ACC, ESC],
+  },
+  {
+    id: "sca-31", tema: "SCA", risco: "baixo",
+    pergunta: "Qual é a relação entre tabagismo e trombose coronariana?",
+    obrigatorios: [
+      "acelera aterosclerose e favorece eventos agudos (disfunção endotelial, inflamação, ativação plaquetária, estado pró-trombótico, vasoconstrição, CO reduzindo a oferta de O₂)",
+      "o risco existe com exposição passiva e não se limita a grandes cargas",
+      "a cessação completa reduz o risco e integra a prevenção secundária",
+    ],
+    errosGraves: [
+      "afirmar efeito protetor do tabagismo após IAM ('paradoxo do fumante')",
+      "limitar o risco a fumantes pesados ou considerar a exposição passiva irrelevante",
+      "declarar cigarros eletrônicos comprovadamente seguros",
+    ],
+    fontes: [CCD, ACC],
+  },
+  {
+    id: "sca-32", tema: "SCA", risco: "medio",
+    pergunta: "Quais drogas recreativas podem precipitar isquemia miocárdica ou infarto, e qual é a hierarquia da evidência?",
+    obrigatorios: [
+      "cocaína, anfetaminas e metanfetamina têm a associação aguda mais direta (simpaticomiméticos: vasoespasmo, trombose, dissecção, arritmias, ↑demanda)",
+      "cannabis: associação observacional, causalidade/magnitude incertas; opioides: lesão sobretudo por hipóxia/hipotensão/adulterantes",
+      "separar associação direta de relações possíveis/indiretas",
+      "obter história sem julgamento e manter ECG/troponina quando indicados",
+    ],
+    errosGraves: [
+      "dar o mesmo peso causal a todas as substâncias",
+      "limitar o mecanismo a vasoespasmo",
+      "dispensar a investigação pela idade jovem",
+      "atribuir toda troponina elevada a IAM tipo 1",
+    ],
+    fontes: [COCAINA, ACC],
+  },
+  {
+    id: "sca-33", tema: "SCA", risco: "alto", sentinela: true,
+    pergunta: "Como cocaína e anfetaminas podem provocar uma síndrome coronariana aguda, e como conduzir a intoxicação aguda?",
+    obrigatorios: [
+      "aumento simpático (FC, PA, contratilidade, demanda) + vasoconstrição/vasoespasmo, ativação plaquetária/trombose, dissecção, arritmias e toxicidade miocárdica",
+      "pode ser IAM tipo 1, IAM tipo 2, vasoespasmo sem infarto ou lesão não isquêmica — não presumir mecanismo único",
+      "na intoxicação aguda: suporte, controle da agitação/hiperatividade simpática (benzodiazepínico titulado) e vasodilatação quando indicada",
+      "NÃO administrar betabloqueador puramente beta-adrenérgico de rotina na toxicidade simpaticomimética aguda; avaliar síndrome aórtica aguda",
+    ],
+    errosGraves: [
+      "atribuir tudo a vasoespasmo ou classificar automaticamente como IAM tipo 1",
+      "administrar fibrinolítico sem critérios e sem considerar dissecção de aorta",
+      "afirmar que betabloqueadores são sempre obrigatórios ou sempre proibidos",
+      "omitir a avaliação de síndrome aórtica aguda diante de sinais de alerta (déficit de pulso, assimetria pressórica)",
+    ],
+    fontes: [COCAINA, ACC],
+  },
+  {
+    id: "sca-34", tema: "SCA", risco: "alto", sentinela: true,
+    pergunta: "Quais condições inflamatórias ou infecciosas aumentam o risco de eventos coronarianos e como interpretar a troponina nesses cenários?",
+    obrigatorios: [
+      "infecções agudas (influenza, COVID-19, pneumonia, sepse) e inflamatórias crônicas aumentam o risco (inflamação, trombose, instabilização de placa, hipóxia, desequilíbrio oferta-demanda)",
+      "troponina elevada pode ser IAM tipo 1, tipo 2 ou lesão não isquêmica; 'infarto' exige evidência de isquemia",
+      "sepse/infecção NÃO classifica automaticamente o evento como IAM tipo 2, nem exclui SCA aterotrombótica concomitante",
+      "não usar troponina isolada para indicar antitrombóticos",
+    ],
+    errosGraves: [
+      "chamar toda troponina elevada na sepse de NSTEMI",
+      "ignorar IAM tipo 1 concomitante",
+      "prescrever dupla antiagregação ou anticoagulação apenas pela troponina",
+      "transformar associação epidemiológica em causalidade individual",
+    ],
+    fontes: [ACC, UDMI],
+  },
+  {
+    id: "sca-35", tema: "SCA", risco: "alto", sentinela: true,
+    pergunta: "Como gestação e puerpério modificam o risco, os mecanismos, os diagnósticos diferenciais e a investigação da síndrome coronariana aguda?",
+    obrigatorios: [
+      "IAM associado à gestação é raro mas grave; SCAD é mecanismo particularmente relevante (peri/pós-parto), além de aterotrombose, trombose/embolia, vasoespasmo e desequilíbrio oferta-demanda",
+      "ECG + troponina SEM atraso; a troponina não é fisiologicamente elevada apenas pela gestação",
+      "diferenciais: embolia pulmonar, síndrome aórtica aguda, miocardite e Takotsubo",
+      "NÃO negar angiografia/reperfusão necessária apenas pela gestação; priorizar estabilização materna + abordagem multidisciplinar",
+    ],
+    errosGraves: [
+      "atribuir a dor torácica automaticamente a causas gestacionais benignas ou excluir IAM pela idade jovem",
+      "presumir que toda SCA gestacional é SCAD",
+      "adiar reperfusão/angiografia necessária apenas pela gestação",
+      "ignorar embolia pulmonar ou síndrome aórtica aguda",
+    ],
+    fontes: [ACC, ESCPREG],
   },
 ];
