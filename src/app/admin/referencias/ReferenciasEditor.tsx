@@ -23,11 +23,25 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const set = (k: keyof Ref, v: Ref[keyof Ref]) => setForm((f) => ({ ...f, [k]: v }));
 
-  async function onPdf(file: File) {
-    setErr(null); setMsg(null); setEnviando(true);
+  async function onArquivo(file: File) {
+    setErr(null); setMsg(null);
+    const ehTexto = /\.(md|markdown|txt|text)$/i.test(file.name) || file.type === "text/markdown" || file.type === "text/plain";
+    // Arquivo de texto (markdown/txt): é texto puro — lê no navegador e joga na caixa de texto.
+    // Não precisa de upload nem de extração de PDF; o indexador trata markdown como texto normal.
+    if (ehTexto) {
+      try {
+        const texto = await file.text();
+        if (!texto.trim()) { setErr("O arquivo de texto está vazio."); return; }
+        set("conteudo", texto);
+        if (!form.titulo) set("titulo", file.name.replace(/\.(md|markdown|txt|text)$/i, ""));
+        setMsg("Arquivo de texto carregado ✓ — clique em “Adicionar referência” para salvar.");
+      } catch { setErr("Falha ao ler o arquivo de texto."); }
+      return;
+    }
+    // PDF: só envia pro armazenamento. A EXTRAÇÃO do texto acontece no servidor, na hora de
+    // salvar (salvarReferenciaPdf) — o texto gigante nunca vem pro navegador.
+    setEnviando(true);
     try {
-      // Só envia o PDF pro armazenamento. A EXTRAÇÃO do texto acontece no servidor, na
-      // hora de salvar (salvarReferenciaPdf) — o texto gigante nunca vem pro navegador.
       const blob = await upload(`referencias/${Date.now()}-${file.name}`, file, { access: "private", handleUploadUrl: "/api/upload" });
       set("arquivo_url", blob.url);
       if (!form.titulo) set("titulo", file.name.replace(/\.pdf$/i, ""));
@@ -125,16 +139,16 @@ export default function ReferenciasEditor({ inicial }: { inicial: Ref[] }) {
           <div><label className={labelCls}>Link da fonte (DOI/site)</label><input className={inputCls} value={form.fonte_url} onChange={(e) => set("fonte_url", e.target.value)} placeholder="https://..." /></div>
         </div>
 
-        {/* PDF */}
+        {/* Arquivo: PDF, Markdown (.md) ou texto (.txt) */}
         <div>
-          <label className={labelCls}>PDF (opcional — extrai o texto automaticamente)</label>
+          <label className={labelCls}>Arquivo (opcional — PDF, Markdown .md ou texto .txt)</label>
           <div className="flex items-center gap-3">
             <button type="button" onClick={() => fileRef.current?.click()} disabled={enviando} className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white/70 transition hover:border-accent/40 hover:text-white disabled:opacity-50">
-              <Upload className="h-4 w-4" /> {enviando ? "Processando…" : "Enviar PDF"}
+              <Upload className="h-4 w-4" /> {enviando ? "Processando…" : "Enviar arquivo"}
             </button>
             {form.arquivo_url && <span className="inline-flex items-center gap-1 text-xs text-accent"><FileText className="h-3.5 w-3.5" /> PDF anexado</span>}
           </div>
-          <input ref={fileRef} type="file" accept="application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onPdf(f); e.target.value = ""; }} />
+          <input ref={fileRef} type="file" accept=".pdf,.md,.markdown,.txt,application/pdf,text/markdown,text/plain" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onArquivo(f); e.target.value = ""; }} />
         </div>
 
         <div>
