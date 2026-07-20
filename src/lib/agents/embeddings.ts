@@ -6,7 +6,8 @@ export async function embedTextos(textos: string[]): Promise<number[][]> {
   const out: number[][] = [];
   // lotes de 96 p/ não estourar o limite
   for (let i = 0; i < textos.length; i += 96) {
-    const lote = textos.slice(i, i + 96).map((t) => t.slice(0, 8000));
+    // trecho vazio/só-espaço faz o endpoint de embeddings rejeitar o lote inteiro → troca por " ".
+    const lote = textos.slice(i, i + 96).map((t) => (t && t.trim() ? t.slice(0, 8000) : " "));
     // RETRY com backoff: uma queda momentânea (rate limit/rede) não pode descartar
     // um livro inteiro. Tenta até 4x antes de desistir.
     let tent = 0;

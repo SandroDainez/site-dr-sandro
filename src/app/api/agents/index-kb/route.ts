@@ -124,8 +124,11 @@ export async function POST(request: NextRequest) {
     if (feitos >= cs.length) { fontesOk++; continue; }
     const fatia = cs.slice(feitos, feitos + (CHUNK_BUDGET - chunksNaChamada));
     let vetores: number[][];
+    // CONTINUE (não break): se ESTA fonte falha no embedding, pulamos SÓ ela — uma fonte
+    // problemática NÃO pode bloquear todas as outras (era o que impedia referências novas de
+    // indexar quando algo mais velho falhava na frente). Ela fica pendente e é retomada depois.
     try { vetores = await embedTextos(fatia); }
-    catch { falhas++; pendentes++; break; }                        // embed falhou → para; próxima chamada retoma
+    catch { falhas++; pendentes++; continue; }
     const pecas = fatia.map((c, j) => ({ conteudo: c, ...f.meta, area: f.meta.area ?? null, fonte_id: f.fonteId, hash: h, embedding: toVector(vetores[j]) }));
     let okFonte = true;
     for (let i = 0; i < pecas.length; i += 100) {
@@ -135,7 +138,7 @@ export async function POST(request: NextRequest) {
       if (!error) { inseridas += lote.length; chunksNaChamada += lote.length; }
       else { falhas++; okFonte = false; break; }
     }
-    if (!okFonte) { pendentes++; break; }                          // insert falhou → para; retoma depois
+    if (!okFonte) { pendentes++; continue; }                        // insert falhou → pula SÓ esta fonte
     if (feitos + fatia.length >= cs.length) fontesOk++;            // fonte concluída
     else pendentes++;                                              // ainda falta (continua na próxima chamada)
   }
