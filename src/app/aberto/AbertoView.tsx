@@ -5,8 +5,8 @@ import { Mic, MessageSquare, Sparkles, Link as LinkIcon, type LucideIcon } from 
 import type { PodcastData } from "@/lib/content";
 import FiltroArea from "@/components/zonas/FiltroArea";
 import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
-import SecaoConteudo from "@/components/zonas/SecaoConteudo";
 import EmBreve from "@/components/zonas/EmBreve";
+import PodcastList from "@/app/podcast/PodcastList";
 import { itemNaArea } from "@/lib/zonas";
 
 const COR = "#ff9d4d";
@@ -29,18 +29,13 @@ function SecaoHead({ icon: Icon, titulo, sub }: { icon: LucideIcon; titulo: stri
 export default function AbertoView({ podcasts }: Props) {
   const [area, setArea] = useAreaFiltro();
 
+  // Episódios da área, mais novos primeiro — renderizados com o MESMO componente da /podcast
+  // (player/capa), não como card genérico "Abrir →".
   const episodios = useMemo(
     () =>
       podcasts
-        .filter((p) => itemNaArea(p, area))
-        .map((p) => ({
-          id: p.id,
-          titulo: p.titulo,
-          href: "/podcast",
-          tipo: "Podcast",
-          area: p.area,
-          areas: p.areas,
-        })),
+        .filter((p) => p.titulo && itemNaArea(p, area))
+        .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()),
     [podcasts, area],
   );
 
@@ -56,15 +51,13 @@ export default function AbertoView({ podcasts }: Props) {
 
       <FiltroArea value={area} onChange={setArea} />
 
-      {/* Podcast e entrevistas */}
-      <SecaoConteudo
-        icon={Mic}
-        titulo="Podcast e entrevistas"
-        sub="Conversas, casos e convidados — pra ouvir com calma."
-        itens={episodios}
-        cor={COR}
-        emBreve="Nenhum episódio nesta área ainda — chega em breve."
-      />
+      {/* Podcast e entrevistas — episódios com player (mesmo componente da /podcast e da home) */}
+      <section>
+        <SecaoHead icon={Mic} titulo="Podcast e entrevistas" sub="Conversas, casos e convidados — pra ouvir com calma." />
+        {episodios.length > 0
+          ? <PodcastList podcasts={episodios} />
+          : <EmBreve texto="Nenhum episódio nesta área ainda — chega em breve." />}
+      </section>
 
       {/* Curiosidades — ainda sem conteúdo (regra: nunca inventar) */}
       <section>
