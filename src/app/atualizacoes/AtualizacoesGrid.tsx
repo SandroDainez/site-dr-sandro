@@ -64,7 +64,9 @@ export function UpdateCard({ item }: { item: AtualizacaoData }) {
     <article
       id={`atualizacao-${item.id}`}
       className={`scroll-mt-24 rounded-2xl border ${cfg.border} bg-white/[0.03] transition ${
-        expanded ? "border-white/20" : "hover:border-white/15"
+        // Aberto ocupa a LARGURA TOTAL da grade (col-span-full) → texto respira, não fica
+        // espremido numa coluna estreita. Fechado, é um card normal na grade.
+        expanded ? "col-span-full border-white/20" : "hover:border-white/15"
       }`}
     >
       {/* Header clicável: abre/recolhe o material */}
@@ -107,9 +109,9 @@ export function UpdateCard({ item }: { item: AtualizacaoData }) {
         </span>
       </button>
 
-      {/* Material (só quando expandido) */}
+      {/* Material (só quando expandido) — largura de leitura confortável (max-w-3xl) */}
       {expanded && (
-        <div className="px-5 pb-5 -mt-1">
+        <div className="px-5 pb-5 -mt-1 max-w-3xl">
           <div
             className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4"
             dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.conteudo) }}
