@@ -19,18 +19,57 @@ const ESP_LABEL: Record<string, string> = {
   emergencias: "Emergências",
 };
 
+// Cor por ÁREA (mesma paleta dos cards manuais): Emergências=emerg, TI=inten, Anestesio=anest.
+// Classes COMPLETAS porque o Tailwind não monta nome de classe dinâmico. Fallback = accent (verde).
+type CorArea = { badge: string; borda: string; bordaAberto: string; logo: string; divisor: string; botao: string };
+const COR_ACCENT: CorArea = {
+  badge: "border-accent/40 bg-accent/10 text-accent",
+  borda: "border-accent/25 hover:border-accent/40",
+  bordaAberto: "border-accent/40 bg-accent/[0.04]",
+  logo: "border-accent/20 bg-accent/[0.06]",
+  divisor: "border-accent/15",
+  botao: "border-accent/30 bg-accent/15 text-accent hover:bg-accent/25",
+};
+const AREA_COR: Record<string, CorArea> = {
+  emergencias: {
+    badge: "border-emerg/40 bg-emerg/10 text-emerg",
+    borda: "border-emerg/25 hover:border-emerg/40",
+    bordaAberto: "border-emerg/40 bg-emerg/[0.04]",
+    logo: "border-emerg/20 bg-emerg/[0.06]",
+    divisor: "border-emerg/15",
+    botao: "border-emerg/30 bg-emerg/15 text-emerg hover:bg-emerg/25",
+  },
+  terapia_intensiva: {
+    badge: "border-inten/40 bg-inten/10 text-inten",
+    borda: "border-inten/25 hover:border-inten/40",
+    bordaAberto: "border-inten/40 bg-inten/[0.04]",
+    logo: "border-inten/20 bg-inten/[0.06]",
+    divisor: "border-inten/15",
+    botao: "border-inten/30 bg-inten/15 text-inten hover:bg-inten/25",
+  },
+  anestesiologia: {
+    badge: "border-anest/40 bg-anest/10 text-anest",
+    borda: "border-anest/25 hover:border-anest/40",
+    bordaAberto: "border-anest/40 bg-anest/[0.04]",
+    logo: "border-anest/20 bg-anest/[0.06]",
+    divisor: "border-anest/15",
+    botao: "border-anest/30 bg-anest/15 text-anest hover:bg-anest/25",
+  },
+};
+
 // Card (vertical, na grade — mesmo padrão dos demais cards do site) de um boletim
 // clínico da IA (medical_updates). Expande no local para mostrar o conteúdo completo.
 export default function BoletimCard({ update, manual = false, logo }: { update: BoletimUpdate; manual?: boolean; logo?: { logoUrl?: string; emoji?: string } }) {
   const [open, setOpen] = useState(false);
   const data = dataCurta(update.data_publicacao);
+  const c = AREA_COR[update.especialidade ?? ""] ?? COR_ACCENT;
 
   return (
-    <article className={`flex flex-col rounded-2xl border bg-white/[0.03] p-5 transition ${open ? "border-accent/40 bg-accent/[0.04]" : "border-accent/25 hover:border-accent/40"}`}>
+    <article className={`flex flex-col rounded-2xl border bg-white/[0.03] p-5 transition ${open ? c.bordaAberto : c.borda}`}>
       {/* Logo + selo */}
       <div className="mb-3 flex items-center gap-2.5">
         {logo && (logo.logoUrl || logo.emoji) && (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-accent/20 bg-accent/[0.06]">
+          <div className={`flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border ${c.logo}`}>
             {logo.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logo.logoUrl} alt="" className="h-full w-full object-contain" />
@@ -39,7 +78,7 @@ export default function BoletimCard({ update, manual = false, logo }: { update: 
             )}
           </div>
         )}
-        <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-accent">
+        <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ${c.badge}`}>
           <Sparkles className="h-3 w-3" /> {manual ? "Boletim" : "Boletim da semana"}
         </span>
       </div>
@@ -61,7 +100,7 @@ export default function BoletimCard({ update, manual = false, logo }: { update: 
 
       {/* Conteúdo completo ao expandir */}
       {open && (
-        <div className="mt-3 border-t border-accent/15 pt-4">
+        <div className={`mt-3 border-t ${c.divisor} pt-4`}>
           <UpdateContent update={update} />
         </div>
       )}
@@ -72,7 +111,7 @@ export default function BoletimCard({ update, manual = false, logo }: { update: 
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
-          className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/15 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25"
+          className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold transition ${c.botao}`}
         >
           {open ? "Recolher" : "Ler boletim"}
           <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
