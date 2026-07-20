@@ -111,7 +111,7 @@ export function UpdateCard({ item }: { item: AtualizacaoData }) {
       {expanded && (
         <div className="px-5 pb-5 -mt-1">
           <div
-            className="whitespace-pre-wrap text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4"
+            className="whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-sm leading-relaxed text-white/70 border-t border-white/10 pt-4"
             dangerouslySetInnerHTML={{ __html: sanitizeRichText(item.conteudo) }}
           />
           {item.imageCaption && item.imageUrl && (

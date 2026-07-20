@@ -52,7 +52,7 @@ export default function UpdateContent({ update }: { update: UpdateContentData })
 
   return (
     <div>
-      {update.resumo && <p className="leading-relaxed text-white/65">{update.resumo}</p>}
+      {update.resumo && <p className="leading-relaxed text-white/65 break-words [overflow-wrap:anywhere]">{update.resumo}</p>}
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {Object.entries(fontesPorOrigem).map(([origem, count]) => {
@@ -93,8 +93,8 @@ export default function UpdateContent({ update }: { update: UpdateContentData })
                     {topico.nivel_evidencia}
                   </span>
                 )}
-                <h3 className="font-semibold text-white">{topico.titulo}</h3>
-                <p className="text-sm leading-relaxed text-white/70">{topico.descricao}</p>
+                <h3 className="font-semibold text-white break-words">{topico.titulo}</h3>
+                <p className="text-sm leading-relaxed text-white/70 break-words [overflow-wrap:anywhere]">{topico.descricao}</p>
                 {topico.relevancia_clinica && (
                   <div className="mt-2 border-l-2 border-accent/50 pl-3">
                     <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-accent">Relevância clínica</p>
