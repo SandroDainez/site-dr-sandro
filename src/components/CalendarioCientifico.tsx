@@ -112,6 +112,16 @@ export default function CalendarioCientifico({
     [eventos]
   );
 
+  // Lista abaixo do calendário = só os eventos do MÊS que está sendo visto (acompanha o ‹ ›).
+  // Casa pelo mês de INÍCIO (mesma referência da grade). Quem quer outro mês, navega no calendário.
+  const doMes = useMemo(() => {
+    const y = mesAtual.getFullYear(), m = mesAtual.getMonth();
+    return ordenados.filter((e) => {
+      const d = new Date(`${e.data_inicio}T12:00:00`);
+      return d.getFullYear() === y && d.getMonth() === m;
+    });
+  }, [ordenados, mesAtual]);
+
   const { dias, tituloMes } = useMemo(() => {
     const ano = mesAtual.getFullYear();
     const mes = mesAtual.getMonth();
@@ -183,12 +193,18 @@ export default function CalendarioCientifico({
           </div>
         </div>
 
-        {/* Lista numerada cronológica */}
-        {ordenados.length > 0 && (
-          <div className="mt-8">
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/70">Todos os eventos em ordem ({ordenados.length})</h4>
+        {/* Lista do MÊS visível (acompanha o calendário). Vazia → orienta a navegar. */}
+        <div className="mt-8">
+          <h4 className="mb-4 text-sm font-semibold uppercase tracking-[0.14em] text-white/70">
+            Eventos de {tituloMes} ({doMes.length})
+          </h4>
+          {doMes.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-8 text-center text-sm text-white/45">
+              Nenhum evento em {tituloMes}. Use <span className="text-white/70">‹ Mês anterior</span> / <span className="text-white/70">Próximo mês ›</span> para ver outros meses.
+            </p>
+          ) : (
             <ol className="space-y-2">
-              {ordenados.map((e, i) => (
+              {doMes.map((e, i) => (
                 <li key={e.id}>
                   <a href={e.href} target={e.external ? "_blank" : undefined} rel={e.external ? "noopener noreferrer" : undefined} className={`group flex items-start gap-3 rounded-xl border p-4 transition ${e.selo ? `${SELO[e.selo].pill} bg-opacity-[0.06]` : "border-white/10 bg-white/[0.03] hover:border-accent/40"}`}>
                     <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${e.selo ? SELO[e.selo].num : "bg-accent/15 text-accent"}`}>{i + 1}</span>
@@ -214,8 +230,8 @@ export default function CalendarioCientifico({
                 </li>
               ))}
             </ol>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </Wrapper>
   );
