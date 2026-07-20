@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Protocolos clínicos",
-  description: "Algoritmos e condutas por área: emergências, terapia intensiva e anestesiologia.",
+  title: "Guias Terapêuticos",
+  description: "Guias terapêuticos por área: emergências, terapia intensiva e anestesiologia — condutas passo a passo.",
 };
 
 

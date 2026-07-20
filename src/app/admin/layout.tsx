@@ -82,7 +82,7 @@ const navGroups = [
       { href: "/admin/cursos", label: "Cursos", icon: GraduationCap, hint: "Cursos completos com aulas, vídeos, slides e PDF." },
       { href: "/admin/banco-questoes", label: "Banco de questões", icon: Brain, hint: "Questões para praticar em /estudar (repetição espaçada). Crie manual ou gere por IA do seu conteúdo." },
       { href: "/admin/topicos-estudo", label: "Tópicos de estudo (home)", icon: BookOpen, hint: "Lista simples de tópicos exibida na home (não é o curso completo)." },
-      { href: "/admin/atualizacoes", label: "Atualizações clínicas", icon: Newspaper, hint: "Novidades por área: emergências, TI, anestesiologia." },
+      { href: "/admin/atualizacoes", label: "Destaques clínicos", icon: Newspaper, hint: "Os cards de 'Destaques clínicos' do site (estudos/diretrizes a dedo). Adicionar, editar, excluir e reordenar. Não confundir com os boletins semanais da IA." },
       { href: "/admin/editora", label: "Editora Médica (artigos)", icon: Feather, hint: "Artigos/matérias: escrever ou gerar rascunho com IA e publicar em /artigos." },
       { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList, hint: "Protocolos clínicos com PDF e infográfico." },
       { href: "/admin/procedimentos", label: "Procedimentos médicos", icon: Stethoscope, hint: "Procedimentos e técnicas com vídeo, PDF, passo a passo e imagem, por especialidade." },

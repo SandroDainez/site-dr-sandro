@@ -421,7 +421,7 @@ export const defaultApps: AppData[] = [
   {
     title: "AnesMap",
     subtitle: "Preparação estruturada para residência, especialização e título",
-    text: "Banco de questões, flashcards SM-2 e protocolos por área, com foco em retenção e tomada de decisão.",
+    text: "Banco de questões, flashcards SM-2 e guias terapêuticos por área, com foco em retenção e tomada de decisão.",
     icon: "Layers",
     glow: "from-emerald-400/30 to-emerald-600/5",
     highlights: ["Questões comentadas por tema", "Revisão espaçada com SM-2"],
@@ -533,7 +533,7 @@ export const defaultContentItems: ContentItemData[] = [
   { title: "Aulas abertas", subtitle: "Acesso livre para revisão rápida", link: "" },
   { title: "Podcasts clínicos", subtitle: "Discussão de casos e condutas", link: "" },
   { title: "Atualizações semanais", subtitle: "Evidência recente aplicada", link: "" },
-  { title: "Protocolos guiados", subtitle: "Fluxos de conduta passo a passo", link: "" },
+  { title: "Guias terapêuticos", subtitle: "Fluxos de conduta passo a passo", link: "" },
 ];
 
 export const defaultCourses: CourseData[] = [
@@ -617,7 +617,7 @@ export const defaultProtocolos: ProtocoloData[] = [
     imageUrl: "",
     imageCaption: "",
     arquivoUrl: "",
-    arquivoLabel: "Ver protocolo",
+    arquivoLabel: "Ver guia",
     data: "2026-05-15",
   },
   {
@@ -695,7 +695,7 @@ export const defaultTypography: TypographyData = {};
 
 export const defaultSiteConfig: SiteConfig = {
   marqueeItems: [
-    "Protocolos revisados semanalmente",
+    "Guias revisados semanalmente",
     "Ferramentas para decisão à beira-leito",
     "Conteúdo aberto sem login",
     "Cursos presenciais, híbridos e online",

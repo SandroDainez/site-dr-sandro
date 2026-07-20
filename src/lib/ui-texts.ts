@@ -12,7 +12,7 @@ export const UI_TEXTS: { key: string; group: string; label: string; default: str
   { key: "seloAtualizacao2", group: "Selos da página Atualizações", label: "Selo 2", default: "🔄 Atualizada semanalmente" },
   { key: "seloAtualizacao3", group: "Selos da página Atualizações", label: "Selo 3", default: "📈 Baseada em evidência recente" },
 
-  { key: "vazioProtocolosTitulo", group: "Textos de “em breve” (seção vazia)", label: "Protocolos vazio — título", default: "Protocolos em breve" },
+  { key: "vazioProtocolosTitulo", group: "Textos de “em breve” (seção vazia)", label: "Guias Terapêuticos vazio — título", default: "Guias terapêuticos em breve" },
   { key: "vazioProtocolosTexto", group: "Textos de “em breve” (seção vazia)", label: "Protocolos vazio — texto", default: "Condutas clínicas passo a passo por área — Emergências, Terapia Intensiva e Anestesiologia." },
   { key: "vazioHub", group: "Textos de “em breve” (seção vazia)", label: "Hub de especialidade vazio", default: "Conteúdo desta especialidade em breve." },
   { key: "hubOutrasEspecialidades", group: "Textos de “em breve” (seção vazia)", label: "Rótulo “Outras especialidades” (hub)", default: "Outras especialidades" },

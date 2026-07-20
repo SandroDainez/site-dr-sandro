@@ -19,7 +19,7 @@ export default async function SiteFooter() {
     }
   }
   const extras = [
-    { label: "Protocolos", href: "/protocolos" },
+    { label: "Guias Terapêuticos", href: "/protocolos" },
     { label: "Procedimentos", href: "/procedimentos" },
     { label: "Videoaulas", href: "/videoaulas" },
     { label: "Atualizações", href: "/atualizacoes" },

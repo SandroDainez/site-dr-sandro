@@ -77,7 +77,7 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
       {item.conteudo && (
         <div className="mt-4">
           <button type="button" onClick={() => setExpanded((v) => !v)} className="text-xs font-medium text-accent/80 transition hover:text-accent">
-            {expanded ? "Fechar protocolo ↑" : "Ver protocolo ↓"}
+            {expanded ? "Fechar guia ↑" : "Ver guia ↓"}
           </button>
           {expanded && (
             <pre
@@ -92,7 +92,7 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
         <div className="mt-4">
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={() => setPdfOpen((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/15 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25">
-              {pdfOpen ? "Fechar leitura ↑" : "📄 Ler protocolo"}
+              {pdfOpen ? "Fechar leitura ↑" : "📄 Ler guia"}
             </button>
             <button type="button" onClick={() => setFull("pdf")} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
               ⛶ Tela cheia

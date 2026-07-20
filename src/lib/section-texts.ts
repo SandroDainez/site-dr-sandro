@@ -13,7 +13,7 @@ export const SECTION_TEXTS: Entry[] = [
   { key: "freeApps", group: "Página inicial", label: "Apps grátis", eyebrow: "Aplicativos gratuitos", title: "Acesso aberto imediato" },
   { key: "utilApps", group: "Página inicial", label: "Apps do dia a dia", eyebrow: "Para o seu dia a dia", title: "Apps para organização e finanças pessoais", desc: "Ferramentas que ajudam no dia a dia — controle de gastos, organização pessoal, planejamento financeiro e mais. Úteis também fora da medicina, pra facilitar a sua rotina." },
   { key: "atualizacoes", group: "Página inicial", label: "Atualizações (home)", eyebrow: "Conteúdo recente", title: "Atualizações clínicas" },
-  { key: "protocolos", group: "Página inicial", label: "Protocolos (home)", eyebrow: "Condutas clínicas", title: "Protocolos Clínicos" },
+  { key: "protocolos", group: "Página inicial", label: "Guias Terapêuticos (home)", eyebrow: "Condutas clínicas", title: "Guias Terapêuticos" },
   { key: "videoaulas", group: "Página inicial", label: "Videoaulas (home)", eyebrow: "Aulas em vídeo", title: "Videoaulas" },
   { key: "colaboradores", group: "Página inicial", label: "Parceiros (home)", eyebrow: "Material de parceiros", title: "Profissionais parceiros" },
   { key: "cursos", group: "Página inicial", label: "Cursos / atualização contínua (home)", eyebrow: "Cursos presenciais, híbridos e online", title: "Atualização médica contínua" },
@@ -25,7 +25,7 @@ export const SECTION_TEXTS: Entry[] = [
   // ── Páginas internas (topo de cada página) ───────────────────────
   { key: "page_atualizacoes", group: "Páginas internas", label: "Página Atualizações", eyebrow: "Conteúdo clínico", title: "Atualizações", desc: "Revisão rápida e direto ao ponto da evidência mais recente, por área clínica." },
   { key: "page_atualizacoes_semanais", group: "Páginas internas", label: "Página Atualizações — histórico semanal", eyebrow: "Boletins clínicos · automático", title: "Atualizações clínicas da semana", desc: "Histórico de todas as atualizações geradas semanalmente, por especialidade — com tópicos, relevância clínica e todas as fontes consultadas. Consulte qualquer semana anterior." },
-  { key: "page_protocolos", group: "Páginas internas", label: "Página Protocolos", eyebrow: "Condutas clínicas", title: "Protocolos Clínicos", desc: "Algoritmos e condutas por área" },
+  { key: "page_protocolos", group: "Páginas internas", label: "Página Guias Terapêuticos", eyebrow: "Condutas clínicas", title: "Guias Terapêuticos", desc: "Algoritmos e condutas por área" },
   { key: "page_videoaulas", group: "Páginas internas", label: "Página Videoaulas", eyebrow: "Conteúdo em vídeo", title: "Videoaulas", desc: "Aulas médicas em vídeo por área" },
   { key: "page_cursos", group: "Páginas internas", label: "Página Cursos", eyebrow: "Formação médica", title: "Cursos", desc: "Cursos com aulas sequenciais, vídeos, slides e materiais para download. Conteúdo gratuito de acesso imediato — cursos completos por assinatura em breve." },
   { key: "page_podcast", group: "Páginas internas", label: "Página Podcast", eyebrow: "Áudio e vídeo", title: "Podcast", desc: "Episódios em áudio e vídeo — discussão de casos, condutas e atualizações. Assista ou ouça aqui, ou no seu app favorito." },
