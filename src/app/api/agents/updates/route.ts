@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOpenAI, AI_MODELS } from "@/lib/ai/openai";
+import { getOpenAI, getDeepSeek, AI_MODELS, deepseekModel } from "@/lib/ai/openai";
 import { createServiceClient, serviceConfigured } from "@/lib/supabase/server";
 import {
   getSemanaAtual, pubmedUrl, verificarCronSecret, PRINCIPIOS_AGENTE,
@@ -60,6 +60,22 @@ type ItemBusca = {
 
 // Forma mínima da resposta de chat.completions que usamos.
 type ChatCompletionResposta = { choices: { message: { content: string | null } }[] };
+
+// SÍNTESE RESILIENTE: tenta OpenAI (gpt-4o); se falhar (ex.: cota/429 esgotada), cai no
+// DeepSeek (mesmo SDK, já usado na geração do app). Assim o boletim semanal NÃO morre quando
+// a cota da OpenAI acaba — foi exatamente o que deixou uma semana sem atualização. Devolve o
+// conteúdo (string JSON) para o chamador dar JSON.parse. Fail-safe fica a cargo do chamador.
+async function chatSintese(prompt: string, maxTokens: number, temperature: number): Promise<string> {
+  const messages = [{ role: "user" as const, content: prompt }];
+  const req = { messages, max_tokens: maxTokens, temperature, response_format: { type: "json_object" as const } };
+  try {
+    const r = await getOpenAI().chat.completions.create({ model: AI_MODELS.chat, ...req });
+    return r.choices[0].message.content ?? "{}";
+  } catch {
+    const r = await getDeepSeek().chat.completions.create({ model: deepseekModel(), ...req });
+    return r.choices[0].message.content ?? "{}";
+  }
+}
 
 // ── CAMADA 1: PubMed ──────────────────────────────────────────────────────────
 async function buscarPubMed(especialidade: string): Promise<Fonte[]> {
@@ -311,14 +327,7 @@ Sua tarefa, tópico por tópico, com rigor de banca:
 
 Retorne APENAS JSON: {"topicos": [ ...os aprovados e corrigidos, mesmos campos do rascunho... ]}`;
   try {
-    const r = await getOpenAI().chat.completions.create({
-      model: AI_MODELS.chat,
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 2500,
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-    });
-    const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+    const parsed = JSON.parse(await chatSintese(prompt, 2500, 0.1));
     const revisados = Array.isArray(parsed.topicos) ? parsed.topicos : [];
     return revisados.length > 0 ? revisados : topicos; // nunca zera a semana
   } catch {
@@ -338,14 +347,7 @@ ${lista}
 
 Escreva um RESUMO de 2-3 frases que sintetize FIELMENTE o que está nesses tópicos — e somente eles. Não cite nada que não esteja na lista. Priorize, na ordem, novos guidelines/posicionamentos e alertas regulatórios. Tom sóbrio de evidência, sem hype. Retorne APENAS JSON: {"resumo": "..."}`;
   try {
-    const r = await getOpenAI().chat.completions.create({
-      model: AI_MODELS.chat,
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 350,
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-    });
-    const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+    const parsed = JSON.parse(await chatSintese(prompt, 350, 0.2));
     return typeof parsed.resumo === "string" && parsed.resumo.trim() ? parsed.resumo.trim() : original;
   } catch {
     return original;
@@ -375,14 +377,7 @@ NÃO altere fatos, números, doses, unidades, nomes de fármacos/exames, siglas,
 Devolva EXATAMENTE o mesmo JSON, com a MESMA quantidade de tópicos e MESMA ordem, só com o texto corrigido:
 ${JSON.stringify(payload, null, 2)}
 Retorne APENAS JSON: {"resumo":"...","topicos":[{"titulo":"...","descricao":"...","relevancia_clinica":"..."}]}`;
-    const r = await getOpenAI().chat.completions.create({
-      model: AI_MODELS.chat,
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 2500,
-      temperature: 0,
-      response_format: { type: "json_object" },
-    });
-    const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+    const parsed = JSON.parse(await chatSintese(prompt, 2500, 0));
     const revT = Array.isArray(parsed.topicos) ? parsed.topicos : [];
     if (revT.length !== topicos.length) return sintese; // desalinhou → não arrisca
     const txt = (novo: unknown, orig: string | undefined) =>
@@ -462,14 +457,7 @@ Retorne APENAS JSON válido:
   let tentativas = 0;
   while (tentativas < 3) {
     try {
-      const r = await getOpenAI().chat.completions.create({
-        model: AI_MODELS.chat,
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 2500,
-        temperature: 0.2,
-        response_format: { type: "json_object" },
-      });
-      const parsed = JSON.parse(r.choices[0].message.content ?? "{}");
+      const parsed = JSON.parse(await chatSintese(prompt, 2500, 0.2));
       // Pipeline de qualidade: revisão adversarial (derruba exagero/não sustentado) →
       // guarda de links (descarta URL/PMID que não exista nas fontes coletadas).
       parsed.topicos = await revisarTopicos(parsed.topicos ?? [], fontesTexto, label);
