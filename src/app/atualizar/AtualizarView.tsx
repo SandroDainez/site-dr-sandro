@@ -12,6 +12,7 @@ import { useAreaFiltro } from "@/components/zonas/useAreaFiltro";
 import type { ItemConteudo } from "@/components/zonas/ConteudoCard";
 import { itemNaArea } from "@/lib/zonas";
 import AtualizacoesFeed from "@/components/AtualizacoesFeed";
+import CalendarioCientifico, { type EventoUnificado } from "@/components/CalendarioCientifico";
 
 const COR = "#b98af0";
 
@@ -25,10 +26,17 @@ type Props = {
   pesquisas: ResearchResumo[];
   comparativos: ResearchResumo[];
   artigos: Artigo[];
+  eventos: EventoUnificado[];
 };
 
-export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesProto, pesquisas, comparativos, artigos }: Props) {
+export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesProto, pesquisas, comparativos, artigos, eventos }: Props) {
   const [area, setArea] = useAreaFiltro();
+
+  // Calendário segue o filtro de área da zona. Evento sem área marcada (cursos próprios) sempre aparece.
+  const eventosArea = useMemo(
+    () => (area === "todos" ? eventos : eventos.filter((e) => !e.areas?.length || e.areas.includes(area))),
+    [eventos, area],
+  );
 
   const itensProto: ItemConteudo[] = useMemo(
     () =>
@@ -108,8 +116,15 @@ export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesPr
 
       <SecaoConteudo icon={FileText} titulo="Artigos" sub="Textos autorais e revisões." itens={itensArtigos} cor={COR} emBreve="Nenhum artigo nesta área ainda — chega em breve." />
 
-      {/* A agenda de eventos (calendário aberto) é renderizada pela página logo abaixo —
-          é server component (busca no Supabase), não cabe dentro deste client component. */}
+      {/* Calendário de eventos ABERTO — segue o filtro de área da zona (não fica misturado). */}
+      {eventos.length > 0 && (
+        <CalendarioCientifico
+          eventos={eventosArea}
+          embedded
+          titulo="Agenda de eventos científicos"
+          subtitulo="Congressos, simpósios e inscrições — Brasil e mundo."
+        />
+      )}
     </div>
   );
 }

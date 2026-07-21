@@ -31,6 +31,7 @@ export type EventoUnificado = {
   external: boolean; // true = site oficial (nova aba); false = inscrição interna
   data_confirmada?: boolean; // false = data ainda provisória ("a confirmar")
   selo?: "proprio" | "parceiro" | null; // evento próprio/parceiro → destaque colorido
+  areas?: string[]; // áreas no formato do site (emergencias|ti|anestesiologia) p/ filtro no cliente
 };
 
 // Selo de evento próprio/parceiro: rótulo + cores (célula da grade e lista).
