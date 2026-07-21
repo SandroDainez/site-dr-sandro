@@ -16,7 +16,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { buildTypographyCss } from "@/lib/typography-sections";
 import PlantaoView from "./PlantaoView";
 
-export const metadata = { title: "Plantão — apoio na hora", description: "Protocolos, procedimentos, calculadoras e assistente clínico para consulta rápida." };
+export const metadata = { title: "Plantão — apoio na hora", description: "Guias terapêuticos, procedimentos, calculadoras e assistente clínico para consulta rápida." };
 
 export default async function PlantaoPage() {
   const [protocolosBlob, protocolosEditora, procedimentos, freeApps, header, navItems, typo, navStyle] = await Promise.all([

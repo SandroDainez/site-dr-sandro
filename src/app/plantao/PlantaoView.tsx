@@ -42,7 +42,7 @@ export default function PlantaoView({ protocolos, procedimentos, calculadoras }:
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: "#ff6259" }}>🔴 Plantão · apoio na hora</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Na beira do leito, em segundos</h1>
-          <p className="mt-2 max-w-2xl text-sm text-white/55">Protocolos, procedimentos, calculadoras e o assistente clínico — o que você precisa consultar rápido, sem estudar.</p>
+          <p className="mt-2 max-w-2xl text-sm text-white/55">Guias terapêuticos, procedimentos, calculadoras e o assistente clínico — o que você precisa consultar rápido, sem estudar.</p>
         </div>
       </div>
 
@@ -65,13 +65,13 @@ export default function PlantaoView({ protocolos, procedimentos, calculadoras }:
 
       {/* Protocolos */}
       <section>
-        <SecaoHead icon={ClipboardList} titulo="Protocolos" sub="Condutas prontas pra consultar na hora." />
+        <SecaoHead icon={ClipboardList} titulo="Guias Terapêuticos" sub="Condutas prontas pra consultar na hora." />
         {proto.length > 0 ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {proto.map((item) => <ProtocoloCard key={item.id} item={item} />)}
           </div>
         ) : (
-          <EmBreve texto="Nenhum protocolo nesta área ainda — chega em breve." />
+          <EmBreve texto="Nenhum guia nesta área ainda — chega em breve." />
         )}
       </section>
 

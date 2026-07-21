@@ -104,7 +104,15 @@ export default function AtualizacoesFeed({
     ? items.filter((it) => it.area === area || (it.kind === "manual" && it.areas?.includes(area)))
     : items;
 
-  filtered.sort((a, b) => b.date.localeCompare(a.date));
+  // Ordena por ÁREA na sequência canônica (Emergências → TI → Anestesiologia) e, dentro da
+  // área, mais novo primeiro. Assim os boletins (topo) e os destaques (embaixo) seguem a MESMA
+  // sequência — as colunas ficam alinhadas por área em vez de parecer bagunçado.
+  const ORDEM_AREA: Record<string, number> = { emergencias: 0, ti: 1, anestesiologia: 2 };
+  filtered.sort((a, b) => {
+    const oa = ORDEM_AREA[a.area] ?? 9, ob = ORDEM_AREA[b.area] ?? 9;
+    if (oa !== ob) return oa - ob;
+    return b.date.localeCompare(a.date);
+  });
   const shown = limit ? filtered.slice(0, limit) : filtered;
 
   return (
