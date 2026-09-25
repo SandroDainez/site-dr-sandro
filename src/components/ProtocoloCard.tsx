@@ -139,14 +139,6 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
           </div>
           {htmlOpen && (
             <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
-              <div className="sticky top-2 z-[60] flex items-center justify-end border-b border-white/10 bg-[#0f1420] p-2 shadow-lg">
-                <button type="button" onClick={() => setFull("html")} className="mr-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/15">
-                  ⛶ Tela cheia
-                </button>
-                <button type="button" onClick={() => setHtmlOpen(false)} className="rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25">
-                  ✕ Fechar
-                </button>
-              </div>
               <iframe src={htmlSrc} title={`${item.titulo} — interativo`} sandbox={htmlSandbox} className="w-full bg-white" style={{ height: "78vh" }} />
             </div>
           )}
