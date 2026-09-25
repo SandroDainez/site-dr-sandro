@@ -55,18 +55,23 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
           );
         }
 
-        // Grupo com dropdown
+        // Grupo com dropdown. Se o grupo tem href (uma zona), o rótulo é um LINK
+        // (clicar leva à página da zona) e o dropdown abre no hover/foco — assim a
+        // pessoa navega OU espia o que tem dentro. Sem href (ex.: "Mais"), é um botão.
+        const triggerCls = `${triggerBase} ${active ? "bg-white/10 text-white" : "text-white/85 hover:bg-white/10 hover:text-white group-hover:bg-white/10 group-hover:text-white"}`;
         return (
           <div key={group.label} className="group relative">
-            <button
-              type="button"
-              aria-haspopup="true"
-              style={itemStyle}
-              className={`${triggerBase} ${active ? "bg-white/10 text-white" : "text-white/85 hover:bg-white/10 hover:text-white group-hover:bg-white/10 group-hover:text-white"}`}
-            >
-              {group.label}
-              <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
-            </button>
+            {group.href ? (
+              <a href={resolveHref(group.href, internal)} style={itemStyle} className={triggerCls}>
+                {group.label}
+                <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
+              </a>
+            ) : (
+              <button type="button" aria-haspopup="true" style={itemStyle} className={triggerCls}>
+                {group.label}
+                <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform duration-200 group-hover:rotate-180" />
+              </button>
+            )}
 
             {/* painel: invisível por opacidade (links continuam focáveis p/ teclado) */}
             <div className="pointer-events-none absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
@@ -78,15 +83,18 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
                     <a
                       key={c.label}
                       href={href}
-                      className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] transition ${isActive ? "bg-white/10 font-medium text-white" : "text-white/75 hover:bg-white/[0.07] hover:text-white"}`}
+                      className={`flex items-start gap-2.5 rounded-xl px-3 py-2 text-[13px] transition ${isActive ? "bg-white/10 font-medium text-white" : "text-white/75 hover:bg-white/[0.07] hover:text-white"}`}
                     >
                       {c.logoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={c.logoUrl} alt="" className="h-5 w-5 shrink-0 rounded-md object-contain" />
+                        <img src={c.logoUrl} alt="" className="mt-0.5 h-5 w-5 shrink-0 rounded-md object-contain" />
                       ) : c.emoji ? (
-                        <span className="text-base leading-none">{c.emoji}</span>
+                        <span className="mt-0.5 text-base leading-none">{c.emoji}</span>
                       ) : null}
-                      {c.label}
+                      <span className="min-w-0">
+                        <span className="block leading-tight">{c.label}</span>
+                        {c.hint && <span className="mt-0.5 block text-[11px] leading-snug text-white/40">{c.hint}</span>}
+                      </span>
                     </a>
                   );
                 })}

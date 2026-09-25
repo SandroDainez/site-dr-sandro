@@ -52,7 +52,7 @@ export default function AbertoView({ podcasts }: Props) {
       <FiltroArea value={area} onChange={setArea} />
 
       {/* Podcast e entrevistas — episódios com player (mesmo componente da /podcast e da home) */}
-      <section>
+      <section id="podcast" className="scroll-mt-24">
         <SecaoHead icon={Mic} titulo="Podcast e entrevistas" sub="Conversas, casos e convidados — pra ouvir com calma." />
         {episodios.length > 0
           ? <PodcastList podcasts={episodios} />
@@ -60,7 +60,7 @@ export default function AbertoView({ podcasts }: Props) {
       </section>
 
       {/* Curiosidades — ainda sem conteúdo (regra: nunca inventar) */}
-      <section>
+      <section id="curiosidades" className="scroll-mt-24">
         <SecaoHead icon={MessageSquare} titulo="Curiosidades" sub="Casos comentados e curiosidades da medicina." />
         <EmBreve texto="Curiosidades e casos comentados chegam em breve." />
       </section>

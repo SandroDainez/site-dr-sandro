@@ -64,7 +64,7 @@ export default function PlantaoView({ protocolos, procedimentos, calculadoras }:
       </section>
 
       {/* Protocolos */}
-      <section>
+      <section id="guias" className="scroll-mt-24">
         <SecaoHead icon={ClipboardList} titulo="Guias Terapêuticos" sub="Condutas prontas pra consultar na hora." />
         {proto.length > 0 ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -94,7 +94,7 @@ export default function PlantaoView({ protocolos, procedimentos, calculadoras }:
       </section>
 
       {/* Calculadoras e ferramentas (apps grátis) */}
-      <section>
+      <section id="calculadoras" className="scroll-mt-24">
         <SecaoHead icon={Calculator} titulo="Calculadoras e ferramentas" sub="Apps de apoio, de uso livre." />
         {calcs.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

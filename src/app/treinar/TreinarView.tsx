@@ -79,6 +79,7 @@ export default function TreinarView({ questoes, flashcards }: Props) {
       </section>
 
       <SecaoConteudo
+        id="questoes"
         icon={ListChecks}
         titulo="Questões"
         sub="Teste-se com questões comentadas."
@@ -88,6 +89,7 @@ export default function TreinarView({ questoes, flashcards }: Props) {
       />
 
       <SecaoConteudo
+        id="flashcards"
         icon={Layers}
         titulo="Flashcards"
         sub="Cartões pra memorizar o essencial."

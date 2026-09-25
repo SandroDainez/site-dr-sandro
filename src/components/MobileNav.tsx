@@ -47,6 +47,28 @@ export default function MobileNav({ items, style, internal = false, currentPath 
               );
             }
             const isOpen = open === group.label;
+            // Zona (tem href): o rótulo NAVEGA e o chevron ao lado ABRE a lista do que
+            // tem dentro — dois alvos no mesmo pill. "Mais" (sem href) é só um toggle.
+            if (group.href) {
+              return (
+                <span
+                  key={group.label}
+                  style={{ fontSize }}
+                  className={`${chip} inline-flex items-center gap-1.5 !pr-1.5 ${active || isOpen ? chipActive : chipIdle}`}
+                >
+                  <a href={resolveHref(group.href, internal)} className="whitespace-nowrap">{group.label}</a>
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    aria-label={`Ver o que tem em ${group.label}`}
+                    onClick={() => setOpen(isOpen ? null : group.label)}
+                    className="-my-1 rounded-full p-1 hover:bg-white/10"
+                  >
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                </span>
+              );
+            }
             return (
               <button
                 key={group.label}
@@ -65,7 +87,7 @@ export default function MobileNav({ items, style, internal = false, currentPath 
       </nav>
 
       {openGroup?.children && (
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {openGroup.children.map((c) => {
             const isActive = !!currentPath && c.href === currentPath;
             return (
@@ -74,15 +96,18 @@ export default function MobileNav({ items, style, internal = false, currentPath 
                 href={resolveHref(c.href, internal)}
                 onClick={() => setOpen(null)}
                 style={{ fontSize }}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] transition ${isActive ? chipActive : "border-white/10 bg-white/[0.04] text-white/80"}`}
+                className={`flex items-start gap-2.5 rounded-2xl border px-3.5 py-2.5 text-[13px] transition ${isActive ? chipActive : "border-white/10 bg-white/[0.04] text-white/85"}`}
               >
                 {c.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.logoUrl} alt="" className="h-4 w-4 shrink-0 rounded object-contain" />
+                  <img src={c.logoUrl} alt="" className="mt-0.5 h-4 w-4 shrink-0 rounded object-contain" />
                 ) : c.emoji ? (
-                  <span className="text-sm leading-none">{c.emoji}</span>
+                  <span className="mt-0.5 text-sm leading-none">{c.emoji}</span>
                 ) : null}
-                {c.label}
+                <span className="min-w-0">
+                  <span className="block font-medium leading-tight">{c.label}</span>
+                  {c.hint && <span className="mt-0.5 block text-[11px] leading-snug text-white/45">{c.hint}</span>}
+                </span>
               </a>
             );
           })}

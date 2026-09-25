@@ -77,10 +77,10 @@ export default function AprenderView({ cursos, aulas, videoaulas, cientificos, c
 
       <SecaoConteudo icon={GraduationCap} titulo="Cursos" sub="Trilhas completas, do básico ao avançado." itens={cursosItens} cor={COR} emBreve="Nenhum curso nesta área ainda — chega em breve." />
 
-      <SecaoConteudo icon={BookOpen} titulo="Mini-aulas" sub="Temas objetivos para revisar rápido." itens={aulasItens} cor={COR} emBreve="Nenhuma mini-aula nesta área ainda — chega em breve." />
+      <SecaoConteudo id="mini-aulas" icon={BookOpen} titulo="Mini-aulas" sub="Temas objetivos para revisar rápido." itens={aulasItens} cor={COR} emBreve="Nenhuma mini-aula nesta área ainda — chega em breve." />
 
       {/* Videoaulas — card RICO reusado (thumbnail, play, PDF, teste de conhecimento) */}
-      <section>
+      <section id="videoaulas" className="scroll-mt-24">
         <SecaoHead icon={PlayCircle} titulo="Videoaulas" sub="Aulas em vídeo para assistir com calma." />
         {videoaulasFiltradas.length > 0 ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

@@ -2,7 +2,7 @@
 // relacionados. Definida em código (estável). Os conteúdos de cada seção seguem
 // editáveis no admin normalmente — o que é fixo aqui é só a montagem dos grupos.
 
-export type NavLink = { label: string; href: string; emoji?: string; logoUrl?: string };
+export type NavLink = { label: string; href: string; emoji?: string; logoUrl?: string; hint?: string };
 export type NavGroup = { label: string; href?: string; children?: NavLink[] };
 
 // Menu = as 6 zonas da reestruturação (ver src/lib/zonas.ts). O conteúdo antigo (protocolos,
@@ -15,18 +15,49 @@ export type NavGroup = { label: string; href?: string; children?: NavLink[] };
 // só não poluem mais o topo.
 export const NAV_GROUPS: NavGroup[] = [
   { label: "Início", href: "/" },
-  { label: "Plantão", href: "/plantao" },
-  { label: "Aprender", href: "/aprender" },
-  { label: "Atualizar", href: "/atualizar" },
-  { label: "Treinar", href: "/treinar" },
-  { label: "Extras", href: "/aberto" },
+  {
+    label: "Plantão", href: "/plantao",
+    children: [
+      { label: "Guias Terapêuticos", href: "/plantao#guias", emoji: "📄", hint: "Condutas prontas pra consultar" },
+      { label: "Calculadoras", href: "/plantao#calculadoras", emoji: "🧮", hint: "Doses, escores e ferramentas" },
+      { label: "Procedimentos", href: "/procedimentos", emoji: "🩺", hint: "Técnicas passo a passo" },
+      { label: "Assistente clínico", href: "/assistente", emoji: "✨", hint: "Pergunte e receba com a fonte" },
+    ],
+  },
+  {
+    label: "Aprender", href: "/aprender",
+    children: [
+      { label: "Cursos", href: "/cursos", emoji: "🎓", hint: "Trilhas completas e certificado" },
+      { label: "Videoaulas", href: "/aprender#videoaulas", emoji: "🎬", hint: "Aulas em vídeo" },
+      { label: "Mini-aulas", href: "/aprender#mini-aulas", emoji: "⚡", hint: "Temas rápidos pra revisar" },
+    ],
+  },
+  {
+    label: "Atualizar", href: "/atualizar",
+    children: [
+      { label: "Boletins clínicos", href: "/atualizar#boletins", emoji: "📰", hint: "O que mudou nas condutas" },
+      { label: "Agenda de eventos", href: "/atualizar#eventos", emoji: "📅", hint: "Congressos e inscrições" },
+    ],
+  },
+  {
+    label: "Treinar", href: "/treinar",
+    children: [
+      { label: "Questões", href: "/treinar#questoes", emoji: "❓", hint: "Teste seu conhecimento" },
+      { label: "Flashcards", href: "/treinar#flashcards", emoji: "🃏", hint: "Revisão rápida" },
+    ],
+  },
+  {
+    label: "Extras", href: "/aberto",
+    children: [
+      { label: "Podcast", href: "/aberto#podcast", emoji: "🎙️", hint: "Episódios e entrevistas" },
+      { label: "Curiosidades", href: "/aberto#curiosidades", emoji: "💡", hint: "Casos e curiosidades" },
+    ],
+  },
   {
     label: "Mais",
     children: [
-      { label: "Meu MedCampus", href: "/minha-area" },
-      { label: "Cursos", href: "/cursos" },
-      { label: "Eventos", href: "#eventos" },
-      { label: "Contato", href: "#contato" },
+      { label: "Meu MedCampus", href: "/minha-area", emoji: "👤", hint: "Perfil e assinatura" },
+      { label: "Contato", href: "#contato", emoji: "✉️", hint: "Fale comigo" },
     ],
   },
 ];

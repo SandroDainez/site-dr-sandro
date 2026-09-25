@@ -84,7 +84,7 @@ export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesPr
 
       {/* Boletins semanais da IA — 1 por área, o mais recente. Semanas anteriores no histórico.
           SEPARADO dos destaques manuais para não misturar os dois tipos de conteúdo. */}
-      <section>
+      <section id="boletins" className="scroll-mt-24">
         <div className="mb-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
             <Newspaper className="h-5 w-5" style={{ color: COR }} /> Boletins da semana
@@ -118,12 +118,14 @@ export default function AtualizarView({ atualizacoes, aiBoletins, atualizacoesPr
 
       {/* Calendário de eventos ABERTO — segue o filtro de área da zona (não fica misturado). */}
       {eventos.length > 0 && (
-        <CalendarioCientifico
-          eventos={eventosArea}
-          embedded
-          titulo="Agenda de eventos científicos"
-          subtitulo="Congressos, simpósios e inscrições — Brasil e mundo."
-        />
+        <div id="eventos" className="scroll-mt-24">
+          <CalendarioCientifico
+            eventos={eventosArea}
+            embedded
+            titulo="Agenda de eventos científicos"
+            subtitulo="Congressos, simpósios e inscrições — Brasil e mundo."
+          />
+        </div>
       )}
     </div>
   );

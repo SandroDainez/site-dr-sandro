@@ -5,7 +5,7 @@ import EmBreve from "./EmBreve";
 // Seção de uma zona: cabeçalho + grade de cards (ou "em construção" se vazio).
 // Presentacional — recebe os itens JÁ filtrados pela área ativa.
 export default function SecaoConteudo({
-  icon: Icon, titulo, sub, itens, cor, emBreve,
+  icon: Icon, titulo, sub, itens, cor, emBreve, id,
 }: {
   icon: LucideIcon;
   titulo: string;
@@ -13,9 +13,10 @@ export default function SecaoConteudo({
   itens: ItemConteudo[];
   cor: string;
   emBreve: string;
+  id?: string; // âncora p/ o menu saltar direto nesta seção (ex.: /treinar#questoes)
 }) {
   return (
-    <section>
+    <section id={id} className={id ? "scroll-mt-24" : undefined}>
       <div className="mb-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
           <Icon className="h-5 w-5" style={{ color: cor }} /> {titulo}
