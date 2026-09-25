@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { Save, Plus, Trash2, Upload, FileText, Loader2, X } from "lucide-react";
+import { Save, Plus, Trash2, Upload, FileText, Loader2 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import type { ProtocoloData } from "@/lib/content";
 import RichTextEditor from "@/components/admin/RichTextEditor";
@@ -346,17 +346,19 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
                     )}
                   </label>
                   {item.arquivoUrl && (
-                    <span className="flex items-center gap-1.5 text-xs text-accent">
-                      <FileText className="h-3.5 w-3.5" /> Arquivo anexado
+                    <>
+                      <span className="flex items-center gap-1.5 text-xs text-accent">
+                        <FileText className="h-3.5 w-3.5" /> Arquivo anexado
+                      </span>
                       <button
                         type="button"
                         onClick={() => updateItem(idx, "arquivoUrl", "")}
-                        className="ml-1 text-white/40 transition hover:text-red-400"
-                        title="Remover arquivo"
+                        className="flex items-center gap-1.5 rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-400/20"
+                        title="Remover o PDF deste guia"
                       >
-                        <X className="h-3.5 w-3.5" />
+                        <Trash2 className="h-3.5 w-3.5" /> Remover PDF
                       </button>
-                    </span>
+                    </>
                   )}
                 </div>
               </div>
@@ -407,17 +409,19 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
                   )}
                 </label>
                 {item.htmlUrl && (
-                  <span className="flex items-center gap-1.5 text-xs text-accent">
-                    <FileText className="h-3.5 w-3.5" /> Interativo anexado
+                  <>
+                    <span className="flex items-center gap-1.5 text-xs text-accent">
+                      <FileText className="h-3.5 w-3.5" /> Interativo anexado
+                    </span>
                     <button
                       type="button"
                       onClick={() => updateItem(idx, "htmlUrl", "")}
-                      className="ml-1 text-white/40 transition hover:text-red-400"
-                      title="Remover interativo"
+                      className="flex items-center gap-1.5 rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:bg-red-400/20"
+                      title="Remover o HTML interativo deste guia"
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <Trash2 className="h-3.5 w-3.5" /> Remover interativo
                     </button>
-                  </span>
+                  </>
                 )}
               </div>
             </div>
