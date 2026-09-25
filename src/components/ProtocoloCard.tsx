@@ -22,16 +22,23 @@ const areaLabel: Record<ProtocoloData["area"], string> = {
 
 const formatDate = dataCurta;
 
-// O interativo é servido em MESMA origem (via /api/img), então mantemos o iframe numa
-// origem OPACA (sandbox sem allow-same-origin): os scripts do doc rodam e a navegação
-// pela barra lateral funciona, mas ele não enxerga cookies/localStorage do MedCampus.
-const HTML_SANDBOX = "allow-scripts allow-popups allow-downloads allow-forms allow-modals";
+// Sandbox do interativo conforme a ORIGEM da URL:
+// - URL absoluta (https://...blob...) = OUTRA origem → liberamos allow-same-origin, então
+//   localStorage/tema/navegação do doc funcionam, e por ser cross-origin ele continua sem
+//   acessar cookies/sessão do MedCampus. (É o caso dos uploads novos, públicos no Blob.)
+// - URL relativa (/api/img, legado mesma-origem) = origem OPACA (sem allow-same-origin):
+//   seguro, mas docs que usam localStorage quebram — por isso reenviar como público.
+function sandboxParaHtml(url?: string): string {
+  const base = "allow-scripts allow-popups allow-downloads allow-forms allow-modals";
+  return url && /^https?:\/\//i.test(url) ? `allow-same-origin ${base}` : base;
+}
 
 export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
   const [expanded, setExpanded] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [htmlOpen, setHtmlOpen] = useState(false);
   const [full, setFull] = useState<null | "pdf" | "text" | "html">(null);
+  const htmlSandbox = sandboxParaHtml(item.htmlUrl);
 
   // Abre automaticamente se a URL aponta para este protocolo (#id), vindo de outra página.
   useEffect(() => {
@@ -140,7 +147,7 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
                   ✕ Fechar
                 </button>
               </div>
-              <iframe src={item.htmlUrl} title={`${item.titulo} — interativo`} sandbox={HTML_SANDBOX} className="w-full bg-white" style={{ height: "78vh" }} />
+              <iframe src={item.htmlUrl} title={`${item.titulo} — interativo`} sandbox={htmlSandbox} className="w-full bg-white" style={{ height: "78vh" }} />
             </div>
           )}
         </div>
@@ -164,7 +171,7 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
           {full === "pdf" && item.arquivoUrl ? (
             <iframe src={`${item.arquivoUrl}#view=FitH`} title={item.titulo} className="min-h-0 w-full flex-1 rounded-xl bg-white" />
           ) : full === "html" && item.htmlUrl ? (
-            <iframe src={item.htmlUrl} title={`${item.titulo} — interativo`} sandbox={HTML_SANDBOX} className="min-h-0 w-full flex-1 rounded-xl bg-white" />
+            <iframe src={item.htmlUrl} title={`${item.titulo} — interativo`} sandbox={htmlSandbox} className="min-h-0 w-full flex-1 rounded-xl bg-white" />
           ) : (
             <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-white/10 bg-black/40 p-5">
               {item.imageUrl && (

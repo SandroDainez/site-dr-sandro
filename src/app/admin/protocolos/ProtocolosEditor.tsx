@@ -38,14 +38,16 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
     setError(null);
     setUploadingHtmlIdx(idx);
     try {
-      // Mesmo caminho do PDF: browser → Vercel Blob privado, servido depois via /api/img.
-      // Forçamos text/html para o navegador renderizar o interativo dentro do iframe.
+      // O interativo é PÚBLICO (cross-origin, servido do próprio Blob) — de propósito.
+      // Assim o iframe roda numa ORIGEM REAL e isolada: o localStorage/tema/navegação do
+      // doc funcionam (o PDF fica privado via /api/img porque não roda JS). Guardamos a
+      // URL direta do Blob; o card detecta que é absoluta e libera allow-same-origin.
       const blob = await upload(`protocolos/${Date.now()}-${file.name}`, file, {
-        access: "private",
+        access: "public",
         handleUploadUrl: "/api/upload",
         contentType: "text/html",
       });
-      updateItem(idx, "htmlUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+      updateItem(idx, "htmlUrl", blob.url);
     } catch (e) {
       setError("Falha no upload do HTML interativo: " + String(e instanceof Error ? e.message : e));
     } finally {
