@@ -1,6 +1,7 @@
 import type { NavStyleData } from "@/lib/content";
 import { NAV_GROUPS, resolveHref, isGroupActive, type NavGroup } from "@/lib/nav-structure";
 import { ChevronDown } from "lucide-react";
+import NavBack from "@/components/NavBack";
 
 type Props = {
   items?: NavGroup[]; // estrutura EFETIVA (NAV_GROUPS + edições do admin); fallback p/ NAV_GROUPS
@@ -33,6 +34,9 @@ export default function SiteNav({ items, style, internal = false, currentPath }:
       style={navStyle}
       className="hidden items-center gap-0 rounded-full border border-white/15 bg-black/80 px-1.5 py-1.5 text-[12.5px] font-medium text-white/85 backdrop-blur-md lg:flex"
     >
+      {currentPath && currentPath !== "/" && (
+        <NavBack currentPath={currentPath} className={`${triggerBase} mr-0.5 text-white/85 hover:bg-white/10 hover:text-white`} />
+      )}
       {groups.map((group) => {
         const active = isGroupActive(group, currentPath);
 

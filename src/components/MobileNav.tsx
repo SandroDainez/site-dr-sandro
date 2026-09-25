@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { NavStyleData } from "@/lib/content";
 import { NAV_GROUPS, resolveHref, isGroupActive, type NavGroup } from "@/lib/nav-structure";
+import NavBack from "@/components/NavBack";
 
 type Props = {
   items?: NavGroup[]; // estrutura EFETIVA (NAV_GROUPS + edições do admin); fallback p/ NAV_GROUPS
@@ -32,6 +33,9 @@ export default function MobileNav({ items, style, internal = false, currentPath 
         className="mobile-nav-scroll -mx-6 w-[calc(100%+3rem)] overflow-x-auto px-6 pt-1"
       >
         <div className="flex w-max items-center gap-2">
+          {currentPath && currentPath !== "/" && (
+            <NavBack currentPath={currentPath} className={`${chip} flex items-center gap-1 ${chipIdle}`} />
+          )}
           {groups.map((group) => {
             const active = isGroupActive(group, currentPath);
             if (!group.children) {
