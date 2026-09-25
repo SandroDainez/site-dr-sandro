@@ -44,7 +44,20 @@ export async function GET(req: NextRequest) {
       "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
     });
 
-    return new NextResponse(res.body, { status: 200, headers });
+    // Ajustes que valem para TODO interativo, sem editar arquivo por arquivo: esconde o
+    // botão "Imprimir" da barra do doc (imprimir/baixar é papel do PDF). Injetamos um
+    // <style> antes de </head> (inline liberado pelo CSP style-src 'unsafe-inline').
+    let html = await res.text();
+    const hideCss =
+      '<style id="mc-guia-overrides">' +
+      'button[onclick*="print"],.top-bar-actions button[title="Imprimir"],' +
+      '[aria-label="Imprimir protocolo"]{display:none!important}' +
+      "</style>";
+    html = html.includes("</head>")
+      ? html.replace("</head>", `${hideCss}</head>`)
+      : hideCss + html;
+
+    return new NextResponse(html, { status: 200, headers });
   } catch {
     return new NextResponse("Error fetching file", { status: 500 });
   }
