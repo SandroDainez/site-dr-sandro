@@ -131,9 +131,6 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
             <button type="button" onClick={() => setFull("html")} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
               ⛶ Tela cheia
             </button>
-            <a href={`${item.htmlUrl}&dl=1`} rel="noreferrer" download className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
-              Baixar interativo ↓
-            </a>
           </div>
           {htmlOpen && (
             <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
