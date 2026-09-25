@@ -208,6 +208,7 @@ export type ProtocoloData = {
   imageSize?: number; // tamanho da imagem em px // caption below image
   arquivoUrl: string;   // optional PDF or external material link
   arquivoLabel: string; // button label, e.g. "Baixar PDF" or "Ver protocolo"
+  htmlUrl?: string;     // opcional: versão INTERATIVA (HTML autônomo no Blob) — 2º formato do guia
   data: string;         // YYYY-MM-DD (last updated)
   areas?: ("emergencias" | "ti" | "anestesiologia")[]; // também aparece nestes hubs, além da área principal
 };

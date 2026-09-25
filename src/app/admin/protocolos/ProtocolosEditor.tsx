@@ -31,7 +31,27 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [uploadingPdfIdx, setUploadingPdfIdx] = useState<number | null>(null);
+  const [uploadingHtmlIdx, setUploadingHtmlIdx] = useState<number | null>(null);
   const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  async function handleHtmlUpload(idx: number, file: File) {
+    setError(null);
+    setUploadingHtmlIdx(idx);
+    try {
+      // Mesmo caminho do PDF: browser → Vercel Blob privado, servido depois via /api/img.
+      // Forçamos text/html para o navegador renderizar o interativo dentro do iframe.
+      const blob = await upload(`protocolos/${Date.now()}-${file.name}`, file, {
+        access: "private",
+        handleUploadUrl: "/api/upload",
+        contentType: "text/html",
+      });
+      updateItem(idx, "htmlUrl", `/api/img?url=${encodeURIComponent(blob.url)}`);
+    } catch (e) {
+      setError("Falha no upload do HTML interativo: " + String(e instanceof Error ? e.message : e));
+    } finally {
+      setUploadingHtmlIdx(null);
+    }
+  }
 
   async function handlePdfUpload(idx: number, file: File) {
     setError(null);
@@ -350,6 +370,53 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
                   placeholder="Baixar PDF"
                   className="w-full rounded-xl border border-white/15 bg-black/30 px-3 py-2 text-sm text-white placeholder:text-white/30 outline-none transition focus:border-accent/50"
                 />
+              </div>
+            </div>
+
+            {/* versão interativa (HTML) — 2º formato do guia */}
+            <div>
+              <label className="mb-1 block text-xs uppercase tracking-[0.1em] text-white/40">
+                Versão interativa (HTML autônomo — opcional)
+              </label>
+              <p className="mb-2 text-xs text-white/40">
+                Envie um <strong className="text-white/60">.html autônomo</strong> (com estilos e scripts embutidos). Ele aparece no card como
+                &ldquo;Ver interativo&rdquo; + &ldquo;Tela cheia&rdquo;, com a navegação pela barra lateral funcionando.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="file"
+                  accept="text/html,.html,.htm"
+                  id={`html-${idx}`}
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleHtmlUpload(idx, f);
+                    e.target.value = "";
+                  }}
+                />
+                <label
+                  htmlFor={`html-${idx}`}
+                  className={`flex cursor-pointer items-center gap-2 rounded-full border border-white/20 bg-white/[0.05] px-3 py-1.5 text-xs text-white transition hover:bg-white/10 ${uploadingHtmlIdx === idx ? "pointer-events-none opacity-50" : ""}`}
+                >
+                  {uploadingHtmlIdx === idx ? (
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando HTML...</>
+                  ) : (
+                    <><Upload className="h-3.5 w-3.5" /> Enviar HTML interativo</>
+                  )}
+                </label>
+                {item.htmlUrl && (
+                  <span className="flex items-center gap-1.5 text-xs text-accent">
+                    <FileText className="h-3.5 w-3.5" /> Interativo anexado
+                    <button
+                      type="button"
+                      onClick={() => updateItem(idx, "htmlUrl", "")}
+                      className="ml-1 text-white/40 transition hover:text-red-400"
+                      title="Remover interativo"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </span>
+                )}
               </div>
             </div>
           </div>

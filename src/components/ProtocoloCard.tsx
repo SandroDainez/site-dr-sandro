@@ -22,10 +22,16 @@ const areaLabel: Record<ProtocoloData["area"], string> = {
 
 const formatDate = dataCurta;
 
+// O interativo é servido em MESMA origem (via /api/img), então mantemos o iframe numa
+// origem OPACA (sandbox sem allow-same-origin): os scripts do doc rodam e a navegação
+// pela barra lateral funciona, mas ele não enxerga cookies/localStorage do MedCampus.
+const HTML_SANDBOX = "allow-scripts allow-popups allow-downloads allow-forms allow-modals";
+
 export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
   const [expanded, setExpanded] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
-  const [full, setFull] = useState<null | "pdf" | "text">(null);
+  const [htmlOpen, setHtmlOpen] = useState(false);
+  const [full, setFull] = useState<null | "pdf" | "text" | "html">(null);
 
   // Abre automaticamente se a URL aponta para este protocolo (#id), vindo de outra página.
   useEffect(() => {
@@ -114,6 +120,32 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
         </div>
       )}
 
+      {item.htmlUrl && (
+        <div className="mt-3">
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setHtmlOpen((v) => !v)} className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 bg-accent/15 px-4 py-1.5 text-xs font-semibold text-accent transition hover:bg-accent/25">
+              {htmlOpen ? "Fechar interativo ↑" : "🧭 Ver interativo"}
+            </button>
+            <button type="button" onClick={() => setFull("html")} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
+              ⛶ Tela cheia
+            </button>
+          </div>
+          {htmlOpen && (
+            <div className="mt-3 overflow-hidden rounded-xl border border-white/10">
+              <div className="sticky top-2 z-[60] flex items-center justify-end border-b border-white/10 bg-[#0f1420] p-2 shadow-lg">
+                <button type="button" onClick={() => setFull("html")} className="mr-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/15">
+                  ⛶ Tela cheia
+                </button>
+                <button type="button" onClick={() => setHtmlOpen(false)} className="rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25">
+                  ✕ Fechar
+                </button>
+              </div>
+              <iframe src={item.htmlUrl} title={`${item.titulo} — interativo`} sandbox={HTML_SANDBOX} className="w-full bg-white" style={{ height: "78vh" }} />
+            </div>
+          )}
+        </div>
+      )}
+
       {full && (
         <div className="fixed inset-0 z-[9999] flex flex-col bg-black/95 p-3 backdrop-blur-sm sm:p-5">
           <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
@@ -131,6 +163,8 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
           </div>
           {full === "pdf" && item.arquivoUrl ? (
             <iframe src={`${item.arquivoUrl}#view=FitH`} title={item.titulo} className="min-h-0 w-full flex-1 rounded-xl bg-white" />
+          ) : full === "html" && item.htmlUrl ? (
+            <iframe src={item.htmlUrl} title={`${item.titulo} — interativo`} sandbox={HTML_SANDBOX} className="min-h-0 w-full flex-1 rounded-xl bg-white" />
           ) : (
             <div className="min-h-0 flex-1 overflow-auto rounded-xl border border-white/10 bg-black/40 p-5">
               {item.imageUrl && (

@@ -33,6 +33,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             "video/*",
             "image/*",
             "application/pdf",
+            "text/html",
             "audio/mpeg",
             "audio/mp3",
             "audio/wav",
