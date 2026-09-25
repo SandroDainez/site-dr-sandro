@@ -223,8 +223,8 @@ const sections = [
   {
     href: "/admin/protocolos",
     icon: ClipboardList,
-    label: "Protocolos",
-    desc: "Gerencie os protocolos clínicos por área: emergências, TI e anestesiologia.",
+    label: "Guias Terapêuticos",
+    desc: "Gerencie os guias terapêuticos por área: emergências, TI e anestesiologia.",
     color: "text-teal-400",
     border: "hover:border-teal-400/40",
   },

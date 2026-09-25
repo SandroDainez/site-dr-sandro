@@ -6,7 +6,7 @@ import { Search, Globe, Download, SendHorizonal, Loader2, CheckCircle2, Library 
 import { listarBibliotecaEditora, enviarParaReferencias, type ItemBiblioteca } from "./actions";
 
 const MODULO_LABEL: Record<string, string> = {
-  "arquiteto-protocolos": "Arquiteto de Protocolos",
+  "arquiteto-protocolos": "Arquiteto de Guias",
   "editor-cientifico": "Editor Científico",
   "editor-premium": "Editor Premium",
   "criador-aulas": "Criador de Aulas",

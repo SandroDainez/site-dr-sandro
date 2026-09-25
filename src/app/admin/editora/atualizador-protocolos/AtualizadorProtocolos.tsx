@@ -242,7 +242,7 @@ export default function AtualizadorProtocolos({ docsIniciais, protocolos, modo }
                 <button type="button" onClick={criarNovo} disabled={busy || !protocoloSel} className="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition hover:brightness-110 disabled:opacity-50"><Plus className="h-4 w-4" /> Criar</button>
               </div>
             </div>
-            {protocolos.length === 0 && <p className="text-[11px] text-amber-300/80">Nenhum protocolo publicado ainda — publique um no Arquiteto de Protocolos primeiro.</p>}
+            {protocolos.length === 0 && <p className="text-[11px] text-amber-300/80">Nenhum protocolo publicado ainda — publique um no Arquiteto de Guias primeiro.</p>}
           </div>
         )}
       </div>

@@ -48,7 +48,7 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
   }
 
   function excluir(p: Prot) {
-    if (!window.confirm(`Excluir o protocolo "${p.title}"? Esta ação não pode ser desfeita.`)) return;
+    if (!window.confirm(`Excluir o guia "${p.title}"? Esta ação não pode ser desfeita.`)) return;
     setErro(null);
     start(async () => {
       const r = await excluirDoc(p.id);
@@ -61,12 +61,12 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
     <div className="mb-10">
       <div className="mb-3 flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-accent" />
-        <p className="text-sm font-semibold text-white">Protocolos gerados por IA (Editora)</p>
+        <p className="text-sm font-semibold text-white">Guias terapêuticos gerados por IA (Editora)</p>
       </div>
       <p className="mb-4 text-xs text-white/50">
-        Estes são criados no <strong className="text-white/70">Arquiteto de Protocolos</strong>. Aqui você ajusta título,
+        Estes são criados no <strong className="text-white/70">Arquiteto de Guias</strong>. Aqui você ajusta título,
         especialidade, imagem/logo e pode excluir. O <strong className="text-white/70">conteúdo</strong> (as seções do
-        protocolo) só se edita no Arquiteto; o <strong className="text-white/70">PDF</strong> é gerado automaticamente a
+        guia) só se edita no Arquiteto; o <strong className="text-white/70">PDF</strong> é gerado automaticamente a
         partir desse conteúdo — não há upload manual de PDF aqui.
       </p>
       {erro && <p className="mb-3 text-xs text-rose-300">{erro}</p>}
@@ -115,7 +115,7 @@ export default function ProtocolosEditoraAdmin({ protocolos }: { protocolos: Pro
               <div>
                 <label className={labelCls}>Conteúdo e PDF</label>
                 <Link href="/admin/editora/arquiteto-protocolos" className={inputCls + " flex items-center justify-center gap-1.5 text-center text-accent transition hover:border-accent/40"}>
-                  <ExternalLink className="h-3.5 w-3.5" /> Editar no Arquiteto de Protocolos
+                  <ExternalLink className="h-3.5 w-3.5" /> Editar no Arquiteto de Guias
                 </Link>
               </div>
             </div>

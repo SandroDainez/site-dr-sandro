@@ -362,7 +362,7 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
         className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-white/20 py-3 text-sm text-white/50 transition hover:border-white/40 hover:text-white/80"
       >
         <Plus className="h-4 w-4" />
-        Adicionar protocolo
+        Adicionar guia
       </button>
 
       <div className="flex items-center gap-3">
@@ -373,7 +373,7 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
           className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-[#0f1420] transition hover:opacity-90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {isPending ? "Salvando..." : "Salvar protocolos"}
+          {isPending ? "Salvando..." : "Salvar guias"}
         </button>
         {saved && <span className="text-sm text-accent">✓ Salvo com sucesso</span>}
         {error && <p className="text-sm text-red-400 max-w-md leading-relaxed">{error}</p>}

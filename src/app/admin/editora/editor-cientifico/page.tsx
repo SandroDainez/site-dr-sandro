@@ -37,7 +37,7 @@ export default async function EditorCientificoPage() {
       <QuandoUsar>
         <strong className="text-white">Use este quando:</strong> você tem referências prontas (diretrizes, artigos, livros) e quer que a IA
         <strong className="text-white/90"> redija um texto científico do zero</strong> — revisão, artigo, resumo clínico. <strong className="text-white/90">Não</strong> é
-        para protocolo institucional (isso é o <strong className="text-white/90">Arquiteto de Protocolos</strong>, 33 seções fixas) nem para refinar um texto
+        para protocolo institucional (isso é o <strong className="text-white/90">Arquiteto de Guias</strong>, 33 seções fixas) nem para refinar um texto
         que você já escreveu (isso é o <strong className="text-white/90">Editor Premium</strong> — você cola o rascunho e a IA densifica/refina em cima dele).
       </QuandoUsar>
 

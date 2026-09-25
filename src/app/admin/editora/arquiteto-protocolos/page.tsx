@@ -19,7 +19,7 @@ export default async function ArquitetoProtocolosPage() {
     <div className="max-w-4xl">
       <div className="mb-8">
         <Link href="/admin/editora" className="text-xs text-muted hover:text-white transition">← Editora Médica</Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Arquiteto de Protocolos {modo === "real"
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">Arquiteto de Guias {modo === "real"
           ? <span className="align-middle text-[10px] font-semibold uppercase tracking-wide text-accent">DeepSeek + GPT-4o</span>
           : <span className="align-middle text-[10px] font-semibold uppercase tracking-wide text-amber-400">piloto · mock</span>}</h1>
         <p className="mt-1 text-sm text-white/50">

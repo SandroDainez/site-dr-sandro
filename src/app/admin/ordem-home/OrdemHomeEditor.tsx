@@ -7,7 +7,7 @@ import { DEFAULT_HOME_ORDER, SECOES_OCULTAS_HOME } from "@/lib/home-sections";
 
 const LABELS: Record<string, string> = {
   atualizacoes: "Atualizações clínicas",
-  protocolos: "Protocolos",
+  protocolos: "Guias Terapêuticos",
   procedimentos: "Procedimentos médicos",
   videoaulas: "Videoaulas",
   cursos: "Cursos",

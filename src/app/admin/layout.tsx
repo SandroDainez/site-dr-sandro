@@ -84,7 +84,7 @@ const navGroups = [
       { href: "/admin/topicos-estudo", label: "Tópicos de estudo (home)", icon: BookOpen, hint: "Lista simples de tópicos exibida na home (não é o curso completo)." },
       { href: "/admin/atualizacoes", label: "Destaques clínicos", icon: Newspaper, hint: "Os cards de 'Destaques clínicos' do site (estudos/diretrizes a dedo). Adicionar, editar, excluir e reordenar. Não confundir com os boletins semanais da IA." },
       { href: "/admin/editora", label: "Editora Médica (artigos)", icon: Feather, hint: "Artigos/matérias: escrever ou gerar rascunho com IA e publicar em /artigos." },
-      { href: "/admin/protocolos", label: "Protocolos", icon: ClipboardList, hint: "Protocolos clínicos com PDF e infográfico." },
+      { href: "/admin/protocolos", label: "Guias Terapêuticos", icon: ClipboardList, hint: "Guias terapêuticos com PDF e infográfico." },
       { href: "/admin/procedimentos", label: "Procedimentos médicos", icon: Stethoscope, hint: "Procedimentos e técnicas com vídeo, PDF, passo a passo e imagem, por especialidade." },
       { href: "/admin/videoaulas", label: "Videoaulas", icon: PlayCircle, hint: "Videoaulas (link do YouTube ou vídeo enviado)." },
       { href: "/admin/podcast", label: "Podcast", icon: Mic, hint: "Episódios em áudio: suas gravações e/ou links (Spotify, YouTube)." },

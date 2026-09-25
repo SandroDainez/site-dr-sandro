@@ -17,14 +17,14 @@ export default async function AdminProtocolosPage() {
   return (
     <div className="max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Protocolos clínicos</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-white">Guias Terapêuticos</h1>
         <p className="mt-1 text-sm text-white/50">
-          Gerencie os protocolos exibidos em{" "}
+          Gerencie os guias terapêuticos exibidos em{" "}
           <span className="font-mono text-white/70">/protocolos</span> e na home.
         </p>
       </div>
 
-      <AdminHelp>Clique em “Adicionar protocolo”. Preencha título, área e descrição; envie o PDF e/ou a imagem do infográfico. Salvar para publicar.</AdminHelp>
+      <AdminHelp>Clique em “Adicionar guia”. Preencha título, área e descrição; envie o PDF e/ou a imagem do infográfico. Salvar para publicar.</AdminHelp>
 
       <ColsShortcut />
 
@@ -32,7 +32,7 @@ export default async function AdminProtocolosPage() {
 
       <ProtocolosEditor initialProtocolos={protocolos} />
 
-      <AreaTypography sectionKey="protocolos" label="Protocolos" initial={typo["protocolos"]} />
+      <AreaTypography sectionKey="protocolos" label="Guias Terapêuticos" initial={typo["protocolos"]} />
     </div>
   );
 }
