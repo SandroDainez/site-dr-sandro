@@ -648,14 +648,23 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                 }}
               />
               {item.imageUrl && (
-                <div className="mt-2">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.imageUrl}
-                    alt="Preview"
-                    className="h-28 w-auto rounded-xl border border-white/10 object-cover"
-                  />
-                  <div className="mt-3">
+                <div className="mt-2 space-y-3">
+                  {/* Preview ENQUADRADO igual ao site (mesma altura + mesmo recorte) */}
+                  <div className="relative w-full max-w-[340px] overflow-hidden rounded-xl border border-white/10 bg-black" style={{ height: item.imageSize ?? 176 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={item.imageUrl}
+                      alt="Preview"
+                      style={item.mostrarInteiro ? { objectFit: "contain" } : {
+                        objectPosition: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%`,
+                        transform: `scale(${(item.zoom ?? 100) / 100})`,
+                        transformOrigin: `${item.enquadramento ?? 50}% ${item.enquadramentoY ?? 50}%`,
+                      }}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <div>
                     <div className="mb-1 flex items-center justify-between">
                       <label className="text-xs text-white/40">Altura da capa no site</label>
                       <span className="text-xs font-semibold tabular-nums text-accent">{item.imageSize ?? 176}px</span>
@@ -673,6 +682,63 @@ export default function VideoaulasEditor({ initialVideoaulas }: Props) {
                       className="w-full accent-[var(--accent,#2ce6b8)]"
                     />
                   </div>
+
+                  {/* Enquadramento da CAPA (imagem). Escondido só quando o bloco do vídeo
+                      enviado já mostra os mesmos controles (evita duplicar — os campos são
+                      compartilhados e valem para a imagem e o vídeo). */}
+                  {!(item.videoUrl && !ytId) && (
+                    <div className="rounded-xl border border-accent/30 bg-accent/[0.05] p-3">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <label className="text-xs font-semibold uppercase tracking-[0.08em] text-accent">📐 Enquadrar a capa</label>
+                        <span className="text-xs font-semibold tabular-nums text-accent">
+                          {item.enquadramento ?? 50}% / {item.enquadramentoY ?? 50}% · zoom {item.zoom ?? 100}%
+                        </span>
+                      </div>
+                      <p className="mb-2 text-[11px] leading-relaxed text-white/45">
+                        Arraste para escolher que parte da imagem aparece. <strong className="text-white/60">Cima/baixo
+                        só funciona com o Zoom acima de 100%</strong> (a imagem larga já preenche a altura; o zoom cria
+                        folga). O quadro acima mostra como fica no site.
+                      </p>
+
+                      <label className="mb-2 flex cursor-pointer items-start gap-2 rounded-lg border border-white/10 bg-black/20 p-2">
+                        <input
+                          type="checkbox"
+                          checked={!!item.mostrarInteiro}
+                          onChange={(e) => {
+                            const v = e.target.checked;
+                            setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, mostrarInteiro: v } : it)));
+                            setSaved(false);
+                          }}
+                          className="mt-0.5 h-4 w-4 accent-[var(--accent,#2ce6b8)]"
+                        />
+                        <span className="text-[11px] leading-relaxed text-white/70">
+                          <strong className="text-white/85">Mostrar imagem inteira (não cortar)</strong> — mostra tudo,
+                          com barras escuras nas laterais. (Desliga o recorte abaixo.)
+                        </span>
+                      </label>
+
+                      <div className={`space-y-2.5 transition ${item.mostrarInteiro ? "pointer-events-none opacity-40" : ""}`}>
+                        <div>
+                          <input type="range" min={0} max={100} value={item.enquadramento ?? 50}
+                            onChange={(e) => { const v = Number(e.target.value); setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, enquadramento: v } : it))); setSaved(false); }}
+                            className="w-full accent-[var(--accent,#2ce6b8)]" />
+                          <div className="mt-1 flex justify-between text-[10px] text-white/30"><span>← Esquerda</span><span>Horizontal</span><span>Direita →</span></div>
+                        </div>
+                        <div>
+                          <input type="range" min={0} max={100} value={item.enquadramentoY ?? 50}
+                            onChange={(e) => { const v = Number(e.target.value); setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, enquadramentoY: v } : it))); setSaved(false); }}
+                            className="w-full accent-[var(--accent,#2ce6b8)]" />
+                          <div className="mt-1 flex justify-between text-[10px] text-white/30"><span>↑ Cima</span><span>Vertical</span><span>Baixo ↓</span></div>
+                        </div>
+                        <div>
+                          <input type="range" min={100} max={400} value={item.zoom ?? 100}
+                            onChange={(e) => { const v = Number(e.target.value); setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, zoom: v } : it))); setSaved(false); }}
+                            className="w-full accent-[var(--accent,#2ce6b8)]" />
+                          <div className="mt-1 flex justify-between text-[10px] text-white/30"><span>🔍 Zoom 100%</span><span>(libera o cima/baixo)</span><span>400%</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
