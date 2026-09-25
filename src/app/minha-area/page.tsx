@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
-import { getCursos } from "@/lib/content";
+import { getCursos, getHeader, getNavItems, getNavStyle, headerSubtitleLines } from "@/lib/content";
 import { sair } from "@/app/entrar/actions";
 import { getPendentesHoje } from "@/app/estudar/actions";
 import { getDesempenho } from "@/app/desempenho/analytics";
@@ -11,6 +11,12 @@ import { BookOpen, Bookmark, GraduationCap, LogOut, Award, ArrowRight, Sparkles,
 import PerfilForm from "./PerfilForm";
 import InstallButton from "@/components/InstallButton";
 import NotificacoesToggle from "@/components/NotificacoesToggle";
+import SiteLogo from "@/components/SiteLogo";
+import AuthButton from "@/components/AuthButton";
+import SearchButton from "@/components/SearchButton";
+import AssistenteButton from "@/components/AssistenteButton";
+import SiteNav from "@/components/SiteNav";
+import MobileNav from "@/components/MobileNav";
 
 export const metadata = { title: "Minha área" };
 
@@ -74,13 +80,27 @@ export default async function MinhaAreaPage() {
   const pendentes = await getPendentesHoje().catch(() => 0);
   const desemp = await getDesempenho().catch(() => null);
   const primeiroNome = (perfil.nome || user.email || "").split(" ")[0] || "médico(a)";
+  const [headerData, navItems, navStyle] = await Promise.all([getHeader(), getNavItems(), getNavStyle()]);
 
   return (
-    <div className="min-h-screen bg-[#0f1420] px-6 py-12 text-white">
+    <div className="min-h-screen bg-[#0f1420] text-white">
+      <header data-typo="header" className="sticky top-0 z-50 border-b border-white/10 bg-[#0f1420]/80 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-3 px-6 py-4 lg:flex-row lg:justify-between lg:gap-0">
+          <Link href="/" className="flex items-center gap-3">
+            <SiteLogo header={headerData} variant="sm" />
+            <div>
+              {headerData.name && <p className="text-2xl font-bold tracking-tight text-white">{headerData.name}</p>}
+              {headerSubtitleLines(headerData)[0] && <p className="text-xs font-semibold text-accent leading-tight">{headerSubtitleLines(headerData)[0]}</p>}
+            </div>
+          </Link>
+          <div className="flex items-center gap-2"><SiteNav items={navItems} style={navStyle} internal currentPath="/minha-area" /><AssistenteButton /><SearchButton /><AuthButton /></div>
+          <MobileNav items={navItems} style={navStyle} internal currentPath="/minha-area" />
+        </div>
+      </header>
+      <div className="px-6 py-12">
       <div className="mx-auto w-full max-w-3xl">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <Link href="/" className="text-xs text-white/45 transition hover:text-white">← Início</Link>
             <h1 className="mt-1 text-3xl font-semibold tracking-tight">Olá, {primeiroNome}</h1>
             <p className="mt-1 text-sm text-white/50">{user.email}</p>
           </div>
@@ -173,6 +193,7 @@ export default async function MinhaAreaPage() {
           <div className="mb-4 flex items-center gap-2"><BookOpen className="h-5 w-5 text-accent" /><h2 className="text-base font-semibold text-white">Meu perfil</h2></div>
           <PerfilForm perfil={perfil} />
         </div>
+      </div>
       </div>
     </div>
   );
