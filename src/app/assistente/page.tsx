@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { getUsuario, createAuthClient } from "@/lib/supabase/auth-server";
+import { getUsuario } from "@/lib/supabase/auth-server";
 import { getHeader, getNavItems, getNavStyle, headerSubtitleLines } from "@/lib/content";
 import SiteLogo from "@/components/SiteLogo";
 import AuthButton from "@/components/AuthButton";
@@ -19,19 +19,8 @@ export default async function AssistentePage() {
     getUsuario(), getHeader(), getNavItems(), getNavStyle(),
   ]);
 
-  // Gate de ASSINANTE: por ora o assistente só está liberado para assinantes
-  // (profiles.liberado) — o mesmo gate que a API já aplica. Ele aparece no menu,
-  // mas quem não é assinante (deslogado ou logado sem liberação) vê um aviso, não o chat.
-  // Não mexe em consumo/quota: é só controle de ACESSO à tela.
-  let liberado = false;
-  if (user) {
-    try {
-      const supabase = await createAuthClient();
-      const { data: perfil } = await supabase.from("profiles").select("liberado").eq("id", user.id).maybeSingle();
-      liberado = !!perfil?.liberado;
-    } catch { /* trata como não liberado */ }
-  }
-
+  // Por ora o assistente é liberado para QUALQUER usuário logado. Ele aparece no menu;
+  // deslogado vê o aviso (com CTA Entrar), logado usa o chat. (A API aplica o mesmo gate.)
   return (
     <div className="flex min-h-[100dvh] flex-col bg-[#0f1420] text-white">
       <header data-typo="header" className="sticky top-0 z-50 border-b border-white/10 bg-[#0f1420]/80 backdrop-blur-xl">
@@ -57,7 +46,7 @@ export default async function AssistentePage() {
           </div>
         </div>
 
-        {liberado ? (
+        {user ? (
           <AssistenteChat />
         ) : (
           <div className="mt-2 flex flex-1 items-start justify-center">
@@ -65,19 +54,15 @@ export default async function AssistentePage() {
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-accent">
                 <Lock className="h-6 w-6" />
               </div>
-              <h2 className="text-lg font-semibold">Ferramenta de uso para assinantes</h2>
+              <h2 className="text-lg font-semibold">Entre para usar o Assistente</h2>
               <p className="mt-2 text-sm leading-relaxed text-white/60">
-                O Assistente clínico está disponível para <strong className="text-white/80">assinantes</strong> do
-                MedCampus. {user
-                  ? "Sua conta ainda não tem acesso liberado."
-                  : "Entre na sua conta de assinante para usar."}
+                O Assistente clínico é exclusivo para usuários <strong className="text-white/80">logados</strong>.
+                Entre na sua conta (é gratuito) para conversar com a fonte citada.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {!user && (
-                  <Link href="/entrar?next=/assistente" className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#0f1420] transition hover:opacity-90">
-                    Entrar
-                  </Link>
-                )}
+                <Link href="/entrar?next=/assistente" className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-[#0f1420] transition hover:opacity-90">
+                  Entrar
+                </Link>
                 <Link href="/" className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/70 transition hover:text-white">
                   Voltar ao início
                 </Link>

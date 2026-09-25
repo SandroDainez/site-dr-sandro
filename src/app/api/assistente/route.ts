@@ -18,9 +18,8 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServiceClient();
 
-  // Gate de aprovação: só membros liberados pelo admin usam o assistente.
-  const { data: perfil } = await supabase.from("profiles").select("liberado").eq("id", user.id).maybeSingle();
-  if (!perfil?.liberado) return NextResponse.json({ error: "Sua conta está aguardando liberação do administrador." }, { status: 403 });
+  // Por ora o assistente é liberado para QUALQUER usuário logado (não exige assinatura).
+  // A exigência de login acima já controla o acesso/custo. (Antes exigia profiles.liberado.)
 
   const openai = getOpenAI();
 
