@@ -38,15 +38,17 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
     setError(null);
     setUploadingHtmlIdx(idx);
     try {
-      // Mesma via privada do PDF (comprovada) — o blob é servido pela rota dedicada
-      // /api/guia-interativo, que entrega o HTML inline (renderiza no iframe) com um CSP
-      // forte. Guardamos a URL da rota, não a do blob.
-      const blob = await upload(`protocolos/${Date.now()}-${file.name}`, file, {
-        access: "private",
-        handleUploadUrl: "/api/upload",
-        contentType: "text/html",
-      });
-      updateItem(idx, "htmlUrl", `/api/guia-interativo?url=${encodeURIComponent(blob.url)}`);
+      // Upload via SERVIDOR (o client upload() direto pro Blob travava só com HTML).
+      // POST multipart simples → a rota grava no Blob privado e devolve a URL; depois o
+      // arquivo é servido inline (com CSP) pela rota /api/guia-interativo.
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload-guia-html", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
+      updateItem(idx, "htmlUrl", `/api/guia-interativo?url=${encodeURIComponent(data.url)}`);
     } catch (e) {
       setError("Falha no upload do HTML interativo: " + String(e instanceof Error ? e.message : e));
     } finally {
