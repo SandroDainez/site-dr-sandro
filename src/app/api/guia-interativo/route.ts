@@ -44,14 +44,16 @@ export async function GET(req: NextRequest) {
       "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
     });
 
-    // Ajustes que valem para TODO interativo, sem editar arquivo por arquivo: esconde o
-    // botão "Imprimir" da barra do doc (imprimir/baixar é papel do PDF). Injetamos um
-    // <style> antes de </head> (inline liberado pelo CSP style-src 'unsafe-inline').
+    // Ajustes que valem para TODO interativo, sem editar arquivo por arquivo. Esconde a
+    // BARRA DE AÇÕES do doc (Expandir tudo · Imprimir · modo escuro): fica redundante com
+    // o "Tela cheia/Fechar" do card e imprimir é papel do PDF. Mantém o ☰ (abre a
+    // navegação lateral) e o título. Injetamos um <style> antes de </head> (inline
+    // liberado pelo CSP style-src 'unsafe-inline').
     let html = await res.text();
     const hideCss =
       '<style id="mc-guia-overrides">' +
-      'button[onclick*="print"],.top-bar-actions button[title="Imprimir"],' +
-      '[aria-label="Imprimir protocolo"]{display:none!important}' +
+      ".top-bar-actions{display:none!important}" +
+      'button[onclick*="print"],[aria-label="Imprimir protocolo"]{display:none!important}' +
       "</style>";
     html = html.includes("</head>")
       ? html.replace("</head>", `${hideCss}</head>`)

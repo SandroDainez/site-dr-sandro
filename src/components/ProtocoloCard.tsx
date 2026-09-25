@@ -37,7 +37,7 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
   // Cache-bust: some quando muda algo que a rota /api/guia-interativo injeta (ex.: esconder
   // o botão Imprimir). Bumpar este número força o CDN/navegador a buscar a versão nova.
   const htmlSrc = item.htmlUrl
-    ? item.htmlUrl + (item.htmlUrl.includes("?") ? "&" : "?") + "v=2"
+    ? item.htmlUrl + (item.htmlUrl.includes("?") ? "&" : "?") + "v=3"
     : item.htmlUrl;
 
   // Abre automaticamente se a URL aponta para este protocolo (#id), vindo de outra página.
