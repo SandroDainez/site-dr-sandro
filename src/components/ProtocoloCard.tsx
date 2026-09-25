@@ -51,13 +51,27 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // fecha a tela cheia com Esc + trava o scroll do fundo
+  // fecha a tela cheia com Esc, trava o scroll do fundo e faz o "voltar" do celular
+  // FECHAR a tela cheia (empurra uma entrada de histórico) em vez de sair do site.
   useEffect(() => {
     if (!full) return;
+    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setFull(null); };
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+
+    let poppedByBack = false;
+    window.history.pushState({ mcFull: true }, "");
+    const onPop = () => { poppedByBack = true; setFull(null); };
+    window.addEventListener("popstate", onPop);
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("popstate", onPop);
+      document.body.style.overflow = "";
+      // Fechado por botão/Esc: remove a entrada que empurramos (sem sair do site).
+      // Fechado pelo "voltar": o navegador já consumiu a entrada, não mexer.
+      if (!poppedByBack) window.history.back();
+    };
   }, [full]);
 
   return (
@@ -155,8 +169,8 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
                   Baixar ↓
                 </a>
               )}
-              <button type="button" onClick={() => setFull(null)} className="rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-white/25">
-                ✕ Fechar (Esc)
+              <button type="button" onClick={() => setFull(null)} className="rounded-full bg-accent px-4 py-1.5 text-xs font-semibold text-[#0f1420] transition hover:opacity-90">
+                ← Voltar ao site
               </button>
             </div>
           </div>
