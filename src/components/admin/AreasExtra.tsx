@@ -28,19 +28,27 @@ export default function AreasExtra({
     onChange([...next]);
   }
 
+  const extras = [...set].filter((a) => a !== primary).length;
+
   return (
-    <div>
-      <label className="mb-1.5 block text-xs uppercase tracking-[0.1em] text-white/40">
-        Também aparece em <span className="normal-case text-white/30">(opcional — além da especialidade principal)</span>
+    <div className="rounded-xl border border-accent/25 bg-accent/[0.04] p-4">
+      <label className="mb-1 block text-sm font-semibold text-white">
+        Em quais áreas este guia aparece
       </label>
+      <p className="mb-3 text-xs text-white/50">
+        A <strong className="text-white/70">principal</strong> (campo “Área” acima) já entra. Clique nas outras para o
+        guia aparecer <strong className="text-white/70">também</strong> naqueles hubs. {extras > 0
+          ? `Aparecendo em ${extras + 1} áreas.`
+          : "Marque quantas quiser."}
+      </p>
       <div className="flex flex-wrap gap-2">
         {AREAS.map((a) => {
           const isPrimary = primary === a.value;
           const checked = set.has(a.value);
           if (isPrimary) {
             return (
-              <span key={a.value} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-white/35">
-                {a.label} <span className="text-white/25">· principal</span>
+              <span key={a.value} className="rounded-full border border-accent/40 bg-accent/15 px-3.5 py-2 text-sm font-medium text-accent">
+                {a.label} <span className="text-accent/70">· principal ✓</span>
               </span>
             );
           }
@@ -50,13 +58,13 @@ export default function AreasExtra({
               type="button"
               onClick={() => toggle(a.value)}
               aria-pressed={checked}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              className={`rounded-full border px-3.5 py-2 text-sm font-medium transition ${
                 checked
                   ? "border-accent/50 bg-accent/15 text-accent"
-                  : "border-white/15 bg-white/[0.03] text-white/60 hover:border-white/30 hover:text-white"
+                  : "border-white/20 bg-white/[0.03] text-white/60 hover:border-white/40 hover:text-white"
               }`}
             >
-              {checked ? "✓ " : ""}{a.label}
+              {checked ? "✓ " : "+ "}{a.label}
             </button>
           );
         })}
