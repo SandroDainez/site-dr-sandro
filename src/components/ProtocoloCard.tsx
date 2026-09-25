@@ -22,23 +22,18 @@ const areaLabel: Record<ProtocoloData["area"], string> = {
 
 const formatDate = dataCurta;
 
-// Sandbox do interativo conforme a ORIGEM da URL:
-// - URL absoluta (https://...blob...) = OUTRA origem → liberamos allow-same-origin, então
-//   localStorage/tema/navegação do doc funcionam, e por ser cross-origin ele continua sem
-//   acessar cookies/sessão do MedCampus. (É o caso dos uploads novos, públicos no Blob.)
-// - URL relativa (/api/img, legado mesma-origem) = origem OPACA (sem allow-same-origin):
-//   seguro, mas docs que usam localStorage quebram — por isso reenviar como público.
-function sandboxParaHtml(url?: string): string {
-  const base = "allow-scripts allow-popups allow-downloads allow-forms allow-modals";
-  return url && /^https?:\/\//i.test(url) ? `allow-same-origin ${base}` : base;
-}
+// O interativo é servido pela rota /api/guia-interativo (mesma origem), que já entrega
+// o HTML com um CSP forte (o doc não chama APIs do site, não envia forms, não busca
+// recurso externo). Por isso liberamos allow-same-origin: o doc ganha origem real
+// (localStorage/tema/navegação funcionam) e o CSP trata o isolamento.
+const HTML_SANDBOX = "allow-scripts allow-same-origin allow-popups allow-downloads allow-forms allow-modals";
 
 export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
   const [expanded, setExpanded] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [htmlOpen, setHtmlOpen] = useState(false);
   const [full, setFull] = useState<null | "pdf" | "text" | "html">(null);
-  const htmlSandbox = sandboxParaHtml(item.htmlUrl);
+  const htmlSandbox = HTML_SANDBOX;
 
   // Abre automaticamente se a URL aponta para este protocolo (#id), vindo de outra página.
   useEffect(() => {
@@ -136,6 +131,9 @@ export default function ProtocoloCard({ item }: { item: ProtocoloData }) {
             <button type="button" onClick={() => setFull("html")} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
               ⛶ Tela cheia
             </button>
+            <a href={`${item.htmlUrl}&dl=1`} rel="noreferrer" download className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-white/70 transition hover:border-accent/40 hover:text-white">
+              Baixar interativo ↓
+            </a>
           </div>
           {htmlOpen && (
             <div className="mt-3 overflow-hidden rounded-xl border border-white/10">

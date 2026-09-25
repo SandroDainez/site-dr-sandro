@@ -38,16 +38,15 @@ export default function ProtocolosEditor({ initialProtocolos }: Props) {
     setError(null);
     setUploadingHtmlIdx(idx);
     try {
-      // O interativo é PÚBLICO (cross-origin, servido do próprio Blob) — de propósito.
-      // Assim o iframe roda numa ORIGEM REAL e isolada: o localStorage/tema/navegação do
-      // doc funcionam (o PDF fica privado via /api/img porque não roda JS). Guardamos a
-      // URL direta do Blob; o card detecta que é absoluta e libera allow-same-origin.
+      // Mesma via privada do PDF (comprovada) — o blob é servido pela rota dedicada
+      // /api/guia-interativo, que entrega o HTML inline (renderiza no iframe) com um CSP
+      // forte. Guardamos a URL da rota, não a do blob.
       const blob = await upload(`protocolos/${Date.now()}-${file.name}`, file, {
-        access: "public",
+        access: "private",
         handleUploadUrl: "/api/upload",
         contentType: "text/html",
       });
-      updateItem(idx, "htmlUrl", blob.url);
+      updateItem(idx, "htmlUrl", `/api/guia-interativo?url=${encodeURIComponent(blob.url)}`);
     } catch (e) {
       setError("Falha no upload do HTML interativo: " + String(e instanceof Error ? e.message : e));
     } finally {
